@@ -1,5 +1,7 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,29 +11,29 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.adapter.MyDappsListAdapter;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.util.KeyboardUtils;
+import com.alphawallet.app.viewmodel.MyDappsViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 
 import java.util.List;
 
-import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
-
+import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
 
-import dagger.hilt.android.AndroidEntryPoint;
-
 @AndroidEntryPoint
-public class MyDappsFragment extends Fragment implements OnDappClickListener {
+public class MyDappsFragment extends BaseFragment implements OnDappClickListener
+{
+    private MyDappsViewModel viewModel;
     private MyDappsListAdapter adapter;
     private AWalletAlertDialog dialog;
     private TextView noDapps;
@@ -39,7 +41,8 @@ public class MyDappsFragment extends Fragment implements OnDappClickListener {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+                             @Nullable Bundle savedInstanceState)
+    {
         View view = inflater.inflate(R.layout.layout_my_dapps, container, false);
         adapter = new MyDappsListAdapter(
                 getData(),
@@ -53,21 +56,25 @@ public class MyDappsFragment extends Fragment implements OnDappClickListener {
         noDapps = view.findViewById(R.id.no_dapps);
         showOrHideViews();
         KeyboardUtils.hideKeyboard(view);
+        viewModel = new ViewModelProvider(this).get(MyDappsViewModel.class);
         return view;
     }
 
-    private List<DApp> getData() {
+    private List<DApp> getData()
+    {
         return DappBrowserUtils.getMyDapps(getContext());
     }
 
-    private void onDappEdited(DApp dapp) {
+    private void onDappEdited(DApp dapp)
+    {
         Intent intent = new Intent(getActivity(), AddEditDappActivity.class);
         intent.putExtra("mode", 1);
         intent.putExtra("dapp", dapp);
         getActivity().startActivity(intent);
     }
 
-    private void onDappRemoved(DApp dapp) {
+    private void onDappRemoved(DApp dapp)
+    {
         dialog = new AWalletAlertDialog(getActivity());
         dialog.setTitle(R.string.title_remove_dapp);
         dialog.setMessage(getString(R.string.remove_from_my_dapps, dapp.getName()));
@@ -81,7 +88,8 @@ public class MyDappsFragment extends Fragment implements OnDappClickListener {
         dialog.show();
     }
 
-    private void removeDapp(DApp dapp) {
+    private void removeDapp(DApp dapp)
+    {
         try
         {
             List<DApp> myDapps = DappBrowserUtils.getMyDapps(getContext());
@@ -106,22 +114,29 @@ public class MyDappsFragment extends Fragment implements OnDappClickListener {
         }
     }
 
-    private void updateData() {
+    private void updateData()
+    {
         adapter.setDapps(DappBrowserUtils.getMyDapps(getContext()));
         showOrHideViews();
     }
 
-    private void showOrHideViews() {
-        if (adapter.getItemCount() > 0) {
+    private void showOrHideViews()
+    {
+        if (adapter.getItemCount() > 0)
+        {
             noDapps.setVisibility(View.GONE);
-        } else {
+        }
+        else
+        {
             noDapps.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
+        viewModel.track(Analytics.Navigation.MY_DAPPS);
         updateData();
     }
 

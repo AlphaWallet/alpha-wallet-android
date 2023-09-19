@@ -19,18 +19,12 @@ public abstract class C {
     public static final int SEND_INTENT_REQUEST_CODE = 4;
     public static final int TERMINATE_ACTIVITY = 5;
     public static final int ADDED_TOKEN_RETURN = 9;
+    public static final int STANDARD_POPUP_INACTIVITY_DISMISS = 15*1000; //Standard dismiss after 15 seconds
 
     public static final String ETHEREUM_NETWORK_NAME = "Ethereum";
     public static final String CLASSIC_NETWORK_NAME = "Ethereum Classic";
-    public static final String POA_NETWORK_NAME = "POA";
     public static final String XDAI_NETWORK_NAME = "Gnosis";
-    public static final String KOVAN_NETWORK_NAME = "Kovan (Test)";
-    public static final String ROPSTEN_NETWORK_NAME = "Ropsten (Test)";
-    public static final String SOKOL_NETWORK_NAME = "Sokol (Test)";
-    public static final String RINKEBY_NETWORK_NAME = "Rinkeby (Test)";
     public static final String GOERLI_NETWORK_NAME = "Görli (Test)";
-    public static final String ARTIS_SIGMA1_NETWORK = "ARTIS sigma1";
-    public static final String ARTIS_TAU1_NETWORK = "ARTIS tau1 (Test)";
     public static final String BINANCE_TEST_NETWORK = "BSC TestNet";
     public static final String BINANCE_MAIN_NETWORK = "Binance (BSC)";
     public static final String HECO_MAIN_NETWORK = "Heco";
@@ -39,13 +33,11 @@ public abstract class C {
     public static final String FANTOM_TEST_NETWORK = "Fantom (Test)";
     public static final String AVALANCHE_NETWORK = "Avalanche";
     public static final String FUJI_TEST_NETWORK = "Avalanche FUJI (Test)";
-    public static final String MATIC_NETWORK = "Polygon";
-    public static final String MATIC_TEST_NETWORK = "Mumbai (Test)";
+    public static final String POLYGON_NETWORK = "Polygon";
+    public static final String POLYGON_TEST_NETWORK = "Mumbai (Test)";
     public static final String OPTIMISTIC_NETWORK = "Optimistic";
-    public static final String OPTIMISTIC_TEST_NETWORK = "Optimistic (Test)";
     public static final String CRONOS_MAIN_NETWORK = "Cronos";
     public static final String CRONOS_TEST_NETWORK = "Cronos (Test)";
-    public static final String ARBITRUM_TEST_NETWORK = "Arbitrum (Test)";
     public static final String ARBITRUM_ONE_NETWORK = "Arbitrum One";
     public static final String PALM_NAME = "PALM";
     public static final String PALM_TEST_NAME = "PALM (Test)";
@@ -57,40 +49,44 @@ public abstract class C {
     public static final String AURORA_TESTNET_NAME = "Aurora (Test)";
     public static final String MILKOMEDA_NAME = "Milkomeda Cardano";
     public static final String MILKOMEDA_TESTNET_NAME = "Milkomeda Cardano (Test)";
-    public static final String PHI_NETWORK_NAME = "PHI";
+    public static final String SEPOLIA_TESTNET_NAME = "Sepolia (Test)";
+    public static final String OPTIMISM_GOERLI_TESTNET_NAME = "Optimism Goerli (Test)";
+    public static final String ARBITRUM_GOERLI_TESTNET_NAME = "Arbitrum Goerli (Test)";
+    public static final String OKX_NETWORK_NAME = "OKXChain Mainnet";
+    public static final String ROOTSTOCK_NETWORK_NAME = "Rootstock";
+    public static final String ROOTSTOCK_TESTNET_NAME = "Rootstock (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
     public static final String XDAI_TICKER_NAME = "dai";
-    public static final String ARTIS_SIGMA_TICKER = "artis";
     public static final String BINANCE_TICKER = "binance";
 
     public static final String ETHEREUM_TICKER = "ethereum";
-    public static final String POA_TICKER = "poa";
 
     public static final String USD_SYMBOL = "$";
     public static final String ETH_SYMBOL = "ETH";
     public static final String xDAI_SYMBOL = "xDai";
-    public static final String POA_SYMBOL = "POA";
     public static final String ETC_SYMBOL = "ETC";
     public static final String GOERLI_SYMBOL = "GÖETH";
-    public static final String ARTIS_SIGMA1_SYMBOL = "ATS";
-    public static final String ARTIS_TAU1_SYMBOL = "ATS";
     public static final String BINANCE_SYMBOL = "BNB";
     public static final String HECO_SYMBOL = "HT";
     public static final String FANTOM_SYMBOL = "FTM";
     public static final String AVALANCHE_SYMBOL = "AVAX";
-    public static final String MATIC_SYMBOL = "MATIC";
+    public static final String POLYGON_SYMBOL = "MATIC";
     public static final String CRONOS_SYMBOL = "CRO";
     public static final String CRONOS_TEST_SYMBOL = "tCRO";
     public static final String ARBITRUM_SYMBOL = "AETH";
-    public static final String ARBITRUM_TEST_SYMBOL = "ARETH";
     public static final String PALM_SYMBOL = "PALM";
     public static final String KLAYTN_SYMBOL = "KLAY";
     public static final String IOTEX_SYMBOL = "IOTX";
     public static final String MILKOMEDA_SYMBOL = "milkADA";
     public static final String MILKOMEDA_TEST_SYMBOL = "milktADA";
-    public static final String PHI_NETWORK_SYMBOL = "\u03d5";
+    public static final String SEPOLIA_SYMBOL = "ETH";
+    public static final String OPTIMISM_GOERLI_TEST_SYMBOL = "ETH";
+    public static final String ARBITRUM_GOERLI_TEST_SYMBOL = "AGOR";
+    public static final String OKX_SYMBOL = "OKT";
+    public static final String ROOTSTOCK_SYMBOL = "RBTC";
+    public static final String ROOTSTOCK_TEST_SYMBOL = "tBTC";
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -104,6 +100,8 @@ public abstract class C {
 
     public static final String QUICKSWAP_EXCHANGE_DAPP = "https://quickswap.exchange/#/swap";
     public static final String ONEINCH_EXCHANGE_DAPP   = "https://app.1inch.io/#/[CHAIN]/swap/[TOKEN1]/[TOKEN2]";
+
+    public static final String GLIDE_URL_INVALID = "com.bumptech.glide.load.HttpException";
 
     public static final String GWEI_UNIT = "Gwei";
 
@@ -124,6 +122,7 @@ public abstract class C {
     public static final String EXTRA_TOKEN_ID = "TID";
     public static final String EXTRA_TOKEN_BALANCE = "BALANCE";
     public static final String EXTRA_TOKENID_LIST = "TOKENIDLIST";
+    public static final String EXTRA_ATTESTATION_ID = "ATTNID";
     public static final String EXTRA_NFTASSET_LIST = "NFTASSET_LIST";
     public static final String EXTRA_NFTASSET = "NFTASSET";
     public static final String ERC875RANGE = "ERC875RANGE";
@@ -154,7 +153,6 @@ public abstract class C {
     public static final String EXTRA_NONCE = "_NONCE";
     public static final String EXTRA_TXHASH = "_TXHASH";
     public static final String DAPP_URL_LOAD = "DAPP_URL";
-    public static final String EXTRA_LOCAL_NETWORK_SELECT_FLAG = "EXTRA_LOCAL_NETWORK_SELECT";
     public static final String EXTRA_PRICE_ALERT = "EXTRA_PRICE_ALERT";
     public static final String EXTRA_SESSION_ID = "SESSION_ID";
     public static final String EXTRA_WC_REQUEST_ID = "REQUEST_ID";
@@ -163,6 +161,7 @@ public abstract class C {
     public static final String EXTRA_NAME = "NAME";
     public static final String EXTRA_CHAIN_OBJ = "CHAIN_OBJ";
     public static final String EXTRA_1559_TX = "1559_TX";
+    public static final String EXTRA_FROM_SPLASH = "FROM_SPLASH";
 
     public static final String PRUNE_ACTIVITY =
             "com.stormbird.wallet.PRUNE_ACTIVITY";
@@ -208,6 +207,9 @@ public abstract class C {
     public static final String SETTINGS_INSTANTIATED = "com.stormbird.wallet.SETTINGS_INSTANTIATED";
     public static final String APP_FOREGROUND_STATE = "com.alphawallet.APP_FOREGROUND_STATE";
     public static final String EXTRA_APP_FOREGROUND = "com.alphawallet.IS_FOREGORUND";
+    public static final String QRCODE_SCAN = "com.alphawallet.QRSCAN";
+    public static final String SIGNAL_NFT_SYNC = "com.alphawallet.SYNC_NFT";
+    public static final String SYNC_STATUS = "com.alphawallet.SYNC_STATUS";
 
     public static final String DEFAULT_GAS_PRICE =     "10000000000";
     public static final String DEFAULT_XDAI_GAS_PRICE = "1000000000";
@@ -234,8 +236,11 @@ public abstract class C {
     public static final String LINKEDIN_PACKAGE_NAME = "com.linkedin.android";
     public static final String REDDIT_PACKAGE_NAME = "com.reddit.frontpage";
     public static final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
+    public static final String FROM_NOTIFICATION = "from_notification";
+    public static final int SHORT_SYMBOL_LENGTH = 5;
 
     public interface ErrorCode {
+
         int UNKNOWN = 1;
         int CANT_GET_STORE_PASSWORD = 2;
         int ALREADY_ADDED = 3;
@@ -248,8 +253,8 @@ public abstract class C {
         int SWAP_QUOTE_ERROR = 8;
         int SWAP_TIMEOUT_ERROR = 9;
     }
-
     public interface Key {
+
         String WALLET = "wallet";
         String TRANSACTION = "transaction";
         String TICKET_RANGE = "ticket_range";
@@ -275,8 +280,9 @@ public abstract class C {
     public static final String ENS_HISTORY = "ensHistory";
     public static final String ENS_HISTORY_PAIR = "ens_history_pair";
 
+
     public enum TokenStatus {
-        DEFAULT, PENDING, INCOMPLETE
+        DEFAULT, PENDING, INCOMPLETE;
     }
 
     public static final String INTERNET_SEARCH_PREFIX = "https://duckduckgo.com/?q=";
@@ -291,17 +297,11 @@ public abstract class C {
 
     //Analytics
     public static final String PREF_UNIQUE_ID = "unique_id";
-    public static final String AN_IMPORT_WALLET = "Wallet Imported";
-    public static final String AN_WALLET_TYPE = "Wallet Type";
-    public static final String AN_SEED_PHRASE = "Seed Phrase";
-    public static final String AN_KEYSTORE = "Keystore";
-    public static final String AN_PRIVATE_KEY = "Private Key";
-    public static final String AN_USE_GAS = "Gas Settings";
-    public static final String AN_CALL_ACTIONSHEET = "Use ActionSheet";
-    public static final String AN_USE_ONRAMP = "Use OnRamp";
-    public static final String APP_NAME = "PACKAGE_NAME";
 
-    public static final String ALPHAWALLET_LOGO_URI = "https://alphawallet.com/wp-content/themes/alphawallet/img/alphawallet-logo.svg";
+    public static final String ALPHAWALLET_LOGO_URI = "https://alphawallet.com/wp-content/themes/alphawallet/img/logo-horizontal-new.svg";
+    public static final String ALPHAWALLET_WEBSITE = "https://alphawallet.com";
+    public static final String WALLET_CONNECT_REACT_APP_RELAY_URL = "wss://relay.walletconnect.com";
+    public static final String ALPHA_WALLET_LOGO_URL = "https://user-images.githubusercontent.com/51817359/158344418-c0f2bd19-38bb-4e64-a1d5-25ceb099688a.png";
 
     // Theme/Dark Mode
     public static final int THEME_LIGHT = 0;
@@ -310,19 +310,23 @@ public abstract class C {
 
     // OpenSea APIs
     public static final String OPENSEA_COLLECTION_API_MAINNET = "https://api.opensea.io/collection/";
-    public static final String OPENSEA_ASSETS_API_MAINNET = "https://api.opensea.io/api/v1/assets";
-    public static final String OPENSEA_ASSETS_API_RINKEBY = "https://testnets-api.opensea.io/api/v1/assets";
-    public static final String OPENSEA_ASSETS_API_MATIC = "https://api.opensea.io/api/v2/assets/matic";
-    public static final String OPENSEA_SINGLE_ASSET_API_MAINNET = "https://api.opensea.io/api/v1/asset/";
-    public static final String OPENSEA_SINGLE_ASSET_API_RINKEBY = "https://testnets-api.opensea.io/api/v1/asset/";
-    public static final String OPENSEA_SINGLE_ASSET_API_MATIC = "https://api.opensea.io/api/v2/metadata/matic/";
 
-    // Progress Info
-    public interface ProgressInfo {
-        int FETCHING_CHAINS = 1;
-        int FETCHING_CONNECTIONS = 2;
-        int FETCHING_QUOTE = 3;
-    }
+    public static final String OPENSEA_ASSETS_API_MAINNET = "https://api.opensea.io/api/v1/assets";
+    public static final String OPENSEA_ASSETS_API_TESTNET = "https://testnets-api.opensea.io/api/v1/assets";
+    public static final String OPENSEA_ASSETS_API_MATIC = "https://api.opensea.io/api/v2/assets/matic";
+    public static final String OPENSEA_ASSETS_API_ARBITRUM = "https://api.opensea.io/api/v2/assets/arbitrum";
+    public static final String OPENSEA_ASSETS_API_AVALANCHE = "https://api.opensea.io/api/v2/assets/avalanche";
+    public static final String OPENSEA_ASSETS_API_KLAYTN = "https://api.opensea.io/api/v2/assets/klaytn";
+    public static final String OPENSEA_ASSETS_API_OPTIMISM = "https://api.opensea.io/api/v2/assets/optimism";
+
+    public static final String OPENSEA_SINGLE_ASSET_API_MAINNET = "https://api.opensea.io/api/v1/asset/";
+    public static final String OPENSEA_SINGLE_ASSET_API_TESTNET = "https://testnets-api.opensea.io/api/v1/asset/";
+    public static final String OPENSEA_SINGLE_ASSET_API_MATIC = "https://api.opensea.io/api/v2/metadata/matic/";
+    public static final String OPENSEA_SINGLE_ASSET_API_ARBITRUM = "https://api.opensea.io/api/v2/metadata/arbitrum/";
+    public static final String OPENSEA_SINGLE_ASSET_API_AVALANCHE = "https://api.opensea.io/api/v2/metadata/avalanche/";
+    public static final String OPENSEA_SINGLE_ASSET_API_KLAYTN = "https://api.opensea.io/api/v2/metadata/klaytn/";
+    public static final String OPENSEA_SINGLE_ASSET_API_OPTIMISM = "https://api.opensea.io/api/v2/metadata/optimism/";
+
 
     //Timing
     public static long CONNECT_TIMEOUT = 10; //Seconds
@@ -330,4 +334,9 @@ public abstract class C {
     public static long WRITE_TIMEOUT = 10;
     public static long PING_INTERVAL = 10;
     public static final long LONG_WRITE_TIMEOUT = 30;
+
+    public static final String EXTERNAL_APP_DOWNLOAD_LINK = "https://alphawallet.com/download/AlphaWallet-release-build.apk";
+
+    // shortcuts
+    public static final String ACTION_TOKEN_SHORTCUT = "token_shortcut";
 }

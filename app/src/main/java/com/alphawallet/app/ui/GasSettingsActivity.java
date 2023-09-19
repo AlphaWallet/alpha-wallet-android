@@ -1,6 +1,5 @@
 package com.alphawallet.app.ui;
 
-
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.content.Context;
@@ -8,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,7 +38,7 @@ import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.repository.entity.RealmTokenTicker;
 import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.entity.GasSettingsCallback;
-import com.alphawallet.app.ui.widget.entity.GasSpeed2;
+import com.alphawallet.app.ui.widget.entity.GasSpeed;
 import com.alphawallet.app.ui.widget.entity.GasWarningLayout;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
@@ -61,16 +61,12 @@ import io.realm.RealmQuery;
 public class GasSettingsActivity extends BaseActivity implements GasSettingsCallback
 {
     public static final int GAS_PRECISION = 5; //5 dp for gas
-
     GasSettingsViewModel viewModel;
-
     private GasSliderView gasSliderView;
     private CustomAdapter adapter;
-
     private GasPriceSpread gasSpread;
     private Realm1559Gas realmGasSpread;
     private RealmGasSpread realmLegacyGasSpread;
-
     private TXSpeed currentGasSpeedIndex = TXSpeed.STANDARD;
     private long chainId;
     private BigDecimal presetGasLimit;
@@ -82,6 +78,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private long minGasPrice;
     private boolean gasWarningShown;
     private boolean isUsing1559;
+    private TextView baseGasFeeText;
 
     private enum Warning
     {
@@ -106,6 +103,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         RecyclerView recyclerView = findViewById(R.id.list);
         gasWarning = findViewById(R.id.gas_warning_bubble);
         insufficientWarning = findViewById(R.id.insufficient_bubble);
+        baseGasFeeText = findViewById(R.id.text_base_price);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         viewModel = new ViewModelProvider(this)
@@ -135,15 +133,18 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         recyclerView.setAdapter(adapter);
         gasSliderView.setCallback(this);
 
+        LinearLayout baseGasFeeLayout = findViewById(R.id.text_base_price_layout);
         // start listening for gas price updates
         if (isUsing1559)
         {
             startGasListener();
+            baseGasFeeLayout.setVisibility(View.VISIBLE);
         }
         else
         {
             startLegacyGasListener();
             gasSliderView.usingLegacyGas();
+            baseGasFeeLayout.setVisibility(View.GONE);
         }
 
         gasWarningShown = false;
@@ -192,9 +193,13 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     {
         gasSpread = new GasPriceSpread(this, gasSpread, gs.getResult());
         gasSliderView.initGasPriceMax(gasSpread.getQuickestGasSpeed().gasPrice);
-        GasSpeed2 custom = gasSpread.getSelectedGasFee(TXSpeed.CUSTOM);
-        updateCustomElement(custom.gasPrice.maxFeePerGas, custom.gasPrice.maxPriorityFeePerGas, customGasLimit.toBigInteger());
+        GasSpeed custom = gasSpread.getSelectedGasFee(TXSpeed.CUSTOM);
+        updateCustomElement(custom.gasPrice.maxFeePerGas, custom.gasPrice.priorityFee, customGasLimit.toBigInteger());
         gasSliderView.initGasPrice(custom);
+
+        //update base price
+        String baseFeePrice = getCleanAmount(gasSpread.getQuickestGasSpeed().gasPrice.baseFee);
+        baseGasFeeText.setText(baseFeePrice);
 
         //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
         adapter.notifyDataSetChanged();
@@ -204,8 +209,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     {
         gasSpread = new GasPriceSpread(this, gasSpread, gs.getTimeStamp(), gs.getGasFees(), gs.isLocked());
         gasSliderView.initGasPriceMax(gasSpread.getQuickestGasSpeed().gasPrice);
-        GasSpeed2 custom = gasSpread.getSelectedGasFee(TXSpeed.CUSTOM);
-        updateCustomElement(custom.gasPrice.maxFeePerGas, custom.gasPrice.maxPriorityFeePerGas, customGasLimit.toBigInteger());
+        GasSpeed custom = gasSpread.getSelectedGasFee(TXSpeed.CUSTOM);
+        updateCustomElement(custom.gasPrice.maxFeePerGas, custom.gasPrice.priorityFee, customGasLimit.toBigInteger());
         gasSliderView.initGasPrice(custom);
 
         //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
@@ -232,16 +237,16 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     public void onBackPressed()
     {
         Intent result = new Intent();
-        GasSpeed2 gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
+        GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
         result.putExtra(C.EXTRA_SINGLE_ITEM, currentGasSpeedIndex.ordinal());
         result.putExtra(C.EXTRA_GAS_LIMIT, customGasLimit.toString());
         result.putExtra(C.EXTRA_NONCE, gasSliderView.getNonce());
         result.putExtra(C.EXTRA_AMOUNT, gs.seconds);
 
-        GasSpeed2 custom = gasSpread.getSelectedGasFee(TXSpeed.CUSTOM);
+        GasSpeed custom = gasSpread.getSelectedGasFee(TXSpeed.CUSTOM);
 
         result.putExtra(C.EXTRA_GAS_PRICE, custom.gasPrice.maxFeePerGas.toString());
-        result.putExtra(C.EXTRA_MIN_GAS_PRICE, custom.gasPrice.maxPriorityFeePerGas.toString());
+        result.putExtra(C.EXTRA_MIN_GAS_PRICE, custom.gasPrice.priorityFee.toString());
 
         setResult(RESULT_OK, result);
         finish();
@@ -277,6 +282,27 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         adapter.notifyItemChanged(TXSpeed.CUSTOM.ordinal());
     }
 
+    private String getCleanAmount(BigInteger amountInWei)
+    {
+        String convertedAmount;
+        BigDecimal ethAmount = Convert.fromWei(new BigDecimal(amountInWei), Convert.Unit.ETHER);
+        BigDecimal gweiAmount = BalanceUtils.weiToGweiBI(amountInWei);
+        if (BalanceUtils.requiresSmallGweiValueSuffix(ethAmount))
+        {
+            convertedAmount = BalanceUtils.getSlidingBaseValue(new BigDecimal(amountInWei), 18, GAS_PRECISION);
+        }
+        else if (gweiAmount.compareTo(BigDecimal.valueOf(2)) < 0)
+        {
+            convertedAmount = BalanceUtils.weiToGwei(new BigDecimal(amountInWei), 2);
+        }
+        else
+        {
+            convertedAmount = BalanceUtils.weiToGwei(new BigDecimal(amountInWei), 2);
+        }
+
+        return convertedAmount;
+    }
+
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.GasSpeedHolder>
     {
         private final Token baseCurrency;
@@ -295,15 +321,20 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         {
             final MaterialRadioButton radio;
             final TextView speedName;
-            final TextView speedGwei;
+            final TextView basePriceText;
             final TextView speedCostEth;
             final TextView speedCostFiat;
             final TextView speedTime;
-            final TextView priorityFee;
+            final TextView currencySymbol;
             final View itemLayout;
-
             final LinearLayout warning;
             final TextView warningText;
+            final LinearLayout baseFeeLayout;
+            final LinearLayout maxFeeLayout;
+            final LinearLayout priorityFeeLayout;
+            final TextView baseFeeValue;
+            final TextView maxFeeValue;
+            final TextView priorityFeeValue;
 
             GasSpeedHolder(View view)
             {
@@ -314,10 +345,30 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 speedCostEth = view.findViewById(R.id.text_speed_cost_eth);
                 speedTime = view.findViewById(R.id.text_speed_time);
                 itemLayout = view.findViewById(R.id.layout_list_item);
-                speedGwei = view.findViewById(R.id.text_gwei);
-                priorityFee = view.findViewById(R.id.text_priority_fee);
+                basePriceText = view.findViewById(R.id.text_base_fee);
+                currencySymbol = view.findViewById(R.id.text_currency);
+                baseFeeLayout = view.findViewById(R.id.base_fee_layout);
+                maxFeeLayout = view.findViewById(R.id.max_fee_layout);
+                priorityFeeLayout = view.findViewById(R.id.priority_fee_layout);
+                baseFeeValue = view.findViewById(R.id.text_base_fee_value);
+                maxFeeValue = view.findViewById(R.id.text_max_fee_value);
+                priorityFeeValue = view.findViewById(R.id.text_priority_value);
 
-                if (!isUsing1559) priorityFee.setVisibility(View.GONE);
+                if (!isUsing1559)
+                {
+                    priorityFeeLayout.setVisibility(View.GONE);
+                    maxFeeLayout.setVisibility(View.GONE);
+                    baseFeeLayout.setVisibility(View.VISIBLE);
+                    basePriceText.setText(R.string.label_gas_price);
+                }
+                else
+                {
+                    priorityFeeLayout.setVisibility(View.VISIBLE);
+                    maxFeeLayout.setVisibility(View.VISIBLE);
+                    basePriceText.setText(R.string.base_fee);
+                    baseFeeLayout.setVisibility(View.GONE);
+                    ((TextView)view.findViewById(R.id.text_max_fee_currency)).setText(TickerService.getCurrencySymbol());
+                }
 
                 warning = view.findViewById(R.id.layout_speed_warning);
                 warningText = view.findViewById(R.id.text_speed_warning);
@@ -334,6 +385,46 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                     speedName.setTypeface(ResourcesCompat.getFont(getApplicationContext(), R.font.font_regular));
                 }
             }
+
+            public Pair<String, BigDecimal> handleCustomSpeed(GasSpeed gs, TXSpeed position)
+            {
+                String baseGasAmount = "";
+                BigDecimal useGasLimit = BigDecimal.ZERO;
+                if (gs.seconds == 0)
+                {
+                    blankCustomHolder(this);
+                    setCustomGasDetails(position);
+                }
+                else
+                {
+                    //recalculate the custom speed every time it's updated
+                    gs.seconds = getExpectedTransactionTime(gs.gasPrice.maxFeePerGas);
+                    baseGasAmount = context.getString(R.string.bracketed, context.getString(R.string.set_your_speed));
+                    useGasLimit = customGasLimit;
+
+                    speedName.setVisibility(View.GONE);
+                    warning.setVisibility(View.VISIBLE);
+
+                    switch (warningType)
+                    {
+                        case OFF:
+                            warning.setVisibility(View.GONE);
+                            speedName.setVisibility(View.VISIBLE);
+                            break;
+                        case LOW:
+                            warningText.setText(R.string.speed_too_low);
+                            break;
+                        case HIGH:
+                            warningText.setText(R.string.speed_high_gas);
+                            break;
+                        case INSUFFICIENT:
+                            warningText.setText(R.string.insufficient_gas);
+                            break;
+                    }
+                }
+
+                return new Pair<>(baseGasAmount, useGasLimit);
+            }
         }
 
         private CustomAdapter(Context ctx)
@@ -347,7 +438,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         {
             BigDecimal useGasLimit = presetGasLimit;
             TXSpeed position = gasSpread.getSelectedPosition(holder.getAbsoluteAdapterPosition());//  TXSpeed.values()[holder.getAbsoluteAdapterPosition()];
-            GasSpeed2 gs = gasSpread.getSelectedGasFee(position);
+            GasSpeed gs = gasSpread.getSelectedGasFee(position);
             holder.speedName.setText(gs.speed);
 
             holder.speedName.setVisibility(View.VISIBLE);
@@ -374,90 +465,52 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 notifyItemChanged(holder.getAbsoluteAdapterPosition());
             });
 
-            BigDecimal maxGas = BalanceUtils.weiToGweiBI(gs.gasPrice.maxFeePerGas);
-            String speedGwei;
-
-            BigDecimal ethAmount = Convert.fromWei(new BigDecimal(gs.gasPrice.maxFeePerGas), Convert.Unit.ETHER);
-
-            if (BalanceUtils.requiresSmallGweiValueSuffix(ethAmount))
-            {
-                speedGwei = context.getString(R.string.token_balance,
-                        BalanceUtils.getSlidingBaseValue(new BigDecimal(gs.gasPrice.maxFeePerGas), 18, GAS_PRECISION),
-                        baseCurrency.getSymbol());
-            }
-            else if (maxGas.compareTo(BigDecimal.valueOf(2)) < 0)
-            {
-                speedGwei = BalanceUtils.weiToGwei(new BigDecimal(gs.gasPrice.maxFeePerGas), 2);
-            }
-            else
-            {
-                speedGwei = BalanceUtils.weiToGweiBI(gs.gasPrice.maxFeePerGas).toBigInteger().toString();
-            }
-
-            String priorityFee = BalanceUtils.weiToGwei(new BigDecimal(gs.gasPrice.maxPriorityFeePerGas), 2);
+            String baseGasAmount = getCleanAmount(gs.gasPrice.baseFee);
+            String maxGasAmount = getCleanAmount(gs.gasPrice.maxFeePerGas);
+            String priorityFee = BalanceUtils.displayDigitPrecisionValue(new BigDecimal(gs.gasPrice.priorityFee), Convert.Unit.GWEI.getFactor(), 2); //convert wei to Gwei then truncate to 2 digits
 
             if (position == TXSpeed.CUSTOM)
             {
-                if (gs.seconds == 0)
-                {
-                    blankCustomHolder(holder);
-                    setCustomGasDetails(position);
-                    return;
-                }
-                else
-                {
-                    //recalculate the custom speed every time it's updated
-                    gs.seconds = getExpectedTransactionTime(gs.gasPrice.maxFeePerGas);
-                    speedGwei = context.getString(R.string.bracketed, context.getString(R.string.set_your_speed));
-                    useGasLimit = customGasLimit;
-                }
-
-                holder.speedName.setVisibility(View.GONE);
-                holder.warning.setVisibility(View.VISIBLE);
-
-                switch (warningType)
-                {
-                    case OFF:
-                        holder.warning.setVisibility(View.GONE);
-                        holder.speedName.setVisibility(View.VISIBLE);
-                        break;
-                    case LOW:
-                        holder.warningText.setText(R.string.speed_too_low);
-                        break;
-                    case HIGH:
-                        holder.warningText.setText(R.string.speed_high_gas);
-                        break;
-                    case INSUFFICIENT:
-                        holder.warningText.setText(R.string.insufficient_gas);
-                        break;
-                }
+                 Pair<String, BigDecimal> customReturn = holder.handleCustomSpeed(gs, position);
+                 if (!TextUtils.isEmpty(customReturn.first) && !customReturn.second.equals(BigDecimal.ZERO))
+                 {
+                     baseGasAmount = customReturn.first;
+                     useGasLimit = customReturn.second;
+                 }
             }
 
-            BigDecimal gasFee = new BigDecimal(gs.gasPrice.maxFeePerGas).multiply(useGasLimit);
+            //Calculate estimate gas: for 1559 it's base fee + max priority, or if legacy, it's just the gas price
+            BigDecimal gasFee = gs.calculateGasFee(useGasLimit, isUsing1559);
+            BigDecimal gasFeeMax = gs.calculateMaxGasFee(useGasLimit);
 
-            String gasAmountInBase = BalanceUtils.getSlidingBaseValue(gasFee, baseCurrency.tokenInfo.decimals, GAS_PRECISION);
+            String gasAmountInBase = BalanceUtils.getScaledValue(gasFee, baseCurrency.tokenInfo.decimals, 18);
+            String gasMaxAmountInBase = BalanceUtils.getScaledValue(gasFeeMax, baseCurrency.tokenInfo.decimals, 18);
             if (gasAmountInBase.equals("0"))
                 gasAmountInBase = "0.00001"; //NB no need to allow for zero gas chains; this activity wouldn't appear
-            String displayStr = context.getString(R.string.gas_amount, gasAmountInBase, baseCurrency.getSymbol());
             String displayTime = context.getString(R.string.gas_time_suffix,
                     Utils.shortConvertTimePeriodInSeconds(gs.seconds, context));
             String fiatStr = getGasCost(gasAmountInBase);
+            String fiatMaxStr = getGasCost(gasMaxAmountInBase);
 
-            String buildGasMax = (isUsing1559 ? context.getString(R.string.gas_max) : context.getString(R.string.label_gas_price)) + ": " + context.getString(R.string.delete_session, speedGwei);
-            holder.speedGwei.setText(buildGasMax);
-            holder.speedCostEth.setText(context.getString(R.string.gas_fiat_suffix, gasAmountInBase, baseCurrency.getSymbol()));
+            String baseFeeStr = isUsing1559 ? baseGasAmount : maxGasAmount;
+            holder.baseFeeValue.setText(baseFeeStr);
+            holder.speedCostEth.setText(context.getString(R.string.gas_fiat_suffix,
+                    BalanceUtils.displayDigitPrecisionValue(gasFee, baseCurrency.tokenInfo.decimals, 2), baseCurrency.getSymbol()));
             holder.speedTime.setText(displayTime);
-            String buildPriorityFee = context.getString(R.string.priority_fee) + ": " + context.getString(R.string.delete_session, priorityFee);
-            holder.priorityFee.setText(buildPriorityFee);
+            holder.priorityFeeValue.setText(priorityFee);
 
             if (fiatStr.length() > 0)
             {
                 holder.speedCostFiat.setVisibility(View.VISIBLE);
                 holder.speedCostFiat.setText(fiatStr);
+                holder.currencySymbol.setText(TickerService.getCurrencySymbol());
+                holder.maxFeeValue.setText(fiatMaxStr);
             }
             else
             {
+                holder.currencySymbol.setVisibility(View.GONE);
                 holder.speedCostFiat.setVisibility(View.GONE);
+                holder.maxFeeLayout.setVisibility(View.GONE);
             }
 
             setCustomGasDetails(position);
@@ -482,7 +535,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
 
         private void blankCustomHolder(GasSpeedHolder holder)
         {
-            holder.speedGwei.setText(context.getString(R.string.bracketed, context.getString(R.string.set_your_speed)));
+            holder.basePriceText.setText(context.getString(R.string.bracketed, context.getString(R.string.set_your_speed)));
             holder.speedCostEth.setText("");
             holder.speedCostFiat.setText("");
             holder.speedTime.setText("");
@@ -505,7 +558,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                     //calculate equivalent fiat
                     double cryptoRate = Double.parseDouble(rtt.getPrice());
                     double cryptoAmount = Double.parseDouble(gasAmountInBase);
-                    costStr = TickerService.getCurrencyString(cryptoAmount * cryptoRate);
+                    //costStr = TickerService.getCurrencyString(cryptoAmount * cryptoRate);
+                    costStr = BalanceUtils.genCurrencyString(cryptoAmount * cryptoRate, "");
                 }
             }
             catch (Exception e)
@@ -528,7 +582,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 }
                 else
                 {
-                    GasSpeed2 gs = gasSpread.getSelectedGasFee(position);
+                    GasSpeed gs = gasSpread.getSelectedGasFee(position);
                     gasSliderView.initGasPriceMax(gs.gasPrice);
                     gasSliderView.setVisibility(View.GONE);
                     hideGasWarning();
@@ -572,8 +626,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
                 TXSpeed nextSpeed = gasSpread.getNextSpeed(speed);
                 if (nextSpeed == TXSpeed.CUSTOM) break;
 
-                GasSpeed2 ug = gasSpread.getSelectedGasFee(speed);
-                GasSpeed2 lg = gasSpread.getSelectedGasFee(nextSpeed);
+                GasSpeed ug = gasSpread.getSelectedGasFee(speed);
+                GasSpeed lg = gasSpread.getSelectedGasFee(nextSpeed);
                 double lowerBound = lg.gasPrice.maxFeePerGas.doubleValue();
                 double upperBound = ug.gasPrice.maxFeePerGas.doubleValue();
                 if (lowerBound <= dGasPrice && (upperBound >= dGasPrice))
@@ -705,5 +759,4 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
             gasWarning.setVisibility(View.GONE);
         }
     }
-
 }

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/layout_simple_toolbar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/layoutButtons"
+        android:layout_below="@id/toolbar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:layout_marginTop="@dimen/optimal_30"
+                android:scaleType="fitCenter"
+                android:src="@drawable/icons_illustrations_analytics"
+                android:visibility="visible" />
+
+            <TextView
+                style="@style/Aw.Typography"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/standard_16"
+                android:layout_marginVertical="@dimen/optimal_30"
+                android:lineSpacingMultiplier="1.3"
+                android:text="@string/message_share_anonymous_data"
+                android:textAlignment="center" />
+
+            <View style="@style/Aw.Component.Separator" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/cozy_20"
+                android:paddingVertical="@dimen/standard_16">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/switch_crash_report"
+                    android:animateLayoutChanges="true"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="@string/share_anonymous_data" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_crash_report"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>

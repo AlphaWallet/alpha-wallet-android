@@ -9,16 +9,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DisplayState;
-import com.alphawallet.app.entity.GasSettings;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
@@ -31,14 +29,17 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
 import com.alphawallet.app.ui.TransferTicketDetailActivity;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.hardware.SignatureReturnType;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.SignableBytes;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
-
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -56,12 +57,13 @@ import io.reactivex.schedulers.Schedulers;
  * Created by James on 21/02/2018.
  */
 @HiltViewModel
-public class TransferTicketDetailViewModel extends BaseViewModel {
+public class TransferTicketDetailViewModel extends BaseViewModel implements TransactionSendHandlerInterface
+{
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<String> newTransaction = new MutableLiveData<>();
     private final MutableLiveData<String> universalLinkReady = new MutableLiveData<>();
-    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
-    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
 
     private final GenericWalletInteract genericWalletInteract;
     private final KeyService keyService;
@@ -69,7 +71,6 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final GasService gasService;
-    private final AnalyticsServiceType analyticsService;
     private final TokensService tokensService;
 
     private ParseMagicLink parser;
@@ -85,29 +86,43 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
                                   AssetDefinitionService assetDefinitionService,
                                   GasService gasService,
                                   AnalyticsServiceType analyticsService,
-                                  TokensService tokensService) {
+                                  TokensService tokensService)
+    {
         this.genericWalletInteract = genericWalletInteract;
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.gasService = gasService;
-        this.analyticsService = analyticsService;
         this.tokensService = tokensService;
+        setAnalyticsService(analyticsService);
     }
 
-    public MutableLiveData<TransactionData> transactionFinalised()
+    public MutableLiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
     }
-    public MutableLiveData<Throwable> transactionError() { return transactionError; }
+
+    public MutableLiveData<TransactionReturn> transactionError()
+    {
+        return transactionError;
+    }
 
     public LiveData<Wallet> defaultWallet()
     {
         return defaultWallet;
     }
-    public LiveData<String> newTransaction() { return newTransaction; }
-    public LiveData<String> universalLinkReady() { return universalLinkReady; }
+
+    public LiveData<String> newTransaction()
+    {
+        return newTransaction;
+    }
+
+    public LiveData<String> universalLinkReady()
+    {
+        return universalLinkReady;
+    }
+
     private void initParser()
     {
         if (parser == null)
@@ -119,20 +134,17 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
     public void prepare(Token token)
     {
         this.token = token;
-        disposable = genericWalletInteract
-                .find()
-                .subscribe(this::onDefaultWallet, this::onError);
-
         gasService.startGasPriceCycle(token.tokenInfo.chainId);
     }
 
-    private void onDefaultWallet(Wallet wallet) {
+    private void onDefaultWallet(Wallet wallet)
+    {
         defaultWallet.setValue(wallet);
     }
 
     public Wallet getWallet()
     {
-       return defaultWallet.getValue();
+        return defaultWallet.getValue();
     }
 
     public void setWallet(Wallet wallet)
@@ -162,7 +174,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
+                .sign(defaultWallet().getValue(), tradeBytes)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotSignature, this::onError);
@@ -183,7 +195,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
         //sign this link
         disposable = createTransactionInteract
-                .sign(defaultWallet().getValue(), tradeBytes, token.tokenInfo.chainId)
+                .sign(defaultWallet().getValue(), tradeBytes)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotSignature, this::onError);
@@ -191,6 +203,8 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
 
     private void gotSignature(SignatureFromKey signature)
     {
+        if (signature.sigType == SignatureReturnType.SIGNING_POSTPONED) return;
+
         String universalLink = parser.completeUniversalLink(token.tokenInfo.chainId, linkMessage, signature.signature);
         //Now open the share icon
         universalLinkReady.postValue(universalLink);
@@ -208,12 +222,18 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         }
         else
         {
-            final byte[] data = TokenRepository.createTicketTransferData(to, transferList, token);
-            disposable = createTransactionInteract.create(defaultWallet.getValue(), token.getAddress(),
-                    BigInteger.ZERO, gasService.getGasPrice(), new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS), data, token.tokenInfo.chainId)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(newTransaction::postValue, this::onError);
+            final byte[] transactionBytes = TokenRepository.createTicketTransferData(to, transferList, token);
+            final Web3Transaction w3tx = new Web3Transaction(
+                    new Address(getWallet().address),
+                    new Address(token.getAddress()),
+                    BigInteger.ZERO,
+                    BigInteger.ZERO,
+                    new BigInteger(C.DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS),
+                    -1,
+                    Numeric.toHexString(transactionBytes),
+                    -1);
+
+            requestSignature(w3tx, getWallet(), token.tokenInfo.chainId);
         }
     }
 
@@ -266,7 +286,7 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         keyService.completeAuthentication(signData);
     }
 
-    public Single<BigInteger> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
+    public Single<GasEstimate> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
     {
         return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet, BigInteger.ZERO);
     }
@@ -281,29 +301,25 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
         keyService.completeAuthentication(signData);
     }
 
-    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId)
+    public void requestSignature(Web3Transaction finalTx, Wallet wallet, long chainId)
     {
-        disposable = createTransactionInteract
-                .createWithSig(wallet, finalTx, chainId)
-                .subscribe(transactionFinalised::postValue,
-                        transactionError::postValue);
+        createTransactionInteract.requestSignature(finalTx, wallet, chainId, this);
     }
 
-    public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId, long chainId) {
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction w3Tx, SignatureFromKey signatureFromKey)
+    {
+        createTransactionInteract.sendTransaction(wallet, chainId, w3Tx, signatureFromKey);
+    }
+
+    public byte[] getERC721TransferBytes(String to, String contractAddress, String tokenId, long chainId)
+    {
         Token token = tokensService.getToken(chainId, contractAddress);
         List<BigInteger> tokenIds = token.stringHexToBigIntegerList(tokenId);
         return TokenRepository.createERC721TransferFunction(to, token, tokenIds);
     }
 
-    public void actionSheetConfirm(String mode)
+    public TokensService getTokenService()
     {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(mode);
-
-        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
-    }
-
-    public TokensService getTokenService() {
         return tokensService;
     }
 
@@ -320,5 +336,24 @@ public class TransferTicketDetailViewModel extends BaseViewModel {
             intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             context.startActivity(intent);
         }
+    }
+
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        transactionFinalised.postValue(txData);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn txError)
+    {
+        transactionError.postValue(txError);
+    }
+
+    public void loadWallet(String address)
+    {
+        disposable = genericWalletInteract
+                .findWallet(address)
+                .subscribe(this::onDefaultWallet, this::onError);
     }
 }

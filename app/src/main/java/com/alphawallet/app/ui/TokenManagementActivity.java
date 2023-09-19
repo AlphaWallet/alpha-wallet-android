@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
+import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.ADDRESS_FORMAT;
 
 import android.content.Intent;
@@ -11,8 +12,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -30,7 +32,9 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.ui.widget.adapter.TokenListAdapter;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TokenManagementViewModel;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 
 import java.util.ArrayList;
 
@@ -39,45 +43,20 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 @AndroidEntryPoint
-public class TokenManagementActivity extends BaseActivity implements TokenListAdapter.ItemClickListener
+public class TokenManagementActivity extends BaseActivity implements TokenListAdapter.Callback
 {
+    private ActivityResultLauncher<Intent> addTokenLauncher;
     private final Handler delayHandler = new Handler(Looper.getMainLooper());
     private TokenManagementViewModel viewModel;
     private RecyclerView tokenList;
-    private Button saveButton;
     private TokenListAdapter adapter;
-    private final TextWatcher textWatcher = new TextWatcher()
-    {
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count)
-        {
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after)
-        {
-        }
-
-        @Override
-        public void afterTextChanged(final Editable s)
-        {
-            delayHandler.removeCallbacksAndMessages(null);
-            delayHandler.postDelayed(() -> {
-                if (adapter != null) adapter.filter(s.toString());
-            }, 750);
-        }
-    };
     private EditText search;
+    private LinearLayout noResultsLayout;
     private Wallet wallet;
     private Realm realm;
     private RealmResults<RealmToken> realmUpdates;
     private String realmId;
     private ArrayList<ContractLocator> tokenUpdates;
-    final ActivityResultLauncher<Intent> addTokenLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getData() == null) return;
-                tokenUpdates = result.getData().getParcelableArrayListExtra(ADDED_TOKEN);
-            });
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -86,31 +65,65 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
         setContentView(R.layout.activity_token_management);
         toolbar();
         setTitle(getString(R.string.add_hide_tokens));
+        initViewModel();
         initViews();
+        initIntentLaunchers();
         tokenUpdates = null;
+    }
+
+    private void initIntentLaunchers()
+    {
+        addTokenLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                //finish and return
+                Intent intent = new Intent();
+                intent.putExtra(RESET_WALLET, true);
+                setResult(RESULT_OK, intent);
+                finish();
+            });
+    }
+
+    private void initViewModel()
+    {
+        viewModel = new ViewModelProvider(this)
+            .get(TokenManagementViewModel.class);
+        viewModel.tokens().observe(this, this::onTokens);
     }
 
     private void initViews()
     {
-        viewModel = new ViewModelProvider(this)
-                .get(TokenManagementViewModel.class);
-        viewModel.tokens().observe(this, this::onTokens);
-
         wallet = new Wallet(viewModel.getTokensService().getCurrentAddress());
         tokenList = findViewById(R.id.token_list);
-        saveButton = findViewById(R.id.btn_apply);
         search = findViewById(R.id.edit_search);
+        noResultsLayout = findViewById(R.id.layout_no_results);
 
         tokenList.setLayoutManager(new LinearLayoutManager(this));
-
-        saveButton.setOnClickListener(v -> {
-            Intent intent = new Intent();
-            setResult(RESULT_OK, intent);
-            finish();
-        });
-
         tokenList.requestFocus();
-        search.addTextChangedListener(textWatcher);
+        search.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+            }
+
+            @Override
+            public void afterTextChanged(final Editable s)
+            {
+                delayHandler.removeCallbacksAndMessages(null);
+                delayHandler.postDelayed(() -> {
+                    if (adapter != null)
+                    {
+                        noResultsLayout.setVisibility(View.GONE);
+                        adapter.filter(s.toString());
+                    }
+                }, 750);
+            }
+        });
     }
 
     private void onTokens(TokenCardMeta[] tokenArray)
@@ -128,6 +141,30 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     public void onItemClick(Token token, boolean enabled)
     {
         viewModel.setTokenEnabled(wallet, token, enabled);
+    }
+
+    @Override
+    public void onSearchFailed(String searchString)
+    {
+        AWalletAlertDialog searchTokenDialog = new AWalletAlertDialog(this);
+        searchTokenDialog.setTitle(getString(R.string.dialog_title_search_token));
+        searchTokenDialog.setButton(R.string.action_continue, v -> {
+            Intent intent = new Intent(this, AddTokenActivity.class);
+            intent.putExtra(C.EXTRA_ADDRESS, searchString);
+            addTokenLauncher.launch(intent);
+        });
+        searchTokenDialog.setSecondaryButton(R.string.action_cancel, v -> {
+            searchTokenDialog.dismiss();
+        });
+
+        if (Utils.isAddressValid(searchString))
+        {
+            searchTokenDialog.show();
+        }
+        else
+        {
+            noResultsLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -205,8 +242,8 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     {
         if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
         realmUpdates = realm.where(RealmToken.class)
-                .like("address", ADDRESS_FORMAT)
-                .findAllAsync();
+            .like("address", ADDRESS_FORMAT)
+            .findAllAsync();
         realmUpdates.addChangeListener(realmTokens -> {
             String filterText = search.getText().toString();
             if (realmTokens.size() == 0 || filterText.length() > 0) return;
@@ -218,12 +255,14 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
 
                 String balance = TokensRealmSource.convertStringBalance(token.getBalance(), token.getContractType());
                 Token t = viewModel.getTokensService().getToken(token.getChainId(), token.getTokenAddress()); //may not be needed to group
-
-                TokenCardMeta meta = new TokenCardMeta(token.getChainId(), token.getTokenAddress(), balance,
+                if (t != null && !t.isEthereum())
+                {
+                    TokenCardMeta meta = new TokenCardMeta(token.getChainId(), token.getTokenAddress(), balance,
                         token.getUpdateTime(), viewModel.getAssetDefinitionService(), token.getName(), token.getSymbol(), token.getContractType(),
                         viewModel.getTokensService().getTokenGroup(t));
-                meta.lastTxUpdate = token.getLastTxTime();
-                adapter.addToken(meta);
+                    meta.lastTxUpdate = token.getLastTxTime();
+                    adapter.addToken(meta);
+                }
             }
         });
     }

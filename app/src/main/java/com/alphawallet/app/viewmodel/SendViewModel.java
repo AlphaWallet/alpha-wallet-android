@@ -7,29 +7,27 @@ import android.content.Intent;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.AnalyticsProperties;
+import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.interact.CreateTransactionInteract;
-import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
 import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
+import com.alphawallet.hardware.SignatureFromKey;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -42,26 +40,24 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 @HiltViewModel
-public class SendViewModel extends BaseViewModel {
+public class SendViewModel extends BaseViewModel implements TransactionSendHandlerInterface
+{
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
-    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
-    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
 
     private final MyAddressRouter myAddressRouter;
     private final EthereumNetworkRepositoryType networkRepository;
     private final TokensService tokensService;
-    private final FetchTransactionsInteract fetchTransactionsInteract;
     private final GasService gasService;
     private final AssetDefinitionService assetDefinitionService;
     private final KeyService keyService;
     private final CreateTransactionInteract createTransactionInteract;
-    private final AnalyticsServiceType analyticsService;
 
     @Inject
     public SendViewModel(MyAddressRouter myAddressRouter,
                          EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                          TokensService tokensService,
-                         FetchTransactionsInteract fetchTransactionsInteract,
                          CreateTransactionInteract createTransactionInteract,
                          GasService gasService,
                          AssetDefinitionService assetDefinitionService,
@@ -71,19 +67,22 @@ public class SendViewModel extends BaseViewModel {
         this.myAddressRouter = myAddressRouter;
         this.networkRepository = ethereumNetworkRepositoryType;
         this.tokensService = tokensService;
-        this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.gasService = gasService;
         this.assetDefinitionService = assetDefinitionService;
         this.keyService = keyService;
         this.createTransactionInteract = createTransactionInteract;
-        this.analyticsService = analyticsService;
+        setAnalyticsService(analyticsService);
     }
 
-    public MutableLiveData<TransactionData> transactionFinalised()
+    public MutableLiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
     }
-    public MutableLiveData<Throwable> transactionError() { return transactionError; }
+
+    public MutableLiveData<TransactionReturn> transactionError()
+    {
+        return transactionError;
+    }
 
     public void showContractInfo(Context ctx, Wallet wallet, Token token)
     {
@@ -95,7 +94,10 @@ public class SendViewModel extends BaseViewModel {
         return networkRepository.getNetworkByChain(chainId);
     }
 
-    public Token getToken(long chainId, String tokenAddress) { return tokensService.getToken(chainId, tokenAddress); }
+    public Token getToken(long chainId, String tokenAddress)
+    {
+        return tokensService.getToken(chainId, tokenAddress);
+    }
 
     public void showImportLink(Context context, String importTxt)
     {
@@ -107,7 +109,7 @@ public class SendViewModel extends BaseViewModel {
 
     public void fetchToken(long chainId, String address, String walletAddress)
     {
-        tokensService.update(address, chainId)
+        tokensService.update(address, chainId, ContractType.NOT_SET)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(tokenInfo -> gotTokenUpdate(tokenInfo, walletAddress), this::onError).isDisposed();
@@ -156,7 +158,7 @@ public class SendViewModel extends BaseViewModel {
         return txBytes;
     }
 
-    public Single<BigInteger> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
+    public Single<GasEstimate> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount)
     {
         return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet, BigInteger.ZERO);
     }
@@ -166,19 +168,25 @@ public class SendViewModel extends BaseViewModel {
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId)
+    public void requestSignature(Web3Transaction finalTx, Wallet wallet, long chainId)
     {
-        disposable = createTransactionInteract
-                .createWithSig(wallet, finalTx, chainId)
-                .subscribe(transactionFinalised::postValue,
-                        transactionError::postValue);
+        createTransactionInteract.requestSignature(finalTx, wallet, chainId, this);
     }
 
-    public void actionSheetConfirm(String mode)
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction tx, SignatureFromKey signatureFromKey)
     {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(mode);
+        createTransactionInteract.sendTransaction(wallet, chainId, tx, signatureFromKey);
+    }
 
-        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        transactionFinalised.postValue(txData);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn txError)
+    {
+        transactionError.postValue(txError);
     }
 }

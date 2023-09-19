@@ -6,6 +6,7 @@ import android.content.Intent;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -15,13 +16,15 @@ import com.alphawallet.app.ui.Erc1155AssetListActivity;
 import com.alphawallet.app.ui.NFTAssetDetailActivity;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
-public class NFTAssetsViewModel extends BaseViewModel {
+public class NFTAssetsViewModel extends BaseViewModel
+{
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
@@ -64,13 +67,14 @@ public class NFTAssetsViewModel extends BaseViewModel {
         return intent;
     }
 
-    public Intent showAssetDetails(Context context, Wallet wallet, Token token, BigInteger tokenId)
+    public Intent showAssetDetails(Context context, Wallet wallet, Token token, BigInteger tokenId, NFTAsset asset)
     {
         Intent intent = new Intent(context, NFTAssetDetailActivity.class);
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKEN_ID, tokenId.toString());
+        if (asset != null) intent.putExtra(C.EXTRA_NFTASSET, asset);
         return intent;
     }
 }

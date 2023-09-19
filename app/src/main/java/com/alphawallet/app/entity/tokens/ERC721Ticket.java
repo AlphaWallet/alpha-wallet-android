@@ -1,7 +1,5 @@
 package com.alphawallet.app.entity.tokens;
 
-import android.app.Activity;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
@@ -12,7 +10,6 @@ import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 
 import org.web3j.abi.datatypes.Function;
@@ -110,12 +107,6 @@ public class ERC721Ticket extends Token
     }
 
     @Override
-    public void clickReact(BaseViewModel viewModel, Activity activity)
-    {
-        viewModel.showTokenList(activity, this);
-    }
-
-    @Override
     public int getContractType()
     {
         return R.string.ERC721T;
@@ -171,7 +162,7 @@ public class ERC721Ticket extends Token
     public List<BigInteger> getNonZeroArrayBalance()
     {
         List<BigInteger> nonZeroValues = new ArrayList<>();
-        for (BigInteger value : balanceArray) if (value.compareTo(BigInteger.ZERO) != 0 && !nonZeroValues.contains(value)) nonZeroValues.add(value);
+        for (BigInteger value : balanceArray) if (value.compareTo(BigInteger.ZERO) != 0) nonZeroValues.add(value);
         return nonZeroValues;
     }
 

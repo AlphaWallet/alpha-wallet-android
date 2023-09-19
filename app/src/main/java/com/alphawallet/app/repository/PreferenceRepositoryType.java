@@ -2,7 +2,10 @@ package com.alphawallet.app.repository;
 
 import com.alphawallet.app.entity.CurrencyItem;
 
-public interface PreferenceRepositoryType {
+import java.util.Set;
+
+public interface PreferenceRepositoryType
+{
     String getCurrentWalletAddress();
 
     void setCurrentWalletAddress(String address);
@@ -18,10 +21,6 @@ public interface PreferenceRepositoryType {
     String getCustomRPCNetworks();
 
     void setCustomRPCNetworks(String networks);
-
-    boolean getNotificationsState();
-
-    void setNotificationState(boolean state);
 
     String getDefaultLocale();
 
@@ -43,57 +42,104 @@ public interface PreferenceRepositoryType {
 
     void setFullScreenState(boolean state);
 
-    void setUse1559Transactions(boolean toggleState);
     boolean getUse1559Transactions();
 
-    boolean isActiveMainnet();
+    void setUse1559Transactions(boolean toggleState);
 
-    void setActiveMainnet(boolean state);
+    boolean getDeveloperOverride();
 
-    boolean hasShownTestNetWarning();
+    void setDeveloperOverride(boolean toggleState);
 
-    void setShownTestNetWarning();
+    boolean isTestnetEnabled();
+
+    void setTestnetEnabled(boolean enabled);
+
+    String getPriceAlerts();
 
     void setPriceAlerts(String json);
 
-    String getPriceAlerts();
     void setHasSetNetworkFilters();
+
     boolean hasSetNetworkFilters();
+
     void blankHasSetNetworkFilters();
 
     void commit();
 
     void incrementLaunchCount();
+
     int getLaunchCount();
+
     void resetLaunchCount();
 
     void setRateAppShown();
+
     boolean getRateAppShown();
 
     void setShowZeroBalanceTokens(boolean shouldShow);
+
     boolean shouldShowZeroBalanceTokens();
 
     int getUpdateWarningCount();
+
     void setUpdateWarningCount(int count);
 
     long getInstallTime();
+
     void setInstallTime(long time);
 
     String getUniqueId();
+
     void setUniqueId(String uuid);
 
     boolean isMarshMallowWarningShown();
+
     void setMarshMallowWarning(boolean shown);
 
     void storeLastFragmentPage(int ordinal);
+
     int getLastFragmentPage();
 
     int getLastVersionCode(int currentCode);
+
     void setLastVersionCode(int code);
 
     int getTheme();
+
     void setTheme(int state);
 
     boolean isNewWallet(String address);
+
     void setNewWallet(String address, boolean isNewWallet);
+    void setWatchOnly(boolean watchOnly);
+
+    boolean isWatchOnly();
+
+    Set<String> getSelectedSwapProviders();
+
+    void setSelectedSwapProviders(Set<String> swapProviders);
+
+    boolean isAnalyticsEnabled();
+
+    void setAnalyticsEnabled(boolean isEnabled);
+
+    boolean isCrashReportingEnabled();
+
+    void setCrashReportingEnabled(boolean isEnabled);
+
+    long getLoginTime(String address);
+
+    void logIn(String address);
+
+    void setFirebaseMessagingToken(String token);
+
+    String getFirebaseMessagingToken();
+
+    boolean isTransactionNotificationsEnabled(String address);
+
+    void setTransactionNotificationEnabled(String address, boolean isEnabled);
+
+    boolean isPostNotificationsPermissionRequested(String address);
+
+    void setPostNotificationsPermissionRequested(String address, boolean hasRequested);
 }

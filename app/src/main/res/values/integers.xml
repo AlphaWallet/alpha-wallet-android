@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget Weights -->
+    <item type="integer" name="widget_label" format="float">1.3</item>
+    <item type="integer" name="widget_content" format="float">3.2</item>
+    <item type="integer" name="widget_control" format="float">0.6</item>
+</resources>

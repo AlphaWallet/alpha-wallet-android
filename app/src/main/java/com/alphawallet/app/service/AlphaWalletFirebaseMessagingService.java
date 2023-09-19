@@ -1,35 +1,63 @@
 package com.alphawallet.app.service;
 
-public class AlphaWalletFirebaseMessagingService
-{
+import androidx.annotation.NonNull;
 
-}
-/*public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingService {
-    public static final String TAG = AlphaWalletFirebaseMessagingService.class.getSimpleName();
-    public static final String IDENTITY_POOL_ID = "us-west-2:6d3c1431-0764-43f0-8ced-54e584fd01ad";
-    public static final String PLATFORM_APPLICATION_ARN = "arn:aws:sns:us-west-2:400248756644:app/GCM/AlphaWallet-Android";
+import com.alphawallet.app.entity.notification.DataMessage;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.Gson;
+
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
+public class AlphaWalletFirebaseMessagingService extends FirebaseMessagingService
+{
+    @Inject
+    TokensService tokensService;
+    @Inject
+    TransactionsService transactionsService;
+    @Inject
+    PreferenceRepositoryType preferenceRepository;
+
+    /**
+     * There are two scenarios when onNewToken is called:
+     * 1) When a new token is generated on initial app startup
+     * 2) Whenever an existing token is changed
+     * Under #2, there are three scenarios when the existing token is changed:
+     * A) App is restored to a new device
+     * B) User uninstalls/reinstalls the app
+     * C) User clears app data
+     */
+    @Override
+    public void onNewToken(@NonNull String token)
+    {
+//         sendRegistrationToServer(token);
+        preferenceRepository.setFirebaseMessagingToken(token);
+    }
+
+    private void sendRegistrationToServer(String token)
+    {
+        // TODO:
+        // If you want to send messages to this application instance or
+        // manage this apps subscriptions on the server side, send the
+        // FCM registration token to your app server.
+    }
 
     @Override
-    public void onNewToken(String token)
+    public void onMessageReceived(@NonNull RemoteMessage remoteMessage)
     {
-        try
+        super.onMessageReceived(remoteMessage);
+        DataMessage.Body body = new Gson().fromJson(remoteMessage.getData().get("body"), DataMessage.Body.class);
+
+        // If recipient is active wallet and app is on background, fetch transactions
+        if (body != null &&
+            body.to.equalsIgnoreCase(preferenceRepository.getCurrentWalletAddress()) &&
+            !tokensService.isOnFocus())
         {
-            CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
-                    getApplicationContext(),
-                    IDENTITY_POOL_ID,
-                    Regions.US_WEST_2
-            );
-            AmazonSNSClient snsClient = new AmazonSNSClient(credentialsProvider);
-            snsClient.setRegion(Region.getRegion(Regions.US_WEST_2));
-            CreatePlatformEndpointRequest request = new CreatePlatformEndpointRequest();
-            request.setPlatformApplicationArn(PLATFORM_APPLICATION_ARN);
-            request.setToken(token);
-            CreatePlatformEndpointResult result = snsClient.createPlatformEndpoint(request);
+            transactionsService.fetchTransactionsFromBackground();
         }
-        catch (Exception e)
-        {
-            Log.e(TAG, e.getMessage(), e);
-        }
-        super.onNewToken(token);
     }
-}*/
+}

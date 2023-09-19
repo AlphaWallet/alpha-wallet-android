@@ -25,20 +25,23 @@ public class HomeReceiver extends BroadcastReceiver
     public void onReceive(Context context, Intent intent)
     {
         Bundle bundle = intent.getExtras();
-        switch (intent.getAction())
+        if (intent.getAction() != null)
         {
-            case C.REQUEST_NOTIFICATION_ACCESS:
-                homeCommsInterface.requestNotificationPermission();
-                break;
-            case C.BACKUP_WALLET_SUCCESS:
-                String keyAddress = bundle.getString("Key");
-                homeCommsInterface.backupSuccess(keyAddress);
-                break;
-            case C.WALLET_CONNECT_REQUEST:
-                String sessionId = bundle.getString("sessionid");
-                homeCommsInterface.openWalletConnect(sessionId);
-            default:
-                break;
+            switch (intent.getAction())
+            {
+                case C.REQUEST_NOTIFICATION_ACCESS:
+                    homeCommsInterface.requestNotificationPermission();
+                    break;
+                case C.BACKUP_WALLET_SUCCESS:
+                    String keyAddress = bundle != null ? bundle.getString("Key", "") : "";
+                    homeCommsInterface.backupSuccess(keyAddress);
+                    break;
+                case C.WALLET_CONNECT_REQUEST:
+                    String sessionId = bundle != null ? bundle.getString("sessionid", "") : "";
+                    homeCommsInterface.openWalletConnect(sessionId);
+                default:
+                    break;
+            }
         }
     }
 

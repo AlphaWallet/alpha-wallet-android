@@ -1,6 +1,8 @@
 package com.alphawallet.app.entity;
 
-import com.alphawallet.app.BuildConfig;
+import static com.alphawallet.app.entity.TransactionDecoder.ReadState.ARGS;
+import static org.web3j.crypto.Keys.ADDRESS_LENGTH_IN_HEX;
+
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
 import org.web3j.crypto.Hash;
@@ -12,9 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.alphawallet.app.entity.TransactionDecoder.ReadState.ARGS;
-import static org.web3j.crypto.Keys.ADDRESS_LENGTH_IN_HEX;
 
 import timber.log.Timber;
 
@@ -29,7 +28,6 @@ import timber.log.Timber;
  * input.
  */
 
-// TODO: Should be a factory class that emits an object containing transaction interpretation
 public class TransactionDecoder
 {
     public static final int FUNCTION_LENGTH = 10;
@@ -43,7 +41,7 @@ public class TransactionDecoder
 
     private FunctionData getUnknownFunction()
     {
-        return new FunctionData("N/A", ContractType.OTHER);
+        return new FunctionData("Contract Call", ContractType.OTHER);
     }
 
     public TransactionDecoder()
@@ -63,9 +61,12 @@ public class TransactionDecoder
             return thisData;
         }
 
-        try {
-            while (parseIndex < input.length() && !(parseState == ParseStage.FINISH)) {
-                switch (parseState) {
+        try
+        {
+            while (parseIndex < input.length() && !(parseState == ParseStage.FINISH))
+            {
+                switch (parseState)
+                {
                     case PARSE_FUNCTION: //get function
                         parseState = setFunction(thisData, readBytes(input, FUNCTION_LENGTH), input.length());
                         break;
@@ -107,7 +108,8 @@ public class TransactionDecoder
         return thisData;
     }
 
-    private ParseStage setFunction(TransactionInput thisData, String input, int length) {
+    private ParseStage setFunction(TransactionInput thisData, String input, int length)
+    {
         //first get expected arg list:
         FunctionData data = functionList.get(input);
 
@@ -136,7 +138,8 @@ public class TransactionDecoder
         SIGNATURE
     }
 
-    private ParseStage getParams(TransactionInput thisData, String input) {
+    private ParseStage getParams(TransactionInput thisData, String input)
+    {
         state = ARGS;
         BigInteger count;
         StringBuilder sb = new StringBuilder();
@@ -152,26 +155,33 @@ public class TransactionDecoder
                         sb.setLength(0);
                         argData = read256bits(input);
                         BigInteger dataCount = Numeric.toBigInt(argData);
-                        String stuff = readBytes(input, dataCount.intValue());
-                        thisData.miscData.add(stuff);
+                        String hexBytes = readBytes(input, dataCount.intValue());
+                        thisData.miscData.add(hexBytes);
+                        thisData.hexArgs.add(Numeric.prependHexPrefix(hexBytes));
                         break;
                     case "string":
                         count = new BigInteger(argData, 16);
                         sb.setLength(0);
                         argData = read256bits(input);
-                        if (count.intValue() > argData.length()) count = BigInteger.valueOf(argData.length());
-                        for (int index = 0; index < (count.intValue()*2); index += 2)
+                        if (count.intValue() > argData.length())
+                            count = BigInteger.valueOf(argData.length());
+                        for (int index = 0; index < (count.intValue() * 2); index += 2)
                         {
-                            int v = Integer.parseInt(argData.substring(index, index+2), 16);
-                            char c = (char)v;
+                            int v = Integer.parseInt(argData.substring(index, index + 2), 16);
+                            char c = (char) v;
                             sb.append(c);
                         }
                         thisData.miscData.add(Numeric.cleanHexPrefix(sb.toString()));
+
+                        //Should be ASCII, try to convert
+                        thisData.hexArgs.add(new String(Numeric.hexStringToByteArray(sb.toString())));
                         break;
                     case "address":
                         if (argData.length() >= 64 - ADDRESS_LENGTH_IN_HEX)
                         {
-                            thisData.addresses.add("0x" + argData.substring(64 - ADDRESS_LENGTH_IN_HEX));
+                            String addr = Numeric.prependHexPrefix(argData.substring(64 - ADDRESS_LENGTH_IN_HEX));
+                            thisData.addresses.add(addr);
+                            thisData.hexArgs.add(addr);
                         }
                         break;
                     case "bytes32":
@@ -181,17 +191,21 @@ public class TransactionDecoder
                     case "uint16[]":
                     case "uint256[]":
                         count = new BigInteger(argData, 16);
-                        for (int i = 0; i < count.intValue(); i++) {
+                        for (int i = 0; i < count.intValue(); i++)
+                        {
                             String inputData = read256bits(input);
                             thisData.arrayValues.add(new BigInteger(inputData, 16));
+                            thisData.hexArgs.add(inputData);
                             if (inputData.equals("0")) break;
                         }
                         break;
                     case "uint256":
+                    case "uint":
                         addArg(thisData, argData);
                         break;
                     case "uint8": //In our standards, we will put uint8 as the signature marker
-                        if (thisData.functionData.hasSig) {
+                        if (thisData.functionData.hasSig)
+                        {
                             state = ReadState.SIGNATURE;
                             sigCount = 0;
                         }
@@ -199,6 +213,11 @@ public class TransactionDecoder
                         break;
                     case "nodata":
                         //no need to store this data - eg placeholder to indicate presence of a vararg
+                        break;
+                    case "bool":
+                        //zero or one?
+                        BigInteger val = new BigInteger(argData, 16);
+                        thisData.hexArgs.add(val.longValue() == 0 ? "false" : "true");
                         break;
                     default:
                         break;
@@ -225,13 +244,14 @@ public class TransactionDecoder
                 if (++sigCount == 3) state = ARGS;
                 break;
         }
+        thisData.hexArgs.add(input);
     }
 
     private String readBytes(String input, int bytes)
     {
         if ((parseIndex + bytes) <= input.length())
         {
-            String value = input.substring(parseIndex, parseIndex+bytes);
+            String value = input.substring(parseIndex, parseIndex + bytes);
             parseIndex += bytes;
             return value;
         }
@@ -245,7 +265,7 @@ public class TransactionDecoder
     {
         if ((parseIndex + 64) <= input.length())
         {
-            String value = input.substring(parseIndex, parseIndex+64);
+            String value = input.substring(parseIndex, parseIndex + 64);
             parseIndex += 64;
             return value;
         }
@@ -452,7 +472,7 @@ public class TransactionDecoder
         if (data != null && data.arrayValues != null)
         {
             indices = new int[data.arrayValues.size()];
-            for (int i = 0; i < data.arrayValues.size() ; i++)
+            for (int i = 0; i < data.arrayValues.size(); i++)
             {
                 indices[i] = data.arrayValues.get(i).intValue();
             }
@@ -461,7 +481,8 @@ public class TransactionDecoder
         return indices;
     }
 
-    public static String buildMethodId(String methodSignature) {
+    public static String buildMethodId(String methodSignature)
+    {
         byte[] input = methodSignature.getBytes();
         byte[] hash = Hash.sha3(input);
         return Numeric.toHexString(hash).substring(0, 10);

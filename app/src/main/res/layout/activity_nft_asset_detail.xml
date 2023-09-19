@@ -34,18 +34,37 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/standard_16"
+                android:layout_marginStart="@dimen/tiny_8"
                 android:layout_marginTop="@dimen/standard_16"
-                android:layout_marginEnd="@dimen/standard_16"
-                android:minHeight="350dp">
+                android:layout_marginEnd="@dimen/tiny_8">
 
                 <com.alphawallet.app.widget.NFTImageView
-                    android:id="@+id/asset_image"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_centerInParent="true"
-                    android:gravity="center"
-                    custom:webview_height="350" />
+                        android:id="@+id/asset_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        android:gravity="center"
+                        custom:webview_height="350" />
+
+                <LinearLayout
+                        android:id="@+id/layout_webwrapper"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal"
+                        android:gravity="top"
+                        android:minHeight="100dp"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                    <com.alphawallet.app.web3.Web3TokenView
+                            android:id="@+id/web3_tokenview"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                    </com.alphawallet.app.web3.Web3TokenView>
+
+                </LinearLayout>
 
             </RelativeLayout>
 
@@ -76,6 +95,13 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/contract_address" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/key_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/key_address" />
 
             <com.alphawallet.app.widget.TokenInfoView
                 android:id="@+id/balance"
@@ -118,6 +144,13 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/asset_total_supply" />
+
+            <com.alphawallet.app.widget.TokenInfoView
+                android:id="@+id/rarity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                custom:tokenInfoLabel="@string/asset_rarity" />
 
             <com.alphawallet.app.widget.TokenInfoView
                 android:id="@+id/num_owners"
@@ -180,6 +213,11 @@
                 android:id="@+id/attributes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
+
+            <com.alphawallet.app.ui.widget.entity.NFTAttributeLayout
+                    android:id="@+id/ts_attributes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

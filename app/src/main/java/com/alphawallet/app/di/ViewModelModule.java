@@ -22,6 +22,7 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.repository.WalletRepositoryType;
+import com.alphawallet.app.router.CoinbasePayRouter;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
@@ -32,6 +33,7 @@ import com.alphawallet.app.router.RedeemSignatureDisplayRouter;
 import com.alphawallet.app.router.SellDetailRouter;
 import com.alphawallet.app.router.TokenDetailRouter;
 import com.alphawallet.app.router.TransferTicketDetailRouter;
+import com.alphawallet.app.service.AnalyticsServiceType;
 
 import dagger.Module;
 import dagger.Provides;
@@ -89,13 +91,19 @@ public class ViewModelModule {
     }
 
     @Provides
-    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository) {
-        return new CreateTransactionInteract(transactionRepository);
+    CreateTransactionInteract provideCreateTransactionInteract(TransactionRepositoryType transactionRepository,
+                                                               AnalyticsServiceType analyticsService) {
+        return new CreateTransactionInteract(transactionRepository, analyticsService);
     }
 
     @Provides
     MyAddressRouter provideMyAddressRouter() {
         return new MyAddressRouter();
+    }
+
+    @Provides
+    CoinbasePayRouter provideCoinbasePayRouter() {
+        return new CoinbasePayRouter();
     }
 
     @Provides

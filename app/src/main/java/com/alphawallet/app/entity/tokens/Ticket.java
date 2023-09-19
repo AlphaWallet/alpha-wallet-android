@@ -1,7 +1,5 @@
 package com.alphawallet.app.entity.tokens;
 
-import android.app.Activity;
-
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TicketRangeElement;
@@ -10,9 +8,7 @@ import com.alphawallet.app.entity.TransactionInput;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.repository.EventResult;
 import com.alphawallet.app.repository.entity.RealmToken;
-import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.BaseViewModel;
 import com.alphawallet.token.entity.TicketRange;
 
 import org.web3j.abi.datatypes.DynamicArray;
@@ -27,31 +23,34 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by James on 27/01/2018.  It might seem counter intuitive
- * but here Ticket refers to a container of an asset class here, not
- * the right to seat somewhere in the venue. Therefore, there
- * shouldn't be List<Ticket> To understand this, imagine that one says
- * "I have two cryptocurrencies: Ether and Bitcoin, each amounts to a
- * hundred", and he pauses and said, "I also have two indices: FIFA
- * and Formuler-one, which, too, amounts to a hundred each".
+ * Created by James on 27/01/2018.
  */
 
 public class Ticket extends Token
 {
     private final List<BigInteger> balanceArray;
-    private boolean isMatchedInXML = false;
 
-    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type) {
+    public Ticket(TokenInfo tokenInfo, List<BigInteger> balances, long blancaTime, String networkName, ContractType type)
+    {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = balances;
-        balance = balanceArray != null ? BigDecimal.valueOf(balanceArray.size()) : BigDecimal.ZERO;
+        balance = balanceArray != null ? BigDecimal.valueOf(getNonZeroArrayBalance().size()) : BigDecimal.ZERO;
         group = TokenGroup.NFT;
     }
 
-    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName, ContractType type) {
+    public Ticket(TokenInfo tokenInfo, String balances, long blancaTime, String networkName, ContractType type)
+    {
         super(tokenInfo, BigDecimal.ZERO, blancaTime, networkName, type);
         this.balanceArray = stringHexToBigIntegerList(balances);
-        balance = BigDecimal.valueOf(balanceArray.size());
+        balance = BigDecimal.valueOf(getNonZeroArrayBalance().size());
+        group = TokenGroup.NFT;
+    }
+
+    public Ticket(Token oldTicket, List<BigInteger> balances)
+    {
+        super(oldTicket.tokenInfo, BigDecimal.ZERO, oldTicket.updateBlancaTime, oldTicket.getNetworkName(), oldTicket.contractType);
+        this.balanceArray = balances;
+        balance = BigDecimal.valueOf(getNonZeroArrayBalance().size());
         group = TokenGroup.NFT;
     }
 
@@ -109,12 +108,6 @@ public class Ticket extends Token
     public void setRealmBalance(RealmToken realmToken)
     {
         realmToken.setBalance(Utils.bigIntListToString(balanceArray, true));
-    }
-
-    @Override
-    public void clickReact(BaseViewModel viewModel, Activity activity)
-    {
-        viewModel.showTokenList(activity, this);
     }
 
     @Override
@@ -235,11 +228,6 @@ public class Ticket extends Token
         return indexList;
     }
 
-    public void checkIsMatchedInXML(AssetDefinitionService assetService)
-    {
-        isMatchedInXML = assetService.hasDefinition(tokenInfo.chainId, tokenInfo.address);
-    }
-
     @Override
     public Function getTransferFunction(String to, List<BigInteger> tokenIndices) throws NumberFormatException
     {
@@ -305,7 +293,10 @@ public class Ticket extends Token
     public List<BigInteger> getNonZeroArrayBalance()
     {
         List<BigInteger> nonZeroValues = new ArrayList<>();
-        for (BigInteger value : balanceArray) if (value.compareTo(BigInteger.ZERO) != 0 && !nonZeroValues.contains(value)) nonZeroValues.add(value);
+        for (BigInteger value : balanceArray)
+        {
+            if (value.compareTo(BigInteger.ZERO) != 0) nonZeroValues.add(value);
+        }
         return nonZeroValues;
     }
 

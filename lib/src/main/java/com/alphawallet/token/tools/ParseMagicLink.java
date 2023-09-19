@@ -14,6 +14,8 @@ import com.alphawallet.token.entity.*;
 
 import static com.alphawallet.token.entity.MagicLinkInfo.mainnetMagicLinkDomain;
 
+import org.web3j.utils.Numeric;
+
 /**
  * Created by James on 21/02/2018.
  */

@@ -1,6 +1,6 @@
 package com.alphawallet.app.viewmodel;
 
-import com.alphawallet.app.entity.lifi.Connection;
+import com.alphawallet.app.entity.lifi.Token;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Tokens
 {
-    public static void sortValue(List<Connection.LToken> tokenItems)
+    public static void sortValue(List<Token> tokenItems)
     {
         Collections.sort(tokenItems, (l, r) -> {
             if (l.isNativeToken())
@@ -28,7 +28,7 @@ public class Tokens
         });
     }
 
-    public static void sortName(List<Connection.LToken> tokenItems)
+    public static void sortName(List<Token> tokenItems)
     {
         Collections.sort(tokenItems, (l, r) -> {
             if (l.isNativeToken())
@@ -41,7 +41,7 @@ public class Tokens
             }
             else
             {
-                return l.name.compareToIgnoreCase(r.name);
+                return l.name.trim().compareToIgnoreCase(r.name.trim());
             }
         });
     }

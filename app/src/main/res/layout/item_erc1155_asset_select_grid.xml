@@ -2,91 +2,68 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/holding_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:background="@drawable/background_grid_icon"
+    custom:strokeColor="?colorSurfaceQuaternary"
+    custom:strokeWidth="1dp">
 
-    <com.google.android.material.card.MaterialCardView
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        custom:cardCornerRadius="8dp"
-        custom:cardElevation="0dp"
-        custom:strokeColor="?colorSurfaceQuaternary"
-        custom:strokeWidth="1dp">
+        android:layout_alignParentTop="true"
+        android:paddingBottom="35dp">
 
-        <LinearLayout
+        <com.alphawallet.app.widget.NFTImageView
+            android:id="@+id/icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/text_count"
+            style="@style/Aw.Typography.Title.SemiBold"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/value_amount_overlay"
+            android:backgroundTint="?colorPrimary"
+            android:gravity="center"
+            android:textColor="?colorOnPrimary"
+            android:visibility="gone"
+            tools:text="25"
+            tools:visibility="visible" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/holding_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/background_round_bottom_corners"
+        android:padding="@dimen/dp9">
+
+        <TextView
+            android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_alignParentStart="true"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:singleLine="true"
+            tools:text="Title" />
 
-            <RelativeLayout
-                android:id="@+id/icon_wrapper"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center">
+        <TextView
+            android:id="@+id/subtitle"
+            style="@style/Aw.Typography.Sub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/title"
+            android:gravity="center"
+            android:singleLine="true"
+            android:visibility="gone"
+            tools:text="Subtitle"
+            tools:visibility="visible" />
 
-                <com.alphawallet.app.widget.NFTImageView
-                    android:id="@+id/icon"
-                    android:layout_width="match_parent"
-                    android:layout_height="156dp"
-                    android:layout_centerInParent="true" />
-
-                <TextView
-                    android:id="@+id/text_count"
-                    style="@style/Aw.Typography.Title.SemiBold"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_centerInParent="true"
-                    android:background="@drawable/value_amount_overlay"
-                    android:backgroundTint="?colorPrimary"
-                    android:gravity="center"
-                    android:textColor="?colorOnPrimary"
-                    android:visibility="gone"
-                    tools:text="25"
-                    tools:visibility="visible" />
-
-                <ProgressBar
-                    android:id="@+id/loading_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:padding="@dimen/standard_16"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/standard_16">
-
-                <TextView
-                    android:id="@+id/title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:singleLine="true"
-                    tools:text="Title" />
-
-                <TextView
-                    android:id="@+id/subtitle"
-                    style="@style/Aw.Typography.Sub"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/title"
-                    android:gravity="center"
-                    android:singleLine="true"
-                    android:visibility="gone"
-                    tools:text="Subtitle"
-                    tools:visibility="visible" />
-
-            </RelativeLayout>
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
+    </RelativeLayout>
 </RelativeLayout>

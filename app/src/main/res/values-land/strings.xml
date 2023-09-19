@@ -3,5 +3,16 @@
     <string name="send_multiple_tokens">Send Multiple Tokens</string>
     <string name="toast_qr_scanning_requires_api_24">QR scanning requires Android 7.0 (API level 24) or above.</string>
     <string name="action_reset_network" >Reset</string>
-    <string name="mode_test">Testnet mode</string>
+    <string name="wc_card_subtitle">Active connections to browser-based Dapp</string>
+    <string name="wc_disconnect">User disconnect the session.</string>
+    <string name="wc_sign_dapp_name">Name</string>
+    <string name="wc_wallet">Wallet</string>
+    <string name="wc_wallet_not_match">Wallet not exist or it\'s watch only.</string>
+    <string name="chain_not_support">Chain %s is not supported.</string>
+    <string name="create_shortcut_for_token">Create a shortcut for this token?</string>
+    <string name="toast_shortcut_created">Shortcut created, long press app icon to see it.</string>
+    <string name="warn_asset_not_belongs_to_active_wallet">Before performing any operation, keep in mind that the current NFT does not belong to the current active wallet, but to %1$s.</string>
+    <string name="remove_shortcut_reminder">Transferring this token will remove the associated shortcut from the home screen.</string>
+    <string name="remove_shortcut_while_token_not_found">Token does not exist, remove the shortcut?</string>
+    <string name="title_remove_shortcut">Remove Shortcut</string>
 </resources>

@@ -19,6 +19,7 @@ import com.alphawallet.app.api.v1.entity.request.SignPersonalMessageRequest;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.ApiV1ViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -26,7 +27,7 @@ import com.alphawallet.app.widget.ApiV1Dialog;
 import com.alphawallet.app.widget.ConfirmationWidget;
 import com.alphawallet.app.widget.SignDataWidget;
 import com.alphawallet.token.entity.Signable;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -115,6 +116,7 @@ public class ApiV1Activity extends BaseActivity
         return dialog;
     }
 
+    //TODO: use ActionSheetSignDialog
     public ApiV1Dialog setupSignPersonalMessageDialog(SignPersonalMessageRequest req, String address)
     {
         ApiV1Dialog dialog = new ApiV1Dialog(this, req);
@@ -152,6 +154,13 @@ public class ApiV1Activity extends BaseActivity
             public void cancelAuthentication()
             {
 
+            }
+
+            //TODO: Hardware: See ActionSheetSignDialog for how to implement this, or better still use ActionSheetSignDialog
+            @Override
+            public void gotSignature(SignatureFromKey signature)
+            {
+                //TODO: Hardware
             }
         };
 

@@ -1,21 +1,24 @@
-name: Unit test
+name: Unit test(MacOS)
 on:
   push:
     branches:
       - master
   pull_request:
+  merge_group:
 jobs:
   test:
     runs-on: macos-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v3
-        
+
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: zulu
-          java-version: 11
-          cache: gradle
+          distribution: oracle
+          java-version: 17
 
       - name: Run unit tests
         run: sh ./build.sh

@@ -12,8 +12,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
@@ -21,20 +19,27 @@ import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
+import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.GitHubRelease;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Transaction;
+import com.alphawallet.app.entity.Version;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
+import com.alphawallet.app.entity.analytics.QrScanResultType;
+import com.alphawallet.app.entity.attestation.ImportAttestation;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -48,6 +53,7 @@ import com.alphawallet.app.repository.entity.RealmWCSession;
 import com.alphawallet.app.router.ExternalBrowserRouter;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.router.MyAddressRouter;
+import com.alphawallet.app.service.AlphaWalletNotificationService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.RealmManager;
@@ -58,15 +64,19 @@ import com.alphawallet.app.ui.AddTokenActivity;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.ImportWalletActivity;
 import com.alphawallet.app.ui.SendActivity;
-import com.alphawallet.app.util.ens.AWEnsResolver;
+import com.alphawallet.app.ui.WalletConnectActivity;
+import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.entity.WCUtils;
+import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
 import com.alphawallet.app.widget.EmailPromptView;
 import com.alphawallet.app.widget.QRCodeActionsView;
 import com.alphawallet.app.widget.WhatsNewView;
+import com.alphawallet.token.entity.ContractInfo;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.token.tools.TokenDefinition;
@@ -75,13 +85,15 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.File;
+import org.web3j.utils.Numeric;
+
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 
@@ -95,13 +107,13 @@ import io.realm.Sort;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import timber.log.Timber;
+import wallet.core.jni.Hash;
 
 @HiltViewModel
-public class HomeViewModel extends BaseViewModel {
-    private final String TAG = "HVM";
+public class HomeViewModel extends BaseViewModel
+{
     public static final String ALPHAWALLET_DIR = "AlphaWallet";
-
-    private final MutableLiveData<NetworkInfo> defaultNetwork = new MutableLiveData<>();
+    private static final long ECHO_MAX_MILLIS = 250; //if second QRCODE read comes before 250 millis, reject
     private final MutableLiveData<Transaction[]> transactions = new MutableLiveData<>();
     private final MutableLiveData<String> backUpMessage = new MutableLiveData<>();
 
@@ -115,19 +127,19 @@ public class HomeViewModel extends BaseViewModel {
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionsService transactionsService;
     private final MyAddressRouter myAddressRouter;
-    private final AnalyticsServiceType analyticsService;
     private final ExternalBrowserRouter externalBrowserRouter;
     private final OkHttpClient httpClient;
     private final RealmManager realmManager;
-
-    private CryptoFunctions cryptoFunctions;
-    private ParseMagicLink parser;
-
-    private final MutableLiveData<File> installIntent = new MutableLiveData<>();
+    private final TokensService tokensService;
+    private final AlphaWalletNotificationService alphaWalletNotificationService;
     private final MutableLiveData<String> walletName = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> splashActivity = new MutableLiveData<>();
+    private final MutableLiveData<String> updateAvailable = new MutableLiveData<>();
+    private CryptoFunctions cryptoFunctions;
+    private ParseMagicLink parser;
     private BottomSheetDialog dialog;
+    private long qrReadTime = Long.MAX_VALUE;
 
     @Inject
     HomeViewModel(
@@ -144,7 +156,10 @@ public class HomeViewModel extends BaseViewModel {
             AnalyticsServiceType analyticsService,
             ExternalBrowserRouter externalBrowserRouter,
             OkHttpClient httpClient,
-            RealmManager realmManager) {
+            RealmManager realmManager,
+            TokensService tokensService,
+            AlphaWalletNotificationService alphaWalletNotificationService)
+    {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
         this.localeRepository = localeRepository;
@@ -155,48 +170,55 @@ public class HomeViewModel extends BaseViewModel {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.myAddressRouter = myAddressRouter;
         this.transactionsService = transactionsService;
-        this.analyticsService = analyticsService;
         this.externalBrowserRouter = externalBrowserRouter;
         this.httpClient = httpClient;
         this.realmManager = realmManager;
-
-
+        this.alphaWalletNotificationService = alphaWalletNotificationService;
+        setAnalyticsService(analyticsService);
         this.preferenceRepository.incrementLaunchCount();
+        this.tokensService = tokensService;
     }
 
     @Override
-    protected void onCleared() {
+    protected void onCleared()
+    {
         super.onCleared();
     }
 
-    public LiveData<Transaction[]> transactions() {
+    public LiveData<Transaction[]> transactions()
+    {
         return transactions;
     }
 
-    public LiveData<File> installIntent() {
-        return installIntent;
-    }
-
-    public LiveData<String> backUpMessage() {
+    public LiveData<String> backUpMessage()
+    {
         return backUpMessage;
     }
 
-    public LiveData<Boolean> splashReset() {
+    public LiveData<Boolean> splashReset()
+    {
         return splashActivity;
     }
 
-    public LiveData<Wallet> defaultWallet() {
+    public LiveData<String> updateAvailable()
+    {
+        return updateAvailable;
+    }
+
+    public LiveData<Wallet> defaultWallet()
+    {
         return defaultWallet;
     }
 
-    public void prepare(Activity activity) {
+    public void prepare(Activity activity)
+    {
         progress.postValue(false);
         disposable = genericWalletInteract
-                .find()
-                .subscribe(w -> {
-                    onDefaultWallet(w);
-                    initWalletConnectSessions(activity, w);
-                    }, this::onError);
+            .find()
+            .subscribe(w -> {
+                onDefaultWallet(w);
+                initWalletConnectSessions(activity, w);
+            }, this::onError);
     }
 
     public void onClean()
@@ -206,43 +228,53 @@ public class HomeViewModel extends BaseViewModel {
 
     private void onDefaultWallet(final Wallet wallet)
     {
+        preferenceRepository.setWatchOnly(wallet.watchOnly());
         defaultWallet.setValue(wallet);
     }
 
-    public void showImportLink(Activity activity, String importData) {
+    public void showImportLink(Activity activity, String importData)
+    {
         disposable = genericWalletInteract
-                .find().toObservable()
-                .filter(wallet -> checkWalletNotEqual(wallet, importData))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(wallet -> importLink(activity, importData), this::onError);
+            .find().toObservable()
+            .filter(wallet -> checkWalletNotEqual(wallet, importData))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(wallet -> importLink(activity, importData), this::onError);
     }
 
-    private boolean checkWalletNotEqual(Wallet wallet, String importData) {
+    private boolean checkWalletNotEqual(Wallet wallet, String importData)
+    {
         boolean filterPass = false;
 
-        try {
-            if (cryptoFunctions == null) {
+        try
+        {
+            if (cryptoFunctions == null)
+            {
                 cryptoFunctions = new CryptoFunctions();
             }
-            if (parser == null) {
+            if (parser == null)
+            {
                 parser = new ParseMagicLink(cryptoFunctions, EthereumNetworkRepository.extraChains());
             }
 
             MagicLinkData data = parser.parseUniversalLink(importData);
             String linkAddress = parser.getOwnerKey(data);
 
-            if (Utils.isAddressValid(data.contractAddress)) {
+            if (Utils.isAddressValid(data.contractAddress))
+            {
                 filterPass = !wallet.address.equals(linkAddress);
             }
-        } catch (Exception e) {
-            Timber.tag(TAG).e(e);
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
         }
 
         return filterPass;
     }
 
-    private void importLink(Activity activity, String importData) {
+    private void importLink(Activity activity, String importData)
+    {
         importTokenRouter.open(activity, importData);
     }
 
@@ -254,12 +286,13 @@ public class HomeViewModel extends BaseViewModel {
         context.startActivity(intent);
     }
 
-    public void getWalletName(Context context) {
+    public void getWalletName(Context context)
+    {
         disposable = fetchWalletsInteract
-                .getWallet(preferenceRepository.getCurrentWalletAddress())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(wallet -> onWallet(context, wallet), this::walletError);
+            .getWallet(preferenceRepository.getCurrentWalletAddress())
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(wallet -> updateWalletTitle(context, wallet), this::walletError);
     }
 
     private void walletError(Throwable throwable)
@@ -268,10 +301,11 @@ public class HomeViewModel extends BaseViewModel {
         splashActivity.postValue(true);
     }
 
-    private void onWallet(Context context, Wallet wallet)
+    private void updateWalletTitle(Context context, Wallet wallet)
     {
         transactionsService.changeWallet(wallet);
-        if (!TextUtils.isEmpty(wallet.name))
+        boolean usingDefaultName = Utils.isDefaultName(wallet.name, context);
+        if (!TextUtils.isEmpty(wallet.name) && !usingDefaultName)
         {
             walletName.postValue(wallet.name);
         }
@@ -284,39 +318,49 @@ public class HomeViewModel extends BaseViewModel {
             walletName.postValue("");
             //check for ENS name
             new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context)
-                    .reverseResolveEns(wallet.address)
-                    .map(ensName -> {
-                        wallet.ENSname = ensName;
-                        return wallet;
-                    })
-                    .flatMap(fetchWalletsInteract::updateENS) //store the ENS name
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(updatedWallet -> walletName.postValue(updatedWallet.ENSname), this::onENSError).isDisposed();
+                .reverseResolveEns(wallet.address)
+                .map(ensName -> {
+                    wallet.ENSname = ensName;
+                    return wallet;
+                })
+                .flatMap(fetchWalletsInteract::updateENS) //store the ENS name
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(updatedWallet -> {
+                    String name = Utils.formatAddress(wallet.address);
+                    if (!TextUtils.isEmpty(updatedWallet.ENSname))
+                    {
+                        name = updatedWallet.ENSname;
+                    }
+                    walletName.postValue(name);
+                }, this::onENSError).isDisposed();
         }
     }
 
-    public LiveData<String> walletName() {
+    public LiveData<String> walletName()
+    {
         return walletName;
     }
 
     public void checkIsBackedUp(String walletAddress)
     {
         genericWalletInteract.getWalletNeedsBackup(walletAddress)
-                .subscribe(backUpMessage::postValue).isDisposed();
+            .subscribe(backUpMessage::postValue).isDisposed();
     }
 
-    public boolean isFindWalletAddressDialogShown() {
+    public boolean isFindWalletAddressDialogShown()
+    {
         return preferenceRepository.isFindWalletAddressDialogShown();
     }
 
-    public void setFindWalletAddressDialogShown(boolean isShown) {
+    public void setFindWalletAddressDialogShown(boolean isShown)
+    {
         preferenceRepository.setFindWalletAddressDialogShown(isShown);
     }
 
     private void onENSError(Throwable throwable)
     {
-        Timber.tag(TAG).e(throwable);
+        Timber.e(throwable);
     }
 
     public void setErrorCallback(FragmentMessenger callback)
@@ -324,32 +368,45 @@ public class HomeViewModel extends BaseViewModel {
         assetDefinitionService.setErrorCallback(callback);
     }
 
-    public void handleQRCode(Activity activity, String qrCode)
+    public void handleQRCode(HomeActivity activity, String qrCode)
     {
         try
         {
-            if (qrCode == null) return;
-
+            AnalyticsProperties props = new AnalyticsProperties();
             QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
             QRResult qrResult = parser.parse(qrCode);
-
             switch (qrResult.type)
             {
+                case ATTESTATION:
+                case EAS_ATTESTATION:
+                    handleImportAttestation(activity, qrResult);
+                    break;
                 case ADDRESS:
+                    props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS.getValue());
+                    track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+
                     //showSend(activity, qrResult); //For now, direct an ETH address to send screen
                     //TODO: Issue #1504: bottom-screen popup to choose between: Add to Address book, Sent to Address, or Watch Wallet
                     showActionSheet(activity, qrResult);
                     break;
                 case PAYMENT:
                 case TRANSFER:
+                    props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
+                    track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+
                     showSend(activity, qrResult);
                     break;
                 case FUNCTION_CALL:
+                    props.put(QrScanResultType.KEY, QrScanResultType.ADDRESS_OR_EIP_681.getValue());
+                    track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+
                     //TODO: Handle via ConfirmationActivity, need to generate function signature + data then call ConfirmationActivity
                     //TODO: Code to generate the function signature will look like the code in generateTransactionFunction
                     break;
                 case URL:
-                    ((HomeActivity)activity).onBrowserWithURL(qrCode);
+                    props.put(QrScanResultType.KEY, QrScanResultType.URL.getValue());
+                    track(Analytics.Action.SCAN_QR_CODE_SUCCESS, props);
+                    activity.onBrowserWithURL(qrCode);
                     break;
                 case MAGIC_LINK:
                     showImportLink(activity, qrCode);
@@ -357,21 +414,61 @@ public class HomeViewModel extends BaseViewModel {
                 case OTHER:
                     qrCode = null;
                     break;
+                case OTHER_PROTOCOL:
+                    break;
+                case WALLET_CONNECT:
+                    startWalletConnect(activity, qrCode);
+                    break;
             }
+
         }
         catch (Exception e)
         {
+            Timber.e(e);
             qrCode = null;
         }
 
-        if(qrCode == null)
+        if (qrCode == null)
         {
             Toast.makeText(activity, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void showActionSheet(Activity activity, QRResult qrResult) {
+    public boolean requiresProcessing(String qrCode)
+    {
+        //prevent echoes
+        long currentTime = System.currentTimeMillis();
+        if (qrCode == null || ((qrReadTime + ECHO_MAX_MILLIS) > currentTime))
+        {
+            Timber.d("QR Read: %s", (qrReadTime - currentTime));
+            return false;
+        }
 
+        qrReadTime = currentTime;
+        return true;
+    }
+
+    private void startWalletConnect(Activity activity, String qrCode)
+    {
+        Intent intent;
+        if (WalletConnectHelper.isWalletConnectV1(qrCode))
+        {
+            intent = new Intent(activity, WalletConnectActivity.class);
+            intent.putExtra("qrCode", qrCode);
+            //intent.putExtra(C.EXTRA_CHAIN_ID, 0);
+        }
+        else
+        {
+            intent = new Intent(activity, WalletConnectV2Activity.class);
+            intent.putExtra("url", qrCode);
+        }
+        activity.startActivity(intent);
+        //setResult(WALLET_CONNECT);
+        //finish();
+    }
+
+    private void showActionSheet(Activity activity, QRResult qrResult)
+    {
         View.OnClickListener listener = v -> {
             if (v.getId() == R.id.send_to_this_address_action)
             {
@@ -397,7 +494,8 @@ public class HomeViewModel extends BaseViewModel {
 
                 Uri blockChainInfoUrl = info.getEtherscanAddressUri(qrResult.getAddress());
 
-                if (blockChainInfoUrl != Uri.EMPTY) {
+                if (blockChainInfoUrl != Uri.EMPTY)
+                {
                     externalBrowserRouter.open(activity, blockChainInfoUrl);
                 }
             }
@@ -466,16 +564,9 @@ public class HomeViewModel extends BaseViewModel {
             uuid = UUID.randomUUID().toString();
         }
 
-        analyticsService.identify(uuid);
         preferenceRepository.setUniqueId(uuid);
-    }
 
-    public void actionSheetConfirm(String mode)
-    {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(mode);
-
-        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+        identify(uuid);
     }
 
     public void checkTransactionEngine()
@@ -498,20 +589,24 @@ public class HomeViewModel extends BaseViewModel {
         return preferenceRepository.getFullScreenState();
     }
 
-    public void tryToShowRateAppDialog(Activity context) {
+    public void tryToShowRateAppDialog(Activity context)
+    {
         //only if installed from PlayStore (checked within the showRateTheApp method)
         RateApp.showRateTheApp(context, preferenceRepository, false);
     }
 
-    public int getUpdateWarnings() {
+    public int getUpdateWarnings()
+    {
         return preferenceRepository.getUpdateWarningCount();
     }
 
-    public void setUpdateWarningCount(int warns) {
+    public void setUpdateWarningCount(int warns)
+    {
         preferenceRepository.setUpdateWarningCount(warns);
     }
 
-    public void setInstallTime(int time) {
+    public void setInstallTime(int time)
+    {
         preferenceRepository.setInstallTime(time);
     }
 
@@ -530,8 +625,10 @@ public class HomeViewModel extends BaseViewModel {
         return preferenceRepository.getLastFragmentPage();
     }
 
-    public void tryToShowEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable) {
-        if (preferenceRepository.getLaunchCount() == 4) {
+    public void tryToShowEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable)
+    {
+        if (preferenceRepository.getLaunchCount() == 4)
+        {
             EmailPromptView emailPromptView = new EmailPromptView(context, successOverlay, handler, onSuccessRunnable);
             BottomSheetDialog emailPromptDialog = new BottomSheetDialog(context);
             emailPromptDialog.setContentView(emailPromptView);
@@ -544,68 +641,62 @@ public class HomeViewModel extends BaseViewModel {
         }
     }
 
-    public void tryToShowWhatsNewDialog(Context context) {
+    public void tryToShowWhatsNewDialog(Context context)
+    {
         PackageInfo packageInfo;
-        try {
+        try
+        {
             packageInfo = context.getPackageManager()
-                    .getPackageInfo(context.getPackageName(), 0);
+                .getPackageInfo(context.getPackageName(), 0);
 
             int versionCode = packageInfo.versionCode;
-            if (preferenceRepository.getLastVersionCode(versionCode) < versionCode) {
-                // load what's new
-                Request request = new Request.Builder()
-                        .header("Accept", "application/vnd.github.v3+json")
-                        .url("https://api.github.com/repos/alphawallet/alpha-wallet-android/releases")
-                        .get()
-                        .build();
-
-                Single.fromCallable(() -> {
-                    try (okhttp3.Response response = httpClient.newCall(request)
-                            .execute()) {
-                        return new Gson().<List<GitHubRelease>>fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>() {
-                        }.getType());
-                    } catch (Exception e) {
-                        Timber.tag(TAG).e(e);
-                    }
-                    return null;
-                }).subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread()).subscribe((releases) -> {
-
-                    BottomSheetDialog dialog = new BottomSheetDialog(context);
-
-                    WhatsNewView view = new WhatsNewView(context, releases, v -> dialog.dismiss(), true);
-                    dialog.setContentView(view);
-                    dialog.setCancelable(true);
-                    dialog.setCanceledOnTouchOutside(true);
-                    BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
-                    dialog.setOnShowListener(d -> behavior.setPeekHeight(view.getHeight()));
-                    dialog.show();
-
-                    preferenceRepository.setLastVersionCode(versionCode);
-
-                }).isDisposed();
+            if (preferenceRepository.getLastVersionCode(versionCode) < versionCode)
+            {
+                Request request = getRequest();
+                Single.fromCallable(getGitHubReleases(request)).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread()).subscribe((releases) -> {
+                        doShowWhatsNewDialog(context, releases);
+                        preferenceRepository.setLastVersionCode(versionCode);
+                    }).isDisposed();
             }
-        } catch (PackageManager.NameNotFoundException e) {
+        }
+        catch (PackageManager.NameNotFoundException e)
+        {
             Timber.e(e);
         }
 
     }
 
-    private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception {
-        Locale locale;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            locale = ctx.getResources().getConfiguration().getLocales().get(0);
-        }
-        else
-        {
-            locale = ctx.getResources().getConfiguration().locale;
-        }
-
-        return new TokenDefinition(
-                xmlInputStream, locale, null);
+    private void doShowWhatsNewDialog(Context context, List<GitHubRelease> releases)
+    {
+        BottomSheetDialog dialog = new BottomSheetDialog(context);
+        WhatsNewView view = new WhatsNewView(context, releases, v -> dialog.dismiss(), true);
+        dialog.setContentView(view);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
+        BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) view.getParent());
+        dialog.setOnShowListener(d -> behavior.setPeekHeight(view.getHeight()));
+        dialog.show();
     }
 
-    public void importScriptFile(Context ctx, boolean appExternal, Intent startIntent)
+    @NonNull
+    private Request getRequest()
+    {
+        return new Request.Builder()
+            .header("Accept", "application/vnd.github.v3+json")
+            .url("https://api.github.com/repos/alphawallet/alpha-wallet-android/releases")
+            .get()
+            .build();
+    }
+
+    private TokenDefinition parseFile(Context ctx, InputStream xmlInputStream) throws Exception
+    {
+        Locale locale = ctx.getResources().getConfiguration().getLocales().get(0);
+        return new TokenDefinition(
+            xmlInputStream, locale, null);
+    }
+
+    public void importScriptFile(HomeActivity ctx, Intent startIntent)
     {
         Uri uri = startIntent.getData();
         final ContentResolver contentResolver = ctx.getContentResolver();
@@ -616,17 +707,23 @@ public class HomeViewModel extends BaseViewModel {
             if (td.holdingToken == null || td.holdingToken.length() == 0)
                 return; //tokenscript with no holding token is currently meaningless. Is this always the case?
 
-            String newFileName = td.contracts.get(td.holdingToken).addresses.values().iterator().next().iterator().next();
-            newFileName = newFileName + ".tsml";
-
-            if (appExternal)
+            //determine type of holding token
+            String newFileName;
+            ContractInfo info = td.contracts.get(td.holdingToken);
+            byte[] preHash = td.getAttestationCollectionPreHash();
+            if (preHash != null)
             {
-                newFileName = ctx.getExternalFilesDir("") + File.separator + newFileName;
+                newFileName = Numeric.toHexString(Hash.keccak256(preHash))
+                        + "-" + info.addresses.keySet().iterator().next();
             }
             else
             {
-                newFileName = Environment.getExternalStorageDirectory() + File.separator + ALPHAWALLET_DIR + File.separator + newFileName;
+                //calculate using formula: "{address.lowercased}-{chainId}"
+                newFileName = info.addresses.values().iterator().next().iterator().next() + "-"
+                        + info.addresses.keySet().iterator().next();
             }
+
+            newFileName = assetDefinitionService.getDebugPath(newFileName + ".tsml");
 
             //Store the new Definition
             try (FileOutputStream fos = new FileOutputStream(newFileName))
@@ -641,19 +738,21 @@ public class HomeViewModel extends BaseViewModel {
             }
 
             iStream.close();
+
+            //register new file
+            assetDefinitionService.notifyNewScriptLoaded(newFileName);
+
+            disposable = assetDefinitionService.resetAttributes(td)
+                    .map(pf -> assetDefinitionService.updateAttestations(td))// do required update for attestations
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe();
         }
         catch (Exception e)
         {
-            Timber.w(e);
+            //import error
+            ctx.tokenScriptError(e.getMessage());
         }
-    }
-
-    public boolean checkDebugDirectory()
-    {
-        File directory = new File(Environment.getExternalStorageDirectory()
-                + File.separator + ALPHAWALLET_DIR);
-
-        return directory.exists();
     }
 
     public void setWalletStartup()
@@ -670,23 +769,24 @@ public class HomeViewModel extends BaseViewModel {
         currencyRepository.setDefaultCurrency(preferenceRepository.getDefaultCurrency());
     }
 
-    public void sendMsgPumpToWC(Context context) {
-
-        Timber.d("Start WC service");
-        WCUtils.startServiceLocal(context, null, WalletConnectActions.MSG_PUMP);
+    public void sendMsgPumpToWC(Context context)
+    {
+        //NB: WalletConnect v1 has been deprecated
+        //Timber.d("Start WC service");
+        //WCUtils.startServiceLocal(context, null, WalletConnectActions.MSG_PUMP);
     }
 
     // Restart walletconnect sessions if required
     private void initWalletConnectSessions(Activity activity, Wallet wallet)
     {
         List<WCClient> clientMap = new ArrayList<>();
-        long cutOffTime = System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS*2;
+        long cutOffTime = System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS * 2;
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
             RealmResults<RealmWCSession> items = realm.where(RealmWCSession.class)
-                    .greaterThan("lastUsageTime", cutOffTime)
-                    .sort("lastUsageTime", Sort.DESCENDING)
-                    .findAll();
+                .greaterThan("lastUsageTime", cutOffTime)
+                .sort("lastUsageTime", Sort.DESCENDING)
+                .findAll();
 
             for (RealmWCSession r : items)
             {
@@ -695,7 +795,7 @@ public class HomeViewModel extends BaseViewModel {
                 {
                     // restart the session if it's not already known by the service
                     clientMap.add(WCUtils.createWalletConnectSession(activity, wallet,
-                            r.getSession(), peerId, r.getRemotePeerId()));
+                        r.getSession(), peerId, r.getRemotePeerId()));
                 }
             }
         }
@@ -720,7 +820,7 @@ public class HomeViewModel extends BaseViewModel {
             @Override
             public void onServiceDisconnected(ComponentName name)
             {
-                Timber.tag(TAG).d("Service disconnected");
+                Timber.d("Service disconnected");
             }
         };
 
@@ -735,5 +835,133 @@ public class HomeViewModel extends BaseViewModel {
     public void setNewWallet(String address, boolean isNewWallet)
     {
         preferenceRepository.setNewWallet(address, isNewWallet);
+    }
+
+    public void checkLatestGithubRelease()
+    {
+        Request request = getRequest();
+        Single.fromCallable(getGitHubReleases(request))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe((releases) -> {
+                    GitHubRelease latestRelease = releases.get(0);
+                    if (latestRelease != null)
+                    {
+                        String latestTag = latestRelease.getTagName();
+                        if (latestRelease.getTagName().charAt(0) == 'v')
+                        {
+                            latestTag = latestTag.substring(1);
+                        }
+                        Version latest = new Version(latestTag);
+                        Version installed = new Version(BuildConfig.VERSION_NAME);
+
+                        if (latest.compareTo(installed) > 0)
+                        {
+                            updateAvailable.postValue(latest.get());
+                        }
+                    }
+                }, Timber::e
+            ).isDisposed();
+    }
+
+    @NonNull
+    private Callable<List<GitHubRelease>> getGitHubReleases(Request request)
+    {
+        return () ->
+        {
+            try (okhttp3.Response response = httpClient.newCall(request)
+                .execute())
+            {
+                return new Gson().fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>()
+                {
+                }.getType());
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
+            return null;
+        };
+    }
+
+    public void subscribeToNotifications()
+    {
+        alphaWalletNotificationService.subscribe(com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
+    }
+
+    public void unsubscribeToNotifications()
+    {
+        alphaWalletNotificationService.unsubscribeToTopic(com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
+    }
+
+    public void setPostNotificationsPermissionRequested(String address)
+    {
+        preferenceRepository.setPostNotificationsPermissionRequested(address, true);
+    }
+
+    public boolean isPostNotificationsPermissionRequested(String address)
+    {
+        return preferenceRepository.isPostNotificationsPermissionRequested(address);
+    }
+
+    public boolean isWatchOnlyWallet()
+    {
+        return preferenceRepository.isWatchOnly();
+    }
+
+    private Single<Wallet> getCurrentWallet()
+    {
+        if (defaultWallet.getValue() != null)
+        {
+            return Single.fromCallable(defaultWallet::getValue);
+        }
+        else
+        {
+            return genericWalletInteract.find();
+        }
+    }
+
+    private void handleImportAttestation(HomeActivity activity, QRResult qrResult)
+    {
+        disposable = getCurrentWallet()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(wallet -> completeImport(activity, wallet, qrResult));
+    }
+
+    private void completeImport(HomeActivity activity, Wallet wallet, QRResult qrResult)
+    {
+        if (wallet == null || wallet.watchOnly())
+        {
+            activity.importError(activity.getString(R.string.watch_wallet));
+        }
+        else
+        {
+            ImportAttestation attnImport = new ImportAttestation(assetDefinitionService, tokensService,
+                    activity, wallet, realmManager, httpClient);
+
+            //attempt to import the wallet
+            attnImport.importAttestation(qrResult);
+        }
+    }
+
+    public boolean handleSmartPass(HomeActivity homeActivity, String smartPassCandidate)
+    {
+        if (smartPassCandidate.startsWith(ImportAttestation.SMART_PASS_URL))
+        {
+            smartPassCandidate = smartPassCandidate.substring(ImportAttestation.SMART_PASS_URL.length()); //chop off leading URL
+            QRResult result = new QRResult(smartPassCandidate);
+            result.type = EIP681Type.EAS_ATTESTATION;
+            String taglessAttestation = Utils.parseEASAttestation(smartPassCandidate);
+            result.functionDetail = Utils.toAttestationJson(taglessAttestation);
+
+            if (!TextUtils.isEmpty(result.functionDetail))
+            {
+                handleImportAttestation(homeActivity, result);
+                return true;
+            }
+        }
+
+        return false;
     }
 }

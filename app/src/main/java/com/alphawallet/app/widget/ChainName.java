@@ -2,8 +2,10 @@ package com.alphawallet.app.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -31,17 +33,26 @@ public class ChainName extends LinearLayout
 
     public void setChainID(long chainId)
     {
-        chainName.setText(EthereumNetworkBase.getShortChainName(chainId));
-        if (invertNameColour)
+        if (EthereumNetworkBase.isChainSupported(chainId))
         {
-            chainName.setTextColor(getContext().getColor(EthereumNetworkBase.getChainColour(chainId)));
-            chainName.setBackgroundResource(R.drawable.background_chain_inverse);
+            setVisibility(View.VISIBLE);
+            chainName.setText(EthereumNetworkBase.getShortChainName(chainId));
+
+            if (invertNameColour)
+            {
+                chainName.setTextColor(getContext().getColor(EthereumNetworkBase.getChainColour(chainId)));
+                chainName.setBackgroundResource(R.drawable.background_chain_inverse);
+            }
+            else
+            {
+                chainName.setTextColor(getContext().getColor(R.color.white));
+                chainName.getBackground().setTint(ContextCompat.getColor(getContext(),
+                    EthereumNetworkBase.getChainColour(chainId)));
+            }
         }
         else
         {
-            chainName.setTextColor(getContext().getColor(R.color.white));
-            chainName.getBackground().setTint(ContextCompat.getColor(getContext(),
-                    EthereumNetworkBase.getChainColour(chainId)));
+            setVisibility(View.GONE);
         }
     }
 

@@ -1,28 +1,6 @@
 package com.alphawallet.app.repository.entity;
 
-import android.content.Context;
-import android.text.TextUtils;
-
-import com.alphawallet.app.R;
-import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.tokens.Token;
-import com.alphawallet.app.repository.EventResult;
-import com.alphawallet.app.ui.widget.entity.ENSHandler;
-import com.alphawallet.app.ui.widget.entity.StatusType;
-
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import io.realm.Realm;
 import io.realm.RealmObject;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
-import io.realm.Sort;
-
-import static com.alphawallet.app.repository.TokensRealmSource.EVENT_CARDS;
 
 /**
  * Created by JB on 17/12/2020.
@@ -36,9 +14,33 @@ public class RealmTransfer extends RealmObject
 
     public String getHash()
     {
-        return hash;
+        String[] split = hash.split("-");
+        if (split.length > 0)
+        {
+            return split[0];
+        }
+        else
+        {
+            return "";
+        }
     }
-    public void setHash(String hash) { this.hash = hash; }
+    public void setHashKey(long chainId, String hash)
+    {
+        this.hash = databaseKey(chainId, hash);
+    }
+
+    public long getChain()
+    {
+        String[] split = hash.split("-");
+        if (split.length > 1)
+        {
+            return Long.parseLong(split[1]);
+        }
+        else
+        {
+            return 0L;
+        }
+    }
 
     public String getTokenAddress()
     {
@@ -68,5 +70,10 @@ public class RealmTransfer extends RealmObject
     public void setEventName(String eventName)
     {
         this.eventName = eventName;
+    }
+
+    public static String databaseKey(long chainId, String hash)
+    {
+        return hash + "-" + chainId;
     }
 }

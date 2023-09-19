@@ -21,6 +21,7 @@ import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
@@ -38,14 +39,16 @@ import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
+import com.alphawallet.app.web3.entity.Address;
+import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
-
-import org.web3j.protocol.core.methods.response.EthEstimateGas;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -65,7 +68,7 @@ import timber.log.Timber;
  * Created by James on 9/03/2018.
  */
 @HiltViewModel
-public class ImportTokenViewModel extends BaseViewModel
+public class ImportTokenViewModel extends BaseViewModel implements TransactionSendHandlerInterface
 {
     private static final long CHECK_BALANCE_INTERVAL = 10;
     private static final String TAG = "ITVM";
@@ -249,7 +252,7 @@ public class ImportTokenViewModel extends BaseViewModel
     private void setupTokenAddr(String contractAddress)
     {
         disposable = tokensService
-                .update(contractAddress, importOrder.chainId)
+                .update(contractAddress, importOrder.chainId, ContractType.NOT_SET)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::getTokenSpec, this::onError);
@@ -421,7 +424,8 @@ public class ImportTokenViewModel extends BaseViewModel
         }
     }
 
-    public void onTransactionError(Throwable throwable) {
+    public void onTransactionError(Throwable throwable)
+    {
         txError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, throwable.getMessage()));
     }
 
@@ -437,7 +441,7 @@ public class ImportTokenViewModel extends BaseViewModel
             gasService.calculateGasEstimate(tradeData, importOrder.chainId, wallet.getValue().address, order.amount, wallet.getValue(), BigInteger.ZERO)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::performImportFinal).isDisposed();
+                    .subscribe(gasEstimate -> performImportFinal(gasEstimate.getValue())).isDisposed();
         }
         catch (Exception e)
         {
@@ -454,11 +458,21 @@ public class ImportTokenViewModel extends BaseViewModel
             //ok let's try to drive this guy through
             final byte[] tradeData = generateReverseTradeData(order, importToken, wallet.getValue().address);
             Timber.tag(TAG).d("Approx value of trade: %s", order.price);
-            //now push the transaction
+            Web3Transaction w3Tx = new Web3Transaction(
+                    new Address(wallet.getValue().address),
+                    new Address(order.contractAddress),
+                    new Address(wallet.getValue().address),
+                    order.priceWei,
+                    gasService.getGasPrice(),
+                    gasEstimate,
+                    -1,
+                    Numeric.toHexString(tradeData),
+                    -1);
+
+            //now push the transaction (TODO: This will fail if the key is locked).
             disposable = createTransactionInteract
-                    .create(wallet.getValue(), order.contractAddress, order.priceWei,
-                            gasService.getGasPrice(), gasEstimate, tradeData, order.chainId)
-                    .subscribe(this::onCreateTransaction, this::onTransactionError);
+                    .createWithSigId(wallet.getValue(), w3Tx, order.chainId) //get signature
+                    .subscribe(sigPackage -> createTransactionInteract.sendTransaction(wallet.getValue(), order.chainId, sigPackage.second, sigPackage.first, w3Tx));
 
             addTokenWatchToWallet();
         }
@@ -467,6 +481,18 @@ public class ImportTokenViewModel extends BaseViewModel
             e.printStackTrace(); // TODO: add user interface handling of the exception.
             error.postValue(new ErrorEnvelope(C.ErrorCode.EMPTY_COLLECTION, "Import Error."));
         }
+    }
+
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        newTransaction.postValue(txData.hash);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn error)
+    {
+        txError.postValue(new ErrorEnvelope(C.ErrorCode.UNKNOWN, error.throwable.getMessage()));
     }
 
     public void importThroughFeemaster(String url)
@@ -507,11 +533,6 @@ public class ImportTokenViewModel extends BaseViewModel
                     break;
             }
         }
-    }
-
-    private void onCreateTransaction(String transaction)
-    {
-        newTransaction.postValue(transaction);
     }
 
     private boolean balanceChange(List<BigInteger> newBalance)

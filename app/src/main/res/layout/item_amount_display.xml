@@ -11,16 +11,18 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/standard_16"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingVertical="@dimen/standard_16"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingEnd="@dimen/mini_4">
 
         <TextView
-            style="@style/Aw.Typography.Label"
+            style="@style/Aw.Typography.Label.Widget"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="start"
+            android:layout_weight="@integer/widget_label"
+            android:gravity="start|center_vertical"
             android:text="@string/amount" />
 
         <TextView
@@ -28,7 +30,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/small_12"
-            android:layout_weight="3.5"
+            android:layout_weight="@integer/widget_content"
             android:gravity="start"
             tools:text="1.234 ETH ≈ 500.23 USD" />
 
@@ -36,12 +38,19 @@
             android:id="@+id/tokens_list"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3.5"
+            android:layout_marginHorizontal="@dimen/small_12"
+            android:layout_weight="@integer/widget_content"
             android:background="@color/transparent"
             android:orientation="horizontal"
             android:visibility="gone"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:visibility="visible" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="@integer/widget_control"
+            android:visibility="invisible" />
 
     </LinearLayout>
 

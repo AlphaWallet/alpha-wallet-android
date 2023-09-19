@@ -6,9 +6,9 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.hardware.SignatureReturnType;
 import com.alphawallet.token.entity.Signable;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -24,6 +24,7 @@ import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletFile;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.crypto.transaction.type.Transaction1559;
 import org.web3j.crypto.transaction.type.TransactionType;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
@@ -58,7 +59,8 @@ public class KeystoreAccountService implements AccountKeystoreService
     private final KeyService keyService;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public KeystoreAccountService(File keyStoreFile, File baseFile, KeyService keyService) {
+    public KeystoreAccountService(File keyStoreFile, File baseFile, KeyService keyService)
+    {
         keyFolder = keyStoreFile;
         databaseFolder = baseFile;
         this.keyService = keyService;
@@ -74,35 +76,40 @@ public class KeystoreAccountService implements AccountKeystoreService
 
     /**
      * No longer used; keep for testing
+     *
      * @param password account password
      * @return
      */
     @Override
-    public Single<Wallet> createAccount(String password) {
+    public Single<Wallet> createAccount(String password)
+    {
         return Single.fromCallable(() -> {
-            ECKeyPair ecKeyPair = Keys.createEcKeyPair();
-            WalletFile walletFile = org.web3j.crypto.Wallet.createLight(password, ecKeyPair);
-            return objectMapper.writeValueAsString(walletFile);
-        }).compose(upstream -> importKeystore(upstream.blockingGet(), password, password))
-        .subscribeOn(Schedulers.io());
+                    ECKeyPair ecKeyPair = Keys.createEcKeyPair();
+                    WalletFile walletFile = org.web3j.crypto.Wallet.createLight(password, ecKeyPair);
+                    return objectMapper.writeValueAsString(walletFile);
+                }).compose(upstream -> importKeystore(upstream.blockingGet(), password, password))
+                .subscribeOn(Schedulers.io());
     }
 
     /**
      * Import Keystore
-     * @param store store to include
-     * @param password store password
+     *
+     * @param store       store to include
+     * @param password    store password
      * @param newPassword
      * @return
      */
     @Override
-    public Single<Wallet> importKeystore(String store, String password, String newPassword) {
+    public Single<Wallet> importKeystore(String store, String password, String newPassword)
+    {
         return Single.fromCallable(() -> {
             String address = extractAddressFromStore(store);
             Wallet wallet;
             //delete old account files - these have had their password overwritten. If present user chose to refresh key
             deleteAccountFiles(address);
 
-            try {
+            try
+            {
                 WalletFile walletFile = objectMapper.readValue(store, WalletFile.class);
                 ECKeyPair kp = org.web3j.crypto.Wallet.decrypt(password, walletFile);
                 Credentials credentials = Credentials.create(kp);
@@ -118,7 +125,9 @@ public class KeystoreAccountService implements AccountKeystoreService
 
                 wallet = new Wallet(credentials.getAddress());
                 wallet.setWalletType(WalletType.KEYSTORE);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 // We need to make sure that we do not have a broken account
                 deleteAccount(address, newPassword).subscribe(() -> {}, t -> {}).isDisposed();
                 throw ex;
@@ -128,11 +137,15 @@ public class KeystoreAccountService implements AccountKeystoreService
         }).subscribeOn(Schedulers.io());
     }
 
-    private String extractAddressFromStore(String store) throws Exception {
-        try {
+    private String extractAddressFromStore(String store) throws Exception
+    {
+        try
+        {
             JSONObject jsonObject = new JSONObject(store);
-            return "0x" + Numeric.cleanHexPrefix(jsonObject.getString("address"));
-        } catch (JSONException ex) {
+            return Numeric.prependHexPrefix(jsonObject.getString("address"));
+        }
+        catch (JSONException ex)
+        {
             throw new Exception("Invalid keystore");
         }
     }
@@ -145,7 +158,8 @@ public class KeystoreAccountService implements AccountKeystoreService
      * @return
      */
     @Override
-    public Single<Wallet> importPrivateKey(String privateKey, String newPassword) {
+    public Single<Wallet> importPrivateKey(String privateKey, String newPassword)
+    {
         return Single.fromCallable(() -> {
             BigInteger key = new BigInteger(privateKey, PRIVATE_KEY_RADIX);
             ECKeyPair keypair = ECKeyPair.create(key);
@@ -155,7 +169,8 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<String> exportAccount(Wallet wallet, String password, String newPassword) {
+    public Single<String> exportAccount(Wallet wallet, String password, String newPassword)
+    {
         return Single
                 .fromCallable(() -> getCredentials(keyFolder, wallet.address, password))
                 .map(credentials -> org.web3j.crypto.Wallet.createLight(newPassword, credentials.getEcKeyPair()))
@@ -166,12 +181,14 @@ public class KeystoreAccountService implements AccountKeystoreService
     /**
      * Delete 'geth' keystore file then ensure password encrypted bytes and keys in Android keystore
      * are deleted
-     * @param address account address
+     *
+     * @param address  account address
      * @param password account password
      * @return
      */
     @Override
-    public Completable deleteAccount(String address, String password) {
+    public Completable deleteAccount(String address, String password)
+    {
         return Completable.fromAction(() -> {
             String cleanedAddr = Numeric.cleanHexPrefix(address).toLowerCase();
             deleteAccountFiles(cleanedAddr);
@@ -192,7 +209,7 @@ public class KeystoreAccountService implements AccountKeystoreService
 
             //Now delete all traces of the key in Android keystore, encrypted bytes and iv file in private data area
             keyService.deleteKey(address);
-        } );
+        });
     }
 
     private void deleteAccountFiles(String address)
@@ -219,7 +236,9 @@ public class KeystoreAccountService implements AccountKeystoreService
             if (contents != null)
             {
                 for (File child : contents)
+                {
                     deleteRecursive(child);
+                }
             }
         }
 
@@ -227,9 +246,41 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<SignatureFromKey> signTransaction(Wallet signer, String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId) {
+    public Single<SignatureFromKey> signTransaction(Wallet signer, String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, long chainId)
+    {
         return Single.fromCallable(() -> {
-            RawTransaction rtx = formatRawTransaction(toAddress, amount, gasPrice, gasLimit, nonce, data);
+                    RawTransaction rtx = formatRawTransaction(toAddress, amount, gasPrice, gasLimit, nonce, data);
+                    byte[] signData = TransactionEncoder.encode(rtx, chainId);
+                    SignatureFromKey returnSig = keyService.signData(signer, signData);
+                    Sign.SignatureData sigData = sigFromByteArray(returnSig.signature);
+                    if (sigData == null)
+                    {
+                        returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
+                        returnSig.failMessage = "Incorrect signature length"; //should never see this message
+                    }
+                    else sigData = TransactionEncoder.createEip155SignatureData(sigData, chainId);
+                    returnSig.signature = encode(rtx, sigData);
+                    return returnSig;
+                })
+                .subscribeOn(Schedulers.io());
+    }
+
+    @Override
+    public Single<SignatureFromKey> signTransaction(Wallet signer, long chainId, RawTransaction rtx)
+    {
+        if (rtx.getTransaction() instanceof Transaction1559)
+        {
+            return signTransactionEIP1559Tx(signer, rtx);
+        }
+        else
+        {
+            return signLegacyTx(signer, chainId, rtx);
+        }
+    }
+
+    private Single<SignatureFromKey> signLegacyTx(Wallet signer, long chainId, RawTransaction rtx)
+    {
+        return Single.fromCallable(() -> {
             byte[] signData = TransactionEncoder.encode(rtx, chainId);
             SignatureFromKey returnSig = keyService.signData(signer, signData);
             Sign.SignatureData sigData = sigFromByteArray(returnSig.signature);
@@ -238,50 +289,32 @@ public class KeystoreAccountService implements AccountKeystoreService
                 returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
                 returnSig.failMessage = "Incorrect signature length"; //should never see this message
             }
-            else sigData = TransactionEncoder.createEip155SignatureData(sigData, chainId);
-            returnSig.signature = encode(rtx, sigData);
             return returnSig;
-        })
-        .subscribeOn(Schedulers.io());
+        });
     }
 
-    @Override
-    public Single<SignatureFromKey> signTransactionEIP1559(Wallet signer, String toAddress, BigInteger amount, BigInteger gasLimit,
-                                                           BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas, long nonce, byte[] data, long chainId)
+    private Single<SignatureFromKey> signTransactionEIP1559Tx(Wallet signer, RawTransaction rtx)
     {
         return Single.fromCallable(() -> {
-            Sign.SignatureData sigData;
-            String dataStr = data != null ? Numeric.toHexString(data) : "";
-
-            RawTransaction rtx = RawTransaction.createTransaction(
-                    chainId,
-                    BigInteger.valueOf(nonce),
-                    gasLimit,
-                    toAddress,
-                    amount,
-                    dataStr,
-                    maxPriorityFeePerGas,
-                    maxFeePerGas
-            );
-
             byte[] signData = TransactionEncoder.encode(rtx);
-
             SignatureFromKey returnSig = keyService.signData(signer, signData);
-            sigData = sigFromByteArray(returnSig.signature);
-            if (sigData == null) {
+            Sign.SignatureData sigData = sigFromByteArray(returnSig.signature);
+            if (sigData == null)
+            {
                 returnSig.sigType = SignatureReturnType.KEY_CIPHER_ERROR;
                 returnSig.failMessage = "Incorrect signature length"; //should never see this message
             }
-            returnSig.signature = encode(rtx, sigData);
             return returnSig;
         }).subscribeOn(Schedulers.io());
     }
 
-    private static byte[] encode(RawTransaction rawTransaction, Sign.SignatureData signatureData) {
+    public static byte[] encode(RawTransaction rawTransaction, Sign.SignatureData signatureData)
+    {
         List<RlpType> values = TransactionEncoder.asRlpValues(rawTransaction, signatureData);
         RlpList rlpList = new RlpList(values);
         byte[] encoded = RlpEncoder.encode(rlpList);
-        if (!rawTransaction.getType().equals(TransactionType.LEGACY)) {
+        if (!rawTransaction.getType().equals(TransactionType.LEGACY))
+        {
             return ByteBuffer.allocate(encoded.length + 1)
                     .put(rawTransaction.getType().getRlpType())
                     .put(encoded)
@@ -292,6 +325,7 @@ public class KeystoreAccountService implements AccountKeystoreService
 
     /**
      * Get web3j credentials
+     *
      * @param keyFolder KeyStore Folder
      * @param address
      * @param password
@@ -343,7 +377,8 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<byte[]> signTransactionFast(Wallet signer, String signerPassword, byte[] message, long chainId) {
+    public Single<byte[]> signMessageFast(Wallet signer, String signerPassword, byte[] message)
+    {
         return Single.fromCallable(() -> {
             Credentials credentials = getCredentials(keyFolder, signer.address, signerPassword);
             Sign.SignatureData signatureData = Sign.signMessage(
@@ -355,10 +390,9 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<SignatureFromKey> signMessage(Wallet signer, Signable message, long chainId)
+    public Single<SignatureFromKey> signMessage(Wallet signer, Signable message)
     {
         return Single.fromCallable(() -> {
-            //byte[] messageHash = Hash.sha3(message);
             SignatureFromKey returnSig = keyService.signData(signer, message.getPrehash());
             returnSig.signature = patchSignatureVComponent(returnSig.signature);
             return returnSig;
@@ -366,7 +400,8 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public boolean hasAccount(String address) {
+    public boolean hasAccount(String address)
+    {
         address = Numeric.cleanHexPrefix(address);
         File[] contents = keyFolder.listFiles();
         if (contents == null) return false;
@@ -382,44 +417,45 @@ public class KeystoreAccountService implements AccountKeystoreService
     }
 
     @Override
-    public Single<Wallet[]> fetchAccounts() {
+    public Single<Wallet[]> fetchAccounts()
+    {
         return Single.fromCallable(() -> {
-            File[] contents = keyFolder.listFiles();
-            List<Date> fileDates = new ArrayList<>();
-            Map<Date, String> walletMap = new HashMap<>();
-            List<Wallet> wallets = new ArrayList<>();
-            if (contents == null || contents.length == 0) return new Wallet[0];
-            //Wallet[] result = new Wallet[contents.length];
-            for (File f : contents)
-            {
-                String fName = f.getName();
-                int index = fName.lastIndexOf("-");
-                String address = "0x" + fName.substring(index + 1);
-                if (Utils.isAddressValid(address))
-                {
-                    String d = fName.substring(5, index-1).replace("T", " ").substring(0, 23);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss.SSS", Locale.ROOT);
-                    Date date = simpleDateFormat.parse(d);
-                    fileDates.add(date);
-                    walletMap.put(date, address);
-                }
-            }
+                    File[] contents = keyFolder.listFiles();
+                    List<Date> fileDates = new ArrayList<>();
+                    Map<Date, String> walletMap = new HashMap<>();
+                    List<Wallet> wallets = new ArrayList<>();
+                    if (contents == null || contents.length == 0) return new Wallet[0];
+                    //Wallet[] result = new Wallet[contents.length];
+                    for (File f : contents)
+                    {
+                        String fName = f.getName();
+                        int index = fName.lastIndexOf("-");
+                        String address = Numeric.prependHexPrefix(fName.substring(index + 1));
+                        if (Utils.isAddressValid(address))
+                        {
+                            String d = fName.substring(5, index - 1).replace("T", " ").substring(0, 23);
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss.SSS", Locale.ROOT);
+                            Date date = simpleDateFormat.parse(d);
+                            fileDates.add(date);
+                            walletMap.put(date, address);
+                        }
+                    }
 
-            Collections.sort(fileDates);
+                    Collections.sort(fileDates);
 
-            //now build a date sorted array:
-            for (Date d : fileDates)
-            {
-                String address = walletMap.get(d);
-                Wallet wallet = new Wallet(address);
-                wallet.type = WalletType.KEYSTORE;
-                wallet.walletCreationTime = d.getTime();
-                wallets.add(wallet);
-            }
+                    //now build a date sorted array:
+                    for (Date d : fileDates)
+                    {
+                        String address = walletMap.get(d);
+                        Wallet wallet = new Wallet(address);
+                        wallet.type = WalletType.KEYSTORE;
+                        wallet.walletCreationTime = d.getTime();
+                        wallets.add(wallet);
+                    }
 
-            return wallets.toArray(new Wallet[0]);
-        })
-        .subscribeOn(Schedulers.io());
+                    return wallets.toArray(new Wallet[0]);
+                })
+                .subscribeOn(Schedulers.io());
     }
 
     /**
@@ -437,7 +473,7 @@ public class KeystoreAccountService implements AccountKeystoreService
     {
         if (signature != null && signature.length == 65 && signature[64] < 27)
         {
-            signature[64] = (byte)(signature[64] + (byte)0x1b);
+            signature[64] = (byte) (signature[64] + (byte) 0x1b);
         }
 
         return signature;

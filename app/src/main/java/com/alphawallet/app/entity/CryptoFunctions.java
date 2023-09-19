@@ -1,18 +1,18 @@
 package com.alphawallet.app.entity;
 
+import android.util.Base64;
+
+import com.alphawallet.app.util.Utils;
+import com.alphawallet.token.entity.CryptoFunctionsInterface;
+import com.alphawallet.token.entity.ProviderTypedData;
+
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+import org.web3j.crypto.StructuredDataEncoder;
 
 import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.Arrays;
-import android.util.Base64;
-
-import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.web3j.StructuredDataEncoder;
-import com.alphawallet.token.entity.CryptoFunctionsInterface;
-import com.alphawallet.token.entity.ProviderTypedData;
 
 import timber.log.Timber;
 import wallet.core.jni.Hash;
@@ -72,6 +72,22 @@ public class CryptoFunctions implements CryptoFunctionsInterface
         }
 
         return msgData;
+    }
+
+    @Override
+    public long getChainId(String messageData)
+    {
+        long chainId = -1;
+        try
+        {
+            StructuredDataEncoder eip721Object = new StructuredDataEncoder(messageData);
+            return Long.parseLong(eip721Object.jsonMessageObject.getDomain().getChainId());
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
+        return chainId;
     }
 
     @Override

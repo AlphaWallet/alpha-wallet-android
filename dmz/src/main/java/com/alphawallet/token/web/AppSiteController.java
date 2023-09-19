@@ -1,23 +1,35 @@
 package com.alphawallet.token.web;
 
+import static com.alphawallet.token.tools.Convert.getEthString;
+import static com.alphawallet.token.tools.ParseMagicLink.normal;
+import static com.alphawallet.token.web.Ethereum.TokenscriptFunction.ZERO_ADDRESS;
+
 import com.alphawallet.token.entity.Attribute;
-import com.github.cliftonlabs.json_simple.JsonObject;
+import com.alphawallet.token.entity.AttributeInterface;
+import com.alphawallet.token.entity.ContractAddress;
+import com.alphawallet.token.entity.ContractInfo;
+import com.alphawallet.token.entity.MagicLinkData;
+import com.alphawallet.token.entity.MagicLinkInfo;
+import com.alphawallet.token.entity.NonFungibleToken;
+import com.alphawallet.token.entity.SalesOrderMalformed;
+import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.entity.TransactionResult;
+import com.alphawallet.token.tools.ParseMagicLink;
+import com.alphawallet.token.tools.TokenDefinition;
+import com.alphawallet.token.web.Ethereum.TokenscriptFunction;
+import com.alphawallet.token.web.Ethereum.TransactionHandler;
+import com.alphawallet.token.web.Service.CryptoFunctions;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
@@ -44,27 +56,8 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.servlet.http.HttpServletRequest;
 
-import com.alphawallet.token.entity.AttributeInterface;
-import com.alphawallet.token.entity.ContractAddress;
-import com.alphawallet.token.entity.ContractInfo;
-import com.alphawallet.token.entity.MagicLinkData;
-import com.alphawallet.token.entity.MagicLinkInfo;
-import com.alphawallet.token.entity.NonFungibleToken;
-import com.alphawallet.token.entity.SalesOrderMalformed;
-import com.alphawallet.token.entity.XMLDsigVerificationResult;
-import com.alphawallet.token.entity.TokenScriptResult;
-import com.alphawallet.token.entity.TransactionResult;
-import com.alphawallet.token.tools.ParseMagicLink;
-import com.alphawallet.token.tools.TokenDefinition;
-import com.alphawallet.token.tools.XMLDSigVerifier;
-import com.alphawallet.token.web.Ethereum.TokenscriptFunction;
-import com.alphawallet.token.web.Ethereum.TransactionHandler;
-import com.alphawallet.token.web.Service.CryptoFunctions;
-import static com.alphawallet.token.tools.Convert.getEthString;
-import static com.alphawallet.token.tools.ParseMagicLink.normal;
-import static com.alphawallet.token.web.Ethereum.TokenscriptFunction.ZERO_ADDRESS;
+import javax.servlet.http.HttpServletRequest;
 
 @Controller
 @SpringBootApplication
@@ -94,7 +87,9 @@ public class AppSiteController implements AttributeInterface
             "      \"namespace\": \"android_app\",\n" +
             "      \"package_name\": \"io.stormbird.wallet\",\n" +
             "      \"sha256_cert_fingerprints\": [\n" +
-            "        \"8E:1E:C7:92:44:E2:AE:8F:5E:BE:A6:09:E5:CC:05:8F:01:9F:67:F4:A6:FF:E7:60:6E:DA:C8:64:8F:29:AB:C0\"\n" +
+            "        \"8E:1E:C7:92:44:E2:AE:8F:5E:BE:A6:09:E5:CC:05:8F:01:9F:67:F4:A6:FF:E7:60:6E:DA:C8:64:8F:29:AB:C0\",\n" +
+            "        \"54:5B:5D:DE:90:45:11:98:14:5C:90:32:C6:AE:F6:85:C3:7D:F5:72:75:FF:25:07:0E:13:03:11:61:66:6A:E3\",\n" +
+            "        \"3C:6E:67:6B:7B:9D:AD:53:A3:03:85:CE:E4:53:D4:EC:D8:2A:DC:4B:14:58:4D:55:28:D2:E4:65:57:C3:4F:9D\"\n" +
             "      ]\n" +
             "    }\n" +
             "  }\n" +
@@ -132,7 +127,7 @@ public class AppSiteController implements AttributeInterface
     {
         if (universalLink.equals("wc"))
         {
-            return "If you are using AlphaWallet with WalletConnect, please launch the AlphaWallet app";
+            return "If you are using AlphaWallet with WalletConnect and facing issues please take the following steps:<br/><br/>\nTry using WalletConnect V2 (or latest version)<br/>\nTry launching the application from within AlphaWallet app's Browser tab.<br/>";
         }
         String domain = request.getServerName();
         ParseMagicLink parser = new ParseMagicLink(cryptoFunctions, null);
@@ -390,6 +385,11 @@ public class AppSiteController implements AttributeInterface
         {
             throw new Exception("Some or all non-fungible tokens are not owned by the claimed owner");
         }
+    }
+
+    @Value("${repository.dir}")
+    public void setRepoDir(String value) {
+        repoDir = Paths.get(value);
     }
 
     public static void main(String[] args) throws IOException { // TODO: should run System.exit() if IOException

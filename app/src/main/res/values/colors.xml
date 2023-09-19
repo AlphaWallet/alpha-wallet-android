@@ -66,6 +66,7 @@
     <color name="text_secondary">@color/dove</color>
     <!-- ?android:textColorSecondary -->
     <color name="text_secondary_inverse">@color/white</color>
+    <color name="active_session_card_background">@color/solitude</color>
     <color name="surface_translucent">@color/translucent_light</color>
     <!-- Required for placing behind icons in dark mode -->
     <color name="dark_mode_icon_background_compensate">@color/transparent</color>

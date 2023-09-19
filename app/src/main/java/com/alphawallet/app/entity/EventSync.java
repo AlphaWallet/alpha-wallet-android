@@ -13,6 +13,7 @@ import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.BatchResponse;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.EthFilter;
@@ -24,6 +25,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 import io.realm.Realm;
 import timber.log.Timber;
@@ -34,8 +36,15 @@ import timber.log.Timber;
 public class EventSync
 {
     public static final long BLOCK_SEARCH_INTERVAL = 100000L;
+    public static final long POLYGON_BLOCK_SEARCH_INTERVAL = 3000L;
+    public static final long OKX_BLOCK_SEARCH_INTERVAL = 2000L;
+
+    private static final String TAG = "EVENT_SYNC";
+    private static final boolean EVENT_SYNC_DEBUGGING = false;
 
     private final Token token;
+
+    private static final HashSet<Long> batchProcessingError = new HashSet<>();
 
     public EventSync(Token token)
     {
@@ -71,8 +80,17 @@ public class EventSync
             case DOWNWARD_SYNC_START: //Start event sync, optimistically try the whole current event range from 1 -> LATEST
                 eventReadStartBlock = BigInteger.ONE;
                 eventReadEndBlock = BigInteger.valueOf(-1L);
-                //write the start point here
-                writeStartSyncBlock(realm, currentBlock.longValue());
+                if (EthereumNetworkBase.isEventBlockLimitEnforced(token.tokenInfo.chainId))
+                {
+                    syncState = EventSyncState.UPWARD_SYNC;
+                    eventReadStartBlock = currentBlock.subtract(EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).multiply(BigInteger.valueOf(3)));
+                    EVENT_DEBUG("Init Sync for restricted block RPC");
+                }
+                else
+                {
+                    //write the start point here
+                    writeStartSyncBlock(realm, currentBlock.longValue());
+                }
                 break;
             case DOWNWARD_SYNC: //we needed to slow down the sync
                 eventReadStartBlock = lastBlockRead.subtract(BigInteger.valueOf(readBlockSize));
@@ -85,22 +103,80 @@ public class EventSync
                 break;
             case UPWARD_SYNC_MAX: //we are syncing from the point we started the downward sync
                 upwardSync = true;
+                if (EthereumNetworkBase.isEventBlockLimitEnforced(token.tokenInfo.chainId) && upwardSyncStateLost(lastBlockRead, currentBlock))
+                {
+                    syncState = EventSyncState.UPWARD_SYNC;
+                    EVENT_DEBUG("Switch back to sync scan");
+                }
+
                 eventReadStartBlock = lastBlockRead;
                 eventReadEndBlock = BigInteger.valueOf(-1L);
                 break;
             case UPWARD_SYNC: //we encountered upward sync issues
                 upwardSync = true;
                 eventReadStartBlock = lastBlockRead;
-                eventReadEndBlock = lastBlockRead.add(BigInteger.valueOf(readBlockSize));
+                if (upwardSyncComplete(eventReadStartBlock, currentBlock)) //detect completion of upward sync and switch to sync_max
+                {
+                    eventReadEndBlock = BigInteger.valueOf(-1L);
+                    syncState = EventSyncState.UPWARD_SYNC_MAX;
+                    EVENT_DEBUG("Sync complete");
+                }
+                else
+                {
+                    eventReadEndBlock = lastBlockRead.add(BigInteger.valueOf(readBlockSize));
+                }
                 break;
+        }
+
+        // Finally adjust the event end read if required. This is placed outside the switch because it should affect
+        // a few different paths
+        eventReadEndBlock = adjustForLimitedBlockSize(eventReadStartBlock, eventReadEndBlock, currentBlock);
+
+        // detect edge condition - it's highly unlikely but acts as a stopper in case of unexpected results
+        // This edge condition is where the start block read is greater than the current block.
+        if (eventReadStartBlock.compareTo(currentBlock) >= 0)
+        {
+            eventReadStartBlock = currentBlock.subtract(BigInteger.ONE);
+            eventReadEndBlock = BigInteger.valueOf(-1L);
+            syncState = EventSyncState.UPWARD_SYNC_MAX;
         }
 
         return new SyncDef(eventReadStartBlock, eventReadEndBlock, syncState, upwardSync);
     }
 
+    private boolean upwardSyncStateLost(BigInteger lastBlockRead, BigInteger currentBlock)
+    {
+        return currentBlock.subtract(lastBlockRead).compareTo(EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId)) >= 0;
+    }
+
+    private boolean upwardSyncComplete(BigInteger eventReadStartBlock, BigInteger currentBlock)
+    {
+        BigInteger maxBlockRead = EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).subtract(BigInteger.ONE);
+        BigInteger diff = currentBlock.subtract(eventReadStartBlock);
+
+        return diff.compareTo(maxBlockRead) < 0;
+    }
+
+    private BigInteger adjustForLimitedBlockSize(BigInteger eventReadStartBlock, BigInteger eventReadEndBlock, BigInteger currentBlock)
+    {
+        if (EthereumNetworkBase.isEventBlockLimitEnforced(token.tokenInfo.chainId))
+        {
+            BigInteger maxBlockRead = EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId);
+
+            long diff = currentBlock.subtract(eventReadStartBlock).longValue();
+
+            if (diff >= maxBlockRead.longValue())
+            {
+                return eventReadStartBlock.add(maxBlockRead).subtract(BigInteger.ONE);
+            }
+        }
+
+        return eventReadEndBlock;
+    }
+
     public boolean handleEthLogError(Response.Error error, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock, SyncDef sync, Realm realm)
     {
-        if (error.getCode() == -32005)
+        if (error.getMessage().toLowerCase(Locale.ROOT).contains("block")) //trigger on block range error
         {
             long newStartBlock;
             long newEndBlock;
@@ -112,8 +188,8 @@ public class EventSync
                 if (endBlock.getValue().equalsIgnoreCase("latest"))
                 {
                     newStartBlock = startBlockVal.longValue();
-                    newEndBlock = newStartBlock + BLOCK_SEARCH_INTERVAL;
-                    blockSize = BLOCK_SEARCH_INTERVAL;
+                    newEndBlock = newStartBlock + EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
+                    blockSize = EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
                 }
                 else
                 {
@@ -134,7 +210,7 @@ public class EventSync
                 if (endBlock.getValue().equalsIgnoreCase("latest"))
                 {
                     BigInteger currentBlock = TransactionsService.getCurrentBlock(token.tokenInfo.chainId);
-                    blockSize = BLOCK_SEARCH_INTERVAL;
+                    blockSize = EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
                     newEndBlock = currentBlock.longValue();
                 }
                 else
@@ -166,7 +242,7 @@ public class EventSync
         if (startBlock.compareTo(BigInteger.ONE) == 0)
         {
             //initial search, apply full limit
-            return currentBlock - BLOCK_SEARCH_INTERVAL;
+            return currentBlock - EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
         }
         else
         {
@@ -183,11 +259,11 @@ public class EventSync
 
         if (rd == null)
         {
-            return BLOCK_SEARCH_INTERVAL;
+            return EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
         }
         else
         {
-            return rd.getResultReceivedTime();
+            return Math.min(rd.getResultReceivedTime(), EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue());
         }
     }
 
@@ -205,8 +281,9 @@ public class EventSync
         else
         {
             int state = rd.getTokenId().intValue();
-            if (state >= EventSyncState.DOWNWARD_SYNC_START.ordinal() || state < EventSyncState.TOP_LIMIT.ordinal())
+            if (state >= EventSyncState.DOWNWARD_SYNC_START.ordinal() && state < EventSyncState.TOP_LIMIT.ordinal())
             {
+                EVENT_DEBUG("Read State: " + EventSyncState.values()[state]);
                 return EventSyncState.values()[state];
             }
             else
@@ -248,6 +325,7 @@ public class EventSync
         }
         else
         {
+            EVENT_DEBUG("ReadEventSync: " + rd.getResultTime());
             return rd.getResultTime();
         }
     }
@@ -299,7 +377,7 @@ public class EventSync
                 break;
             case DOWNWARD_SYNC_COMPLETE: //finished the event read
                 //next time, start where we originally synced from
-                updateEventReads(realm, getSyncStart(realm), BLOCK_SEARCH_INTERVAL, EventSyncState.UPWARD_SYNC_MAX);
+                updateEventReads(realm, getSyncStart(realm), EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue(), EventSyncState.UPWARD_SYNC_MAX);
                 return;
             case DOWNWARD_SYNC: //successful intermediate downward sync
             case UPWARD_SYNC: //successful intermediate upward sync
@@ -308,6 +386,11 @@ public class EventSync
         }
 
         updateEventReads(realm, sync.eventReadEndBlock.longValue(), calcNewIntervalSize(sync, evReads), sync.state);
+    }
+
+    public void resetEventReads(Realm realm)
+    {
+        updateEventReads(realm, 0, 0, EventSyncState.DOWNWARD_SYNC_START);
     }
 
     private void updateEventReads(Realm realm, long lastRead, long readInterval, EventSyncState state)
@@ -328,6 +411,8 @@ public class EventSync
             rd.setResultReceivedTime(readInterval);
             rd.setTokenId(String.valueOf(state.ordinal()));
 
+            EVENT_DEBUG("WriteState: " + state + " " + lastRead);
+
             r.insertOrUpdate(rd);
         });
     }
@@ -335,7 +420,7 @@ public class EventSync
     // If we're syncing downwards, work out what event block size we should read next
     private long calcNewIntervalSize(SyncDef sync, int evReads)
     {
-        if (sync.upwardSync) return BLOCK_SEARCH_INTERVAL;
+        if (sync.upwardSync) return EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
         long endBlock = sync.eventReadEndBlock.longValue() == -1 ? TransactionsService.getCurrentBlock(token.tokenInfo.chainId).longValue()
                 : sync.eventReadEndBlock.longValue();
         long currentReadSize = endBlock - sync.eventReadStartBlock.longValue();
@@ -352,7 +437,7 @@ public class EventSync
         }
         else if ((maxLogReads - evReads) > maxLogReads*0.25)
         {
-            currentReadSize += BLOCK_SEARCH_INTERVAL;
+            currentReadSize += EthereumNetworkBase.getMaxEventFetch(token.tokenInfo.chainId).longValue();
         }
 
         return currentReadSize;
@@ -360,6 +445,8 @@ public class EventSync
 
     /***
      * Event Handling
+     *
+     * TODO: batch up catch-up calls
      */
 
     public Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> processTransferEvents(Web3j web3j, Event transferEvent, DefaultBlockParameter startBlock,
@@ -370,26 +457,18 @@ public class EventSync
         EthFilter receiveFilter = token.getReceiveBalanceFilter(transferEvent, startBlock, endBlock);
         EthFilter sendFilter    = token.getSendBalanceFilter(transferEvent, startBlock, endBlock);
 
-        EthLog receiveLogs = web3j.ethGetLogs(receiveFilter).send();
-        if (receiveLogs.hasError())
-        {
-            throw new LogOverflowException(receiveLogs.getError());
-        }
+        Pair<EthLog, EthLog> ethLogs = getTxLogs(web3j, receiveFilter, sendFilter);
+
+        EthLog receiveLogs = ethLogs.first;
+        EthLog sendLogs = ethLogs.second;
 
         int eventCount = receiveLogs.getLogs().size();
 
         HashSet<BigInteger> rcvTokenIds = new HashSet<>(token.processLogsAndStoreTransferEvents(receiveLogs, transferEvent, txHashes, realm));
 
-        EthLog sentLogs = web3j.ethGetLogs(sendFilter).send();
+        if (sendLogs.getLogs().size() > eventCount) eventCount = sendLogs.getLogs().size();
 
-        if (sentLogs.hasError())
-        {
-            throw new LogOverflowException(receiveLogs.getError());
-        }
-
-        if (sentLogs.getLogs().size() > eventCount) eventCount = sentLogs.getLogs().size();
-
-        HashSet<BigInteger> sendTokenIds = token.processLogsAndStoreTransferEvents(sentLogs, transferEvent, txHashes, realm);
+        HashSet<BigInteger> sendTokenIds = token.processLogsAndStoreTransferEvents(sendLogs, transferEvent, txHashes, realm);
 
         //register Transaction fetches
         for (String txHash : txHashes)
@@ -398,6 +477,69 @@ public class EventSync
         }
 
         return new Pair<>(eventCount, new Pair<>(rcvTokenIds, sendTokenIds));
+    }
+
+    private Pair<EthLog, EthLog> getTxLogs(Web3j web3j, EthFilter receiveFilter, EthFilter sendFilter) throws LogOverflowException, IOException
+    {
+        if (EthereumNetworkBase.getBatchProcessingLimit(token.tokenInfo.chainId) > 0 && !batchProcessingError.contains(token.tokenInfo.chainId))
+        {
+            return getBatchTxLogs(web3j, receiveFilter, sendFilter);
+        }
+        else
+        {
+            EthLog receiveLogs = web3j.ethGetLogs(receiveFilter).send();
+
+            if (receiveLogs.hasError())
+            {
+                throw new LogOverflowException(receiveLogs.getError());
+            }
+
+            EthLog sentLogs = web3j.ethGetLogs(sendFilter).send();
+
+            if (sentLogs.hasError())
+            {
+                throw new LogOverflowException(sentLogs.getError());
+            }
+
+            return new Pair<>(receiveLogs, sentLogs);
+        }
+    }
+
+    private Pair<EthLog, EthLog> getBatchTxLogs(Web3j web3j, EthFilter receiveFilter, EthFilter sendFilter) throws LogOverflowException, IOException
+    {
+        BatchResponse rsp;
+
+        try
+        {
+            rsp = web3j.newBatch()
+                    .add(web3j.ethGetLogs(receiveFilter))
+                    .add(web3j.ethGetLogs(sendFilter))
+                    .send();
+        }
+        catch (ClassCastException e)
+        {
+            rsp = null;
+        }
+
+        if (rsp == null || rsp.getResponses().size() != 2)
+        {
+            batchProcessingError.add(token.tokenInfo.chainId);
+            return getTxLogs(web3j, receiveFilter, sendFilter);
+        }
+
+        EthLog receiveLogs = (EthLog) rsp.getResponses().get(0);
+        EthLog sendLogs = (EthLog) rsp.getResponses().get(1);
+
+        if (receiveLogs.hasError())
+        {
+            throw new LogOverflowException(receiveLogs.getError());
+        }
+        else if (sendLogs.hasError())
+        {
+            throw new LogOverflowException(sendLogs.getError());
+        }
+
+        return new Pair<>(receiveLogs, sendLogs);
     }
 
     public String getActivityName(String toAddress)
@@ -506,12 +648,12 @@ public class EventSync
         if (activityName.equals("receive"))
         {
             instance.where(RealmTransfer.class)
-                    .equalTo("hash", hash)
+                    .like("hash", RealmTransfer.databaseKey(token.tokenInfo.chainId, hash))
                     .findAll().deleteAllFromRealm();
         }
 
         RealmTransfer matchingEntry = instance.where(RealmTransfer.class)
-                .equalTo("hash", hash)
+                .equalTo("hash", RealmTransfer.databaseKey(token.tokenInfo.chainId, hash))
                 .equalTo("tokenAddress", token.tokenInfo.address)
                 .equalTo("eventName", activityName)
                 .equalTo("transferDetail", valueList)
@@ -520,12 +662,20 @@ public class EventSync
         if (matchingEntry == null) //prevent duplicates
         {
             matchingEntry = instance.createObject(RealmTransfer.class);
-            matchingEntry.setHash(hash);
+            matchingEntry.setHashKey(token.tokenInfo.chainId, hash);
             matchingEntry.setTokenAddress(token.tokenInfo.address);
         }
 
         matchingEntry.setEventName(activityName);
         matchingEntry.setTransferDetail(valueList);
         instance.insertOrUpdate(matchingEntry);
+    }
+
+    private void EVENT_DEBUG(String message)
+    {
+        if (EVENT_SYNC_DEBUGGING)
+        {
+            Timber.tag(TAG).i(token.tokenInfo.chainId + " " + token.tokenInfo.address + ": " + message);
+        }
     }
 }

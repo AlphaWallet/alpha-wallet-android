@@ -4,26 +4,26 @@ on:
     branches:
       - master
   pull_request:
+  merge_group:
 jobs:
   lint:
-    name: Run Lint
+    name: Comments lint result on Master
     runs-on: macos-latest
-
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v3
-      - name: Set up JDK
+        with:
+          fetch-depth: 0
+      - name: set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: zulu
-          java-version: 11
+          distribution: oracle
+          java-version: 17
           cache: gradle
-      - name: Run Kotlin lint
-        env:
-          USERNAME: ${{ env.GITHUB_ACTOR }}
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run detekt
         run: ./gradlew :app:detekt
+        continue-on-error: true
       - name: Run Android Lint
-        env:
-          USERNAME: ${{ env.GITHUB_ACTOR }}
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :app:lintAnalyticsDebug

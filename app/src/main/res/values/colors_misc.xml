@@ -14,16 +14,9 @@
 
     <!-- Network Palette  -->
     <color name="mainnet">#2986AF</color>
-    <color name="ropsten">#FF4A8D</color>
-    <color name="kovan">#70578D</color>
-    <color name="rinkeby">#F6C343</color>
-    <color name="sokol">#6B35A2</color>
     <color name="xdai">#48A9A6</color>
     <color name="classic">#378937</color>
-    <color name="poa">#5838A3</color>
     <color name="goerli">#BBAE9A</color>
-    <color name="artis_sigma1">#53A271</color>
-    <color name="artis_tau1">#F97599</color>
     <color name="binance_test">#ffca2f</color>
     <color name="binance_main">#f3ba2f</color>
     <color name="heco_test">#5F9FFF</color>
@@ -49,5 +42,7 @@
     <color name="aurora_testnet">#B2C6D8</color>
     <color name="milkomeda">#222222</color>
     <color name="milkomeda_test">#292929</color>
-    <color name="phi_network">#8176c2</color>
+    <color name="sepolia">#67b1d4</color>
+    <color name="okx">#000000</color>
+    <color name="rootstock">#000000</color>
 </resources>

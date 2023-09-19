@@ -24,22 +24,27 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.EnsNodeNotSyncCallback;
 import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.KeyboardUtils;
 import com.alphawallet.app.util.QRParser;
+import com.alphawallet.app.util.ShortcutUtils;
 import com.alphawallet.app.viewmodel.TransferTicketDetailViewModel;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -51,7 +56,8 @@ import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
-import com.alphawallet.token.tools.Numeric;
+import com.alphawallet.hardware.SignatureFromKey;
+import org.web3j.utils.Numeric;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -98,7 +104,9 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                 .get(TransferTicketDetailViewModel.class);
 
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID);
-        token = viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        String walletAddress = getIntent().getStringExtra(C.Key.WALLET);
+        viewModel.loadWallet(walletAddress);
+        token = viewModel.getTokenService().getToken(walletAddress, chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
 
         String tokenIds = getIntent().getStringExtra(C.EXTRA_TOKENID_LIST);
         List<BigInteger> tokenIdList = token.stringHexToBigIntegerList(tokenIds);
@@ -138,6 +146,17 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
         functionBar.revealButtons();
 
         setupScreen();
+
+        confirmRemoveShortcuts(assetSelection, token);
+    }
+
+    private void confirmRemoveShortcuts(ArrayList<Pair<BigInteger, NFTAsset>> tokenIdList, Token token)
+    {
+        List<String> shortcutIds = ShortcutUtils.getShortcutIds(getApplicationContext(), token, tokenIdList);
+        if (!shortcutIds.isEmpty())
+        {
+            ShortcutUtils.showConfirmationDialog(this, shortcutIds, getString(R.string.remove_shortcut_reminder));
+        }
     }
 
     private void setupScreen()
@@ -256,7 +275,7 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                             addressInput.setAddress(extracted_address);
                         }
                         break;
-                    case QRScanner.DENY_PERMISSION:
+                    case QRScannerActivity.DENY_PERMISSION:
                         showCameraDenied();
                         break;
                     default:
@@ -266,7 +285,6 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                         break;
                 }
                 break;
-
             case C.COMPLETED_TRANSACTION:
                 Intent i = new Intent();
                 i.putExtra(C.EXTRA_TXHASH, data.getStringExtra(C.EXTRA_TXHASH));
@@ -341,8 +359,9 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
 
     private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
-        Timber.w(throwable.getMessage());
-        checkConfirm(BigInteger.ZERO, transactionBytes, txSendAddress, resolvedAddress);
+        Timber.e(throwable);
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        displayErrorMessage(throwable.getMessage());
     }
 
 
@@ -360,7 +379,7 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
     /**
      * Called to check if we're ready to send user to confirm screen / activity sheet popup
      */
-    private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
+    private void checkConfirm(GasEstimate estimate, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
 
         Web3Transaction w3tx = new Web3Transaction(
@@ -368,14 +387,14 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
                 new Address(token.getAddress()),
                 BigInteger.ZERO,
                 BigInteger.ZERO,
-                sendGasLimit,
+                estimate.getValue(),
                 -1,
                 Numeric.toHexString(transactionBytes),
                 -1);
 
-        if (sendGasLimit.equals(BigInteger.ZERO))
+        if (estimate.hasError() || estimate.getValue().equals(BigInteger.ZERO))
         {
-            estimateError(w3tx, transactionBytes, txSendAddress, resolvedAddress);
+            estimateError(estimate, w3tx, transactionBytes, txSendAddress, resolvedAddress);
         }
         else
         {
@@ -405,7 +424,13 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+        viewModel.requestSignature(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(viewModel.getWallet(), token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -424,7 +449,9 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
     @Override
     public void notifyConfirm(String mode)
     {
-        viewModel.actionSheetConfirm(mode);
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        viewModel.track(Analytics.Action.ACTION_SHEET_COMPLETED, props);
     }
 
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -436,19 +463,25 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
         return getGasSettings;
     }
 
-    private void txWritten(TransactionData transactionData)
+    @Override
+    public WalletType getWalletType()
     {
-        actionDialog.transactionWritten(transactionData.txHash);
+        return viewModel.getWallet().type;
+    }
+
+    private void txWritten(TransactionReturn txReturn)
+    {
+        actionDialog.transactionWritten(txReturn.hash);
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(ERROR);
         dialog.setTitle(R.string.error_transaction_failed);
-        dialog.setMessage(throwable.getMessage());
+        dialog.setMessage(txError.throwable.getMessage());
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();
@@ -457,18 +490,24 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
         actionDialog.dismiss();
     }
 
-    private void estimateError(final Web3Transaction w3tx, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
+    private void estimateError(GasEstimate estimate, final Web3Transaction w3tx, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(WARNING);
-        dialog.setTitle(R.string.confirm_transaction);
-        dialog.setMessage(R.string.error_transaction_may_fail);
-        dialog.setButtonText(R.string.button_ok);
+        dialog.setTitle(estimate.hasError() ?
+            R.string.dialog_title_gas_estimation_failed :
+            R.string.confirm_transaction
+        );
+        String message = estimate.hasError() ?
+            getString(R.string.dialog_message_gas_estimation_failed, estimate.getError()) :
+            getString(R.string.error_transaction_may_fail);
+        dialog.setMessage(message);
+        dialog.setButtonText(R.string.action_proceed);
         dialog.setSecondaryButtonText(R.string.action_cancel);
         dialog.setButtonListener(v -> {
             BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
-            checkConfirm(gasEstimate, transactionBytes, txSendAddress, resolvedAddress);
+            checkConfirm(new GasEstimate(gasEstimate), transactionBytes, txSendAddress, resolvedAddress);
         });
 
         dialog.setSecondaryButtonListener(v -> {

@@ -15,6 +15,8 @@ import com.alphawallet.app.entity.TransactionType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
+import com.alphawallet.app.entity.transactionAPI.TransferFetchType;
+import com.alphawallet.app.entity.transactions.TransferEvent;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TransactionLocalSource;
@@ -30,8 +32,10 @@ import org.web3j.utils.Numeric;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -52,18 +56,21 @@ public class TransactionsService
     private final TokensService tokensService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TransactionsNetworkClientType transactionsClient;
+    private final TransactionNotificationService transactionNotificationService;
     private final TransactionLocalSource transactionsCache;
     private int currentChainIndex;
-    private boolean nftCheck;
-
+    private boolean firstCycle;
+    private boolean firstTxCycle;
     private final LongSparseArray<Long> chainTransferCheckTimes = new LongSparseArray<>(); //TODO: Use this to coordinate token checks on chains
     private final LongSparseArray<Long> chainTransactionCheckTimes = new LongSparseArray<>();
-    private static final LongSparseArray<BigInteger> currentBlocks = new LongSparseArray<>();
+    private static final LongSparseArray<CurrentBlockTime> currentBlocks = new LongSparseArray<>();
     private static final ConcurrentLinkedQueue<String> requiredTransactions = new ConcurrentLinkedQueue<>();
+    private final LongSparseArray<TransferFetchType> apiFetchProgress = new LongSparseArray<>();
 
     private final static int TRANSACTION_DROPPED = -1;
     private final static int TRANSACTION_SEEN = -2;
-
+    private final static long START_CHECK_DELAY = 3;
+    private final static long CHECK_CYCLE = 15;
     @Nullable
     private Disposable fetchTransactionDisposable;
     @Nullable
@@ -76,17 +83,24 @@ public class TransactionsService
     private Disposable pendingTransactionCheckCycle;
     @Nullable
     private Disposable transactionResolve;
+    private boolean fromBackground;
 
     public TransactionsService(TokensService tokensService,
                                EthereumNetworkRepositoryType ethereumNetworkRepositoryType,
                                TransactionsNetworkClientType transactionsClient,
-                               TransactionLocalSource transactionsCache)
+                               TransactionLocalSource transactionsCache,
+                               TransactionNotificationService transactionNotificationService)
     {
         this.tokensService = tokensService;
         this.ethereumNetworkRepository = ethereumNetworkRepositoryType;
         this.transactionsClient = transactionsClient;
         this.transactionsCache = transactionsCache;
+        this.transactionNotificationService = transactionNotificationService;
+    }
 
+    public void fetchTransactionsFromBackground()
+    {
+        fromBackground = true;
         fetchTransactions();
     }
 
@@ -95,7 +109,8 @@ public class TransactionsService
         if (TextUtils.isEmpty(tokensService.getCurrentAddress())) return;
 
         currentChainIndex = 0;
-        nftCheck = true; //check nft first to filter out NFT tokens
+        firstCycle = true;
+        firstTxCycle = true;
 
         transactionsClient.checkRequiresAuxReset(tokensService.getCurrentAddress());
 
@@ -103,23 +118,33 @@ public class TransactionsService
             fetchTransactionDisposable.dispose();
         fetchTransactionDisposable = null;
         //reset transaction timers
-        if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
-        {
-            transactionCheckCycle = Observable.interval(0, 15, TimeUnit.SECONDS)
-                    .doOnNext(l -> checkTransactionQueue()).subscribe();
-        }
+        startTransactionCheckCycle(START_CHECK_DELAY);
 
-        if (tokenTransferCheckCycle == null || tokenTransferCheckCycle.isDisposed())
-        {
-            tokenTransferCheckCycle = Observable.interval(2, 17, TimeUnit.SECONDS) //attempt to not interfere with transaction check
-                    .doOnNext(l -> checkTransfers()).subscribe();
-        }
+        readTransferCycle();
 
         if (pendingTransactionCheckCycle == null || pendingTransactionCheckCycle.isDisposed())
         {
-            pendingTransactionCheckCycle = Observable.interval(15, 15, TimeUnit.SECONDS)
+            pendingTransactionCheckCycle = Observable.interval(CHECK_CYCLE, CHECK_CYCLE, TimeUnit.SECONDS)
                     .doOnNext(l -> checkPendingTransactions()).subscribe();
         }
+    }
+
+    private void startTransactionCheckCycle(long checkCycleTime)
+    {
+        if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
+        {
+            transactionCheckCycle = Observable.interval(START_CHECK_DELAY, checkCycleTime, TimeUnit.SECONDS)
+                    .doOnNext(l -> checkTransactionQueue()).subscribe();
+        }
+    }
+
+    private void readTransferCycle()
+    {
+        if (tokenTransferCheckCycle != null && !tokenTransferCheckCycle.isDisposed()) tokenTransferCheckCycle.dispose();
+
+        tokenTransferCheckCycle = Observable.interval(firstCycle ? START_CHECK_DELAY : (START_CHECK_DELAY * 15) + 1,
+                        firstCycle ? CHECK_CYCLE / 3 : CHECK_CYCLE, TimeUnit.SECONDS)
+                .doOnNext(l -> checkTransfers()).subscribe();
     }
 
     public void resumeFocus()
@@ -142,6 +167,7 @@ public class TransactionsService
         chainTransferCheckTimes.clear();
         chainTransactionCheckTimes.clear();
         tokensService.startUpdateCycle();
+        apiFetchProgress.clear();
 
         if (transactionCheckCycle == null || transactionCheckCycle.isDisposed())
         {
@@ -156,36 +182,45 @@ public class TransactionsService
     {
         List<Long> filters = tokensService.getNetworkFilters();
         if (tokensService.getCurrentAddress() == null || filters.size() == 0 ||
-                (eventFetch != null && !eventFetch.isDisposed())) { return; } //skip check if the service isn't set up or if a current check is in progress
-
-        if (currentChainIndex >= filters.size()) currentChainIndex = 0;
-        readTokenMoves(filters.get(currentChainIndex), nftCheck); //check NFTs for same chain on next iteration or advance to next chain
-        Pair<Integer, Boolean> pendingChainData = getNextChainIndex(currentChainIndex, nftCheck, filters);
-        if (pendingChainData.first != currentChainIndex)
+                (BuildConfig.DEBUG && eventFetch != null)) //don't allow multiple calls while debugging
         {
-            updateCurrentBlock(filters.get(currentChainIndex));
+            return; //skip check if the service isn't set up
         }
-        currentChainIndex = pendingChainData.first;
-        nftCheck = pendingChainData.second;
+
+        long chainId = filters.get(currentChainIndex);
+        boolean initiateRead = readTokenMoves(chainId); //check NFTs for same chain on next iteration or advance to next chain
+
+        if (initiateRead)
+        {
+            currentChainIndex = getNextChainIndex(currentChainIndex, chainId, filters);
+        }
     }
 
-    private Pair<Integer, Boolean> getNextChainIndex(int currentIndex, boolean nftCheck, List<Long> filters)
+    private int getNextChainIndex(int currentIndex, long chainId, List<Long> filters)
     {
-        if (filters.size() == 0) return new Pair<>(currentIndex, nftCheck);
+        final NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
+        if (filters.size() == 0 || info == null) return 0;
+        TransferFetchType[] availableTxTypes = info.getTransferQueriesUsed();
 
-        while (true)
+        TransferFetchType tfType = apiFetchProgress.get(chainId, TransferFetchType.ERC_20);
+
+        if (tfType.ordinal() >= availableTxTypes.length) //available API routes may be zero if unsupported (eg custom network)
         {
+            apiFetchProgress.put(chainId, TransferFetchType.ERC_20); // completed reads from this chain, reset to start
             currentIndex++;
-            if (currentIndex >= filters.size())
-            {
-                nftCheck = !nftCheck;
-                currentIndex = 0;
-            }
-            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(filters.get(currentIndex));
-            if (!nftCheck || info.usesSeparateNFTTransferQuery()) break;
+        }
+        else
+        {
+            apiFetchProgress.put(chainId, TransferFetchType.values()[tfType.ordinal() + 1]);
         }
 
-        return new Pair<>(currentIndex, nftCheck);
+        if (currentIndex >= filters.size())
+        {
+            currentIndex = 0;
+            firstCycle = false;
+        }
+
+        return currentIndex;
     }
 
     /**
@@ -199,25 +234,38 @@ public class TransactionsService
         if (filters.contains(chainId))
         {
             currentChainIndex = filters.indexOf(chainId);
-            NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
-            nftCheck = isNft && info.usesSeparateNFTTransferQuery();
+            TransferFetchType nftSelection = ethereumNetworkRepository.getNetworkByChain(chainId).getTransferQueriesUsed().length > 1 ? TransferFetchType.ERC_721 : TransferFetchType.ERC_20;
+            apiFetchProgress.put(chainId, isNft ? nftSelection : TransferFetchType.ERC_20);
         }
     }
 
-    private void readTokenMoves(long chainId, boolean isNFT)
+    private boolean readTokenMoves(long chainId)
     {
         //check if this route has combined NFT
         final NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
-        if (info == null) return;
-        if (isNFT)
+        if (info == null || info.getTransferQueriesUsed().length == 0)
+        {
+            return true;
+        }
+
+        if (eventFetch != null && !eventFetch.isDisposed())
+        {
+            return false;
+        }
+
+        TransferFetchType tfType = apiFetchProgress.get(chainId, TransferFetchType.ERC_20);
+        if (tfType.ordinal() > 0)
         {
             tokensService.checkingChain(chainId);
         }
-        Timber.tag(TAG).d("Check transfers: %s : NFT=%s", chainId, isNFT);
-        eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, isNFT)
+
+        Timber.tag(TAG).d("Check transfers: %s : NFT=%s", chainId, tfType.getValue());
+        eventFetch = transactionsClient.readTransfers(tokensService.getCurrentAddress(), info, tokensService, tfType)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(count -> handleMoveCheck(info.chainId, isNFT), this::gotReadErr);
+                .subscribe(tfMap -> handleMoveCheck(info.chainId, tfType.ordinal() > 0, tfMap), this::gotReadErr);
+
+        return true;
     }
 
     private void gotReadErr(Throwable e)
@@ -226,11 +274,31 @@ public class TransactionsService
         Timber.e(e);
     }
 
-    private void handleMoveCheck(long chainId, boolean isNFT)
+    private void handleMoveCheck(long chainId, boolean isNFT, Map<String, List<TransferEvent>> tfMap)
     {
         chainTransferCheckTimes.put(chainId, System.currentTimeMillis());
         if (isNFT) tokensService.checkingChain(0); //this flags to TokensService that the check is complete. This avoids race condition
         eventFetch = null;
+
+        checkForIncomingTransfers(chainId, tfMap);
+    }
+
+    private void checkForIncomingTransfers(long chainId, Map<String, List<TransferEvent>> tfMap)
+    {
+        tfMap.entrySet().stream()
+            .filter(entry -> !entry.getValue().isEmpty())
+            .map(entry -> new AbstractMap.SimpleEntry<>(entry.getValue().get(0), entry.getKey()))
+            .filter(entry -> entry.getKey().activityName.equalsIgnoreCase("received"))
+            .forEach(entry -> fetchTransaction(tokensService.getCurrentAddress(), chainId, entry.getValue())
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .subscribe(t -> onTransactionFetched(t, entry.getKey()), Timber::e));
+    }
+
+    private void onTransactionFetched(Transaction tx, TransferEvent te)
+    {
+        Token token = tokensService.getToken(tx.chainId, te.contractAddress);
+        showTransactionNotification(tx, token, te);
     }
 
     private void checkTransactionQueue()
@@ -251,8 +319,39 @@ public class TransactionsService
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(transactions -> onUpdateTransactions(transactions, t), this::onTxError);
+
+                checkFirstCycleCompletion();
             }
         }
+    }
+
+    private void checkFirstCycleCompletion()
+    {
+        if (firstTxCycle && hasCompletedFirstCycle())
+        {
+            Timber.tag(TAG).d("Completed first cycle of checks");
+            if (transactionCheckCycle != null && !transactionCheckCycle.isDisposed())
+            {
+                transactionCheckCycle.dispose();
+            }
+            transactionCheckCycle = null;
+            firstTxCycle = false;
+            startTransactionCheckCycle(CHECK_CYCLE);
+        }
+    }
+
+    private boolean hasCompletedFirstCycle()
+    {
+        for (int i = 0; i < chainTransactionCheckTimes.size(); i++)
+        {
+            long checkTime = chainTransactionCheckTimes.valueAt(i);
+            if (checkTime < ethereumNetworkRepository.getAvailableNetworkList().length + 1)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private Token getRequiresTransactionUpdate()
@@ -265,6 +364,11 @@ public class TransactionsService
 
         for (long chainId : chains)
         {
+            NetworkInfo thisInfo = ethereumNetworkRepository.getNetworkByChain(chainId);
+            if (TextUtils.isEmpty(thisInfo.etherscanAPI))
+            {
+                continue;
+            }
             long checkTime = chainTransactionCheckTimes.get(chainId, 0L);
             if (checkTime == 0L)
             {
@@ -278,7 +382,7 @@ public class TransactionsService
         }
 
         //check lowest value
-        if ((System.currentTimeMillis() - oldestCheck) > 45* DateUtils.SECOND_IN_MILLIS)
+        if ((System.currentTimeMillis() - oldestCheck) > 45 * DateUtils.SECOND_IN_MILLIS)
         {
             chainTransactionCheckTimes.put(checkChainId, System.currentTimeMillis());
             return tokensService.getServiceToken(checkChainId);
@@ -287,13 +391,6 @@ public class TransactionsService
         {
             return null;
         }
-    }
-
-    private void updateCurrentBlock(final long chainId)
-    {
-        fetchCurrentBlock(chainId).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(blockValue -> currentBlocks.put(chainId, blockValue), onError -> currentBlocks.put(chainId, BigInteger.ZERO)).isDisposed();
     }
 
     private static Single<BigInteger> fetchCurrentBlock(final long chainId)
@@ -305,7 +402,7 @@ public class TransactionsService
             String blockValStr = ethBlock.getBlock().getNumberRaw();
             if (!TextUtils.isEmpty(blockValStr) && blockValStr.length() > 2)
                 return Numeric.toBigInt(blockValStr);
-            else return currentBlocks.get(chainId, BigInteger.ZERO);
+            else return currentBlocks.get(chainId, new CurrentBlockTime(BigInteger.ZERO)).blockNumber;
         });
     }
 
@@ -365,14 +462,30 @@ public class TransactionsService
      */
     private void checkTokens(Transaction[] txList)
     {
-        for (int i = 0; i < txList.length - 1; i++)
+        for (Transaction tx : txList)
         {
-            Transaction tx = txList[i];
-            if (!tx.hasError() && tx.hasData()) //is this a successful contract transaction?
+            Token token = tokensService.getToken(tx.chainId, tx.to);
+            boolean isSuccessfulContractTx = !tx.hasError() && tx.hasData();
+            if (isSuccessfulContractTx && (token == null && tx.to != null))
             {
-                Token token = tokensService.getToken(tx.chainId, tx.to);
-                if (token == null && tx.to != null)
-                    tokensService.addUnknownTokenToCheckPriority(new ContractAddress(tx.chainId, tx.to));
+                tokensService.addUnknownTokenToCheckPriority(new ContractAddress(tx.chainId, tx.to));
+            }
+            else
+            {
+                showTransactionNotification(tx, token, null);
+            }
+        }
+    }
+
+    private void showTransactionNotification(Transaction transaction, Token token, TransferEvent te)
+    {
+        if (token != null)
+        {
+            transactionNotificationService.showNotification(transaction, token, te);
+            if (fromBackground && !tokensService.isOnFocus())
+            {
+                fromBackground = false;
+                stopService();
             }
         }
     }
@@ -389,8 +502,7 @@ public class TransactionsService
     public void restartService()
     {
         stopAllChainUpdate();
-        tokensService.stopUpdateCycle();
-        tokensService.startUpdateCycle();
+        tokensService.restartUpdateCycle();
         fetchTransactions();
     }
 
@@ -422,6 +534,8 @@ public class TransactionsService
         tokensService.checkingChain(0);
         chainTransferCheckTimes.clear();
         chainTransactionCheckTimes.clear();
+
+        currentChainIndex = 0;
     }
 
     public static void addTransactionHashFetch(String txHash, long chainId, String wallet)
@@ -507,7 +621,7 @@ public class TransactionsService
         if (txData.second.compareTo(BigInteger.ZERO) > 0)
         {
             return EventUtils.getBlockDetails(txData.first.getResult().getBlockHash(), web3j)
-                    .map(blockReceipt -> new Pair<>(txData.first, blockReceipt.getBlock().getTimestamp().longValue()));
+                        .map(blockReceipt -> new Pair<>(txData.first, blockReceipt.getBlock().getTimestamp().longValue()));
         }
         else
         {
@@ -537,14 +651,14 @@ public class TransactionsService
 
     public static BigInteger getCurrentBlock(long chainId)
     {
-        BigInteger currentBlock = currentBlocks.get(chainId, BigInteger.ZERO);
-        if (currentBlock.equals(BigInteger.ZERO))
+        CurrentBlockTime currentBlock = currentBlocks.get(chainId, new CurrentBlockTime(BigInteger.ZERO));
+        if (currentBlock.blockReadRequiresUpdate())
         {
-            currentBlock = fetchCurrentBlock(chainId).blockingGet();
+            currentBlock = new CurrentBlockTime(fetchCurrentBlock(chainId).blockingGet());
             currentBlocks.put(chainId, currentBlock);
         }
 
-        return currentBlock;
+        return currentBlock.blockNumber;
     }
 
     private void checkPendingTransactions()
@@ -568,6 +682,15 @@ public class TransactionsService
                         }
                     }, Timber::w).isDisposed();
         }
+    }
+
+    public Single<Transaction> fetchTransaction(String currentAddress, long chainId, String hash)
+    {
+        return doTransactionFetch(hash, chainId)
+                .map(fetchedTx -> {
+                    transactionsCache.putTransaction(new Wallet(currentAddress), fetchedTx);
+                    return fetchedTx;
+                });
     }
 
     private boolean checkTransactionReceipt(String txHash, long chainId) throws IOException
@@ -641,5 +764,23 @@ public class TransactionsService
         }
 
         return txHashData;
+    }
+
+    private static class CurrentBlockTime
+    {
+        public final long readTime;
+        public final BigInteger blockNumber;
+
+        public CurrentBlockTime(BigInteger blockNo)
+        {
+            readTime = System.currentTimeMillis();
+            blockNumber = blockNo;
+        }
+
+        public boolean blockReadRequiresUpdate()
+        {
+            // update every 10 seconds if required
+            return blockNumber.equals(BigInteger.ZERO) || System.currentTimeMillis() > (readTime + 10 * DateUtils.SECOND_IN_MILLIS);
+        }
     }
 }

@@ -1,9 +1,11 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.token.tools.TokenDefinition.NO_SCRIPT;
+import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
@@ -112,7 +114,7 @@ public class NFTViewModel extends BaseViewModel {
     {
         if (token != null)
         {
-            disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)
+            disposable = assetDefinitionService.getSignatureData(token)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(sig::postValue, this::onSigCheckError);
@@ -139,13 +141,17 @@ public class NFTViewModel extends BaseViewModel {
 
     private void handleFilename(TokenDefinition td)
     {
-        if (!TextUtils.isEmpty(td.holdingToken))
+        switch (td.nameSpace)
         {
-            newScriptFound.postValue(true);
-        }
-        else
-        {
-            scriptUpdateInProgress.postValue(false);
+            case UNCHANGED_SCRIPT:
+                newScriptFound.postValue(false);
+                break;
+            case NO_SCRIPT:
+                scriptUpdateInProgress.postValue(false);
+                break;
+            default:
+                newScriptFound.postValue(true);
+                break;
         }
     }
 
@@ -200,5 +206,19 @@ public class NFTViewModel extends BaseViewModel {
         if (nftBalanceCheck != null && !nftBalanceCheck.isDisposed()) nftBalanceCheck.dispose();
         if (disposable != null && !disposable.isDisposed()) disposable.dispose();
         if (scriptUpdate != null && !scriptUpdate.isDisposed()) scriptUpdate.dispose();
+    }
+
+    public boolean hasTokenScript(Token token)
+    {
+        return token != null && assetDefinitionService.getAssetDefinition(token) != null;
+    }
+
+    public void updateAttributes(Token token)
+    {
+        assetDefinitionService.refreshAllAttributes(token)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(b -> { }, this::onError)
+                .isDisposed();
     }
 }

@@ -9,7 +9,8 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.token.tools.Numeric;
+import com.alphawallet.app.web3j.ens.EnsResolutionException;
+import org.web3j.utils.Numeric;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -43,14 +44,29 @@ public class AWEnsResolver
 
     public AWEnsResolver(Web3j web3j, Context context)
     {
+        this(web3j, context, -1);
+    }
+
+    public AWEnsResolver(Web3j web3j, Context context, long chainId)
+    {
         this.ensResolver = new EnsResolver(web3j);
         this.context = context;
         this.client = setupClient();
 
-        resolvables = new HashMap<String, Resolvable>() {
+        resolvables = new HashMap<>()
+        {
             {
                 put(".bit", new DASResolver(client));
-                put(".crypto", new CryptoResolver(ensResolver));
+//                put(".crypto", new CryptoResolver(ensResolver));
+                put(".crypto", new UnstoppableDomainsResolver(client, chainId));
+                put(".zil", new UnstoppableDomainsResolver(client, chainId));
+                put(".wallet", new UnstoppableDomainsResolver(client, chainId));
+                put(".x", new UnstoppableDomainsResolver(client, chainId));
+                put(".nft", new UnstoppableDomainsResolver(client, chainId));
+                put(".888", new UnstoppableDomainsResolver(client, chainId));
+                put(".dao", new UnstoppableDomainsResolver(client, chainId));
+                put(".blockchain", new UnstoppableDomainsResolver(client, chainId));
+                put(".bitcoin", new UnstoppableDomainsResolver(client, chainId));
             }
         };
     }
@@ -83,6 +99,10 @@ public class AWEnsResolver
             catch (UnableToResolveENS resolve)
             {
                 ensName = fetchPreviouslyUsedENS(address);
+            }
+            catch (EnsResolutionException e)
+            {
+                // Expected to throw when ENS name invalid
             }
             catch (Exception e)
             {

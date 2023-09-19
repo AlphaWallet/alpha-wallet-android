@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.service.IPFSService;
 import com.alphawallet.app.util.Utils;
 
 import org.web3j.abi.TypeReference;
@@ -22,8 +23,6 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import timber.log.Timber;
 
 /**
  * Created by JB on 7/05/2022.
@@ -31,7 +30,7 @@ import timber.log.Timber;
 public class ContractInteract
 {
     private final Token token;
-    protected static OkHttpClient client;
+    protected static IPFSService client;
 
     public ContractInteract(Token token)
     {
@@ -48,28 +47,19 @@ public class ContractInteract
 
     private String loadMetaData(String tokenURI)
     {
-        if (TextUtils.isEmpty(tokenURI)) return "";
+        if (TextUtils.isEmpty(tokenURI))
+        {
+            return "";
+        }
+        else if (Utils.isJson(tokenURI))
+        {
+            return tokenURI;
+        }
 
         //check if this is direct metadata, some tokens do this
-        if (Utils.isJson(tokenURI)) return tokenURI;
-
         setupClient();
 
-        Request request = new Request.Builder()
-                .url(Utils.parseIPFS(tokenURI))
-                .get()
-                .build();
-
-        try (okhttp3.Response response = client.newCall(request).execute())
-        {
-            return response.body().string();
-        }
-        catch (Exception e)
-        {
-            Timber.e(e);
-        }
-
-        return "";
+        return client.getContent(tokenURI);
     }
 
     public NFTAsset fetchTokenMetadata(BigInteger tokenId)
@@ -112,12 +102,13 @@ public class ContractInteract
     {
         if (client == null)
         {
-            client = new OkHttpClient.Builder()
-                    .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
-                    .connectTimeout(C.READ_TIMEOUT, TimeUnit.SECONDS)
-                    .writeTimeout(C.WRITE_TIMEOUT, TimeUnit.SECONDS)
-                    .retryOnConnectionFailure(true)
-                    .build();
+            client = new IPFSService(
+                    new OkHttpClient.Builder()
+                    .connectTimeout(C.CONNECT_TIMEOUT*2, TimeUnit.SECONDS)
+                    .readTimeout(C.READ_TIMEOUT*2, TimeUnit.SECONDS)
+                    .writeTimeout(C.WRITE_TIMEOUT*2, TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(false)
+                    .build());
         }
     }
 }

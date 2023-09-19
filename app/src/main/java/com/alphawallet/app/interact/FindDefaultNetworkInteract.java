@@ -1,5 +1,6 @@
 package com.alphawallet.app.interact;
 
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.entity.NetworkInfo;
 

@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,14 +22,12 @@ import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.TokenActivity;
+import com.alphawallet.app.ui.TransactionDetailActivity;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.token.entity.EventDefinition;
 import com.alphawallet.token.entity.TSTokenView;
-import com.alphawallet.token.tools.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import java.math.BigDecimal;
@@ -39,7 +36,6 @@ import java.util.Map;
 
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 import static com.alphawallet.app.ui.widget.holder.TransactionHolder.DEFAULT_ADDRESS_ADDITIONAL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 /**
  * Created by JB on 28/07/2020.
@@ -47,22 +43,18 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnClickListener
 {
     public static final int VIEW_TYPE = 2016;
-
     private final TokenIcon tokenIcon;
     private final TextView date;
     private final TextView type;
     private final TextView address;
     private final TextView value;
-
     private final AssetDefinitionService assetDefinition;
     private final AdapterCallback refreshSignaller;
     private Token token;
-    private BigInteger tokenId = BigInteger.ZERO;
-
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final TokensService tokensService;
     private String eventKey;
-    private boolean fromTokenView;
+    private Transaction transaction;
 
     public EventHolder(ViewGroup parent, TokensService service, FetchTransactionsInteract interact,
                        AssetDefinitionService svs, AdapterCallback signaller)
@@ -83,16 +75,15 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     @Override
     public void bind(@Nullable EventMeta data, @NonNull Bundle addition)
     {
-        fromTokenView = false;
         String walletAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
         //pull event details from DB
         eventKey = TokensRealmSource.eventActivityKey(data.hash, data.eventName);
-        tokenId = BigInteger.ZERO;
+        findViewById(R.id.token_name_detail).setVisibility(View.GONE);
 
         RealmAuxData eventData = fetchTransactionsInteract.fetchEvent(walletAddress, eventKey);
-        Transaction tx = fetchTransactionsInteract.fetchCached(walletAddress, data.hash);
+        transaction = fetchTransactionsInteract.fetchCached(walletAddress, data.hash);
 
-        if (eventData == null || tx == null)
+        if (eventData == null || transaction == null)
         {
             // probably caused by a new script detected. Signal to holder we need a reset
             refreshSignaller.resetRequired();
@@ -105,14 +96,14 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         tokenIcon.bindData(token, assetDefinition);
         String itemView = null;
 
-        TokenDefinition td = assetDefinition.getAssetDefinition(eventData.getChainId(), eventData.getTokenAddress());
+        TokenDefinition td = assetDefinition.getAssetDefinition(token);
         if (td != null && td.getActivityCards().containsKey(eventData.getFunctionId()))
         {
             TSTokenView view = td.getActivityCards().get(eventData.getFunctionId()).getView(ASSET_SUMMARY_VIEW_NAME);
             if (view != null) itemView = view.tokenView;
         }
 
-        String transactionValue = getEventAmount(eventData, tx);
+        String transactionValue = getEventAmount(eventData, transaction);
 
         if (TextUtils.isEmpty(transactionValue))
         {
@@ -123,23 +114,17 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
             value.setText(getString(R.string.valueSymbol, transactionValue, sym));
         }
 
-        CharSequence typeValue = Utils.createFormattedValue(getContext(), getTitle(eventData), token);
+        CharSequence typeValue = Utils.createFormattedValue(getTitle(eventData), token);
 
         type.setText(typeValue);
         //symbol.setText(sym);
-        address.setText(eventData.getDetail(getContext(), tx, itemView));// getDetail(eventData, resultMap));
+        address.setText(eventData.getDetail(getContext(), transaction, itemView));// getDetail(eventData, resultMap));
         tokenIcon.setStatusIcon(eventData.getEventStatusType());
         tokenIcon.setChainIcon(token.tokenInfo.chainId);
 
         //timestamp
         date.setText(Utils.localiseUnixTime(getContext(), eventData.getResultTime()));
         date.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void setFromTokenView()
-    {
-        fromTokenView = true;
     }
 
     private String getEventAmount(RealmAuxData eventData, Transaction tx)
@@ -208,10 +193,10 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     @Override
     public void onClick(View view)
     {
-        Intent intent = new Intent(getContext(), TokenActivity.class);
-        intent.putExtra(C.EXTRA_TOKEN_ID, Numeric.toHexStringNoPrefix(tokenId)); //pass tokenId if event concerns tokenId
-        intent.putExtra(C.EXTRA_ACTION_NAME, eventKey);
-        intent.putExtra(C.EXTRA_STATE, fromTokenView);
+        Intent intent = new Intent(getContext(), TransactionDetailActivity.class);
+        intent.putExtra(C.EXTRA_TXHASH, transaction.hash);
+        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         getContext().startActivity(intent);
     }

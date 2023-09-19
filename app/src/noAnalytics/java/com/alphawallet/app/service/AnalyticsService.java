@@ -3,10 +3,17 @@ package com.alphawallet.app.service;
 import android.content.Context;
 
 import com.alphawallet.app.entity.ServiceErrorException;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 
 public class AnalyticsService<T> implements AnalyticsServiceType<T> {
 
-    public AnalyticsService(Context context)
+    public AnalyticsService(Context context, PreferenceRepositoryType preferenceRepository)
+    {
+        //No code
+    }
+
+    @Override
+    public void increment(String property)
     {
         //No code
     }

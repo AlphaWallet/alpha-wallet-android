@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.ui.Erc20DetailActivity.HISTORY_LENGTH;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
 import android.content.Intent;
@@ -20,10 +21,14 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.analytics.ActionSheetSource;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.GasService;
@@ -39,8 +44,10 @@ import com.alphawallet.app.widget.ActionSheetDialog;
 import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.entity.ViewType;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -50,7 +57,6 @@ import java.util.Map;
 import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import timber.log.Timber;
 
 /**
  * Created by James on 2/04/2019.
@@ -74,6 +80,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private Realm realm = null;
     private RealmResults<RealmToken> realmTokenUpdates;
     private ActionSheetDialog confirmationDialog;
+    private AnalyticsProperties confirmationDialogProps;
 
     private void initViews(Token t) {
         token = t;
@@ -85,7 +92,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
         TicketRange data = new TicketRange(idList, token.tokenInfo.address, false);
 
-        tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), false);
+        tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), ViewType.VIEW);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSetValuesListener(this);
 
@@ -117,10 +124,21 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         viewModel.getCurrentWallet();
     }
 
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
-        throwable.getStackTrace();
-        Timber.d("ERROR: %s", throwable.getMessage());
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(ERROR);
+        dialog.setTitle(R.string.error_transaction_failed);
+        dialog.setMessage(txError.throwable.getMessage());
+        dialog.setButtonText(R.string.button_ok);
+        dialog.setButtonListener(v -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+        confirmationDialog.dismiss();
+
+        viewModel.trackError(Analytics.Error.TOKEN_SCRIPT, txError.throwable.getMessage());
     }
 
     private void onWalletUpdate(Wallet w)
@@ -258,7 +276,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     @Override
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         TSAction action = functions.get(function);
         if (action != null && action.view == null && action.function != null)
         {
@@ -278,7 +296,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         }
         else
         {
-            viewModel.showFunction(this, token, function, idList);
+            viewModel.showFunction(this, token, function, idList, null);
         }
     }
 
@@ -300,16 +318,20 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
             confirmationDialog.setURL("TokenScript");
             confirmationDialog.setCanceledOnTouchOutside(false);
             confirmationDialog.show();
+
+            confirmationDialogProps = new AnalyticsProperties();
+            confirmationDialogProps.put(Analytics.PROPS_ACTION_SHEET_SOURCE, ActionSheetSource.TOKENSCRIPT.getValue());
+            viewModel.track(Analytics.Navigation.ACTION_SHEET_FOR_TRANSACTION_CONFIRMATION, confirmationDialogProps);
         }
     }
 
     /**
      * Final return path
-     * @param transactionData
+     * @param transactionReturn
      */
-    private void txWritten(TransactionData transactionData)
+    private void txWritten(TransactionReturn transactionReturn)
     {
-        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+        confirmationDialog.transactionWritten(transactionReturn.hash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
     }
 
     private void calculateEstimateDialog()
@@ -335,6 +357,8 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
+
+        viewModel.trackError(Analytics.Error.TOKEN_SCRIPT, getString(R.string.error_insufficient_funds));
     }
 
     private void estimateError(final Web3Transaction w3tx)
@@ -390,7 +414,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
         {
             viewModel.getAssetDefinitionService().addLocalRefs(args);
             //rebuild the view
-            tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), false);
+            tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), ViewType.VIEW);
         }
     }
 
@@ -421,7 +445,13 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, token.tokenInfo.chainId, ""); //return point is txWritten
+        viewModel.requestSignature(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(viewModel.getWallet(), token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -434,12 +464,19 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
             setResult(RESULT_OK, intent);
             finish();
         }
+        else
+        {
+            viewModel.track(Analytics.Action.ACTION_SHEET_CANCELLED, confirmationDialogProps);
+        }
     }
 
     @Override
     public void notifyConfirm(String mode)
     {
         viewModel.actionSheetConfirm(mode);
+
+        confirmationDialogProps.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        viewModel.track(Analytics.Action.ACTION_SHEET_COMPLETED, confirmationDialogProps);
     }
 
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -449,5 +486,11 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
         return getGasSettings;
+    }
+
+    @Override
+    public WalletType getWalletType()
+    {
+        return viewModel.getWallet().type;
     }
 }

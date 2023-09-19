@@ -1,34 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_holder"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/image_asset"
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.00" />
+
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="1.00" />
+
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineBottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="1.00" />
+
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineTop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.00" />
+
+    <RelativeLayout
+        android:id="@+id/image_view_wrapper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
-        tools:src="@drawable/ic_token_eth" />
+        android:visibility="visible"
+        tools:visibility="visible">
 
-    <ProgressBar
-        android:id="@+id/avatar_progress_spinner"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerInParent="true"
-        android:indeterminateDrawable="@drawable/progress_bar_spinner"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        <ImageView
+            android:id="@+id/image_asset"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
+            app:layout_constraintDimensionRatio="1:1"
+            tools:src="@drawable/ic_token_eth"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/image_overlay_rect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/image_asset"
+            android:layout_alignTop="@id/image_asset"
+            android:layout_alignEnd="@id/image_asset"
+            android:layout_alignBottom="@id/image_asset"
+            android:src="@drawable/mask_rounded_corners"
+            android:visibility="visible"
+            tools:visibility="visible" />
+
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/web_view_wrapper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <WebView
             android:id="@+id/image_web_view"
@@ -43,8 +87,20 @@
             android:id="@+id/overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/masking_circle"
+            android:src="@drawable/select_masking_circle"
             android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/overlay_rect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/image_web_view"
+            android:layout_alignTop="@id/image_web_view"
+            android:layout_alignEnd="@id/image_web_view"
+            android:layout_alignBottom="@id/image_web_view"
+            android:src="@drawable/mask_rounded_corners"
+            android:visibility="visible"
+            tools:visibility="visible" />
 
     </RelativeLayout>
 
@@ -52,17 +108,30 @@
         android:id="@+id/layout_fallback"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="false"
-        android:focusable="false"
-        android:visibility="gone">
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="invisible"
+        tools:visibility="gone">
 
         <com.alphawallet.app.widget.TokenIcon
             android:id="@+id/icon_fallback"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
-            android:clickable="false"
-            android:focusable="false"
             custom:square="true" />
     </RelativeLayout>
-</RelativeLayout>
+
+    <ProgressBar
+            android:id="@+id/avatar_progress_spinner"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_centerInParent="true"
+            android:indeterminateDrawable="@drawable/progress_bar_spinner"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@id/guidelineBottom"
+            app:layout_constraintEnd_toStartOf="@id/guidelineRight"
+            app:layout_constraintStart_toEndOf="@id/guidelineLeft"
+            app:layout_constraintTop_toTopOf="@id/guidelineTop"
+            tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

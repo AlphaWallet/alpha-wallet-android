@@ -1,11 +1,7 @@
 package com.alphawallet.app.web3;
 
-import static androidx.webkit.WebSettingsCompat.FORCE_DARK_OFF;
-import static androidx.webkit.WebSettingsCompat.FORCE_DARK_ON;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -19,10 +15,9 @@ import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.webkit.WebSettingsCompat;
-import androidx.webkit.WebViewFeature;
 
 import com.alphawallet.app.BuildConfig;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.URLLoadInterface;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
@@ -192,6 +187,10 @@ public class Web3View extends WebView {
         getSettings().setUserAgentString(getSettings().getUserAgentString()
                 + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
         WebView.setWebContentsDebuggingEnabled(true); //so devs can debug their scripts/pages
+        setInitialScale(0);
+        getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+        getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+
         addJavascriptInterface(new SignCallbackJSInterface(
                 this,
                 innerOnSignTransactionListener,
@@ -285,10 +284,9 @@ public class Web3View extends WebView {
         this.onWalletActionListener = onWalletActionListener;
     }
 
-    public void onSignTransactionSuccessful(Web3Transaction transaction, String signHex)
+    public void onSignTransactionSuccessful(TransactionReturn txData)
     {
-        long callbackId = transaction.leafPosition;
-        callbackToJS(callbackId, JS_PROTOCOL_ON_SUCCESSFUL, signHex);
+        callbackToJS(txData.tx.leafPosition, JS_PROTOCOL_ON_SUCCESSFUL, txData.hash);
     }
 
     public void onSignMessageSuccessful(Signable message, String signHex)

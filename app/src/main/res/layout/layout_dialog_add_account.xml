@@ -1,27 +1,32 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
     <com.alphawallet.app.widget.BottomSheetHandleView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal" />
 
     <TextView
-        android:id="@+id/new_account_action"
-        style="@style/Aw.Component.ActionItem"
-        android:text="@string/action_create_new_account" />
+            android:id="@+id/new_account_action"
+            style="@style/Aw.Component.ActionItem"
+            android:text="@string/action_create_new_account" />
 
     <TextView
-        android:id="@+id/import_account_action"
-        style="@style/Aw.Component.ActionItem"
-        android:text="@string/title_import" />
+            android:id="@+id/import_account_action"
+            style="@style/Aw.Component.ActionItem"
+            android:text="@string/title_import" />
 
     <TextView
-        android:id="@+id/watch_account_action"
-        style="@style/Aw.Component.ActionItem"
-        android:text="@string/action_watch_account" />
+            android:id="@+id/watch_account_action"
+            style="@style/Aw.Component.ActionItem"
+            android:text="@string/action_watch_account" />
+
+    <TextView
+            android:id="@+id/hardware_card"
+            style="@style/Aw.Component.ActionItem"
+            android:text="@string/use_hardware_card" />
 
 </LinearLayout>
 

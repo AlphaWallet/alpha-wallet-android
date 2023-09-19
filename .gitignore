@@ -35,14 +35,19 @@ app/noAnalytics/release/output.json
 .gradle/
 /build
 app/release
+app/CMakeFiles
 app/debug
 app/debug/output.json
+
+# Library
+hardware_stub/build/
 
 # Fastlane
 fastlane/report.xml
 
 # Local configuration file (sdk path, etc)
 local.properties
+gradle.properties
 
 #C/C++ object files
 app/.cxx/
@@ -71,5 +76,8 @@ gen-external-apklibs
 
 fastlane/.google-play-key.json
 DCIM/
+.project
 vendor/
 .project
+output/
+node_modules/

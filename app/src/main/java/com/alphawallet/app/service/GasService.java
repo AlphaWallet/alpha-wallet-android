@@ -7,31 +7,30 @@ import static com.alphawallet.app.C.GAS_LIMIT_MIN;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.TICKER_DB;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ARTIS_TAU1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.entity.EIP1559FeeOracleResult;
 import com.alphawallet.app.entity.FeeHistory;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SuggestEIP1559Kt;
-import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.HttpServiceHelper;
 import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.Nullable;
@@ -70,7 +69,6 @@ public class GasService implements ContractGasProvider
     private static final String BLOCK_COUNT = "[BLOCK_COUNT]";
     private static final String NEWEST_BLOCK = "[NEWEST_BLOCK]";
     private static final String REWARD_PERCENTILES = "[REWARD_PERCENTILES]";
-
     private static final String FEE_HISTORY = "{\"jsonrpc\":\"2.0\",\"method\":\"eth_feeHistory\",\"params\":[\""+ BLOCK_COUNT +"\", \""+ NEWEST_BLOCK +"\",["+ REWARD_PERCENTILES +"]],\"id\":1}";
     private final String WHALE_ACCOUNT = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"; //used for calculating gas estimate where a tx would exceed the limits with default gas settings
     private final EthereumNetworkRepositoryType networkRepository;
@@ -79,11 +77,11 @@ public class GasService implements ContractGasProvider
     private long currentChainId;
     private Web3j web3j;
     private BigInteger currentGasPrice;
+    private long currentGasPriceTime;
     private BigInteger currentLowGasPrice = BigInteger.ZERO;
     private final String ETHERSCAN_API_KEY;
     private final String POLYGONSCAN_API_KEY;
     private boolean keyFail;
-
     @Nullable
     private Disposable gasFetchDisposable;
 
@@ -100,16 +98,16 @@ public class GasService implements ContractGasProvider
         ETHERSCAN_API_KEY = "&apikey=" + keyProvider.getEtherscanKey();
         POLYGONSCAN_API_KEY = "&apikey=" + keyProvider.getPolygonScanKey();
         keyFail = false;
+        currentGasPrice = BigInteger.ZERO;
+        currentGasPriceTime = 0;
     }
 
     public void startGasPriceCycle(long chainId)
     {
         updateChainId(chainId);
-        if (gasFetchDisposable == null || gasFetchDisposable.isDisposed())
-        {
-            gasFetchDisposable = Observable.interval(0, FETCH_GAS_PRICE_INTERVAL_SECONDS, TimeUnit.SECONDS)
-                    .doOnNext(l -> fetchCurrentGasPrice()).subscribe();
-        }
+        if (gasFetchDisposable != null && !gasFetchDisposable.isDisposed()) gasFetchDisposable.dispose();
+        gasFetchDisposable = Observable.interval(0, FETCH_GAS_PRICE_INTERVAL_SECONDS, TimeUnit.SECONDS)
+                .doOnNext(l -> fetchCurrentGasPrice()).subscribe();
     }
 
     public void stopGasPriceCycle()
@@ -128,6 +126,8 @@ public class GasService implements ContractGasProvider
         }
         else if (web3j == null || web3j.ethChainId().getId() != chainId)
         {
+            currentGasPrice = BigInteger.ZERO;
+            currentGasPriceTime = 0;
             currentChainId = chainId;
             web3j = getWeb3jService(chainId);
         }
@@ -136,31 +136,23 @@ public class GasService implements ContractGasProvider
     private void fetchCurrentGasPrice()
     {
         currentLowGasPrice = BigInteger.ZERO;
-        currentGasPrice = BigInteger.ZERO;
         updateCurrentGasPrices()
-                .flatMap(this::useNodeFallback)
+                .flatMap(this::useNodeEstimate)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(updated -> {
                     Timber.d("Updated gas prices: %s", updated);
-                    }, Throwable::printStackTrace)
+                }, Throwable::printStackTrace)
                 .isDisposed();
 
-        //also update EIP1559
+        //also update EIP1559 if required and we haven't previously determined there's no EIP1559 support
         getEIP1559FeeStructure()
                 .map(result -> updateEIP1559Realm(result, currentChainId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(r -> Timber.d(r ? "Updated Fees" : "Fail to update fees"), this::handleError).isDisposed();
-    }
-
-    private Single<Boolean> useNodeFallback(Boolean updated)
-    {
-        if (updated) return Single.fromCallable(() -> true);
-        else
-        {
-            return useNodeEstimate();
-        }
+                .subscribe(r -> {
+                    if (!r) Timber.d("Fail to update fees");
+                }, this::handleError).isDisposed();
     }
 
     @Override
@@ -187,6 +179,11 @@ public class GasService implements ContractGasProvider
         return new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS);
     }
 
+    private boolean nodeFetchValid()
+    {
+        return (System.currentTimeMillis() + FETCH_GAS_PRICE_INTERVAL_SECONDS * 1000) <= currentGasPriceTime;
+    }
+
     private Single<Boolean> updateCurrentGasPrices()
     {
         String gasOracleAPI = EthereumNetworkRepository.getGasOracle(currentChainId);
@@ -199,52 +196,40 @@ public class GasService implements ContractGasProvider
         else
         {
             //use node to get chain price
-            return useNodeEstimate();
+            return useNodeEstimate(false);
         }
     }
 
-    private Single<Boolean> useNodeEstimate()
+    private Single<Boolean> useNodeEstimate(boolean updated)
     {
-        if (EthereumNetworkRepository.hasGasOverride(currentChainId))
+        if (nodeFetchValid())
+        {
+            return Single.fromCallable(() -> true);
+        }
+        else if (EthereumNetworkRepository.hasGasOverride(currentChainId))
         {
             updateRealm(new GasPriceSpread(EthereumNetworkRepository.gasOverrideValue(currentChainId),
                     networkRepository.hasLockedGas(currentChainId)), currentChainId);
+            currentGasPriceTime = System.currentTimeMillis();
             currentGasPrice = EthereumNetworkRepository.gasOverrideValue(currentChainId);
             return Single.fromCallable(() -> true);
         }
         else
         {
-            final long nodeId = currentChainId;
             return Single.fromCallable(() -> web3j.ethGasPrice().send())
-                    .map(price -> updateGasPrice(price, nodeId));
+                    .map(price -> updateGasPrice(price, currentChainId, updated));
         }
     }
 
-    private Boolean updateGasPrice(EthGasPrice ethGasPrice, long chainId)
+    private Boolean updateGasPrice(EthGasPrice ethGasPrice, long chainId, boolean databaseUpdated)
     {
-        currentGasPrice = fixGasPrice(ethGasPrice.getGasPrice(), chainId);
-        updateRealm(new GasPriceSpread(currentGasPrice, networkRepository.hasLockedGas(chainId)), chainId);
+        currentGasPrice = ethGasPrice.getGasPrice();
+        currentGasPriceTime = System.currentTimeMillis();
+        if (!databaseUpdated)
+        {
+            updateRealm(new GasPriceSpread(currentGasPrice, networkRepository.hasLockedGas(chainId)), chainId);
+        }
         return true;
-    }
-
-    private BigInteger fixGasPrice(BigInteger gasPrice, long chainId)
-    {
-        if (gasPrice.compareTo(BigInteger.ZERO) > 0)
-        {
-            return gasPrice;
-        }
-        else
-        {
-            //gas price from node is zero
-            switch ((int)chainId)
-            {
-                default:
-                    return gasPrice;
-                case (int)ARTIS_TAU1_ID:
-                    //this node incorrectly returns gas price zero, use 1 Gwei
-                    return new BigInteger(C.DEFAULT_XDAI_GAS_PRICE);
-            }
-        }
     }
 
     private Single<Boolean> updateEtherscanGasPrices(String gasOracleAPI)
@@ -268,7 +253,6 @@ public class GasService implements ContractGasProvider
                     if (gps.isResultValid())
                     {
                         update = true;
-                        currentGasPrice = gps.getSelectedGasFee(TXSpeed.STANDARD).gasPrice.maxFeePerGas;
                         currentLowGasPrice = gps.getBaseFee();
                     }
                     else
@@ -279,7 +263,7 @@ public class GasService implements ContractGasProvider
             }
             catch (Exception e)
             {
-                Timber.e(e);
+                Timber.w(e);
             }
 
             return update;
@@ -312,7 +296,7 @@ public class GasService implements ContractGasProvider
 
     private boolean updateEIP1559Realm(final Map<Integer, EIP1559FeeOracleResult> result, final long chainId)
     {
-        boolean hasError = false;
+        boolean succeeded = true;
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {
             realm.executeTransaction(r -> {
@@ -330,14 +314,22 @@ public class GasService implements ContractGasProvider
         }
         catch (Exception e)
         {
-            hasError = true;
+            succeeded = false;
         }
 
-        return hasError;
+        return succeeded;
     }
 
-    public Single<BigInteger> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress,
-                                                   BigInteger amount, Wallet wallet, final BigInteger defaultLimit)
+    public Single<GasEstimate> calculateGasEstimate(byte[] transactionBytes, long chainId, String toAddress,
+                                                    BigInteger amount, Wallet wallet, final BigInteger defaultLimit)
+    {
+        updateChainId(chainId);
+        return useNodeEstimate(true)
+                    .flatMap(com -> calculateGasEstimateInternal(transactionBytes, chainId, toAddress, amount, wallet, defaultLimit));
+    }
+
+    public Single<GasEstimate> calculateGasEstimateInternal(byte[] transactionBytes, long chainId, String toAddress,
+                                                     BigInteger amount, Wallet wallet, final BigInteger defaultLimit)
     {
         String txData = "";
         if (transactionBytes != null && transactionBytes.length > 0)
@@ -348,7 +340,6 @@ public class GasService implements ContractGasProvider
         updateChainId(chainId);
         String finalTxData = txData;
 
-        //do we have 1559 gas and can we use it?
         if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
@@ -364,30 +355,30 @@ public class GasService implements ContractGasProvider
         }
     }
 
-    private BigInteger convertToGasLimit(EthEstimateGas estimate, BigInteger defaultLimit)
+    private GasEstimate convertToGasLimit(EthEstimateGas estimate, BigInteger defaultLimit)
     {
         if (estimate.hasError())
         {
             if (estimate.getError().getCode() == -32000) //out of gas
             {
-                return defaultLimit;
+                return new GasEstimate(defaultLimit, estimate.getError().getMessage());
             }
             else
             {
-                return BigInteger.ZERO;
+                return new GasEstimate(BigInteger.ZERO, estimate.getError().getMessage());
             }
         }
         else if (estimate.getAmountUsed().compareTo(BigInteger.ZERO) > 0)
         {
-            return estimate.getAmountUsed();
+            return new GasEstimate(estimate.getAmountUsed());
         }
         else if (defaultLimit == null || defaultLimit.equals(BigInteger.ZERO))
         {
-            return new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS); //cautious gas limit
+            return new GasEstimate(new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS));
         }
         else
         {
-            return defaultLimit;
+            return new GasEstimate(defaultLimit);
         }
     }
 
@@ -429,6 +420,24 @@ public class GasService implements ContractGasProvider
 
     private Single<Map<Integer, EIP1559FeeOracleResult>> getEIP1559FeeStructure()
     {
+        return BlockNativeGasAPI.get(httpClient).fetchGasEstimates(currentChainId)
+                    .flatMap(this::useCalculationIfRequired); //if interface doesn't have blocknative API then use calculation method
+    }
+
+    private Single<Map<Integer, EIP1559FeeOracleResult>> useCalculationIfRequired(Map<Integer, EIP1559FeeOracleResult> resultMap)
+    {
+        if (resultMap.size() > 0)
+        {
+            return Single.fromCallable(() -> resultMap);
+        }
+        else
+        {
+            return getEIP1559FeeStructureCalculation();
+        }
+    }
+
+    private Single<Map<Integer, EIP1559FeeOracleResult>> getEIP1559FeeStructureCalculation()
+    {
         return getChainFeeHistory(100, "latest", "")
                 .flatMap(feeHistory -> SuggestEIP1559Kt.SuggestEIP1559(this, feeHistory));
     }
@@ -454,6 +463,7 @@ public class GasService implements ContractGasProvider
             case ERC721_LEGACY:
             case ERC721_TICKET:
             case ERC721_UNDETERMINED:
+            case ERC721_ENUMERABLE:
                 return new BigInteger(DEFAULT_GAS_LIMIT_FOR_NONFUNGIBLE_TOKENS);
             default:
                 //unknown
@@ -464,17 +474,22 @@ public class GasService implements ContractGasProvider
     public Single<FeeHistory> getChainFeeHistory(int blockCount, String lastBlock, String rewardPercentiles)
     {
         //TODO: Replace once Web3j fully supports EIP1559
-        String requestJSON = FEE_HISTORY.replace(BLOCK_COUNT, ("0x" + Long.toHexString(blockCount))).replace(NEWEST_BLOCK, lastBlock)
+        String requestJSON = FEE_HISTORY.replace(BLOCK_COUNT, (Numeric.prependHexPrefix(Long.toHexString(blockCount)))).replace(NEWEST_BLOCK, lastBlock)
                 .replace(REWARD_PERCENTILES, rewardPercentiles);
 
         RequestBody requestBody = RequestBody.create(requestJSON, HttpService.JSON_MEDIA_TYPE);
         NetworkInfo info = networkRepository.getNetworkByChain(currentChainId);
 
+        final Request.Builder rqBuilder = new Request.Builder()
+                .url(info.rpcServerUrl)
+                .post(requestBody);
+
+        HttpServiceHelper.addRequiredCredentials(info.chainId, rqBuilder, KeyProviderFactory.get().getKlaytnKey(),
+                KeyProviderFactory.get().getInfuraSecret(), EthereumNetworkBase.usesProductionKey, EthereumNetworkBase.isInfura(info.rpcServerUrl));
+
         return Single.fromCallable(() -> {
-            Request request = new Request.Builder()
-                    .url(info.rpcServerUrl)
-                    .post(requestBody)
-                    .build();
+            Request request = rqBuilder.build();
+
             try (Response response = httpClient.newCall(request).execute())
             {
                 if (response.code() / 200 == 1)

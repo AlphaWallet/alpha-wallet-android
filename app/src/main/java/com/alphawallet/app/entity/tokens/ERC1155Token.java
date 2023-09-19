@@ -5,7 +5,6 @@ import static com.alphawallet.app.repository.TokenRepository.callSmartContractFu
 import static com.alphawallet.app.util.Utils.parseTokenId;
 import static org.web3j.tx.Contract.staticExtractEventParameters;
 
-import android.app.Activity;
 import android.util.Pair;
 
 import com.alphawallet.app.R;
@@ -23,7 +22,6 @@ import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.util.Utils;
-import com.alphawallet.app.viewmodel.BaseViewModel;
 
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
@@ -84,6 +82,20 @@ public class ERC1155Token extends Token
     public Map<BigInteger, NFTAsset> getTokenAssets()
     {
         return assets;
+    }
+
+    @Override
+    public boolean hasPositiveBalance()
+    {
+        for (NFTAsset asset : assets.values())
+        {
+            if (asset.getBalance().compareTo(BigDecimal.ZERO) > 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -155,7 +167,13 @@ public class ERC1155Token extends Token
     @Override
     public BigDecimal getBalanceRaw()
     {
-        return new BigDecimal(assets.size());
+        BigDecimal balance = BigDecimal.ZERO;
+        for (NFTAsset asset : assets.values())
+        {
+            balance = balance.add(asset.getBalance());
+        }
+
+        return balance;
     }
 
     @Override
@@ -182,8 +200,6 @@ public class ERC1155Token extends Token
     @Override
     public String getTransactionResultValue(Transaction transaction, int precision)
     {
-
-
         if (isEthereum() && !transaction.hasInput())
         {
             //basic eth transaction
@@ -276,66 +292,103 @@ public class ERC1155Token extends Token
     }
 
     @Override
-    public List<BigInteger> getChangeList(Map<BigInteger, NFTAsset> assetMap)
-    {
-        //detect asset removal
-        List<BigInteger> oldAssetIdList = new ArrayList<>(assetMap.keySet());
-        oldAssetIdList.removeAll(assets.keySet());
-
-        List<BigInteger> changeList = new ArrayList<>(oldAssetIdList);
-
-        //Now detect differences or new tokens
-        for (BigInteger tokenId : assets.keySet())
-        {
-            NFTAsset newAsset = assets.get(tokenId);
-            NFTAsset oldAsset = assetMap.get(tokenId);
-
-            if (oldAsset == null || newAsset.hashCode() != oldAsset.hashCode())
-            {
-                changeList.add(tokenId);
-            }
-        }
-
-        return changeList;
-    }
-
-    private List<Uint256> fetchBalances(Set<BigInteger> tokenIds)
-    {
-        Function balanceOfBatch = balanceOfBatch(getWallet(), tokenIds);
-        return callSmartContractFunctionArray(tokenInfo.chainId, balanceOfBatch, getAddress(), getWallet());
-    }
-
-    @Override
-    public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
+    public Map<BigInteger, NFTAsset> getAssetChange(Map<BigInteger, NFTAsset> oldAssetList)
     {
         //first see if there's no change; if this is the case we can skip
-        if (assetsUnchanged(assetMap)) return assets;
+        if (assetsUnchanged(oldAssetList)) return assets;
 
         //add all known tokens in
-        Map<BigInteger, NFTAsset> sum = new HashMap<>(assetMap);
+        Map<BigInteger, NFTAsset> sum = new HashMap<>(oldAssetList);
         sum.putAll(assets);
         Set<BigInteger> tokenIds = sum.keySet();
         Function balanceOfBatch = balanceOfBatch(getWallet(), tokenIds);
         List<Uint256> balances = callSmartContractFunctionArray(tokenInfo.chainId, balanceOfBatch, getAddress(), getWallet());
         Map<BigInteger, NFTAsset> updatedAssetMap;
 
-        if (balances != null && balances.size() > 0)
+        if (balances == null) //network error
+        {
+            updatedAssetMap = assets;
+        }
+        else if (balances.size() == 0) //token is destroyed
         {
             updatedAssetMap = new HashMap<>();
-            int index = 0;
-            for (BigInteger tokenId : tokenIds)
+            for (Map.Entry<BigInteger, NFTAsset> entry : sum.entrySet())
             {
-                NFTAsset thisAsset = new NFTAsset(sum.get(tokenId));
-                BigInteger balance = balances.get(index).getValue();
-                thisAsset.setBalance(new BigDecimal(balance));
-                updatedAssetMap.put(tokenId, thisAsset);
-
-                index++;
+                NFTAsset thisAsset = new NFTAsset(entry.getValue());
+                thisAsset.setBalance(BigDecimal.ZERO);
+                updatedAssetMap.put(entry.getKey(), thisAsset);
             }
         }
         else
         {
-            updatedAssetMap = assets;
+            updatedAssetMap = new HashMap<>();
+            int index = 0;
+            for (Map.Entry<BigInteger, NFTAsset> entry : sum.entrySet())
+            {
+                NFTAsset thisAsset = new NFTAsset(entry.getValue());
+                BigInteger balance = balances.get(index).getValue();
+                thisAsset.setBalance(new BigDecimal(balance));
+                updatedAssetMap.put(entry.getKey(), thisAsset);
+
+                index++;
+            }
+        }
+
+        return updatedAssetMap;
+    }
+
+    private List<Uint256> fetchBalances(Set<BigInteger> tokenIds)
+    {
+        Function balanceOfBatch = balanceOfBatch(getWallet(), tokenIds);
+        List<Uint256> balances = callSmartContractFunctionArray(tokenInfo.chainId, balanceOfBatch, getAddress(), getWallet());
+        if (balances == null) //bad network read
+        {
+            return null;
+        }
+        else if (balances.size() == 0) //contract may have been destroyed
+        {
+            for (BigInteger tokenId : tokenIds)
+            {
+                balances.add(new Uint256(0));
+            }
+        }
+
+        return balances;
+    }
+
+    @Override
+    public Map<BigInteger, NFTAsset> queryAssets(Map<BigInteger, NFTAsset> assetMap)
+    {
+        Set<BigInteger> tokenIds = assetMap.keySet();
+        Function balanceOfBatch = balanceOfBatch(getWallet(), tokenIds);
+        List<Uint256> balances = callSmartContractFunctionArray(tokenInfo.chainId, balanceOfBatch, getAddress(), getWallet());
+        Map<BigInteger, NFTAsset> updatedAssetMap = new HashMap<>();
+
+        if (balances == null) //bad network read
+        {
+            return assetMap;
+        }
+        else if (balances.size() == 0) //contract may have been destroyed
+        {
+            for (Map.Entry<BigInteger, NFTAsset> entry : assetMap.entrySet())
+            {
+                NFTAsset thisAsset = new NFTAsset(entry.getValue());
+                thisAsset.setBalance(BigDecimal.ZERO);
+                updatedAssetMap.put(entry.getKey(), thisAsset);
+            }
+        }
+        else
+        {
+            int index = 0;
+            for (Map.Entry<BigInteger, NFTAsset> entry : assetMap.entrySet())
+            {
+                NFTAsset thisAsset = new NFTAsset(entry.getValue());
+                BigInteger balance = balances.get(index).getValue();
+                thisAsset.setBalance(new BigDecimal(balance));
+                updatedAssetMap.put(entry.getKey(), thisAsset);
+
+                index++;
+            }
         }
 
         return updatedAssetMap;
@@ -488,13 +541,7 @@ public class ERC1155Token extends Token
     @Override
     public String getStringBalanceForUI(int scale)
     {
-        return balance.toString();
-    }
-
-    @Override
-    public void clickReact(BaseViewModel viewModel, Activity activity)
-    {
-        viewModel.showTokenList(activity, this);
+        return getBalanceRaw().toString();
     }
 
     @Override
@@ -594,7 +641,7 @@ public class ERC1155Token extends Token
 
         filter.addSingleTopic(null);
         filter.addSingleTopic(null);
-        filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(getWallet()))); //listen for events 'to' the wallet
+        filter.addSingleTopic(Numeric.prependHexPrefix(TypeEncoder.encode(new Address(getWallet())))); //listen for events 'to' the wallet
         return filter;
     }
 
@@ -609,7 +656,7 @@ public class ERC1155Token extends Token
                         .addSingleTopic(EventEncoder.encode(event)); // send event format
 
         filter.addSingleTopic(null);
-        filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(getWallet()))); //listen for events 'from' the wallet
+        filter.addSingleTopic(Numeric.prependHexPrefix(TypeEncoder.encode(new Address(getWallet())))); //listen for events 'from' the wallet
         filter.addSingleTopic(null);
         return filter;
     }
@@ -643,7 +690,7 @@ public class ERC1155Token extends Token
 
         try
         {
-            final Web3j web3j = TokenRepository.getWeb3jService(tokenInfo.chainId);
+            final Web3j web3j = TokenRepository.getWeb3jServiceForEvents(tokenInfo.chainId);
 
             Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> evRead = eventSync.processTransferEvents(web3j,
                     getBalanceUpdateEvents(), startBlock, endBlock, realm);
@@ -681,7 +728,7 @@ public class ERC1155Token extends Token
             Timber.e(e);
         }
 
-        return new BigDecimal(assets.keySet().size());
+        return getBalanceRaw(); //new BigDecimal(assets.keySet().size());
     }
 
     @Override

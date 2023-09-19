@@ -16,13 +16,11 @@ public class BalanceUtils
     private static final String weiInEth  = "1000000000000000000";
     private static final int showDecimalPlaces = 5;
     private static final int slidingDecimalPlaces = 2;
-    private static final BigDecimal displayThresholdMillis = BigDecimal.ONE.divide(BigDecimal.valueOf(1000000), 18, RoundingMode.DOWN);
-    private static final BigDecimal oneGwei = BigDecimal.ONE.divide(Convert.Unit.GWEI.getWeiFactor(), 18, RoundingMode.DOWN); //BigDecimal.valueOf(0.000000001);
-
+    private static final BigDecimal displayThresholdEth = Convert.fromWei(Convert.toWei(BigDecimal.valueOf(0.01), Convert.Unit.GWEI), Convert.Unit.ETHER); //Convert. toWei(BigDecimal.valueOf(0.01), Convert.Unit.ETHER);
+    private static final BigDecimal oneGwei = BigDecimal.ONE.divide(Convert.Unit.GWEI.getWeiFactor(), 18, RoundingMode.DOWN); // BigDecimal.valueOf(0.000000001);
     public static final String MACRO_PATTERN = "###,###,###,###,##0";
     public static final String CURRENCY_PATTERN = MACRO_PATTERN + ".00";
     private static final double ONE_BILLION = 1000000000.0;
-
     private static String getDigitalPattern(int precision)
     {
         return getDigitalPattern(precision, 0);
@@ -37,6 +35,42 @@ public class BalanceUtils
         standardisedNumericFormat.setGroupingSeparator(',');
 
         return new DecimalFormat(pattern, standardisedNumericFormat);
+    }
+
+    /**
+     * This method displays at least `numberOfDigits` of decimals
+     * @param value
+     * @param numberOfDigits
+     * @return
+     */
+    public static String displayDigitPrecisionValue(BigDecimal value, int decimalReduction, int numberOfDigits)
+    {
+        //divide down to value
+        value = value.divide(BigDecimal.valueOf(10).pow(decimalReduction));
+        if (value.compareTo(BigDecimal.ONE) > 0)
+        {
+            return getScaledValue(value, 0, 2);
+        }
+        else
+        {
+            //how many zeros?
+            int zeros = calcZeros(value.doubleValue());
+            //scale to zeros + numberOfDigits
+            String pattern = getDigitalPattern(zeros + numberOfDigits - 1);
+            return scaledValue(value, pattern, 0, 0);
+        }
+    }
+
+    private static int calcZeros(double value)
+    {
+        int zeros = 0;
+        while (value < 1.0 && value > 0.0)
+        {
+            value *= 10.0;
+            zeros++;
+        }
+
+        return zeros;
     }
 
     private static String getDigitalPattern(int precision, int fixed)
@@ -197,12 +231,12 @@ public class BalanceUtils
 
     public static boolean requiresSmallValueSuffix(BigDecimal correctedValue)
     {
-        return correctedValue.compareTo(displayThresholdMillis) < 0;
+        return correctedValue.compareTo(displayThresholdEth) < 0;
     }
 
     public static boolean requiresSmallGweiValueSuffix(BigDecimal ethAmount)
     {
-        return ethAmount.compareTo(oneGwei) < 0;
+        return ethAmount.compareTo(displayThresholdEth) < 0;
     }
 
     private static boolean requiresSuffix(BigDecimal correctedValue, int dPlaces)
@@ -357,9 +391,9 @@ public class BalanceUtils
         {
             return smallSuffixValue(correctedValue);
         }
-        else if (correctedValue.compareTo(displayThresholdMillis) < 0)
+        else if (correctedValue.compareTo(displayThresholdEth) < 0)
         {
-            returnValue = correctedValue.divide(displayThresholdMillis, slidingDecimalPlaces, RoundingMode.DOWN) + " m";
+            returnValue = correctedValue.divide(displayThresholdEth, slidingDecimalPlaces, RoundingMode.DOWN) + " m";
         }
         else if (requiresSuffix(correctedValue, dPlaces))
         {
@@ -378,8 +412,8 @@ public class BalanceUtils
 
     private static String smallSuffixValue(BigDecimal correctedValue)
     {
-        final BigDecimal displayThresholdMicro = BigDecimal.ONE.divide(BigDecimal.valueOf(1000000000), 18, RoundingMode.DOWN);
-        final BigDecimal displayThresholdNano  = BigDecimal.ONE.divide(BigDecimal.valueOf(1000000000000L), 18, RoundingMode.DOWN);
+        final BigDecimal displayThresholdMicro = BigDecimal.ONE.divide(BigDecimal.valueOf(100000000L), 18, RoundingMode.DOWN);
+        final BigDecimal displayThresholdNano  = BigDecimal.ONE.divide(BigDecimal.valueOf(100000000000L), 18, RoundingMode.DOWN);
 
         BigDecimal weiAmount = Convert.toWei(correctedValue, Convert.Unit.ETHER);
 

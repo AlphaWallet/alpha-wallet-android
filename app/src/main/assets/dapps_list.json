@@ -1,9 +1,7 @@
-[ 
+[
+  {"name": "Aave", "description": "A decentralized non-custodial liquidity protocol where users can participate as depositors or borrowers", "url": "https://app.aave.com/", "category": "Finance"},
   {"name": "Tbull", "description": "A Utility Token on Binance Smart Chain for Payments for Services", "url": "tbull.live", "category": "Utility"},
   {"name": "Rare Coin", "description": "Free Crypto Faucet & Yeild Farming", "url": "make.rare.claims", "category": "Tool"},
-  {"name": "Phiswap", "description": "Swap On The Largest & Fastest Growing Decentralized Exchange", "url": "https://app.phiswap.com", "category": "Finance"},
-  {"name": "Phitoken", "description": "Easily Mint New PHI20 Tokens From Any Device", "url": "https://app.phitoken.com", "category": "Tool"},
-  {"name": "PHI.Auction", "description": "Mint, Buy, Sell NFT Marketplace On PHI Network Smart Chain", "url": "https://phi.auction", "category": "Marketplace"},
   {"name": "Eporio", "description": "The cheaper marketplace for NFT - Non Fungible Tokens", "url": "https://epor.io", "category": "Marketplace"},
   {"name": "DeFiBox", "description": "one-stop DeFi asset, data and protocols aggregation platform", "url": "https://www.defibox.com/index?utm_source=2189969", "category": "Tool"},
   {"name": "TokenSets", "description": "Enhance your portfolio with automated asset management strategies.", "url": "https://www.tokensets.com/", "category": "Finance"},
@@ -30,8 +28,6 @@
   {"name": "Gravity", "description": "Create your gravatar.", "url": "https://gravity.cool/", "category": "Property"},
   {"name": "Mokens", "description": "Create your own collectibles", "url": "https://mokens.io/", "category": "Property"},
   {"name": "TENZ-ID", "description": "TENZ-ID is a Decentralized Blockchain naming system", "url": "https://tenzorum.org/tenz_id/", "category": "Property"},
-  {"name": "PHI Network", "description": "Decentralized Social Media, Earn, Entertain, Engage & Exchange", "url": "https://phi.network", "category": "Social Media"},
-  {"name": "Phiswap", "description": "Swap, earn, and build on PHI Networks leading decentralized crypto trading protocol.", "url": "https://app.phiswap.com", "category": "Exchange"},
   {"name": "MonitorChain", "description": "Real-time surveillance", "url": "https://secure.monitorchain.com/", "category": "Security"},
   {"name": "Cent", "description": "Earn cryptocurrency sharing your wisdom and creativity.", "url": "https://beta.cent.co/", "category": "Social Media"},
   {"name": "Indorse", "description": "Professional Network", "url": "https://indorse.io/", "category": "Social Media"},
@@ -89,5 +85,14 @@
   {"name": "Swapzone", "description": "Swapzone is a custody-free cryptocurrency exchange aggregator with no registration needed.", "url": "https://swapzone.io/", "category": "Exchange"},
   {"name": "mail³", "description": "Decentralized mail system for web3 natives.", "url": "https://app.mail3.me/", "category": "Social Media"},
   {"name": "ApeNow", "description": "Buy now, pay later marketplace for NFTs.", "url": "https://www.apenowpaylater.com/", "category": "Marketplace"},
-  {"name": "AirCash", "description": "AirCash is the first and largest decentralized OTC platform in the galaxy.", "url": "https://aircash.finance", "category": "Exchange"}
+  {"name": "AirCash", "description": "AirCash is the first and largest decentralized OTC platform in the galaxy.", "url": "https://aircash.finance", "category": "Exchange"},
+  {"name": "Lido", "description": "Liquidity for staked assets", "url": "https://lido.fi/", "category": "Finance"},
+  {"name": "Blur", "description": "The fastest NFT marketplace", "url": "https://www.blur.io", "category": "Marketplace"},
+  {"name": "Blockworks", "description": "A media and information platform that delivers news and insights about crypto to millions of investors.", "url": "https://blockworks.co/", "category": "News"},
+  {"name": "nft now", "description": "nft now is on a mission to redefine how creators and their communities share in the value they create.", "url": "https://nftnow.com/", "category": "News"},
+  {"name": "CryptoSlate", "description": "A comprehensive and contextualized source for crypto news, insights and data.", "url": "https://cryptoslate.com/", "category": "News"},
+  {"name": "Hypemoon", "description": "Your Portal Into Web3 Culture", "url": "https://hypemoon.com/", "category": "News"},
+  {"name": "BeInCrypto", "description": "Unbiased crypto news", "url": "https://beincrypto.com/", "category": "News"},
+  {"name": "The Defiant", "description": "The essential information platform for the open economy", "url": "https://thedefiant.io/", "category": "News"},
+  {"name": "Verse DEX", "description": "Bitcoin.com's multichain Verse DEX aims to bring everyone permissionless and non-custodial trading access, with a special focus on newcomers to DeFi.", "url": "https://verse.bitcoin.com/", "category": "Exchange"}
 ]

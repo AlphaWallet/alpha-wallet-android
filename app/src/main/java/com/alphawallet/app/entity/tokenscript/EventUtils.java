@@ -667,7 +667,7 @@ public abstract class EventUtils
                 }
                 else if (tokenIds.size() == 1)
                 {
-                    filter.addSingleTopic("0x" + TypeEncoder.encode(new Uint256(tokenIds.get(0))));
+                    filter.addSingleTopic(Numeric.prependHexPrefix(TypeEncoder.encode(new Uint256(tokenIds.get(0)))));
                 }
                 else
                 {
@@ -675,14 +675,14 @@ public abstract class EventUtils
                     List<String> optionals = new ArrayList<>();
                     for (BigInteger uid : tokenIds)
                     {
-                        String entry = "0x" + TypeEncoder.encode(new Uint256(uid));
+                        String entry = Numeric.prependHexPrefix(TypeEncoder.encode(new Uint256(uid)));
                         optionals.add(entry);
                     }
                     filter.addOptionalTopics(optionals.toArray(new String[0]));
                 }
                 break;
             case "ownerAddress":
-                filter.addSingleTopic("0x" + TypeEncoder.encode(new Address(attrIf.getWalletAddr())));
+                filter.addSingleTopic(Numeric.prependHexPrefix(TypeEncoder.encode(new Address(attrIf.getWalletAddr()))));
                 break;
             default:
                 Attribute attr = attrIf.fetchAttribute(ev.contract, filterTopicValue);
@@ -696,7 +696,7 @@ public abstract class EventUtils
                     else if (tokenIds.size() == 1)
                     {
                         TokenScriptResult.Attribute attrResult = attrIf.fetchAttrResult(tokenAddr, attr, tokenIds.get(0));
-                        filter.addSingleTopic("0x" + TypeEncoder.encode(new Uint256(attrResult.value)));
+                        filter.addSingleTopic(Numeric.prependHexPrefix(TypeEncoder.encode(new Uint256(attrResult.value))));
                     }
                     else
                     {
@@ -705,7 +705,7 @@ public abstract class EventUtils
                         for (BigInteger uid : tokenIds)
                         {
                             TokenScriptResult.Attribute attrResult = attrIf.fetchAttrResult(tokenAddr, attr, uid);
-                            String entry = "0x" + TypeEncoder.encode(new Uint256(attrResult.value));
+                            String entry = Numeric.prependHexPrefix(TypeEncoder.encode(new Uint256(attrResult.value)));
                             optionals.add(entry);
                         }
                         filter.addOptionalTopics(optionals.toArray(new String[0]));
@@ -769,7 +769,7 @@ public abstract class EventUtils
             String tokenIdStr = EventUtils.getTopicVal(ev, log);
             if (tokenIdStr.startsWith("0x"))
             {
-                tokenId = com.alphawallet.token.tools.Numeric.toBigInt(tokenIdStr);
+                tokenId = Numeric.toBigInt(tokenIdStr);
             }
             else
             {

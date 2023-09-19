@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui.widget.adapter;
 
-import android.app.Activity;
+import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
+
 import android.content.Context;
 import android.util.Pair;
 import android.view.ViewGroup;
@@ -29,11 +30,12 @@ import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
 import com.alphawallet.app.ui.widget.holder.BinderViewHolder;
 import com.alphawallet.app.ui.widget.holder.NFTAssetHolder;
 import com.alphawallet.app.ui.widget.holder.QuantitySelectorHolder;
+import com.alphawallet.app.ui.widget.holder.TextHolder;
 import com.alphawallet.app.ui.widget.holder.TicketHolder;
 import com.alphawallet.app.ui.widget.holder.TokenDescriptionHolder;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
-import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.entity.ViewType;
 import com.bumptech.glide.Glide;
 
 import org.jetbrains.annotations.NotNull;
@@ -47,8 +49,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
-import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
-
 /**
  * Created by James on 9/02/2018.
  */
@@ -58,31 +58,29 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
     TicketRange currentRange = null;
     final Token token;
     protected final OpenSeaService openseaService;
-    private final boolean clickThrough;
+    private final ViewType clickThrough;
     protected int assetCount;
-    private FunctionCallback functionCallback;
-    private final Activity activity;
     private boolean isGrid;
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
-                                   OpenSeaService opensea, Activity activity) {
+                                   OpenSeaService opensea)
+    {
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
-        clickThrough = true;
+        clickThrough = ViewType.ITEM_VIEW;
         openseaService = opensea;
         setToken(t);
-        this.activity = activity;
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, AssetDefinitionService service,
-                                   OpenSeaService opensea, Activity activity, boolean isGrid) {
+                                   OpenSeaService opensea, boolean isGrid)
+    {
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
-        clickThrough = true;
+        clickThrough = ViewType.ITEM_VIEW;
         openseaService = opensea;
-        this.activity = activity;
         this.isGrid = isGrid;
         setToken(t);
     }
@@ -93,10 +91,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
-        clickThrough = false;
+        clickThrough = ViewType.VIEW;
         openseaService = null;
         setTokenRange(token, tokenSelection);
-        this.activity = null;
     }
 
     public NonFungibleTokenAdapter(TokensAdapterCallback tokenClickListener, Token t, ArrayList<Pair<BigInteger, NFTAsset>> assetSelection,
@@ -105,10 +102,9 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         super(tokenClickListener, service);
         assetCount = 0;
         token = t;
-        clickThrough = false;
+        clickThrough = ViewType.VIEW;
         openseaService = null;
         setAssetSelection(token, assetSelection);
-        this.activity = null;
     }
 
     private void setAssetSelection(Token token, List<Pair<BigInteger, NFTAsset>> selection)
@@ -118,9 +114,11 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
 
     @NotNull
     @Override
-    public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public BinderViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+    {
         BinderViewHolder<?> holder = null;
-        switch (viewType) {
+        switch (viewType)
+        {
             case TicketHolder.VIEW_TYPE: //Ticket holder now deprecated //TODO: remove
                 holder = new TicketHolder(R.layout.item_ticket, parent, token, assetService);
                 holder.setOnTokenClickListener(tokensAdapterCallback);
@@ -141,14 +139,19 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
             case QuantitySelectorHolder.VIEW_TYPE:
                 holder = new QuantitySelectorHolder(R.layout.item_quantity_selector, parent, assetCount, assetService);
                 break;
+            default:
+                holder = new TextHolder(R.layout.item_standard_header, parent);
+                break;
         }
 
         return holder;
     }
 
-    public int getTicketRangeCount() {
+    public int getTicketRangeCount()
+    {
         int count = 0;
-        if (currentRange != null) {
+        if (currentRange != null)
+        {
             count = currentRange.tokenIds.size();
         }
         return count;
@@ -167,7 +170,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         int holderType = getHolderType();
 
         //TokenScript view for ERC721 overrides OpenSea display
-        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
+        if (assetService.hasTokenView(t, ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
 
         List<TicketRangeElement> sortedList = generateSortedList(assetService, token, tokenIds); //generate sorted list
         addSortedItems(sortedList, t, holderType); //insert sorted items into view
@@ -183,7 +186,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
         int holderType = getHolderType();
 
         //TokenScript view for ERC721 overrides OpenSea display
-        if (assetService.hasTokenView(t.tokenInfo.chainId, t.getAddress(), ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
+        if (assetService.hasTokenView(t, ASSET_SUMMARY_VIEW_NAME)) holderType = AssetInstanceScriptHolder.VIEW_TYPE;
 
         addRanges(t, holderType);
         items.endBatchedUpdates();
@@ -197,7 +200,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
 
         for (int i = 0; i < selection.size(); i++)
         {
-            items.add(new NFTSortedItem(selection.get(i), i+1));
+            items.add(new NFTSortedItem(selection.get(i), i + 1));
         }
 
         items.endBatchedUpdates();
@@ -256,7 +259,7 @@ public class NonFungibleTokenAdapter extends TokensAdapter implements NonFungibl
             {
                 currentRange = new TicketRange(e.id, t.getAddress());
                 final T item = generateType(currentRange, 10 + i, id);
-                items.add((SortedItem)item);
+                items.add((SortedItem) item);
                 currentTime = e.time;
             }
         }

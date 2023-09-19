@@ -22,20 +22,24 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.EIP681Type;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.ui.widget.entity.AmountReadyCallback;
@@ -51,9 +55,10 @@ import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.InputAmount;
 import com.alphawallet.app.widget.SignTransactionDialog;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.Convert;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import java.math.BigDecimal;
@@ -73,9 +78,7 @@ import timber.log.Timber;
 public class SendActivity extends BaseActivity implements AmountReadyCallback, StandardFunctionInterface, AddressReadyCallback, ActionSheetCallback
 {
     private static final BigDecimal NEGATIVE = BigDecimal.ZERO.subtract(BigDecimal.ONE);
-
     SendViewModel viewModel;
-
     private Wallet wallet;
     private Token token;
     private final Handler handler = new Handler();
@@ -198,100 +201,96 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        Operation taskCode = null;
-        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
-            requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
-        }
-
-        if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
-        {
-            if (confirmationDialog != null && confirmationDialog.isShowing())
-                confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
-        }
-        else if (requestCode == C.BARCODE_READER_REQUEST_CODE)
-        {
-            switch (resultCode)
+            Operation taskCode = null;
+            if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
             {
-                case Activity.RESULT_OK:
-                    if (data != null)
-                    {
-                        String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
+                taskCode = Operation.values()[requestCode - SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS];
+                requestCode = SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS;
+            }
 
-                        //if barcode is still null, ensure we don't GPF
-                        if (qrCode == null)
+            if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
+            {
+                if (confirmationDialog != null && confirmationDialog.isShowing())
+                    confirmationDialog.completeSignRequest(resultCode == RESULT_OK);
+            }
+            else if (requestCode == C.BARCODE_READER_REQUEST_CODE)
+            {
+                switch (resultCode)
+                {
+                    case Activity.RESULT_OK:
+                        if (data != null)
                         {
-                            //Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
-                            displayScanError();
-                            return;
-                        }
-                        else if (qrCode.startsWith("wc:"))
-                        {
-                            startWalletConnect(qrCode);
-                        }
-                        else
-                        {
+                            String qrCode = data.getStringExtra(C.EXTRA_QR_CODE);
 
-                            QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
-                            QRResult result = parser.parse(qrCode);
-                            String extracted_address = null;
-                            if (result != null)
+                            //if barcode is still null, ensure we don't GPF
+                            if (qrCode == null)
                             {
-                                extracted_address = result.getAddress();
-                                switch (result.getProtocol())
-                                {
-                                    case "address":
-                                        addressInput.setAddress(extracted_address);
-                                        break;
-                                    case "ethereum":
-                                        //EIP681 protocol
-                                        validateEIP681Request(result, false);
-                                        break;
-                                    default:
-                                        displayScanError();
-                                        break;
-                                }
+                                //Toast.makeText(this, R.string.toast_qr_code_no_address, Toast.LENGTH_SHORT).show();
+                                displayScanError();
+                                return;
                             }
-                            else //try magiclink
+                            else
                             {
-                                ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
-                                try
+                                QRParser parser = QRParser.getInstance(EthereumNetworkBase.extraChains());
+                                QRResult result = parser.parse(qrCode);
+                                String extracted_address = null;
+                                if (result != null)
                                 {
-                                    if (magicParser.parseUniversalLink(qrCode).chainId > 0) //see if it's a valid link
+                                    extracted_address = result.getAddress();
+                                    switch (result.getProtocol())
                                     {
-                                        //let's try to import the link
-                                        viewModel.showImportLink(this, qrCode);
-                                        finish();
-                                        return;
+                                        case "address":
+                                            addressInput.setAddress(extracted_address);
+                                            break;
+                                        case "ethereum":
+                                            //EIP681 protocol
+                                            validateEIP681Request(result, false);
+                                            break;
+                                        default:
+                                            break;
                                     }
                                 }
-                                catch (SalesOrderMalformed e)
+                                else //try magiclink
                                 {
-                                    e.printStackTrace();
+                                    ParseMagicLink magicParser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
+                                    try
+                                    {
+                                        if (magicParser.parseUniversalLink(qrCode).chainId > 0) //see if it's a valid link
+                                        {
+                                            //let's try to import the link
+                                            viewModel.showImportLink(this, qrCode);
+                                            finish();
+                                            return;
+                                        }
+                                    }
+                                    catch (SalesOrderMalformed e)
+                                    {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                if (extracted_address == null)
+                                {
+                                    displayScanError();
                                 }
                             }
-
-                            if (extracted_address == null)
-                            {
-                                displayScanError();
-                            }
                         }
-                    }
-                    break;
-                case QRScanner.DENY_PERMISSION:
-                    showCameraDenied();
-                    break;
-                default:
-                    Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
-                            "Code: " + resultCode
-                    ));
-                    break;
+                        break;
+                    case QRScannerActivity.DENY_PERMISSION:
+                        showCameraDenied();
+                        break;
+                    default:
+                        Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
+                                "Code: " + resultCode
+                        ));
+                        break;
+                }
             }
-        }
-        else
-        {
-            super.onActivityResult(requestCode, resultCode, data);
+            else
+            {
+                super.onActivityResult(requestCode, resultCode, data);
+            }
         }
     }
 
@@ -576,30 +575,31 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
 
     private void handleError(Throwable throwable, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
-        Timber.w(throwable);
-        checkConfirm(BigInteger.ZERO, transactionBytes, txSendAddress, resolvedAddress);
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        displayErrorMessage(throwable.getMessage());
     }
 
     /**
      * Called to check if we're ready to send user to confirm screen / activity sheet popup
      */
-    private void checkConfirm(final BigInteger sendGasLimit, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
+    private void checkConfirm(final GasEstimate estimate, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
         BigInteger ethValue = token.isEthereum() ? sendAmount.toBigInteger() : BigInteger.ZERO;
         long leafCode = amountInput.isSendAll() ? -2 : -1;
         Web3Transaction w3tx = new Web3Transaction(
                 new Address(txSendAddress),
-                new Address(token.getAddress()),
+                token.isEthereum() ? null : new Address(token.getAddress()),
+                new Address(wallet.address),
                 ethValue,
                 sendGasPrice.toBigInteger(),
-                sendGasLimit,
+                estimate.getValue(),
                 -1,
                 Numeric.toHexString(transactionBytes),
                 leafCode);
 
-        if (sendGasLimit.equals(BigInteger.ZERO))
+        if (estimate.hasError() || estimate.getValue().equals(BigInteger.ZERO))
         {
-            estimateError(w3tx, transactionBytes, txSendAddress, resolvedAddress);
+            estimateError(estimate, w3tx, transactionBytes, txSendAddress, resolvedAddress);
         }
         else
         {
@@ -626,7 +626,14 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, wallet, token.tokenInfo.chainId);
+        viewModel.requestSignature(finalTx, wallet, token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        //complete sending the transaction
+        viewModel.sendTransaction(wallet, token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -655,47 +662,57 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     @Override
     public void notifyConfirm(String mode)
     {
-        viewModel.actionSheetConfirm(mode);
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        viewModel.track(Analytics.Action.ACTION_SHEET_COMPLETED, props);
     }
 
-    private void txWritten(TransactionData transactionData)
+    @Override
+    public WalletType getWalletType()
     {
-        confirmationDialog.transactionWritten(transactionData.txHash);
+        return wallet.type;
+    }
+
+    private void txWritten(TransactionReturn txData)
+    {
+        confirmationDialog.transactionWritten(txData.hash);
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
-        Timber.d("txError: %s", throwable.getMessage());
-        if (throwable instanceof SocketTimeoutException)
+        Timber.d("txError: %s", txError.throwable.getMessage());
+        if (txError.throwable instanceof SocketTimeoutException)
         {
             showTxnTimeoutDialog();
         }
         else
         {
-            showTxnErrorDialog(throwable);
+            showTxnErrorDialog(txError.throwable);
         }
         confirmationDialog.dismiss();
     }
 
-    private void estimateError(final Web3Transaction w3tx, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
+    private void estimateError(GasEstimate estimate, final Web3Transaction w3tx, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(WARNING);
-        dialog.setTitle(R.string.confirm_transaction);
-        dialog.setMessage(R.string.error_transaction_may_fail);
-        dialog.setButtonText(R.string.button_ok);
+        dialog.setTitle(estimate.hasError() ?
+            R.string.dialog_title_gas_estimation_failed :
+            R.string.confirm_transaction
+            );
+        String message = estimate.hasError() ?
+            getString(R.string.dialog_message_gas_estimation_failed, estimate.getError()) :
+            getString(R.string.error_transaction_may_fail);
+        dialog.setMessage(message);
+        dialog.setButtonText(R.string.action_proceed);
         dialog.setSecondaryButtonText(R.string.action_cancel);
         dialog.setButtonListener(v -> {
             BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
-            checkConfirm(gasEstimate, transactionBytes, txSendAddress, resolvedAddress);
+            checkConfirm(new GasEstimate(gasEstimate), transactionBytes, txSendAddress, resolvedAddress);
         });
-
-        dialog.setSecondaryButtonListener(v -> {
-            dialog.dismiss();
-        });
-
+        dialog.setSecondaryButtonListener(v -> dialog.dismiss());
         dialog.show();
     }
 

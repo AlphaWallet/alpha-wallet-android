@@ -9,8 +9,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 
 public abstract class BinderViewHolder<T> extends RecyclerView.ViewHolder {
@@ -48,4 +51,18 @@ public abstract class BinderViewHolder<T> extends RecyclerView.ViewHolder {
 	public void setFromTokenView() { }
 
 	public void onDestroyView() { }
+
+    protected void setTokenDetailName(Token token)
+    {
+        if (token.getSymbol().length() > C.SHORT_SYMBOL_LENGTH)
+        {
+            TextView tokenNameDetail = findViewById(R.id.token_name_detail);
+            tokenNameDetail.setVisibility(View.VISIBLE);
+            tokenNameDetail.setText(token.getFullName());
+        }
+        else
+        {
+            findViewById(R.id.token_name_detail).setVisibility(View.GONE);
+        }
+    }
 }

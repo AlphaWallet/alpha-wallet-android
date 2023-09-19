@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    tools:ignore="UseCompoundDrawables">
+
+    <ImageView
+        android:id="@+id/chain_icon"
+        android:layout_width="@dimen/token_icon_small"
+        android:layout_height="@dimen/token_icon_small"
+        android:layout_marginStart="@dimen/standard_16"
+        android:contentDescription="Chain Logo"
+        android:src="@drawable/ic_icons_network_eth"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/chain_name"
+        style="@style/Aw.Typography.Caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/tiny_8"
+        tools:text="@string/ethereum" />
+
+</LinearLayout>

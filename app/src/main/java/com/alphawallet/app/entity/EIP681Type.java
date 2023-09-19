@@ -13,5 +13,8 @@ public enum EIP681Type
     URL,
     MAGIC_LINK,
     OTHER_PROTOCOL,
-    OTHER
+    WALLET_CONNECT,
+    ATTESTATION,
+    OTHER,
+    EAS_ATTESTATION
 }

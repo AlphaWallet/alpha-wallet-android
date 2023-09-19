@@ -10,23 +10,27 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.entity.AnalyticsProperties;
-import com.alphawallet.app.entity.DAppFunction;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.GenericCallback;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
+import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.alphawallet.app.interact.CreateTransactionInteract;
+import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.interact.WalletConnectInteract;
+import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.repository.entity.RealmWCSession;
@@ -36,7 +40,9 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
 import com.alphawallet.app.service.WalletConnectService;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.GetClientCallback;
@@ -44,11 +50,10 @@ import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
 import com.alphawallet.app.walletconnect.entity.WCUtils;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import com.alphawallet.token.entity.EthereumMessage;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.EthereumTypedMessage;
-import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -60,29 +65,31 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import timber.log.Timber;
 
 @HiltViewModel
-public class WalletConnectViewModel extends BaseViewModel
+public class WalletConnectViewModel extends BaseViewModel implements TransactionSendHandlerInterface
 {
     public static final String WC_SESSION_DB = "wc_data-db.realm";
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
     private final MutableLiveData<Boolean> serviceReady = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionSigned = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<List<WalletConnectSessionItem>> sessions = new MutableLiveData<>();
     protected Disposable disposable;
     private final KeyService keyService;
     private final FindDefaultNetworkInteract findDefaultNetworkInteract;
     private final GenericWalletInteract genericWalletInteract;
+    private final FetchWalletsInteract fetchWalletsInteract;
     private final CreateTransactionInteract createTransactionInteract;
+    private final WalletConnectInteract walletConnectInteract;
     private final RealmManager realmManager;
     private final GasService gasService;
     private final TokensService tokensService;
-    private final AnalyticsServiceType analyticsService;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
 
     private final HashMap<String, WCClient> clientBuffer = new HashMap<>();
@@ -92,28 +99,35 @@ public class WalletConnectViewModel extends BaseViewModel
     @Nullable
     private Disposable prepareDisposable;
 
+    private final AWWalletConnectClient awWalletConnectClient;
+
     private static final String TAG = "WCClientVM";
 
     @Inject
     WalletConnectViewModel(KeyService keyService,
                            FindDefaultNetworkInteract findDefaultNetworkInteract,
-                           CreateTransactionInteract createTransactionInteract,
+                           FetchWalletsInteract fetchWalletsInteract, CreateTransactionInteract createTransactionInteract,
                            GenericWalletInteract genericWalletInteract,
-                           RealmManager realmManager,
+                           WalletConnectInteract walletConnectInteract, RealmManager realmManager,
                            GasService gasService,
                            TokensService tokensService,
                            AnalyticsServiceType analyticsService,
-                           EthereumNetworkRepositoryType ethereumNetworkRepository)
+                           EthereumNetworkRepositoryType ethereumNetworkRepository,
+                           AWWalletConnectClient awWalletConnectClient
+    )
     {
         this.keyService = keyService;
         this.findDefaultNetworkInteract = findDefaultNetworkInteract;
+        this.fetchWalletsInteract = fetchWalletsInteract;
         this.createTransactionInteract = createTransactionInteract;
         this.genericWalletInteract = genericWalletInteract;
+        this.walletConnectInteract = walletConnectInteract;
         this.realmManager = realmManager;
         this.gasService = gasService;
         this.tokensService = tokensService;
-        this.analyticsService = analyticsService;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
+        setAnalyticsService(analyticsService);
+        this.awWalletConnectClient = awWalletConnectClient;
         prepareDisposable = null;
         disposable = genericWalletInteract
                 .find()
@@ -182,6 +196,21 @@ public class WalletConnectViewModel extends BaseViewModel
         return defaultWallet;
     }
 
+    public MutableLiveData<TransactionReturn> transactionFinalised()
+    {
+        return transactionFinalised;
+    }
+
+    public MutableLiveData<TransactionReturn> transactionSigned()
+    {
+        return transactionSigned;
+    }
+
+    public MutableLiveData<TransactionReturn> transactionError()
+    {
+        return transactionError;
+    }
+
     public Wallet getWallet()
     {
         return wallet;
@@ -197,61 +226,37 @@ public class WalletConnectViewModel extends BaseViewModel
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void signMessage(Signable message, DAppFunction dAppFunction)
+    public void requestSignature(Web3Transaction finalTx, Wallet wallet, long chainId)
     {
-        resetSignDialog();
-        disposable = createTransactionInteract.sign(defaultWallet.getValue(), message, MAINNET_ID)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
-                        error -> dAppFunction.DAppError(error, message));
+        createTransactionInteract.requestSignature(finalTx, wallet, chainId, this);
     }
 
-    public void signTransaction(Context ctx, Web3Transaction w3tx, DAppFunction dAppFunction, String requesterURL, long chainId)
+    public void requestSignatureOnly(Web3Transaction tx, Wallet fromWallet, long chainId)
     {
-        resetSignDialog();
-        EthereumMessage etm = new EthereumMessage(w3tx.getFormattedTransaction(ctx, chainId, getNetworkSymbol(chainId)).toString(),
-                requesterURL, w3tx.leafPosition, SignMessageType.SIGN_MESSAGE);
-
-        if (w3tx.isConstructor())
-        {
-            disposable = createTransactionInteract.signTransaction(defaultWallet.getValue(), w3tx, chainId)
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
-                            error -> dAppFunction.DAppError(error, etm));
-        }
-        else
-        {
-            disposable = createTransactionInteract.signTransaction(defaultWallet.getValue(), w3tx, chainId)
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(sig -> dAppFunction.DAppReturn(Numeric.hexStringToByteArray(sig.signature), etm),
-                            error -> dAppFunction.DAppError(error, etm));
-        }
+        createTransactionInteract.requestSignTransaction(tx, wallet, chainId, this);
     }
 
-    public void sendTransaction(final Web3Transaction finalTx, long chainId, SendTransactionInterface callback)
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction tx, SignatureFromKey signatureFromKey)
     {
-        if (finalTx.isConstructor())
-        {
-            disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), finalTx.gasPrice, finalTx.gasLimit, finalTx.payload, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
-                            error -> callback.transactionError(finalTx.leafPosition, error));
-        }
-        else
-        {
-            disposable = createTransactionInteract
-                    .createWithSig(defaultWallet.getValue(), finalTx, chainId)
-                    .subscribe(txData -> callback.transactionSuccess(finalTx, txData.txHash),
-                            error -> callback.transactionError(finalTx.leafPosition, error));
-        }
+        createTransactionInteract.sendTransaction(wallet, chainId, tx, signatureFromKey);
     }
 
-    public Single<BigInteger> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount, BigInteger defaultLimit)
+    public Single<GasEstimate> calculateGasEstimate(Wallet wallet, byte[] transactionBytes, long chainId, String sendAddress, BigDecimal sendAmount, BigInteger defaultLimit)
     {
         return gasService.calculateGasEstimate(transactionBytes, chainId, sendAddress, sendAmount.toBigInteger(), wallet, defaultLimit);
+    }
+
+    public Single<GasEstimate> calculateGasEstimate(Wallet wallet, Web3Transaction transaction, long chainId)
+    {
+        if (transaction.isBaseTransfer())
+        {
+            return Single.fromCallable(() -> new GasEstimate(BigInteger.valueOf(C.GAS_LIMIT_MIN)));
+        }
+        else
+        {
+            return gasService.calculateGasEstimate(org.web3j.utils.Numeric.hexStringToByteArray(transaction.payload), chainId,
+                    transaction.recipient.toString(), transaction.value, wallet, transaction.gasLimit);
+        }
     }
 
     public void resetSignDialog()
@@ -401,20 +406,38 @@ public class WalletConnectViewModel extends BaseViewModel
         }
     }
 
-    public void deleteSession(String sessionId)
+    public void deleteSession(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
     {
-        Timber.d("deleteSession: %s", sessionId);
+        if (session instanceof WalletConnectV2SessionItem)
+        {
+            deleteSessionV2(session, callback);
+        }
+        else
+        {
+            deleteSessionV1(session, callback);
+        }
+        updateSessions();
+    }
+
+    private void deleteSessionV2(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
+    {
+        awWalletConnectClient.disconnect(session.sessionId, callback);
+    }
+
+    private void deleteSessionV1(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
+    {
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
         {
             realm.executeTransactionAsync(r -> {
                 RealmWCSession sessionAux = r.where(RealmWCSession.class)
-                        .equalTo("sessionId", sessionId)
+                        .equalTo("sessionId", session.sessionId)
                         .findFirst();
 
                 if (sessionAux != null)
                 {
                     sessionAux.deleteFromRealm();
                 }
+                callback.onSessionDisconnected();
             });
         }
     }
@@ -471,21 +494,8 @@ public class WalletConnectViewModel extends BaseViewModel
         return records;
     }
 
-    public List<WalletConnectSessionItem> getSessions()
+    public MutableLiveData<List<WalletConnectSessionItem>> sessions()
     {
-        List<WalletConnectSessionItem> sessions = new ArrayList<>();
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
-        {
-            RealmResults<RealmWCSession> items = realm.where(RealmWCSession.class)
-                    .sort("lastUsageTime", Sort.DESCENDING)
-                    .findAll();
-
-            for (RealmWCSession r : items)
-            {
-                sessions.add(new WalletConnectSessionItem(r));
-            }
-        }
-
         return sessions;
     }
 
@@ -541,6 +551,7 @@ public class WalletConnectViewModel extends BaseViewModel
             {
                 WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
                 walletConnectService.putClient(sessionId, client);
+                awWalletConnectClient.updateNotification();
             }
 
             @Override
@@ -602,14 +613,6 @@ public class WalletConnectViewModel extends BaseViewModel
             info = findDefaultNetworkInteract.getNetworkInfo(MAINNET_ID);
         }
         return info.symbol;
-    }
-
-    public void actionSheetConfirm(String mode)
-    {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData("(WC)" + mode); //disambiguate signs/sends etc through WC
-
-        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
     }
 
     public void prepareIfRequired()
@@ -680,6 +683,11 @@ public class WalletConnectViewModel extends BaseViewModel
         return tokensService;
     }
 
+    public Wallet findWallet(String address)
+    {
+        return fetchWalletsInteract.getWallet(address).blockingGet();
+    }
+
     public void endSession(String sessionId)
     {
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
@@ -698,39 +706,43 @@ public class WalletConnectViewModel extends BaseViewModel
         }
     }
 
-    // remove wallet connect sessions with no transaction history
-    public void removeEmptySessions(Context context, Runnable onComplete)
+    public void removeSessionsWithoutSignRecords(Context context)
     {
-        // create list of sessions which are inactive and has zero txn/sign
-        // delete them from realm
         getInactiveSessionIds(context, sessions -> {
-            ArrayList<String> sessionIdsToRemove = new ArrayList<>();
-            for (String sessionId : sessions)
-            {
-                // if no txn/sign history found
-                if (getSignRecords(sessionId).isEmpty())
-                {
-                    // add this sessionId to the list of removable
-                    sessionIdsToRemove.add(sessionId);
-                }
-            }
-            deleteSessionsFromRealm(sessionIdsToRemove, onComplete);
+            deleteSessionsFromRealm(filterSessionsWithoutSignRecords(sessions), this::updateSessions);
         });
     }
 
-    // remove all inactive wallet connect sessions
-    public void removeAllSessions(Context context, Runnable onSuccess)
+    @NonNull
+    private ArrayList<String> filterSessionsWithoutSignRecords(List<String> sessions)
+    {
+        ArrayList<String> result = new ArrayList<>();
+        for (String sessionId : sessions)
+        {
+            if (getSignRecords(sessionId).isEmpty())
+            {
+                result.add(sessionId);
+            }
+        }
+        return result;
+    }
+
+    public void updateSessions()
+    {
+        sessions.postValue(walletConnectInteract.getSessions());
+    }
+
+    public void removeInactiveSessions(Context context)
     {
         getInactiveSessionIds(context, list -> {
-            Timber.d("removeAllSessions: sessionsToRemove: %d", list.size());
-            deleteSessionsFromRealm(list, onSuccess);
+            deleteSessionsFromRealm(list, this::updateSessions);
         });
     }
 
     // connects to service to check session state and gives inactive sessions
     private void getInactiveSessionIds(Context context, GenericCallback<List<String>> callback)
     {
-        List<WalletConnectSessionItem> sessionItems = getSessions();        // all sessions in DB
+        List<WalletConnectSessionItem> sessionItems = walletConnectInteract.getSessions();
         ArrayList<String> inactiveSessions = new ArrayList<>();
         ServiceConnection connection = new ServiceConnection()
         {
@@ -766,7 +778,6 @@ public class WalletConnectViewModel extends BaseViewModel
     // deletes the RealmWCSession objects with the given sessionIds present in the list
     private void deleteSessionsFromRealm(List<String> sessionIds, Runnable onSuccess)
     {
-        Timber.d("deleteSessionsFromRealm: sessions: %s", sessionIds);
         if (sessionIds.isEmpty())
             return;
         try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
@@ -776,12 +787,46 @@ public class WalletConnectViewModel extends BaseViewModel
                         .in("sessionId", sessionIds.toArray(new String[]{}))
                         .findAll()
                         .deleteAllFromRealm();
-                Timber.d("deleteSessions: Success: %s\nList: %s", isDeleted, sessionIds);
+                Timber.tag(TAG).i("deleteSessions: Success: %s\nList: %s", isDeleted, sessionIds);
             }, onSuccess::run);
         }
         catch (Exception e)
         {
-            Timber.e(e);
+            Timber.tag(TAG).e(e);
         }
+    }
+
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        transactionFinalised.postValue(txData);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn txError)
+    {
+        transactionError.postValue(txError);
+    }
+
+    @Override
+    public void transactionSigned(SignatureFromKey sigData, Web3Transaction w3Tx)
+    {
+        transactionSigned.postValue(new TransactionReturn(Numeric.toHexString(sigData.signature), w3Tx));
+    }
+
+    public void signTransaction(long chainId, Web3Transaction tx, SignatureFromKey signatureFromKey)
+    {
+        createTransactionInteract.signTransaction(chainId, tx, signatureFromKey);
+    }
+
+    public boolean isActiveNetwork(long chainId)
+    {
+        return ethereumNetworkRepository.getSelectedFilters().contains(chainId);
+    }
+
+    public void blankLiveData()
+    {
+        transactionFinalised.postValue(null);
+        transactionSigned.postValue(null);
     }
 }

@@ -3,9 +3,6 @@ package com.alphawallet.app.interact;
 import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
 
-import android.util.Log;
-
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.repository.WalletRepositoryType;
@@ -32,6 +29,13 @@ public class GenericWalletInteract
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread());
 	}
+
+    public Single<Wallet> findWallet(String account)
+    {
+        return walletRepository.findWallet(account)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
 
 	/**
 	 * Called when wallet marked as backed up.

@@ -1,14 +1,13 @@
 package com.alphawallet.app.util;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.EthereumProtocolParser;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
 import com.alphawallet.token.entity.ChainSpec;
 import com.alphawallet.token.entity.MagicLinkInfo;
+import org.web3j.utils.Numeric;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
@@ -84,14 +83,30 @@ public class QRParser {
         return (Utils.isAddressValid(address) || ENSHandler.canBeENSName(address)) ? address : null;
     }
 
-    public QRResult parse(String url) {
-        if (url == null) return null;
-        String[] parts = url.split(":");
-
+    public QRResult parse(String url)
+    {
         QRResult result = null;
 
+        if (url == null) return null;
+
+        if (Utils.hasEASAttestation(url))
+        {
+            result = new QRResult(url);
+            result.type = EIP681Type.EAS_ATTESTATION;
+            String taglessAttestation = Utils.parseEASAttestation(url);
+            result.functionDetail = Utils.toAttestationJson(taglessAttestation);
+            return result;
+        }
+
+        String[] parts = url.split(":");
+
+        if (url.startsWith("wc:"))
+        {
+            return new QRResult(url, EIP681Type.WALLET_CONNECT);
+        }
+
         //Check for import/magic link
-        if(checkForMagicLink(url))
+        if (checkForMagicLink(url))
         {
             result = new QRResult(url, EIP681Type.MAGIC_LINK);
             return result;
@@ -101,7 +116,8 @@ public class QRParser {
         {
             String address = extractAddress(parts[0]);
 
-            if (address != null) {
+            if (address != null)
+            {
                 result = new QRResult(address);
             }
         }
@@ -115,7 +131,8 @@ public class QRParser {
         if (result == null)
         {
             String address = extractAddress(url);
-            if (address != null) {
+            if (address != null)
+            {
                 result = new QRResult(address);
             }
             else
@@ -136,6 +153,51 @@ public class QRParser {
         {
             //promote type
             result.type = EIP681Type.OTHER_PROTOCOL;
+        }
+
+        if (result.type == EIP681Type.OTHER)
+        {
+            result = decodeAttestation(url);
+        }
+
+        return result;
+    }
+
+    private QRResult decodeAttestation(String url)
+    {
+        QRResult result = new QRResult(url, EIP681Type.OTHER);
+        //determine if this is an attestation
+
+        try
+        {
+            //first - is it pure decimal?
+            BigInteger checkAmount = new BigInteger(url, 10); //will throw if not decimal
+
+            //read chain
+            int chainLength = Integer.parseInt(url.substring(0, 1));
+            int index = chainLength + 1;
+            if (url.length() <= index + 49 + 2)
+            {
+                return result;
+            }
+
+            long chainId = Long.parseLong(url.substring(1, index));
+            BigInteger addrBI = new BigInteger(url.substring(index, index + 49));
+            index += 49;
+            String address = Numeric.toHexStringWithPrefixZeroPadded(addrBI, 40);
+            String attestation = url.substring(index);
+            BigInteger attestationBI = new BigInteger(attestation);
+
+            String attestationHex = attestationBI.toString(16);
+
+            if (attestationHex.startsWith("30"))
+            {
+                result = new QRResult(attestationHex, chainId, address);
+            }
+        }
+        catch (Exception e)
+        {
+            //Wasn't an attestation
         }
 
         return result;

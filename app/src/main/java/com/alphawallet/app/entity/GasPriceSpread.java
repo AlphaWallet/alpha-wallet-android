@@ -7,7 +7,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.alphawallet.app.R;
-import com.alphawallet.app.ui.widget.entity.GasSpeed2;
+import com.alphawallet.app.ui.widget.entity.GasSpeed;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,6 +16,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 /**
  * Created by JB on 20/01/2022.
@@ -30,7 +32,7 @@ public class GasPriceSpread implements Parcelable
     private final boolean hasLockedGas;
     private BigInteger baseFee = BigInteger.ZERO;
 
-    public GasSpeed2 getSelectedGasFee(TXSpeed currentGasSpeedIndex)
+    public GasSpeed getSelectedGasFee(TXSpeed currentGasSpeedIndex)
     {
         return fees.get(currentGasSpeedIndex);
     }
@@ -40,11 +42,11 @@ public class GasPriceSpread implements Parcelable
         return fees.size();
     }
 
-    public GasSpeed2 getQuickestGasSpeed()
+    public GasSpeed getQuickestGasSpeed()
     {
         for (TXSpeed txs : TXSpeed.values())
         {
-            GasSpeed2 gs = fees.get(txs);
+            GasSpeed gs = fees.get(txs);
             if (gs != null) return gs;
         }
 
@@ -52,12 +54,12 @@ public class GasPriceSpread implements Parcelable
         return null;
     }
 
-    public GasSpeed2 getSlowestGasSpeed()
+    public GasSpeed getSlowestGasSpeed()
     {
         TXSpeed slowest = TXSpeed.STANDARD;
         for (TXSpeed txs : TXSpeed.values())
         {
-            GasSpeed2 gs = fees.get(txs);
+            GasSpeed gs = fees.get(txs);
             if (gs != null)
             {
                 if (gs.gasPrice.maxFeePerGas.compareTo(fees.get(slowest).gasPrice.maxFeePerGas) < 0)
@@ -75,7 +77,7 @@ public class GasPriceSpread implements Parcelable
         boolean begin = false;
         for (TXSpeed txs : TXSpeed.values())
         {
-            GasSpeed2 gs = fees.get(txs);
+            GasSpeed gs = fees.get(txs);
             if (gs != null)
             {
                 if (txs == speed)
@@ -97,7 +99,7 @@ public class GasPriceSpread implements Parcelable
         int index = 0;
         for (TXSpeed txs : TXSpeed.values())
         {
-            GasSpeed2 gs = fees.get(txs);
+            GasSpeed gs = fees.get(txs);
             if (gs == null) continue;
             else if (absoluteAdapterPosition == index) return txs;
             index++;
@@ -109,7 +111,7 @@ public class GasPriceSpread implements Parcelable
     public final long timeStamp;
     public TXSpeed speedIndex = TXSpeed.STANDARD;
 
-    private final Map<TXSpeed, GasSpeed2> fees = new HashMap<>();
+    private final Map<TXSpeed, GasSpeed> fees = new HashMap<>();
 
     public GasPriceSpread(Context ctx, Map<Integer, EIP1559FeeOracleResult> result)
     {
@@ -118,7 +120,7 @@ public class GasPriceSpread implements Parcelable
         if (result == null || result.size() == 0) return;
         setComponents(ctx, result);
 
-        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, fees.get(TXSpeed.STANDARD).gasPrice));
+        fees.put(TXSpeed.CUSTOM, new GasSpeed(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, fees.get(TXSpeed.STANDARD).gasPrice));
     }
 
     public GasPriceSpread(Context ctx, GasPriceSpread gs, Map<Integer, EIP1559FeeOracleResult> result)
@@ -128,9 +130,9 @@ public class GasPriceSpread implements Parcelable
         if (result == null || result.size() == 0) return;
         setComponents(ctx, result);
 
-        GasSpeed2 custom = gs.getSelectedGasFee(TXSpeed.CUSTOM);
+        GasSpeed custom = gs.getSelectedGasFee(TXSpeed.CUSTOM);
 
-        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), custom.seconds, custom.gasPrice));
+        fees.put(TXSpeed.CUSTOM, new GasSpeed(ctx.getString(R.string.speed_custom), custom.seconds, custom.gasPrice));
     }
 
     //This is a fallback method, it should never be used
@@ -140,8 +142,8 @@ public class GasPriceSpread implements Parcelable
 
         BigInteger baseFeeApprox = maxFeePerGas.subtract(maxPriorityFeePerGas.divide(BigInteger.valueOf(2)));
 
-        fees.put(TXSpeed.STANDARD, new GasSpeed2(ctx.getString(R.string.speed_average), STANDARD_SECONDS, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFeeApprox)));
-        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFeeApprox)));
+        fees.put(TXSpeed.STANDARD, new GasSpeed(ctx.getString(R.string.speed_average), STANDARD_SECONDS, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFeeApprox)));
+        fees.put(TXSpeed.CUSTOM, new GasSpeed(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFeeApprox)));
         hasLockedGas = false;
     }
 
@@ -149,8 +151,8 @@ public class GasPriceSpread implements Parcelable
     {
         timeStamp = System.currentTimeMillis();
 
-        fees.put(TXSpeed.FAST, new GasSpeed2("", FAST_SECONDS, new BigDecimal(currentAvGasPrice).multiply(BigDecimal.valueOf(1.2)).toBigInteger()));
-        fees.put(TXSpeed.STANDARD, new GasSpeed2("", STANDARD_SECONDS, currentAvGasPrice));
+        fees.put(TXSpeed.FAST, new GasSpeed("", FAST_SECONDS, new BigDecimal(currentAvGasPrice).multiply(BigDecimal.valueOf(1.2)).toBigInteger()));
+        fees.put(TXSpeed.STANDARD, new GasSpeed("", STANDARD_SECONDS, currentAvGasPrice));
         hasLockedGas = lockedGas;
     }
 
@@ -158,8 +160,8 @@ public class GasPriceSpread implements Parcelable
     {
         timeStamp = System.currentTimeMillis();
 
-        fees.put(TXSpeed.STANDARD, new GasSpeed2(ctx.getString(R.string.speed_average), STANDARD_SECONDS, gasPrice));
-        fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, gasPrice));
+        fees.put(TXSpeed.STANDARD, new GasSpeed(ctx.getString(R.string.speed_average), STANDARD_SECONDS, gasPrice));
+        fees.put(TXSpeed.CUSTOM, new GasSpeed(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, gasPrice));
         hasLockedGas = false;
     }
 
@@ -193,10 +195,10 @@ public class GasPriceSpread implements Parcelable
         }
 
         //convert to wei
-        fees.put(TXSpeed.RAPID, new GasSpeed2("", RAPID_SECONDS, gweiToWei(rRapid)));
-        fees.put(TXSpeed.FAST, new GasSpeed2("", FAST_SECONDS, gweiToWei(rFast)));
-        fees.put(TXSpeed.STANDARD, new GasSpeed2("", STANDARD_SECONDS, gweiToWei(rStandard)));
-        fees.put(TXSpeed.SLOW, new GasSpeed2("", SLOW_SECONDS, gweiToWei(rSlow)));
+        fees.put(TXSpeed.RAPID, new GasSpeed("", RAPID_SECONDS, gweiToWei(rRapid)));
+        fees.put(TXSpeed.FAST, new GasSpeed("", FAST_SECONDS, gweiToWei(rFast)));
+        fees.put(TXSpeed.STANDARD, new GasSpeed("", STANDARD_SECONDS, gweiToWei(rStandard)));
+        fees.put(TXSpeed.SLOW, new GasSpeed("", SLOW_SECONDS, gweiToWei(rSlow)));
         baseFee = gweiToWei(rBaseFee);
 
         hasLockedGas = false;
@@ -213,16 +215,16 @@ public class GasPriceSpread implements Parcelable
 
         if (gasSpread != null)
         {
-            GasSpeed2 custom = gasSpread.getSelectedGasFee(TXSpeed.CUSTOM);
+            GasSpeed custom = gasSpread.getSelectedGasFee(TXSpeed.CUSTOM);
 
             if (custom != null)
             {
-                fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), custom.seconds, custom.gasPrice.maxFeePerGas));
+                fees.put(TXSpeed.CUSTOM, new GasSpeed(ctx.getString(R.string.speed_custom), custom.seconds, custom.gasPrice.maxFeePerGas));
             }
         }
         else
         {
-            fees.put(TXSpeed.CUSTOM, new GasSpeed2(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, feeMap.get(TXSpeed.STANDARD)));
+            fees.put(TXSpeed.CUSTOM, new GasSpeed(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, feeMap.get(TXSpeed.STANDARD)));
         }
         hasLockedGas = locked;
     }
@@ -232,25 +234,25 @@ public class GasPriceSpread implements Parcelable
         BigInteger gasPrice = feeMap.get(speed);
         if (gasPrice != null && gasPrice.compareTo(BigInteger.ZERO) > 0)
         {
-            fees.put(speed, new GasSpeed2(speedName, seconds, gasPrice));
+            fees.put(speed, new GasSpeed(speedName, seconds, gasPrice));
         }
     }
 
     private void setComponents(Context ctx, Map<Integer, EIP1559FeeOracleResult> result)
     {
-        int third = result.size()/3;
+        int quarter = result.size()/4;
 
-        fees.put(TXSpeed.RAPID, new GasSpeed2(ctx.getString(R.string.speed_rapid), RAPID_SECONDS, new EIP1559FeeOracleResult(result.get(0))));
-        fees.put(TXSpeed.FAST, new GasSpeed2(ctx.getString(R.string.speed_fast), FAST_SECONDS, new EIP1559FeeOracleResult(result.get(third))));
-        fees.put(TXSpeed.STANDARD, new GasSpeed2(ctx.getString(R.string.speed_average), STANDARD_SECONDS, new EIP1559FeeOracleResult(result.get(third*2))));
-        fees.put(TXSpeed.SLOW, new GasSpeed2(ctx.getString(R.string.speed_slow), SLOW_SECONDS, new EIP1559FeeOracleResult(result.get(result.size()-1))));
+        fees.put(TXSpeed.RAPID, new GasSpeed(ctx.getString(R.string.speed_rapid), RAPID_SECONDS, new EIP1559FeeOracleResult(result.get(0))));
+        fees.put(TXSpeed.FAST, new GasSpeed(ctx.getString(R.string.speed_fast), FAST_SECONDS, new EIP1559FeeOracleResult(result.get(quarter))));
+        fees.put(TXSpeed.STANDARD, new GasSpeed(ctx.getString(R.string.speed_average), STANDARD_SECONDS, new EIP1559FeeOracleResult(result.get(quarter*2))));
+        fees.put(TXSpeed.SLOW, new GasSpeed(ctx.getString(R.string.speed_slow), SLOW_SECONDS, new EIP1559FeeOracleResult(result.get(result.size()-1))));
 
         //now de-duplicate
         for (TXSpeed txs : TXSpeed.values())
         {
-            GasSpeed2 gs = fees.get(txs);
+            GasSpeed gs = fees.get(txs);
             if (txs == TXSpeed.STANDARD || gs == null) continue;
-            if (gs.gasPrice.maxPriorityFeePerGas.equals(fees.get(TXSpeed.STANDARD).gasPrice.maxPriorityFeePerGas)
+            if (gs.gasPrice.priorityFee.equals(fees.get(TXSpeed.STANDARD).gasPrice.priorityFee)
                 && gs.gasPrice.maxFeePerGas.equals(fees.get(TXSpeed.STANDARD).gasPrice.maxFeePerGas))
             {
                 fees.remove(txs);
@@ -260,15 +262,27 @@ public class GasPriceSpread implements Parcelable
 
     public void setCustom(BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas, long fastSeconds)
     {
-        GasSpeed2 gsCustom = fees.get(TXSpeed.CUSTOM);
+        GasSpeed gsCustom = fees.get(TXSpeed.CUSTOM);
         BigInteger baseFee = gsCustom.gasPrice.baseFee;
-        fees.put(TXSpeed.CUSTOM, new GasSpeed2(gsCustom.speed, fastSeconds, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFee)));
+        fees.put(TXSpeed.CUSTOM, new GasSpeed(gsCustom.speed, fastSeconds, new EIP1559FeeOracleResult(maxFeePerGas, maxPriorityFeePerGas, baseFee)));
+    }
+
+    public void setCustom(@Nullable GasSpeed gs)
+    {
+        if (gs != null)
+        {
+            GasSpeed rapid = fees.get(TXSpeed.RAPID);
+            BigInteger baseFee = rapid != null ? rapid.gasPrice.baseFee : gs.gasPrice.baseFee;
+
+            GasSpeed custom = new GasSpeed(gs.speed, gs.seconds, new EIP1559FeeOracleResult(gs.gasPrice.maxFeePerGas, gs.gasPrice.priorityFee, baseFee));
+            fees.put(TXSpeed.CUSTOM, custom);
+        }
     }
 
     public void setCustom(BigInteger gasPrice, long fastSeconds)
     {
-        GasSpeed2 gsCustom = fees.get(TXSpeed.CUSTOM);
-        fees.put(TXSpeed.CUSTOM, new GasSpeed2(gsCustom.speed, fastSeconds, gasPrice));
+        GasSpeed gsCustom = fees.get(TXSpeed.CUSTOM);
+        fees.put(TXSpeed.CUSTOM, new GasSpeed(gsCustom.speed, fastSeconds, gasPrice));
     }
 
     protected GasPriceSpread(Parcel in)
@@ -282,7 +296,7 @@ public class GasPriceSpread implements Parcelable
         for (int i = 0; i < feeCount; i++)
         {
             int entry = in.readInt();
-            GasSpeed2 r = in.readParcelable(GasSpeed2.class.getClassLoader());
+            GasSpeed r = in.readParcelable(GasSpeed.class.getClassLoader());
             fees.put(TXSpeed.values()[entry], r);
         }
     }
@@ -313,7 +327,7 @@ public class GasPriceSpread implements Parcelable
         dest.writeInt(speedIndex.ordinal());
         dest.writeByte(hasLockedGas ? (byte) 1 : (byte) 0);
 
-        for (Map.Entry<TXSpeed, GasSpeed2> entry : fees.entrySet())
+        for (Map.Entry<TXSpeed, GasSpeed> entry : fees.entrySet())
         {
             dest.writeInt(entry.getKey().ordinal());
             dest.writeParcelable(entry.getValue(), flags);
@@ -322,9 +336,9 @@ public class GasPriceSpread implements Parcelable
 
     public void addCustomGas(long seconds, EIP1559FeeOracleResult fee)
     {
-        GasSpeed2 currentCustom = fees.get(TXSpeed.CUSTOM);
+        GasSpeed currentCustom = fees.get(TXSpeed.CUSTOM);
         fees.put(TXSpeed.CUSTOM,
-                new GasSpeed2(currentCustom.speed, seconds, fee));
+                new GasSpeed(currentCustom.speed, seconds, fee));
     }
 
     public EIP1559FeeOracleResult getCurrentGasFee()
@@ -337,14 +351,15 @@ public class GasPriceSpread implements Parcelable
         return fees.get(this.speedIndex).seconds;
     }
 
-    public GasSpeed2 getGasSpeed()
+    public GasSpeed getGasSpeed()
     {
         return fees.get(this.speedIndex);
     }
 
     public boolean hasCustom()
     {
-        return fees.get(TXSpeed.CUSTOM).seconds != 0;
+        GasSpeed custom = fees.get(TXSpeed.CUSTOM);
+        return (custom != null && custom.seconds != 0);
     }
 
     public boolean hasLockedGas() { return hasLockedGas; }
@@ -355,7 +370,7 @@ public class GasPriceSpread implements Parcelable
     {
         for (TXSpeed txs : TXSpeed.values())
         {
-            GasSpeed2 gs = fees.get(txs);
+            GasSpeed gs = fees.get(txs);
             if (gs != null && gs.gasPrice.maxFeePerGas.compareTo(BigInteger.ZERO) > 0) return true;
         }
 
@@ -372,5 +387,10 @@ public class GasPriceSpread implements Parcelable
         }
 
         return 0;
+    }
+
+    public GasSpeed getCustom()
+    {
+        return fees.get(TXSpeed.CUSTOM);
     }
 }

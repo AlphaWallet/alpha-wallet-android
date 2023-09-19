@@ -1,16 +1,16 @@
 package com.alphawallet.app;
 
+import com.alphawallet.token.entity.CryptoFunctionsInterface;
+import com.alphawallet.token.entity.ProviderTypedData;
+
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+import org.web3j.crypto.StructuredDataEncoder;
 
 import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Base64;
-
-import com.alphawallet.app.web3j.StructuredDataEncoder;
-import com.alphawallet.token.entity.CryptoFunctionsInterface;
-import com.alphawallet.token.entity.ProviderTypedData;
 
 import wallet.core.jni.Hash;
 
@@ -61,6 +61,12 @@ public class CryptoFunctions implements CryptoFunctionsInterface
     }
 
     @Override
+    public long getChainId(String messageData)
+    {
+        return -1;
+    }
+
+    @Override
     public byte[] getStructuredData(String messageData)
     {
         try
@@ -78,16 +84,16 @@ public class CryptoFunctions implements CryptoFunctionsInterface
 
     public static Sign.SignatureData sigFromByteArray(byte[] sig)
     {
-        if (sig.length < 64 || sig.length > 65) return null;
+        if (sig.length < 64 || sig.length > 65)
+        {
+            return null;
+        }
 
-        byte   subv = sig[64];
+        byte subv = sig[64];
         if (subv < 27) subv += 27;
 
         byte[] subrRev = Arrays.copyOfRange(sig, 0, 32);
         byte[] subsRev = Arrays.copyOfRange(sig, 32, 64);
-
-        BigInteger r = new BigInteger(1, subrRev);
-        BigInteger s = new BigInteger(1, subsRev);
 
         return new Sign.SignatureData(subv, subrRev, subsRev);
     }

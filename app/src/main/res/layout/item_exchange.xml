@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_list_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="@dimen/small_12"
+    android:paddingStart="@dimen/small_12"
+    android:paddingEnd="@dimen/tiny_8">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/token_icon"
+        android:layout_width="@dimen/token_icon"
+        android:background="@drawable/masking_circle"
+        android:layout_height="@dimen/token_icon"
+        android:layout_alignParentStart="true"
+        android:layout_gravity="center_vertical" />
+
+    <LinearLayout
+        android:id="@+id/layout_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/small_12"
+        android:layout_toStartOf="@id/checkbox"
+        android:layout_toEndOf="@id/token_icon"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/provider"
+            style="@style/Aw.Typography.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="PancakeSwap" />
+
+        <TextView
+            android:id="@+id/subtitle"
+            style="@style/Aw.Typography.Sub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="https://pancakeswap.io" />
+
+    </LinearLayout>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:clickable="false"
+        android:focusable="false" />
+
+</RelativeLayout>

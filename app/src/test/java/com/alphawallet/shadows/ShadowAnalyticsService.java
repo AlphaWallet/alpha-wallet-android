@@ -11,7 +11,7 @@ import org.robolectric.annotation.Implements;
 public class ShadowAnalyticsService
 {
     @Implementation
-    public void __constructor__(Context context) {
+    public void __constructor__(Context context, ShadowPreferenceRepository preferenceRepository) {
     }
 
     @Implementation

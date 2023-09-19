@@ -1,7 +1,6 @@
 package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
-import static com.alphawallet.app.entity.Operation.SIGN_DATA;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.TOKENSCRIPT_CONVERSION_ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
@@ -13,12 +12,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -29,10 +28,13 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.DApp;
-import com.alphawallet.app.entity.DAppFunction;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
+import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
@@ -49,10 +51,13 @@ import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheet;
 import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.MethodArg;
@@ -60,7 +65,7 @@ import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptElement;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
@@ -85,14 +90,13 @@ import timber.log.Timber;
  */
 @AndroidEntryPoint
 public class FunctionActivity extends BaseActivity implements FunctionCallback,
-                                                              PageReadyCallback, OnSignPersonalMessageListener, SignAuthenticationCallback,
-                                                              StandardFunctionInterface, TokenScriptRenderCallback, WebCompletionCallback,
-                                                              OnSetValuesListener, ActionSheetCallback
+        PageReadyCallback, OnSignPersonalMessageListener, StandardFunctionInterface, TokenScriptRenderCallback,
+        WebCompletionCallback, OnSetValuesListener, ActionSheetCallback
 {
     private TokenFunctionViewModel viewModel;
-
     private Token token;
     private List<BigInteger> tokenIds;
+    private NFTAsset asset;
     private BigInteger tokenId;
     private String actionMethod;
     private Web3TokenView tokenView;
@@ -103,16 +107,23 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private int parsePass = 0;
     private int resolveInputCheckCount;
     private TSAction action;
-    private ActionSheetDialog confirmationDialog;
+    private ActionSheet confirmationDialog;
 
     private void initViews() {
         actionMethod = getIntent().getStringExtra(C.EXTRA_STATE);
         String tokenIdStr = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
         if (tokenIdStr == null || tokenIdStr.length() == 0) tokenIdStr = "0";
 
-        String address = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
+        asset = getIntent().getParcelableExtra(C.EXTRA_NFTASSET);
+        if (wallet == null) {
+            viewModel.getCurrentWallet();
+        } else {
+            viewModel.loadWallet(wallet.address);
+        }
+
         long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
-        token = viewModel.getToken(chainId, address);
+        token = resolveAssetToken(wallet, chainId);
 
         if (token == null)
         {
@@ -123,28 +134,35 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenIds = token.stringHexToBigIntegerList(tokenIdStr);
         tokenId = tokenIds.get(0);
         tokenView = findViewById(R.id.web3_tokenview);
-
         tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.setWalletAddress(new Address(token.getWallet()));
         tokenView.setupWindowCallback(this);
-        tokenView.setRpcUrl(token.tokenInfo.chainId);
+        tokenView.setRpcUrl(viewModel.getBrowserRPC(token.tokenInfo.chainId));
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSignPersonalMessageListener(this);
         tokenView.setOnSetValuesListener(this);
         tokenView.setKeyboardListenerCallback(this);
         viewModel.startGasPriceUpdate(token.tokenInfo.chainId);
-        viewModel.getCurrentWallet();
         parsePass = 0;
+    }
 
-        ProgressBar loadSpinner = findViewById(R.id.ticket_load_spinner);
-        handler.postDelayed(() -> loadSpinner.setVisibility(View.GONE), 2500);
+    private Token resolveAssetToken(Wallet wallet, long chainId)
+    {
+        if (asset != null && asset.isAttestation())
+        {
+            return viewModel.getTokenService().getAttestation(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS), asset.getAttestationID());
+        }
+        else
+        {
+            return viewModel.getTokensService().getToken(wallet.address, chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        }
     }
 
     private void displayFunction(String tokenAttrs)
     {
         try
         {
-            Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+            Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
             TSAction action = functions.get(actionMethod);
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
 
@@ -175,9 +193,18 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
 
         // Fetch attributes local to this action and add them to the injected token properties
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
+        if (functions == null)
+        {
+            recreate();
+            return;
+        }
+
         action = functions.get(actionMethod);
         List<Attribute> localAttrs = (action != null && action.attributes != null) ? new ArrayList<>(action.attributes.values()) : null;
+
+        //Add attestation attributes
+        attrs.append(viewModel.addAttestationAttrs(asset, token, action));
 
         viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs)
                     .subscribeOn(Schedulers.io())
@@ -188,7 +215,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void addMultipleTokenIds(StringBuilder sb)
     {
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         TSAction action = functions.get(actionMethod);
         boolean hasTokenIds = false;
 
@@ -230,8 +257,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private void onAttr(TokenScriptResult.Attribute attribute)
     {
         //is the attr incomplete?
-        Timber.d("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
-        TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
+        if (!TextUtils.isEmpty(attribute.id))
+        {
+            Timber.d("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
+            TokenScriptResult.addPair(attrs, attribute);
+        }
     }
 
     private void fillEmpty()
@@ -241,7 +271,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_script_view);
         setupViews();
@@ -280,6 +311,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 .get(TokenFunctionViewModel.class);
         viewModel.invalidAddress().observe(this, this::errorInvalidAddress);
         viewModel.insufficientFunds().observe(this, this::errorInsufficientFunds);
+        viewModel.gasEstimateError().observe(this, this::estimateError);
         viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
@@ -303,7 +335,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void completeTokenScriptFunction(String function)
     {
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
+        if (functions == null) return;
         action = functions.get(function);
 
         if (action != null && action.function != null) //if no function then it's handled by the token view
@@ -384,16 +417,19 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         {
             //open action sheet after we determine the gas limit
             Web3Transaction web3Tx = viewModel.handleFunction(action, tokenId, token, this);
-            if (web3Tx.gasLimit.equals(BigInteger.ZERO))
+            if (web3Tx != null)
             {
-                calculateEstimateDialog();
-                //get gas estimate
-                viewModel.estimateGasLimit(web3Tx, token.tokenInfo.chainId);
-            }
-            else
-            {
-                //go straight to confirmation
-                checkConfirm(web3Tx);
+                if (web3Tx.gasLimit.equals(BigInteger.ZERO))
+                {
+                    calculateEstimateDialog();
+                    //get gas estimate
+                    viewModel.estimateGasLimit(web3Tx, token.tokenInfo.chainId);
+                }
+                else
+                {
+                    //go straight to confirmation
+                    checkConfirm(web3Tx);
+                }
             }
             viewModel.getAssetDefinitionService().clearResultMap();
         }
@@ -407,7 +443,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         if (w3tx.gasLimit.equals(BigInteger.ZERO))
         {
-            estimateError(w3tx);
+            estimateError(new Pair<>(new GasEstimate(BigInteger.ZERO, "Gas Estimate Zero"), w3tx));
         }
         else if (confirmationDialog == null || !confirmationDialog.isShowing())
         {
@@ -430,24 +466,28 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         alertDialog.show();
     }
 
-    private void estimateError(final Web3Transaction w3tx)
+    private void estimateError(Pair<GasEstimate, Web3Transaction> estimate)
     {
+        if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
         if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(WARNING);
-        alertDialog.setTitle(R.string.confirm_transaction);
-        alertDialog.setMessage(R.string.error_transaction_may_fail);
-        alertDialog.setButtonText(R.string.button_ok);
+        alertDialog.setTitle(estimate.first.hasError() ?
+                R.string.dialog_title_gas_estimation_failed :
+                R.string.confirm_transaction
+        );
+        String message = estimate.first.hasError() ?
+                getString(R.string.dialog_message_gas_estimation_failed, estimate.first.getError()) :
+                getString(R.string.error_transaction_may_fail);
+        alertDialog.setMessage(message);
+        alertDialog.setButtonText(R.string.action_proceed);
         alertDialog.setSecondaryButtonText(R.string.action_cancel);
         alertDialog.setButtonListener(v -> {
+            Web3Transaction w3tx = estimate.second;
             BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
             checkConfirm(new Web3Transaction(w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, gasEstimate, w3tx.nonce, w3tx.payload, w3tx.description));
         });
-
-        alertDialog.setSecondaryButtonListener(v -> {
-            alertDialog.dismiss();
-        });
-
+        alertDialog.setSecondaryButtonListener(v -> alertDialog.dismiss());
         alertDialog.show();
     }
 
@@ -496,13 +536,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
         if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();
         alertDialog = new AWalletAlertDialog(this);
         alertDialog.setIcon(ERROR);
         alertDialog.setTitle(R.string.error_transaction_failed);
-        alertDialog.setMessage(throwable.getMessage());
+        alertDialog.setMessage(txError.throwable.getMessage());
         alertDialog.setButtonText(R.string.button_ok);
         alertDialog.setButtonListener(v -> {
             alertDialog.dismiss();
@@ -549,12 +589,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void signMessage(Signable message, DAppFunction dAppFunction)
-    {
-        viewModel.signMessage(message, dAppFunction, token.tokenInfo.chainId);
-    }
-
-    @Override
     public void functionSuccess()
     {
         LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
@@ -564,11 +598,11 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     /**
      * Final return path
-     * @param transactionData write success hash back to ActionSheet
+     * @param transactionReturn write success hash back to ActionSheet
      */
-    private void txWritten(TransactionData transactionData)
+    private void txWritten(TransactionReturn transactionReturn)
     {
-        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+        confirmationDialog.transactionWritten(transactionReturn.hash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
     }
 
     private final Runnable closer = this::finish;
@@ -637,8 +671,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     public void onSignPersonalMessage(EthereumMessage message)
     {
         //pop open the actionsheet
-        confirmationDialog = new ActionSheetDialog(this, this, this, message);
-        confirmationDialog.setCanceledOnTouchOutside(false);
+        confirmationDialog = new ActionSheetSignDialog(this, this, message);
+        confirmationDialog.setSigningWallet(viewModel.getWallet().address);
         confirmationDialog.show();
         confirmationDialog.fullExpand();
     }
@@ -661,12 +695,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         try
         {
             BigInteger recoveredKey = Sign.signedMessageToKey(msgHash, sd);
-            addressRecovered = "0x" + Keys.getAddress(recoveredKey);
+            addressRecovered = Numeric.prependHexPrefix(Keys.getAddress(recoveredKey));
             Timber.d("Recovered: %s", addressRecovered);
-        }
-        catch (SignatureException e)
-        {
-            e.printStackTrace();
         }
         catch (Exception e)
         {
@@ -697,7 +727,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
         if (requestCode >= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS && requestCode <= SignTransactionDialog.REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS + 10)
         {
-            gotAuthorisation(resultCode == RESULT_OK);
+            confirmationDialog.gotAuthorisation(resultCode == RESULT_OK);
         }
     }
 
@@ -778,51 +808,25 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void gotAuthorisation(boolean gotAuth)
+    public void signingComplete(SignatureFromKey signature, Signable message)
     {
-        if (!gotAuth) viewModel.failedAuthentication(SIGN_DATA);
+        String signHex = Numeric.toHexString(signature.signature);
+        signHex = Numeric.cleanHexPrefix(signHex);
+        tokenView.onSignPersonalMessageSuccessful(message, signHex);
+        testRecoverAddressFromSignature(message.getMessage(), signHex);
     }
 
     @Override
-    public void gotAuthorisationForSigning(boolean gotAuth, Signable messageToSign)
+    public void signingFailed(Throwable error, Signable message)
     {
-        viewModel.completeAuthentication(SIGN_DATA);
-
-        DAppFunction dAppFunction = new DAppFunction()
-        {
-            @Override
-            public void DAppError(Throwable error, Signable message)
-            {
-                confirmationDialog.dismiss();
-                tokenView.onSignCancel(message);
-                functionFailed();
-            }
-
-            @Override
-            public void DAppReturn(byte[] data, Signable message)
-            {
-                String signHex = Numeric.toHexString(data);
-                signHex = Numeric.cleanHexPrefix(signHex);
-                tokenView.onSignPersonalMessageSuccessful(message, signHex);
-                testRecoverAddressFromSignature(message.getMessage(), signHex);
-                confirmationDialog.success();
-            }
-        };
-
-        if (gotAuth)
-        {
-            signMessage(messageToSign, dAppFunction);
-        }
-        else
-        {
-            confirmationDialog.dismiss();
-        }
+        tokenView.onSignCancel(message);
+        functionFailed();
     }
 
     @Override
-    public void cancelAuthentication()
+    public WalletType getWalletType()
     {
-        if (confirmationDialog != null && confirmationDialog.isShowing()) confirmationDialog.dismiss();
+        return viewModel.getWallet().type;
     }
 
     @Override
@@ -878,7 +882,13 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, token.tokenInfo.chainId, ""); //return point is txWritten
+        viewModel.requestSignature(finalTx, viewModel.getWallet(), token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(viewModel.getWallet(), token.tokenInfo.chainId, tx, signature);
     }
 
     @Override

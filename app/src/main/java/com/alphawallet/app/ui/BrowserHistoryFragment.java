@@ -1,5 +1,8 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
+import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_REMOVE_HISTORY;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,26 +11,27 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.DApp;
 import com.alphawallet.app.ui.widget.OnDappClickListener;
 import com.alphawallet.app.ui.widget.adapter.BrowserHistoryAdapter;
 import com.alphawallet.app.util.DappBrowserUtils;
+import com.alphawallet.app.viewmodel.BrowserHistoryViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 
 import java.util.List;
 
-import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_CLICK;
-import static com.alphawallet.app.ui.DappBrowserFragment.DAPP_REMOVE_HISTORY;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class BrowserHistoryFragment extends Fragment {
+public class BrowserHistoryFragment extends BaseFragment
+{
+    private BrowserHistoryViewModel viewModel;
     private BrowserHistoryAdapter adapter;
     private AWalletAlertDialog dialog;
     private TextView clear;
@@ -36,7 +40,8 @@ public class BrowserHistoryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+                             @Nullable Bundle savedInstanceState)
+    {
         View view = inflater.inflate(R.layout.layout_browser_history, container, false);
         adapter = new BrowserHistoryAdapter(
                 getData(),
@@ -62,9 +67,16 @@ public class BrowserHistoryFragment extends Fragment {
             dialog.setSecondaryButtonText(R.string.dialog_cancel_back);
             dialog.show();
         });
-
+        viewModel = new ViewModelProvider(this).get(BrowserHistoryViewModel.class);
         showOrHideViews();
         return view;
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        viewModel.track(Analytics.Navigation.BROWSER_HISTORY);
     }
 
     @Override
@@ -74,24 +86,30 @@ public class BrowserHistoryFragment extends Fragment {
         adapter.clear();
     }
 
-    private void showOrHideViews() {
-        if (adapter.getItemCount() > 0) {
+    private void showOrHideViews()
+    {
+        if (adapter.getItemCount() > 0)
+        {
             clear.setVisibility(View.VISIBLE);
             noHistory.setVisibility(View.GONE);
-        } else {
+        }
+        else
+        {
             clear.setVisibility(View.GONE);
             noHistory.setVisibility(View.VISIBLE);
         }
     }
 
-    private void clearHistory() {
+    private void clearHistory()
+    {
         DappBrowserUtils.clearHistory(getContext());
         adapter.setDapps(getData());
         showOrHideViews();
     }
 
-    private void onHistoryItemRemoved(DApp dapp) {
-        DappBrowserUtils.removeFromHistory(getContext(), dapp);
+    private void onHistoryItemRemoved(DApp dapp)
+    {
+        DappBrowserUtils.removeFromHistory(getContext(), dapp.getUrl());
         adapter.setDapps(getData());
         showOrHideViews();
         setFragmentResult(DAPP_REMOVE_HISTORY, dapp);
@@ -104,7 +122,8 @@ public class BrowserHistoryFragment extends Fragment {
         getParentFragmentManager().setFragmentResult(DAPP_CLICK, result);
     }
 
-    private List<DApp> getData() {
+    private List<DApp> getData()
+    {
         return DappBrowserUtils.getBrowserHistory(getContext());
     }
 }

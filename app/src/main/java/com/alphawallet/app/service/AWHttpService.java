@@ -125,11 +125,13 @@ public class AWHttpService extends HttpService
             requestBody = RequestBody.create("", MEDIA_TYPE_TEXT);
         }
 
-        Headers headers = buildHeaders();
         okhttp3.Request httpRequest =
-                new okhttp3.Request.Builder().url(url).headers(headers).post(requestBody).build();
+                new okhttp3.Request.Builder()
+                        .url(url)
+                        .headers(buildHeaders())
+                        .post(requestBody).build();
 
-        okhttp3.Response response;
+        okhttp3.Response response = null;
 
         try
         {
@@ -151,6 +153,7 @@ public class AWHttpService extends HttpService
 
         if (response.code() / 100 == 4) //rate limited
         {
+            response.close();
             return trySecondaryNode(request);
         }
 
@@ -161,10 +164,9 @@ public class AWHttpService extends HttpService
     {
         Timber.d("trySecondaryNode: ");
         RequestBody requestBody = RequestBody.create(request, JSON_MEDIA_TYPE);
-        Headers headers = buildHeaders();
 
         okhttp3.Request httpRequest =
-                new okhttp3.Request.Builder().url(secondaryUrl).headers(headers).post(requestBody).build();
+                new okhttp3.Request.Builder().url(secondaryUrl).post(requestBody).build();
 
         okhttp3.Response response;
 
@@ -190,6 +192,7 @@ public class AWHttpService extends HttpService
         }
         else if (!useSecondaryNode && secondaryUrl != null)
         {
+            response.close();
             return trySecondaryNode(request);
         }
         else
@@ -259,4 +262,10 @@ public class AWHttpService extends HttpService
 
     @Override
     public void close() throws IOException {}
+
+    @Override
+    public String getUrl()
+    {
+        return this.url;
+    }
 }

@@ -1,23 +1,23 @@
 package com.alphawallet.app.ui.widget.holder;
 
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.alphawallet.app.R;
-
 import com.alphawallet.app.entity.tokens.Token;
-
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.web3.Web3TokenView;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.token.entity.TicketRange;
-import com.alphawallet.app.ui.widget.TokensAdapterCallback;
+import com.alphawallet.token.entity.ViewType;
 
 public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements View.OnClickListener, View.OnLongClickListener, PageReadyCallback
 {
@@ -51,7 +51,7 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
 
         if (data.tokenIds.size() > 0)
         {
-            tokenView.displayTicketHolder(token, data, assetService, true);
+            tokenView.displayTicketHolder(token, data, assetService, ViewType.ITEM_VIEW);
         }
     }
 

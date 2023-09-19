@@ -1,24 +1,16 @@
 package com.alphawallet.app.entity;
 
-import com.alphawallet.app.entity.tokenscript.EventUtils;
-import com.alphawallet.app.util.Utils;
-import com.alphawallet.token.tools.Numeric;
+import android.text.TextUtils;
 
-import org.web3j.protocol.Web3j;
+import com.alphawallet.app.util.Utils;
 
 import java.math.BigInteger;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
-
-import android.text.TextUtils;
 
 /**
  * Created by JB on 17/05/2021.
@@ -65,14 +57,10 @@ public class CovalentTransaction
                 Param param = new Param();
                 param.type = lp.type;
                 String rawValue = TextUtils.isEmpty(lp.value) || lp.value.equals("null") ? rawLogValue : lp.value;
+                param.value = rawValue;
                 if (lp.type.startsWith("uint") || lp.type.startsWith("int"))
                 {
-                    param.valueBI = rawValue.startsWith("0x") ? Numeric.toBigInt(rawValue) : new BigInteger(rawValue);
-                    param.value = "";
-                }
-                else
-                {
-                    param.value = rawValue;
+                    param.valueBI = Utils.stringToBigInteger(rawValue);// rawValue.startsWith("0x") ? Numeric.toBigInt(rawValue) : new BigInteger(rawValue);
                 }
 
                 params.put(lp.name, param);
@@ -153,21 +141,10 @@ public class CovalentTransaction
 
         Map<String, Param> logParams = logEvent.getParams();
 
-        ev.from = logParams.get("from").value;
-        ev.to = logParams.get("to").value;
-
-        logParams.remove("from");
-        logParams.remove("to");
-
-        if (logEvent.sender_contract_decimals == 0)
-        {
-            //get TokenId
-            ev.tokenID = logParams.values().iterator().next().valueBI.toString();
-        }
-        else
-        {
-            ev.value = logParams.values().iterator().next().valueBI.toString();
-        }
+        ev.from = logParams.containsKey("from") ? logParams.get("from").value : "";
+        ev.to = logParams.containsKey("to") ? logParams.get("to").value : "";
+        ev.tokenID = logParams.containsKey("tokenId") ? logParams.get("tokenId").valueBI.toString() : "";
+        ev.value = logParams.containsKey("value") ? logParams.get("value").valueBI.toString() : "";
 
         ev.gasUsed = gas_spent;
         ev.gasPrice = gas_price;

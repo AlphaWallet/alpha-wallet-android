@@ -10,16 +10,17 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/standard_16"
         android:layout_marginTop="@dimen/standard_16"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingEnd="@dimen/mini_4">
 
         <TextView
-            style="@style/Aw.Typography.Label"
+            style="@style/Aw.Typography.Label.Widget"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="start"
+            android:layout_weight="@integer/widget_label"
+            android:gravity="start|center_vertical"
             android:lines="1"
             android:text="@string/speed_gas" />
 
@@ -28,7 +29,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/small_12"
-            android:layout_weight="3"
+            android:layout_weight="@integer/widget_content"
             android:orientation="horizontal"
             android:visibility="gone"
             tools:visibility="gone">
@@ -54,7 +55,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/small_12"
-            android:layout_weight="3"
+            android:layout_weight="@integer/widget_content"
             android:orientation="horizontal"
             android:visibility="gone"
             tools:visibility="gone">
@@ -81,7 +82,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/small_12"
-            android:layout_weight="3"
+            android:layout_weight="@integer/widget_content"
             android:gravity="start"
             android:text="@string/speed_average" />
 
@@ -90,27 +91,28 @@
             style="@style/Aw.Typography.Control"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:gravity="end"
+            android:layout_weight="@integer/widget_control"
+            android:gravity="start"
             android:lines="1"
             android:orientation="horizontal"
             android:text="@string/edit"
             android:visibility="gone"
-            tools:visibility="visible"/>
+            tools:visibility="visible" />
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/standard_16"
         android:layout_marginBottom="@dimen/standard_16"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingEnd="@dimen/mini_4">
 
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="@integer/widget_label" />
 
         <TextView
             android:id="@+id/text_time_estimate"
@@ -119,21 +121,24 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/small_12"
             android:layout_marginTop="@dimen/mini_4"
-            android:layout_weight="3"
+            android:layout_weight="@integer/widget_content"
             android:gravity="start"
             tools:text="&lt; 0.003 ETH ($0.55 USD)≈2 minutes" />
 
         <View
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="0.6" />
+            android:layout_height="1dp"
+            android:layout_weight="@integer/widget_control" />
 
     </LinearLayout>
 
     <TextView
         android:id="@+id/text_speedup_note"
+        style="@style/Aw.Typography.Sub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/standard_16"
+        android:paddingBottom="@dimen/standard_16"
         android:textAlignment="center"
         android:visibility="gone"
         tools:text="@string/text_speedup_note"

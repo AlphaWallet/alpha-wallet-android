@@ -1,5 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -9,20 +11,19 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.alphawallet.app.C;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.EventUtils;
 import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
+import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmTransaction;
@@ -31,9 +32,11 @@ import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
 
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthTransaction;
@@ -43,6 +46,8 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -50,55 +55,46 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
-import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
-
-import javax.inject.Inject;
-
 @HiltViewModel
-public class TransactionDetailViewModel extends BaseViewModel {
+public class TransactionDetailViewModel extends BaseViewModel implements TransactionSendHandlerInterface
+{
     private final ExternalBrowserRouter externalBrowserRouter;
-
     private final FindDefaultNetworkInteract networkInteract;
     private final TokenRepositoryType tokenRepository;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final CreateTransactionInteract createTransactionInteract;
-
+    private final GenericWalletInteract genericWalletInteract;
     private final KeyService keyService;
     private final TokensService tokenService;
     private final GasService gasService;
-    private final AnalyticsServiceType analyticsService;
-
+    private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
     private final MutableLiveData<BigInteger> latestBlock = new MutableLiveData<>();
     private final MutableLiveData<Transaction> latestTx = new MutableLiveData<>();
     private final MutableLiveData<Transaction> transaction = new MutableLiveData<>();
-    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
-    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
-
-    public LiveData<BigInteger> latestBlock() {
-        return latestBlock;
-    }
-    public LiveData<Transaction> latestTx() { return latestTx; }
-    public LiveData<Transaction> onTransaction() { return transaction; }
+    private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
     private String walletAddress;
-
+    @Nullable
+    private Disposable findWalletDisposable;
     @Nullable
     private Disposable pendingUpdateDisposable;
-
     @Nullable
     private Disposable currentBlockUpdateDisposable;
 
     @Inject
     TransactionDetailViewModel(
-            FindDefaultNetworkInteract findDefaultNetworkInteract,
-            ExternalBrowserRouter externalBrowserRouter,
-            TokenRepositoryType tokenRepository,
-            TokensService tokenService,
-            FetchTransactionsInteract fetchTransactionsInteract,
-            KeyService keyService,
-            GasService gasService,
-            CreateTransactionInteract createTransactionInteract,
-            AnalyticsServiceType analyticsService)
+        GenericWalletInteract genericWalletInteract,
+        FindDefaultNetworkInteract findDefaultNetworkInteract,
+        ExternalBrowserRouter externalBrowserRouter,
+        TokenRepositoryType tokenRepository,
+        TokensService tokenService,
+        FetchTransactionsInteract fetchTransactionsInteract,
+        KeyService keyService,
+        GasService gasService,
+        CreateTransactionInteract createTransactionInteract,
+        AnalyticsServiceType analyticsService)
     {
+        this.genericWalletInteract = genericWalletInteract;
         this.networkInteract = findDefaultNetworkInteract;
         this.externalBrowserRouter = externalBrowserRouter;
         this.tokenService = tokenService;
@@ -107,30 +103,63 @@ public class TransactionDetailViewModel extends BaseViewModel {
         this.keyService = keyService;
         this.gasService = gasService;
         this.createTransactionInteract = createTransactionInteract;
-        this.analyticsService = analyticsService;
+        setAnalyticsService(analyticsService);
     }
 
-    public MutableLiveData<TransactionData> transactionFinalised()
+    public LiveData<Wallet> wallet()
+    {
+        return wallet;
+    }
+
+    public LiveData<BigInteger> latestBlock()
+    {
+        return latestBlock;
+    }
+
+    public LiveData<Transaction> latestTx()
+    {
+        return latestTx;
+    }
+
+    public LiveData<Transaction> onTransaction()
+    {
+        return transaction;
+    }
+
+    public MutableLiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
     }
-    public MutableLiveData<Throwable> transactionError() { return transactionError; }
 
-    public void prepare(final long chainId, final String walletAddr)
+    public MutableLiveData<TransactionReturn> transactionError()
     {
-        walletAddress = walletAddr;
-        currentBlockUpdateDisposable = Observable.interval(0, 6, TimeUnit.SECONDS)
-                .doOnNext(l -> {
-                    disposable = tokenRepository.fetchLatestBlockNumber(chainId)
-                            .subscribeOn(Schedulers.io())
-                            .subscribeOn(AndroidSchedulers.mainThread())
-                            .subscribe(latestBlock::postValue, t -> { this.latestBlock.postValue(BigInteger.ZERO); });
-                }).subscribe();
+        return transactionError;
     }
 
-    public void showMoreDetails(Context context, Transaction transaction) {
+    public void prepare(final long chainId)
+    {
+        findWalletDisposable = genericWalletInteract.find()
+            .subscribe(w -> onWallet(w, chainId), this::onError);
+    }
+
+    private void onWallet(Wallet w, long chainId)
+    {
+        wallet.postValue(w);
+        walletAddress = w.address;
+        currentBlockUpdateDisposable = Observable.interval(0, 6, TimeUnit.SECONDS)
+            .doOnNext(l -> {
+                disposable = tokenRepository.fetchLatestBlockNumber(chainId)
+                    .subscribeOn(Schedulers.io())
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(latestBlock::postValue, t -> this.latestBlock.postValue(BigInteger.ZERO));
+            }).subscribe();
+    }
+
+    public void showMoreDetails(Context context, Transaction transaction)
+    {
         Uri uri = buildEtherscanUri(transaction);
-        if (uri != null && Utils.isValidUrl(uri.toString())) {
+        if (uri != null)
+        {
             externalBrowserRouter.open(context, uri);
         }
     }
@@ -160,7 +189,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
     public void shareTransactionDetail(Context context, Transaction transaction)
     {
         Uri shareUri = buildEtherscanUri(transaction);
-        if (shareUri != null) {
+        if (shareUri != null)
+        {
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("text/plain");
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.subject_transaction_detail));
@@ -178,10 +208,14 @@ public class TransactionDetailViewModel extends BaseViewModel {
     private Uri buildEtherscanUri(Transaction transaction)
     {
         NetworkInfo networkInfo = networkInteract.getNetworkInfo(transaction.chainId);
-        if (networkInfo != null) {
+        if (networkInfo != null && Utils.isValidUrl(networkInfo.etherscanUrl))
+        {
             return networkInfo.getEtherscanUri(transaction.hash);
         }
-        return null;
+        else
+        {
+            return null;
+        }
     }
 
     public boolean hasEtherscanDetail(Transaction tx)
@@ -202,8 +236,10 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
     public void onDispose()
     {
-        if (pendingUpdateDisposable != null && !pendingUpdateDisposable.isDisposed()) pendingUpdateDisposable.dispose();
-        if (currentBlockUpdateDisposable != null && !currentBlockUpdateDisposable.isDisposed()) currentBlockUpdateDisposable.dispose();
+        if (pendingUpdateDisposable != null && !pendingUpdateDisposable.isDisposed())
+            pendingUpdateDisposable.dispose();
+        if (currentBlockUpdateDisposable != null && !currentBlockUpdateDisposable.isDisposed())
+            currentBlockUpdateDisposable.dispose();
     }
 
     public void fetchTransaction(Wallet wallet, String txHash, long chainId)
@@ -214,9 +250,9 @@ public class TransactionDetailViewModel extends BaseViewModel {
             //fetch Transaction from chain
             Web3j web3j = getWeb3jService(chainId);
             disposable = EventUtils.getTransactionDetails(txHash, web3j)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(Schedulers.io())
-                    .subscribe(ethTx -> storeTx(ethTx, wallet, chainId, web3j), this::onError);
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(ethTx -> storeTx(ethTx, wallet, chainId, web3j), this::onError);
         }
         else
         {
@@ -235,11 +271,11 @@ public class TransactionDetailViewModel extends BaseViewModel {
 
         org.web3j.protocol.core.methods.response.Transaction ethTx = rawTx.getTransaction().get();
         disposable = EventUtils.getBlockDetails(ethTx.getBlockHash(), web3j)
-                .map(ethBlock -> new Transaction(ethTx, chainId, true, ethBlock.getBlock().getTimestamp().longValue()))
-                .map(tx -> writeTransaction(wallet, tx))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(transaction::postValue, this::onError);
+            .map(ethBlock -> new Transaction(ethTx, chainId, true, ethBlock.getBlock().getTimestamp().longValue()))
+            .map(tx -> writeTransaction(wallet, tx))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(transaction::postValue, this::onError);
     }
 
     private Transaction writeTransaction(Wallet wallet, Transaction tx)
@@ -248,8 +284,8 @@ public class TransactionDetailViewModel extends BaseViewModel {
         {
             instance.beginTransaction();
             RealmTransaction realmTx = instance.where(RealmTransaction.class)
-                    .equalTo("hash", tx.hash)
-                    .findFirst();
+                .equalTo("hash", tx.hash)
+                .findFirst();
 
             if (realmTx == null) realmTx = instance.createObject(RealmTransaction.class, tx.hash);
             TransactionsRealmCache.fill(realmTx, tx);
@@ -296,19 +332,47 @@ public class TransactionDetailViewModel extends BaseViewModel {
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId, String overridenTxHash)
+    public void requestSignature(Web3Transaction finalTx, Wallet wallet, long chainId)
     {
-        disposable = createTransactionInteract
-                .createWithSig(wallet, finalTx, chainId)
-                .subscribe(transactionFinalised::postValue,
-                        transactionError::postValue);
+        createTransactionInteract.requestSignature(finalTx, wallet, chainId, this);
     }
 
-    public void actionSheetConfirm(String mode)
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction w3Tx, SignatureFromKey signatureFromKey)
     {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(mode);
+        createTransactionInteract.sendTransaction(wallet, chainId, w3Tx, signatureFromKey);
+    }
 
-        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        transactionFinalised.postValue(txData);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn error)
+    {
+        transactionError.postValue(error);
+    }
+
+    @Override
+    protected void onCleared()
+    {
+        super.onCleared();
+        if (disposable != null && disposable.isDisposed())
+        {
+            disposable.dispose();
+        }
+        if (findWalletDisposable != null && findWalletDisposable.isDisposed())
+        {
+            findWalletDisposable.dispose();
+        }
+        if (pendingUpdateDisposable != null && pendingUpdateDisposable.isDisposed())
+        {
+            pendingUpdateDisposable.dispose();
+        }
+        if (currentBlockUpdateDisposable != null && currentBlockUpdateDisposable.isDisposed())
+        {
+            currentBlockUpdateDisposable.dispose();
+        }
     }
 }

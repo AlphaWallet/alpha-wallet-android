@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        .imgbox {
+            display: grid;
+            width: 100%;
+            height: 100vh;
+        }
+        .center-fit {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            margin: auto;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="imgbox">
+        <video class="center-fit" autoplay name="media" loop>
+            <source src="[URL]" type="[MIME]">
+        </video>
+        </div>
+    </body>
+</html>

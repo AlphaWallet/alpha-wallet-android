@@ -2,6 +2,7 @@ package com.alphawallet.app.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -32,6 +33,13 @@ public class NetworkDisplayWidget extends LinearLayout
     public void setNetwork(long networkId)
     {
         networkIcon.bindData(networkId);
-        networkName.setText(EthereumNetworkBase.getShortChainName(networkId));
+        if (EthereumNetworkBase.isChainSupported(networkId))
+        {
+            networkName.setText(EthereumNetworkBase.getShortChainName(networkId));
+        }
+        else
+        {
+            networkName.setText(getContext().getString(R.string.unsupported_network, String.valueOf(networkId)));
+        }
     }
 }

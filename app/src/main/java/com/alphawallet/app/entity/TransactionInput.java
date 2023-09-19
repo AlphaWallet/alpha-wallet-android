@@ -1,5 +1,9 @@
 package com.alphawallet.app.entity;
 
+import static com.alphawallet.app.C.BURN_ADDRESS;
+import static com.alphawallet.app.C.ETHER_DECIMALS;
+import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
+
 import android.content.Context;
 import android.text.TextUtils;
 
@@ -23,11 +27,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.alphawallet.app.C.BURN_ADDRESS;
-import static com.alphawallet.app.C.ETHER_DECIMALS;
-import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
-import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
-
 /**
  * Created by James on 4/03/2018.
  *
@@ -47,6 +46,7 @@ public class TransactionInput
     public List<BigInteger> arrayValues;
     public List<String> sigData;
     public List<String> miscData;
+    public List<String> hexArgs;
     public String tradeAddress;
     public TransactionType type;
 
@@ -59,6 +59,7 @@ public class TransactionInput
         addresses = new ArrayList<>();
         sigData = new ArrayList<>();
         miscData = new ArrayList<>();
+        hexArgs = new ArrayList<>();
     }
 
     //Addresses are in 256bit format
@@ -298,7 +299,7 @@ public class TransactionInput
             case UNKNOWN_FUNCTION:
             case INVALID_OPERATION:
             default:
-                address = tx.from;
+                address = tx.to;
                 break;
         }
 
@@ -323,7 +324,7 @@ public class TransactionInput
             byte[] tradeBytes = parser.getTradeBytes(ticketIndexArray, contractAddress, priceWei, expiry);
             //attempt ecrecover
             BigInteger key = Sign.signedMessageToKey(tradeBytes, sig);
-            address = "0x" + Keys.getAddress(key);
+            address = Numeric.prependHexPrefix(Keys.getAddress(key));
         }
         catch (Exception e)
         {
@@ -619,11 +620,11 @@ public class TransactionInput
         {
             if (!token.isEthereum())
             {
-                operationValue = operationValue + " " + token.getSymbol();
+                operationValue = operationValue + " " + token.getShortSymbol();
             }
             else if (!TextUtils.isEmpty(operationValue))
             {
-                operationValue = operationValue + " " + token.getSymbol();
+                operationValue = operationValue + " " + token.getShortSymbol();
             }
             else
             {
@@ -814,5 +815,46 @@ public class TransactionInput
             default:
                 return !tx.value.equals("0");
         }
+    }
+
+    public String buildFunctionCallText()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append(functionData.functionName);
+        sb.append("(");
+        boolean firstArg = true;
+        for (String arg : hexArgs)
+        {
+            if (!firstArg) sb.append(", ");
+            if (arg.startsWith("0"))
+            {
+                sb.append(truncateValue(arg));
+            }
+            else
+            {
+                sb.append(arg);
+            }
+            firstArg = false;
+        }
+
+        sb.append(")");
+
+        return sb.toString();
+    }
+
+    private String truncateValue(String arg)
+    {
+        String retVal = arg;
+        try
+        {
+            BigInteger argVal = new BigInteger(arg, 16);
+            retVal = argVal.toString(16);
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return retVal;
     }
 }

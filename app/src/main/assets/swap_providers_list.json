@@ -1,0 +1,110 @@
+[
+  {
+    "key": "dodo",
+    "name": "DODO",
+    "url": "https://dodoex.io/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/dodo.png"
+  },
+  {
+    "key": "paraswap",
+    "name": "ParaSwap",
+    "url": "https://www.paraswap.io/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/paraswap.png"
+  },
+  {
+    "key": "1inch",
+    "name": "1inch",
+    "url": "https://1inch.io/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/oneinch.png"
+  },
+  {
+    "key": "openocean",
+    "name": "OpenOcean",
+    "url": "https://openocean.finance/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/openocean.png"
+  },
+  {
+    "key": "0x",
+    "name": "0x",
+    "url": "https://www.0x.org/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/zerox.png"
+  },
+  {
+    "key": "superfluid",
+    "name": "Superfluid",
+    "url": "https://www.superfluid.finance/",
+    "logoURI": "https://www.superfluid.finance/assets/favicon/favicon-32x32.png"
+  },
+  {
+    "key": "uniswap",
+    "name": "UniswapV2",
+    "url": "https://uniswap.org/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/uniswap.png"
+  },
+  {
+    "key": "quickswap",
+    "name": "QuickSwap",
+    "url": "https://quickswap.exchange/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/quick.png"
+  },
+  {
+    "key": "pancakeswap",
+    "name": "PancakeSwap",
+    "url": "https://pancakeswap.finance/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/pancake.png"
+  },
+  {
+    "key": "honeyswap",
+    "name": "Honeyswap",
+    "url": "https://honeyswap.org/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/honey.png"
+  },
+  {
+    "key": "spookyswap",
+    "name": "SpookySwap",
+    "url": "https://spooky.fi/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/spooky.png"
+  },
+  {
+    "key": "spiritswap",
+    "name": "SpiritSwap",
+    "url": "https://www.spiritswap.finance/",
+    "logoURI": "https://github.com/Layer3Org/spiritswap-tokens-list-icon/blob/master/token-list/images/inspirit.png?raw=true"
+  },
+  {
+    "key": "solarbeam",
+    "name": "Solarbeam",
+    "url": "https://solarbeam.io/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/solarbeam.png"
+  },
+  {
+    "key": "jswap",
+    "name": "JSwap",
+    "url": "https://app.jswap.finance/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/jswap.png"
+  },
+  {
+    "key": "cronaswap",
+    "name": "CronaSwap",
+    "url": "https://app.cronaswap.org/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/cronaswap.png"
+  },
+  {
+    "key": "voltage",
+    "name": "Voltage",
+    "url": "https://app.voltage.finance/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/voltage.png"
+  },
+  {
+    "key": "ubeswap",
+    "name": "UbeSwap",
+    "url": "https://ubeswap.org/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/ubeswap.png"
+  },
+  {
+    "key": "sushiswap",
+    "name": "SushiSwap",
+    "url": "https://sushi.com/",
+    "logoURI": "https://raw.githubusercontent.com/lifinance/types/main/src/assets/icons/exchanges/sushi.png"
+  }
+]

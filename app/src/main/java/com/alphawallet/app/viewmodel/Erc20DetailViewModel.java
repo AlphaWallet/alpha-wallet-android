@@ -17,6 +17,7 @@ import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.router.SendTokenRouter;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.token.entity.SigReturnType;
@@ -52,13 +53,15 @@ public class Erc20DetailViewModel extends BaseViewModel {
                                 FetchTransactionsInteract fetchTransactionsInteract,
                                 AssetDefinitionService assetDefinitionService,
                                 TokensService tokensService,
-                                OnRampRepositoryType onRampRepository)
+                                OnRampRepositoryType onRampRepository,
+                                AnalyticsServiceType analyticsService)
     {
         this.myAddressRouter = myAddressRouter;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
         this.onRampRepository = onRampRepository;
+        setAnalyticsService(analyticsService);
     }
 
     public LiveData<XMLDsigDescriptor> sig()
@@ -114,7 +117,7 @@ public class Erc20DetailViewModel extends BaseViewModel {
 
     public void checkTokenScriptValidity(Token token)
     {
-        disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)
+        disposable = assetDefinitionService.getSignatureData(token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig::postValue, this::onSigCheckError);

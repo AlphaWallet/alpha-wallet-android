@@ -5,16 +5,27 @@ apply plugin: 'application'
 mainClassName = 'com.alphawallet.scripttool.ScriptTool'
 
 repositories {
+    google()
+    jcenter()
     mavenCentral()
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://plugins.gradle.org/m2/' }
 }
 
 version = '0.1' // current tool for demonstration only
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 17
+targetCompatibility = 17
 
 dependencies {
-    implementation 'org.web3j:core:4.5.0'
+    //implementation 'org.web3j:core:4.9.8'
+    implementation files('../app/libs/abi-4.9.8.jar')
+    implementation files('../app/libs/core-4.9.8.jar')
+    implementation files('../app/libs/crypto-4.9.8.jar')
+    implementation files('../app/libs/utils-4.9.8.jar')
+
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
     testImplementation 'junit:junit:4.12'
     implementation project(path: ':lib')
     // To avoid any kind of class conflicts and logger conflicts, 
@@ -30,5 +41,5 @@ run {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.5'
+    gradleVersion = '7.4.2'
 }

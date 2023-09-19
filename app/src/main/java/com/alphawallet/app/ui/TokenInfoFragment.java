@@ -84,6 +84,7 @@ public class TokenInfoFragment extends BaseFragment {
     private TokenInfoView statsMaxVolume;
     private TokenInfoView stats1YearLow;
     private TokenInfoView stats1YearHigh;
+    private TokenInfoView contractAddress;
 
     @Nullable
     @Override
@@ -129,9 +130,14 @@ public class TokenInfoFragment extends BaseFragment {
             statsMaxVolume = new TokenInfoView(getContext(), "Max Volume");
             stats1YearLow = new TokenInfoView(getContext(), "1 Year Low");
             stats1YearHigh = new TokenInfoView(getContext(), "1 Year High");
+            contractAddress = new TokenInfoView(getContext(), getString(R.string.contract_address));// findViewById(R.id.contract_address);
+            contractAddress.setCopyableValue(token.tokenInfo.address);
 
             tokenInfoHeaderView = new TokenInfoHeaderView(getContext(), token, viewModel.getTokensService());
             tokenInfoHeaderLayout.addView(tokenInfoHeaderView);
+
+            LinearLayout contractAddrView = view.findViewById(R.id.layout_contract_addr);
+            contractAddrView.addView(contractAddress);
 
             /*tokenInfoLayout.addView(new TokenInfoCategoryView(getContext(), "Portfolio"));
             tokenInfoLayout.addView(portfolioBalance);

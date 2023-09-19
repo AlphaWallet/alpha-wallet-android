@@ -1,11 +1,14 @@
 package com.alphawallet.app.viewmodel;
 
 import static com.alphawallet.app.entity.DisplayState.TRANSFER_TO_ADDRESS;
+import static com.alphawallet.token.tools.TokenDefinition.NO_SCRIPT;
+import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
@@ -13,12 +16,13 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
-import com.alphawallet.app.entity.DAppFunction;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -35,6 +39,7 @@ import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
 import com.alphawallet.app.ui.AssetDisplayActivity;
 import com.alphawallet.app.ui.Erc1155AssetSelectActivity;
 import com.alphawallet.app.ui.Erc20DetailActivity;
@@ -50,17 +55,18 @@ import com.alphawallet.app.util.JsonUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.FunctionDefinition;
 import com.alphawallet.token.entity.MethodArg;
 import com.alphawallet.token.entity.SigReturnType;
-import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.gson.Gson;
 
@@ -74,6 +80,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -90,7 +97,8 @@ import timber.log.Timber;
  * Stormbird in Singapore
  */
 @HiltViewModel
-public class TokenFunctionViewModel extends BaseViewModel {
+public class TokenFunctionViewModel extends BaseViewModel implements TransactionSendHandlerInterface
+{
     private final AssetDefinitionService assetDefinitionService;
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
@@ -100,21 +108,19 @@ public class TokenFunctionViewModel extends BaseViewModel {
     private final GenericWalletInteract genericWalletInteract;
     private final OpenSeaService openseaService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
-    private final AnalyticsServiceType analyticsService;
     private final MutableLiveData<Token> insufficientFunds = new MutableLiveData<>();
     private final MutableLiveData<String> invalidAddress = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
     private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
     private final MutableLiveData<Wallet> walletUpdate = new MutableLiveData<>();
-    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
-    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
     private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
+    private final MutableLiveData<Pair<GasEstimate, Web3Transaction>> gasEstimateError = new MutableLiveData<>();
     private final MutableLiveData<List<OpenSeaAsset.Trait>> traits = new MutableLiveData<>();
-    private final MutableLiveData<NFTAsset> attrs = new MutableLiveData<>();
     private final MutableLiveData<AssetContract> assetContract = new MutableLiveData<>();
     private final MutableLiveData<NFTAsset> nftAsset = new MutableLiveData<>();
     private final MutableLiveData<Boolean> scriptUpdateInProgress = new MutableLiveData<>();
-
     private Wallet wallet;
 
     @Nullable
@@ -151,7 +157,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
-        this.analyticsService = analyticsService;
+        setAnalyticsService(analyticsService);
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -184,14 +190,17 @@ public class TokenFunctionViewModel extends BaseViewModel {
         return newScriptFound;
     }
 
-    public LiveData<Boolean> scriptUpdateInProgress() { return scriptUpdateInProgress; }
+    public LiveData<Boolean> scriptUpdateInProgress()
+    {
+        return scriptUpdateInProgress;
+    }
 
-    public MutableLiveData<TransactionData> transactionFinalised()
+    public MutableLiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
     }
 
-    public MutableLiveData<Throwable> transactionError()
+    public MutableLiveData<TransactionReturn> transactionError()
     {
         return transactionError;
     }
@@ -201,14 +210,9 @@ public class TokenFunctionViewModel extends BaseViewModel {
         return gasEstimateComplete;
     }
 
-    public MutableLiveData<List<OpenSeaAsset.Trait>> traits()
+    public MutableLiveData<Pair<GasEstimate, Web3Transaction>> gasEstimateError()
     {
-        return traits;
-    }
-
-    public MutableLiveData<AssetContract> assetContract()
-    {
-        return assetContract;
+        return gasEstimateError;
     }
 
     public MutableLiveData<NFTAsset> nftAsset()
@@ -263,15 +267,23 @@ public class TokenFunctionViewModel extends BaseViewModel {
         ctx.startActivity(intent);
     }
 
-    public void showFunction(Context ctx, Token token, String method, List<BigInteger> tokenIds)
+    public void showFunction(Context ctx, Token token, String method, List<BigInteger> tokenIds, NFTAsset asset)
     {
         Intent intent = new Intent(ctx, FunctionActivity.class);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.Key.WALLET, wallet);
         intent.putExtra(C.EXTRA_STATE, method);
-        if (tokenIds == null)
+        if (asset != null)
+        {
+            intent.putExtra(C.EXTRA_NFTASSET, asset);
+        }
+
+        if (tokenIds == null || tokenIds.size() == 0)
+        {
             tokenIds = new ArrayList<>(Collections.singletonList(BigInteger.ZERO));
+        }
+
         intent.putExtra(C.EXTRA_TOKEN_ID, Utils.bigIntListToString(tokenIds, true));
         intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         ctx.startActivity(intent);
@@ -279,7 +291,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
 
     public void checkTokenScriptValidity(Token token)
     {
-        disposable = assetDefinitionService.getSignatureData(token.tokenInfo.chainId, token.tokenInfo.address)
+        disposable = assetDefinitionService.getSignatureData(token)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(sig::postValue, this::onSigCheckError);
@@ -292,15 +304,6 @@ public class TokenFunctionViewModel extends BaseViewModel {
         failSig.type = SigReturnType.NO_TOKENSCRIPT;
         failSig.subject = throwable.getMessage();
         sig.postValue(failSig);
-    }
-
-    public void signMessage(Signable message, DAppFunction dAppFunction, long chainId)
-    {
-        disposable = createTransactionInteract.sign(wallet, message, chainId)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(sig -> dAppFunction.DAppReturn(sig.signature, message),
-                        error -> dAppFunction.DAppError(error, message));
     }
 
     public String getTransactionBytes(Token token, BigInteger tokenId, FunctionDefinition def)
@@ -357,6 +360,12 @@ public class TokenFunctionViewModel extends BaseViewModel {
         disposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
+    }
+
+    public Single<Wallet> findActiveWallet()
+    {
+        return genericWalletInteract
+                .find();
     }
 
     private void onDefaultWallet(Wallet w)
@@ -497,7 +506,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
             to = action.function.contract.addresses.get(token.tokenInfo.chainId).get(0);
         }
 
-        if (to == null || !Utils.isAddressValid(to))
+        if (!Utils.isAddressValid(to))
         {
             invalidAddress.postValue(to);
             isValid = false;
@@ -563,6 +572,8 @@ public class TokenFunctionViewModel extends BaseViewModel {
         {
             scriptUpdate.dispose();
         }
+
+        gasService.stopGasPriceCycle();
     }
 
     public OpenSeaService getOpenseaService()
@@ -587,13 +598,17 @@ public class TokenFunctionViewModel extends BaseViewModel {
 
     private void handleDefinition(TokenDefinition td)
     {
-        if (!TextUtils.isEmpty(td.holdingToken))
+        switch (td.nameSpace)
         {
-            newScriptFound.postValue(true);
-        }
-        else
-        {
-            scriptUpdateInProgress.postValue(false);
+            case UNCHANGED_SCRIPT:
+                newScriptFound.postValue(false);
+                break;
+            case NO_SCRIPT:
+                scriptUpdateInProgress.postValue(false);
+                break;
+            default:
+                newScriptFound.postValue(true);
+                break;
         }
     }
 
@@ -633,19 +648,28 @@ public class TokenFunctionViewModel extends BaseViewModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(estimate -> buildNewConfirmation(estimate, w3tx),
-                        error -> buildNewConfirmation(BigInteger.ZERO, w3tx)); //node didn't like this tx
+                        error -> {
+                            buildNewConfirmation(new GasEstimate(BigInteger.ZERO), w3tx); //node didn't like this tx
+                        });
     }
 
-    private void buildNewConfirmation(BigInteger estimate, Web3Transaction w3tx)
+    private void buildNewConfirmation(GasEstimate estimate, Web3Transaction w3tx)
     {
-        gasEstimateComplete.postValue(new Web3Transaction(
-                w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, estimate, w3tx.nonce, w3tx.payload, w3tx.description));
+        if (estimate.hasError())
+        {
+            gasEstimateError.postValue(new Pair<>(estimate, w3tx));
+        }
+        else
+        {
+            gasEstimateComplete.postValue(new Web3Transaction(
+                    w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, estimate.getValue(), w3tx.nonce, w3tx.payload, w3tx.description));
+        }
     }
 
     @Override
     public void showErc20TokenDetail(Activity context, @NotNull String address, String symbol, int decimals, @NotNull Token token)
     {
-        boolean hasDefinition = assetDefinitionService.hasDefinition(token.tokenInfo.chainId, address);
+        boolean hasDefinition = assetDefinitionService.hasDefinition(token);
         Intent intent = new Intent(context, Erc20DetailActivity.class);
         intent.putExtra(C.EXTRA_SENDING_TOKENS, !token.isEthereum());
         intent.putExtra(C.EXTRA_CONTRACT_ADDRESS, address);
@@ -690,29 +714,11 @@ public class TokenFunctionViewModel extends BaseViewModel {
         return tokensService;
     }
 
-    public void getAuthentication(Activity activity, SignAuthenticationCallback callback)
-    {
-        genericWalletInteract.find()
-                .subscribe(wallet -> keyService.getAuthenticationForSignature(wallet, activity, callback))
-                .isDisposed();
-    }
-
-    public void sendTransaction(Web3Transaction finalTx, long chainId, String overridenTxHash)
-    {
-        disposable = createTransactionInteract
-                .createWithSig(wallet, finalTx, chainId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(transactionFinalised::postValue,
-                        transactionError::postValue);
-    }
-
     public void actionSheetConfirm(String mode)
     {
-        AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-        analyticsProperties.setData(mode);
-
-        analyticsService.track(C.AN_CALL_ACTIONSHEET, analyticsProperties);
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        track(Analytics.Action.ACTION_SHEET_COMPLETED, props);
     }
 
     public Single<Intent> showTransferSelectCount(Context ctx, Token token, BigInteger tokenId)
@@ -732,16 +738,15 @@ public class TokenFunctionViewModel extends BaseViewModel {
         return intent;
     }
 
-    public Single<Intent> getTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)
+    public Intent getTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection)
     {
-        return genericWalletInteract.find()
-                .map(wallet -> completeTransferIntent(ctx, token, tokenIds, selection, wallet));
+        return completeTransferIntent(ctx, token, tokenIds, selection, getWallet());
     }
 
     private Intent completeTransferIntent(Context ctx, Token token, List<BigInteger> tokenIds, ArrayList<NFTAsset> selection, Wallet wallet)
     {
         Intent intent = new Intent(ctx, TransferNFTActivity.class);
-        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.Key.WALLET, wallet.address);
         intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
         intent.putExtra(C.EXTRA_ADDRESS, token.getAddress());
         intent.putExtra(C.EXTRA_TOKENID_LIST, Utils.bigIntListToString(tokenIds, true));
@@ -870,7 +875,7 @@ public class TokenFunctionViewModel extends BaseViewModel {
                     }
                     else
                     {
-                        storeAsset(token, tokenId, new NFTAsset(result), oldAsset);
+                        storeAsset(token, tokenId, asset, oldAsset);
                         asset.attachOpenSeaAssetData(osAsset);
                         nftAsset.postValue(asset);
                     }
@@ -892,4 +897,119 @@ public class TokenFunctionViewModel extends BaseViewModel {
             getTokenMetadata(token, tokenId, oldAsset);
         }
     }
+
+    public String getBrowserRPC(long chainId)
+    {
+        return ethereumNetworkRepository.getDappBrowserRPC(chainId);
+    }
+
+    public boolean hasTokenScript(Token token)
+    {
+        return token != null && assetDefinitionService.getAssetDefinition(token) != null;
+    }
+
+    public void updateLocalAttributes(Token token, BigInteger tokenId)
+    {
+        //Fetch Allowed attributes, then call updateAllowedAttributes
+        assetDefinitionService.fetchFunctionMap(token, Collections.singletonList(tokenId), token.getInterfaceSpec())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(availableActions -> updateAllowedAttrs(token, availableActions), this::onError)
+                .isDisposed();
+    }
+
+    private void updateAllowedAttrs(Token token, Map<BigInteger, List<String>> availableActions)
+    {
+        if (!availableActions.keySet().stream().findFirst().isPresent())
+        {
+            return;
+        }
+        TokenDefinition td = assetDefinitionService.getAssetDefinition(token);
+        List<Attribute> localAttrList = assetDefinitionService.getLocalAttributes(td, availableActions);
+
+        //now refresh all these attrs
+        assetDefinitionService.refreshAttributes(token, td, availableActions.keySet().stream().findFirst().get(), localAttrList)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(v -> { }, this::onError)
+                .isDisposed();
+    }
+
+    //Transaction handling
+
+    public void getAuthentication(Activity activity, SignAuthenticationCallback callback)
+    {
+        genericWalletInteract.find()
+                .subscribe(wallet -> keyService.getAuthenticationForSignature(wallet, activity, callback))
+                .isDisposed();
+    }
+
+    public void getAuthentication(Activity activity, Wallet wallet, SignAuthenticationCallback callback)
+    {
+        keyService.getAuthenticationForSignature(wallet, activity, callback);
+    }
+
+    public void requestSignature(Web3Transaction finalTx, Wallet wallet, long chainId)
+    {
+        createTransactionInteract.requestSignature(finalTx, wallet, chainId, this);
+    }
+
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction tx, SignatureFromKey signatureFromKey)
+    {
+        createTransactionInteract.sendTransaction(wallet, chainId, tx, signatureFromKey);
+    }
+
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        transactionFinalised.postValue(txData);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn rtn)
+    {
+        transactionError.postValue(rtn);
+    }
+
+    public void loadWallet(String address)
+    {
+        disposable = genericWalletInteract
+                .findWallet(address)
+                .subscribe(this::onDefaultWallet, this::onError);
+    }
+
+    public Single<Wallet> findWallet(String walletAddress)
+    {
+        return genericWalletInteract.findWallet(walletAddress);
+    }
+
+
+    public String addAttestationAttrs(NFTAsset asset, Token token, TSAction action)
+    {
+        StringBuilder attrs = new StringBuilder();
+        if (asset != null && asset.isAttestation())
+        {
+            List<TokenScriptResult.Attribute> attestationAttrs = assetDefinitionService.getAttestationAttrs(token, action, asset.getAttestationID());
+            if (attestationAttrs != null)
+            {
+                for (TokenScriptResult.Attribute attr : attestationAttrs)
+                {
+                    onAttr(attrs, attr);
+                }
+            }
+        }
+
+        return attrs.toString();
+    }
+
+    private void onAttr(StringBuilder attrs, TokenScriptResult.Attribute attribute)
+    {
+        //is the attr incomplete?
+        if (!TextUtils.isEmpty(attribute.id))
+        {
+            Timber.d("ATTR/FA: " + attribute.id + " (" + attribute.name + ")" + " : " + attribute.text);
+            TokenScriptResult.addPair(attrs, attribute);
+        }
+    }
+
 }

@@ -7,7 +7,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 /**
  * Created by James on 24/02/2018.

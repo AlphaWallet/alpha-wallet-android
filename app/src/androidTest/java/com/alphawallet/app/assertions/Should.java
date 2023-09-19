@@ -8,8 +8,8 @@ import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withSubstring;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.alphawallet.app.util.Helper.waitUntil;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
 import android.widget.TextView;
@@ -18,7 +18,7 @@ import com.alphawallet.app.R;
 
 public class Should
 {
-    private static final int TIMEOUT_IN_SECONDS = 5 * 60;
+    private static final int TIMEOUT_IN_SECONDS = 10;
 
     public static void shouldSee(String text)
     {
@@ -28,6 +28,11 @@ public class Should
     public static void shouldNotSee(String text)
     {
         onView(isRoot()).perform(waitUntil(not(withSubstring(text)), TIMEOUT_IN_SECONDS));
+    }
+
+    public static void shouldNotSee(int id)
+    {
+        onView(isRoot()).perform(waitUntil(not(withId(id)), TIMEOUT_IN_SECONDS));
     }
 
     public static void shouldSee(int id)

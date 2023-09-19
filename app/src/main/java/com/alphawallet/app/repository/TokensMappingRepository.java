@@ -1,11 +1,11 @@
 package com.alphawallet.app.repository;
 
-import static android.text.format.DateUtils.DAY_IN_MILLIS;
+import android.content.Context;
 
-import android.util.Pair;
-
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.TokensMapping;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -13,67 +13,108 @@ import com.google.gson.reflect.TypeToken;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import timber.log.Timber;
+public class TokensMappingRepository implements TokensMappingRepositoryType
+{
+    private static final String TOKENS_JSON_FILENAME = "tokens.json";
+    private final Context context;
+    private Map<String, TokenGroup> tokenMap;
+    private Map<String, ContractAddress> contractMappings;
 
-public class TokensMappingRepository {
+    public TokensMappingRepository(Context context)
+    {
+        this.context = context;
 
-    private final OkHttpClient httpClient;
-    private final TokenLocalSource source;
+        init();
+    }
 
-    public TokensMappingRepository(TokenLocalSource localSource) {
-        this.httpClient = new OkHttpClient();
-        this.source = localSource;
-
-        //find when we last updated
-        if (source.getLastMappingsUpdate() < (System.currentTimeMillis() - DAY_IN_MILLIS))
+    private void init()
+    {
+        if (tokenMap == null || contractMappings == null)
         {
-            fetchTokenList() //Fetch the token list from github and store into a pair of mappings, 1st mapping is the derivative tokens with a pointer to their base token. Second is the base token and grouping
-                    .map(source::storeTokensMapping) //Store these mappings into an optimal database. Note the mappings are not used again, we instead use the realm database
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe()
-                    .isDisposed();
+            createMap(Utils.loadJSONFromAsset(context, TOKENS_JSON_FILENAME));
         }
     }
 
-    public Single<Pair<Map<String, ContractAddress>, Map<String, TokenGroup>>> fetchTokenList()
+    private void createMap(String mapping)
     {
-        return Single.fromCallable(() -> {
+        tokenMap = new HashMap<>();
+        contractMappings = new HashMap<>();
+        TokensMapping[] tokensMapping = new Gson().fromJson(mapping, new TypeToken<TokensMapping[]>()
+        {
+        }.getType());
 
-            Request request = new Request.Builder()
-                    .url("https://raw.githubusercontent.com/AlphaWallet/TokenTest/master/tokens.json")
-                    .get()
-                    .build();
-
-            Map<String, ContractAddress> sourceMap = new HashMap<>();
-            Map<String, TokenGroup> baseMappings = new HashMap<>();
-
-            try (okhttp3.Response response = httpClient.newCall(request)
-                    .execute())
+        if (tokensMapping != null)
+        {
+            for (TokensMapping entry : tokensMapping)
             {
-                TokensMapping[] tokensMapping = new Gson().fromJson(response.body().string(), new TypeToken<TokensMapping[]>() {}.getType());
-
-                for (TokensMapping thisMapping : tokensMapping)
+                ContractAddress baseAddress = null;
+                for (ContractAddress address : entry.getContracts())
                 {
-                    ContractAddress baseAddress = thisMapping.getContracts().get(0);
-                    baseMappings.put(baseAddress.getAddressKey(), thisMapping.getGroup()); //insert base mapping (eg DAI on mainnet) along with token type
-                    for (int i = 1; i < thisMapping.getContracts().size(); i++)
+                    tokenMap.putIfAbsent(address.getAddressKey(), entry.getGroup());
+                    if (baseAddress == null)
                     {
-                        sourceMap.put(thisMapping.getContracts().get(i).getAddressKey(), baseAddress); //insert mirrored token with pointer to base token (eg DAI on Arbitrum).
+                        baseAddress = address;
+                    }
+                    else
+                    {
+                        contractMappings.putIfAbsent(address.getAddressKey(), baseAddress); // make a note of contracts that mirror base addresses - this should be used in the
                     }
                 }
             }
-            catch (Exception e)
-            {
-                Timber.e(e);
-            }
+        }
+    }
 
-            return new Pair<>(sourceMap, baseMappings);
-        });
+    @Override
+    public TokenGroup getTokenGroup(long chainId, String address, ContractType type)
+    {
+        if (tokenMap == null) init();
+
+        TokenGroup result = TokenGroup.ASSET;
+
+        TokenGroup g = tokenMap.get(ContractAddress.toAddressKey(chainId, address));
+        if (g != null)
+        {
+            result = g;
+        }
+
+        if (result == TokenGroup.SPAM)
+        {
+            return result;
+        }
+
+        switch (type)
+        {
+            case NOT_SET:
+            case OTHER:
+            case ETHEREUM:
+            case CURRENCY:
+            case CREATION:
+            case DELETED_ACCOUNT:
+            case ERC20:
+            default:
+                return result;
+
+            case ERC721:
+            case ERC721_ENUMERABLE:
+            case ERC875_LEGACY:
+            case ERC875:
+            case ERC1155:
+            case ERC721_LEGACY:
+            case ERC721_TICKET:
+            case ERC721_UNDETERMINED:
+                return TokenGroup.NFT;
+        }
+    }
+
+    /**
+     * Return the base token this token was initially derived from or self if there's no mapping
+     * @param chainId
+     * @param address
+     * @return
+     */
+    @Override
+    public ContractAddress getBaseToken(long chainId, String address)
+    {
+        return contractMappings.getOrDefault(ContractAddress.toAddressKey(chainId, address), new ContractAddress(chainId, address));
     }
 }

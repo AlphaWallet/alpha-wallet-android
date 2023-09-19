@@ -425,6 +425,71 @@ public class AWRealmMigration implements RealmMigration
             }
             oldVersion++;
         }
+
+        if (oldVersion == 46)
+        {
+            RealmObjectSchema realmData = schema.get("RealmTokenScriptData");
+            if (realmData != null && !realmData.hasField("ipfsPath"))
+            {
+                realmData.addField("ipfsPath", String.class);
+            }
+            oldVersion++;
+        }
+
+        if (oldVersion >= 47 && oldVersion <= 50)
+        {
+            RealmObjectSchema realmData = schema.get("RealmAttestation");
+            if (realmData == null)
+            {
+                schema.create("RealmAttestation")
+                        .addField("address", String.class, FieldAttribute.PRIMARY_KEY)
+                        .addField("name", String.class)
+                        .addField("chains", String.class)
+                        .addField("subTitle", String.class)
+                        .addField("id", String.class)
+                        .addField("hash", String.class)
+                        .addField("attestation", String.class);
+            }
+            else if (!realmData.hasField("attestation"))
+            {
+                realmData.addField("attestation", String.class);
+            }
+
+            oldVersion = 51;
+        }
+
+        if (oldVersion == 51)
+        {
+            RealmObjectSchema realmData = schema.get("RealmTokenScriptData");
+            if (realmData != null && !realmData.hasField("schemaUID"))
+            {
+                realmData.addField("schemaUID", String.class);
+            }
+
+            realmData = schema.get("RealmAttestation");
+            if (realmData != null && !realmData.hasField("identifierHash"))
+            {
+                realmData.addField("identifierHash", String.class);
+            }
+
+            if (realmData != null && realmData.hasField("hash"))
+            {
+                realmData.renameField("hash", "schemaUID");
+            }
+
+            oldVersion = 52;
+        }
+
+        if (oldVersion == 52)
+        {
+            RealmObjectSchema realmData = schema.get("RealmAttestation");
+            if (realmData != null && realmData.hasField("schemaUID"))
+            {
+                realmData.renameField("schemaUID", "collectionId");
+            }
+
+            oldVersion = 53;
+        }
     }
 
     @Override

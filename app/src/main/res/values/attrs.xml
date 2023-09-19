@@ -36,8 +36,12 @@
     </declare-styleable>
     <declare-styleable name="StandardHeader">
         <attr name="headerText" format="string" />
+        <attr name="controlText" format="integer" />
+        <attr name="controlImageRes" format="integer" />
         <attr name="showSwitch" format="boolean" />
         <attr name="showChain" format="boolean" />
+        <attr name="showTextControl" format="boolean" />
+        <attr name="showImageControl" format="boolean" />
     </declare-styleable>
     <declare-styleable name="TokenInfoCategoryView">
         <attr name="title" format="string" />
@@ -72,6 +76,7 @@
         <attr name="marginRight" format="dimension" />
         <attr name="textColour" format="color" />
         <attr name="android:gravity" />
+        <attr name="lines" />
     </declare-styleable>
     <declare-styleable name="BarcodeScannerView">
         <attr name="shouldScaleToFill" format="boolean" />
@@ -106,6 +111,9 @@
         <attr name="swValueRes" format="integer" />
         <attr name="swCaptionRes" format="integer" />
     </declare-styleable>
+    <declare-styleable name="SignDataWidget">
+        <attr name="noTitle" format="boolean" />
+    </declare-styleable>
     <declare-styleable name="BottomSheetToolbarView">
         <attr name="title"/>
         <attr name="text"/>
@@ -119,8 +127,6 @@
     <attr name="colorSurfaceDark" format="reference" />
     <attr name="colorSurfaceSearch" format="reference" />
     <attr name="colorIconBackgroundCompensate" format="reference" />
-
-
     <declare-styleable name="NodeStatusInfo">
         <attr name="android:icon"/>
         <attr name="android:text"/>

@@ -7,22 +7,23 @@ import android.os.Bundle;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.MediaLinks;
+import com.alphawallet.app.viewmodel.SupportSettingsViewModel;
 import com.alphawallet.app.widget.SettingsItemView;
 
+import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
 
-import dagger.hilt.android.AndroidEntryPoint;
-
 @AndroidEntryPoint
-public class SupportSettingsActivity extends BaseActivity {
-
+public class SupportSettingsActivity extends BaseActivity
+{
+    private SupportSettingsViewModel viewModel;
     private LinearLayout supportSettingsLayout;
-
     private SettingsItemView telegram;
     private SettingsItemView discord;
     private SettingsItemView email;
@@ -34,19 +35,36 @@ public class SupportSettingsActivity extends BaseActivity {
     private SettingsItemView github;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_generic_settings);
 
         toolbar();
+
         setTitle(getString(R.string.title_support));
+
+        initViewModel();
 
         initializeSettings();
 
         addSettingsToLayout();
     }
 
-    private void initializeSettings() {
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        viewModel.track(Analytics.Navigation.SETTINGS_SUPPORT);
+    }
+
+    private void initViewModel()
+    {
+        viewModel = new ViewModelProvider(this).get(SupportSettingsViewModel.class);
+    }
+
+    private void initializeSettings()
+    {
         telegram = new SettingsItemView.Builder(this)
                 .withIcon(R.drawable.ic_logo_telegram)
                 .withTitle(R.string.telegram)
@@ -102,25 +120,31 @@ public class SupportSettingsActivity extends BaseActivity {
                 .build();
     }
 
-    private void addSettingsToLayout() {
+    private void addSettingsToLayout()
+    {
         supportSettingsLayout = findViewById(R.id.layout);
-        if (MediaLinks.AWALLET_TELEGRAM_URL != null) {
+        if (MediaLinks.AWALLET_TELEGRAM_URL != null)
+        {
             supportSettingsLayout.addView(telegram);
         }
 
-        if (MediaLinks.AWALLET_DISCORD_URL != null){
+        if (MediaLinks.AWALLET_DISCORD_URL != null)
+        {
             supportSettingsLayout.addView(discord);
         }
 
-        if (MediaLinks.AWALLET_EMAIL1 != null) {
+        if (MediaLinks.AWALLET_EMAIL1 != null)
+        {
             supportSettingsLayout.addView(email);
         }
 
-        if (MediaLinks.AWALLET_TWITTER_URL != null) {
+        if (MediaLinks.AWALLET_TWITTER_URL != null)
+        {
             supportSettingsLayout.addView(twitter);
         }
 
-        if (MediaLinks.AWALLET_GITHUB != null) {
+        if (MediaLinks.AWALLET_GITHUB != null)
+        {
             supportSettingsLayout.addView(github);
         }
 
@@ -138,47 +162,63 @@ public class SupportSettingsActivity extends BaseActivity {
         supportSettingsLayout.addView(faq);
     }
 
-    private void onTelegramClicked() {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(MediaLinks.AWALLET_TELEGRAM_URL));
-        if (isAppAvailable(C.TELEGRAM_PACKAGE_NAME)) {
-            intent.setPackage(C.TELEGRAM_PACKAGE_NAME);
+    private void onTelegramClicked()
+    {
+        if (MediaLinks.isMediaTargeted(getApplicationContext()))
+        {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(MediaLinks.AWALLET_TELEGRAM_URL));
+            if (isAppAvailable(C.TELEGRAM_PACKAGE_NAME))
+            {
+                intent.setPackage(C.TELEGRAM_PACKAGE_NAME);
+            }
+            try
+            {
+                viewModel.track(Analytics.Action.SUPPORT_TELEGRAM);
+                startActivity(intent);
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
         }
-        try {
+    }
+
+    private void onGitHubClicked()
+    {
+        try
+        {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(MediaLinks.AWALLET_GITHUB));
+            viewModel.track(Analytics.Action.SUPPORT_GITHUB);
             startActivity(intent);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Timber.e(e);
         }
     }
 
-    private void onGitHubClicked() {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-
-        intent.setData(Uri.parse(MediaLinks.AWALLET_GITHUB));
-
-        try {
-            startActivity(intent);
-        } catch (Exception e) {
-            Timber.e(e);
+    private void onDiscordClicked()
+    {
+        if (MediaLinks.isMediaTargeted(getApplicationContext()))
+        {
+            try
+            {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                viewModel.track(Analytics.Action.SUPPORT_DISCORD);
+                startActivity(intent);
+            }
+            catch (Exception e)
+            {
+                Timber.e(e);
+            }
         }
     }
 
-    private void onDiscordClicked(){
-        Intent intent;
-        try {
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        } catch (Exception e) {
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_DISCORD_URL));
-        }
-        try {
-            startActivity(intent);
-        } catch (Exception e) {
-            Timber.e(e);
-        }
-    }
-
-    private void onEmailClicked() {
+    private void onEmailClicked()
+    {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         final String at = "@";
         String email =
@@ -187,94 +227,133 @@ public class SupportSettingsActivity extends BaseActivity {
                         "&body=" + Uri.encode("");
         intent.setData(Uri.parse(email));
 
-        try {
+        try
+        {
+            viewModel.track(Analytics.Action.SUPPORT_EMAIL);
             startActivity(intent);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Timber.e(e);
         }
     }
 
-    private void onLinkedInClicked() {
+    private void onLinkedInClicked()
+    {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(MediaLinks.AWALLET_LINKEDIN_URL));
-        if (isAppAvailable(C.LINKEDIN_PACKAGE_NAME)) {
+        if (isAppAvailable(C.LINKEDIN_PACKAGE_NAME))
+        {
             intent.setPackage(C.LINKEDIN_PACKAGE_NAME);
         }
-        try {
+        try
+        {
             startActivity(intent);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Timber.e(e);
         }
     }
 
-    private void onTwitterClicked() {
+    private void onTwitterClicked()
+    {
         Intent intent;
-        try {
+        try
+        {
             getPackageManager().getPackageInfo(C.TWITTER_PACKAGE_NAME, 0);
             intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_URL));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_TWITTER_URL));
         }
-        try {
+        try
+        {
+            viewModel.track(Analytics.Action.SUPPORT_TWITTER);
             startActivity(intent);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Timber.e(e);
         }
     }
 
-    private void onRedditClicked() {
+    private void onRedditClicked()
+    {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        if (isAppAvailable(C.REDDIT_PACKAGE_NAME)) {
+        if (isAppAvailable(C.REDDIT_PACKAGE_NAME))
+        {
             intent.setPackage(C.REDDIT_PACKAGE_NAME);
         }
 
         intent.setData(Uri.parse(MediaLinks.AWALLET_REDDIT_URL));
 
-        try {
+        try
+        {
             startActivity(intent);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Timber.e(e);
         }
     }
 
-    private void onFacebookClicked() {
+    private void onFacebookClicked()
+    {
         Intent intent;
-        try {
+        try
+        {
             getPackageManager().getPackageInfo(C.FACEBOOK_PACKAGE_NAME, 0);
             intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_URL));
             //intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_ID));
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MediaLinks.AWALLET_FACEBOOK_URL));
         }
-        try {
+        try
+        {
             startActivity(intent);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Timber.e(e);
         }
     }
 
-    private void onBlogClicked() {
+    private void onBlogClicked()
+    {
 
     }
 
-    private void onFaqClicked() {
+    private void onFaqClicked()
+    {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(MediaLinks.AWALLET_FAQ_URL));
 
-        try {
+        try
+        {
+            viewModel.track(Analytics.Action.SUPPORT_FAQ);
             startActivity(intent);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Timber.e(e);
         }
     }
 
-    private boolean isAppAvailable(String packageName) {
+    private boolean isAppAvailable(String packageName)
+    {
         PackageManager pm = getPackageManager();
-        try {
+        try
+        {
             pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
             return true;
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             return false;
         }
     }

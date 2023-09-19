@@ -1,4 +1,7 @@
 <code_scheme name="Project" version="173">
+  <JetCodeStyleSettings>
+    <option name="CODE_STYLE_DEFAULTS" value="KOTLIN_OFFICIAL" />
+  </JetCodeStyleSettings>
   <codeStyleSettings language="JAVA">
     <option name="BRACE_STYLE" value="2" />
     <option name="CLASS_BRACE_STYLE" value="2" />
@@ -7,8 +10,9 @@
     <option name="WHILE_ON_NEW_LINE" value="true" />
     <option name="CATCH_ON_NEW_LINE" value="true" />
     <option name="FINALLY_ON_NEW_LINE" value="true" />
-    <option name="KEEP_SIMPLE_LAMBDAS_IN_ONE_LINE" value="true" />
     <option name="DOWHILE_BRACE_FORCE" value="3" />
+    <option name="FOR_BRACE_FORCE" value="3" />
+    <option name="WRAP_LONG_LINES" value="true" />
   </codeStyleSettings>
   <codeStyleSettings language="XML">
     <indentOptions>
@@ -121,5 +125,8 @@
         </section>
       </rules>
     </arrangement>
+  </codeStyleSettings>
+  <codeStyleSettings language="kotlin">
+    <option name="CODE_STYLE_DEFAULTS" value="KOTLIN_OFFICIAL" />
   </codeStyleSettings>
 </code_scheme>

@@ -75,7 +75,10 @@ public class ImportKeystoreFragment extends ImportFragment
     public void onResume()
     {
         super.onResume();
-        if (keystore == null && getActivity() != null) setupView();
+        if (keystore == null || password == null)
+        {
+            requireActivity().recreate();
+        }
     }
 
     @Override
@@ -93,11 +96,7 @@ public class ImportKeystoreFragment extends ImportFragment
     {
         if (password.getVisibility() == View.GONE)
         {
-            keystore.setVisibility(View.GONE);
-            password.setVisibility(View.VISIBLE);
-            passwordText.setVisibility(View.VISIBLE);
-            password.requestFocus();
-            updateButtonState(false);
+            showPassword();
         }
         else
         {
@@ -125,17 +124,31 @@ public class ImportKeystoreFragment extends ImportFragment
     {
         if (password != null && password.getVisibility() == View.VISIBLE)
         {
-            keystore.setVisibility(View.VISIBLE);
-            password.setVisibility(View.GONE);
-            passwordText.setVisibility(View.GONE);
-            keystore.requestFocus();
-            updateButtonState(true);
+            showKeystore();
             return true;
         }
         else
         {
             return false;
         }
+    }
+
+    public void showKeystore()
+    {
+        keystore.setVisibility(View.VISIBLE);
+        password.setVisibility(View.GONE);
+        passwordText.setVisibility(View.GONE);
+        keystore.requestFocus();
+        updateButtonState(true);
+    }
+
+    private void showPassword()
+    {
+        keystore.setVisibility(View.GONE);
+        password.setVisibility(View.VISIBLE);
+        passwordText.setVisibility(View.VISIBLE);
+        password.requestFocus();
+        updateButtonState(false);
     }
 
     public void setOnImportKeystoreListener(@Nullable OnImportKeystoreListener onImportKeystoreListener) {

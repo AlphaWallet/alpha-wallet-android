@@ -9,28 +9,42 @@
 #   define HAS_KEYS 0
 #endif
 
+#define QUOTE(str) #str
+#define EXPAND_AND_QUOTE(str) QUOTE(str)
+
 #ifdef IFKEY
 #   define HAS_INFURA 1
+#   define INFURA_Q EXPAND_AND_QUOTE(IFKEY)
 #else
 #   define HAS_INFURA 0
 #endif
 
 #ifdef OSKEY
 #   define HAS_OS 1
+#   define OSKEY_Q EXPAND_AND_QUOTE(OSKEY)
 #else
 #   define HAS_OS 0
 #endif
 
 #ifdef PSKEY
 #   define HAS_PS 1
+#   define PSKEY_Q EXPAND_AND_QUOTE(PSKEY)
 #else
 #   define HAS_PS 0
 #endif
 
 #ifdef ASKEY
 #   define HAS_AS 1
+#   define ASKEY_Q EXPAND_AND_QUOTE(ASKEY)
 #else
 #   define HAS_AS 0
+#endif
+
+#ifdef WCKEY
+#   define HAS_WC 1
+#   define WCKEY_Q EXPAND_AND_QUOTE(WCKEY)
+#else
+#   define HAS_WC 0
 #endif
 
 JNIEXPORT jstring JNICALL
@@ -39,7 +53,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getInfuraKey( JNIEnv* env
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, infuraKey);
 #elif (HAS_INFURA == 1)
-    return (*env)->NewStringUTF(env, IFKEY);
+    return (*env)->NewStringUTF(env, INFURA_Q);
 #else
     const jstring key = "da3717f25f824cc1baa32d812386d93f";
     return (*env)->NewStringUTF(env, key);
@@ -69,12 +83,36 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getRampKey( JNIEnv* env, 
 }
 
 JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getCoinbasePayAppId( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, coinbasePayAppId);
+#else
+    const jstring key = ""; // <-- replace with your Coinbase Pay app id
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSecondaryInfuraKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, secondaryInfuraKey);
 #elif (HAS_INFURA == 1)
-    return (*env)->NewStringUTF(env, IFKEY);
+    return (*env)->NewStringUTF(env, INFURA_Q);
+#else
+    const jstring key = "da3717f25f824cc1baa32d812386d93f";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getTertiaryInfuraKey( JNIEnv* env, jobject thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, tertiaryInfuraKey);
+#elif (HAS_INFURA == 1)
+    return (*env)->NewStringUTF(env, INFURA_Q);
 #else
     const jstring key = "da3717f25f824cc1baa32d812386d93f";
     return (*env)->NewStringUTF(env, key);
@@ -128,7 +166,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getPolygonScanKey(JNIEnv 
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, polygonScanKey);
 #elif (HAS_PS == 1)
-    return (*env)->NewStringUTF(env, PSKEY);
+    return (*env)->NewStringUTF(env, PSKEY_Q);
 #else
     const jstring key = "";
     return (*env)->NewStringUTF(env, key);
@@ -152,7 +190,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getAuroraScanKey( JNIEnv*
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, auroraKey);
 #elif (HAS_AURORA == 1)
-    return (*env)->NewStringUTF(env, ASKEY);
+    return (*env)->NewStringUTF(env, ASKEY_Q);
 #else
     const jstring key = "...";
     return (*env)->NewStringUTF(env, key);
@@ -165,7 +203,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getOpenSeaKey( JNIEnv* en
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, openSeaKey);
 #elif (HAS_OS == 1)
-    return (*env)->NewStringUTF(env, OSKEY);
+    return (*env)->NewStringUTF(env, OSKEY_Q);
 #else
     const jstring key = "...";
     return (*env)->NewStringUTF(env, key);
@@ -173,7 +211,100 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getOpenSeaKey( JNIEnv* en
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_util_AWEnsResolver_getOpenSeaKey( JNIEnv* env, jclass thiz )
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getWalletConnectProjectId( JNIEnv* env, jclass thiz )
 {
-    return Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getOpenSeaKey(env, thiz);
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, walletConnectProjectId);
+#elif (HAS_WC == 1)
+    return (*env)->NewStringUTF(env, WCKEY_Q);
+#else
+    return (*env)->NewStringUTF(env, ""); // Doesn't have walletconnect key
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getInfuraSecret(JNIEnv *env, jobject thiz) {
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, infuraSecret);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getUnstoppableDomainsKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, unstoppableDomainsKey);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getOkLinkKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, oklinkKey);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBlockPiBaobabKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, blockpiBaobab);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBlockPiCypressKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, blockpiCypress);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBlockNativeKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, blockNative);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSmartPassKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, smartpass);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSmartPassDevKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, smartpassDev);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
 }

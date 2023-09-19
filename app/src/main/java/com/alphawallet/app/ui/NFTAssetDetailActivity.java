@@ -1,22 +1,27 @@
 package com.alphawallet.app.ui;
 
+import static android.text.Html.FROM_HTML_MODE_LEGACY;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+import static java.util.Collections.singletonList;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.lifecycle.ViewModelProvider;
@@ -24,19 +29,24 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.OpenSeaAsset;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.NFTAttributeLayout;
-import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.util.ShortcutUtils;
 import com.alphawallet.app.viewmodel.TokenFunctionViewModel;
+import com.alphawallet.app.web3.Web3TokenView;
+import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
@@ -46,8 +56,14 @@ import com.alphawallet.app.widget.NFTImageView;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.TSAction;
+import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.entity.TokenScriptResult;
+import com.alphawallet.token.entity.TokenScriptResult.Attribute;
+import com.alphawallet.token.entity.ViewType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
+import com.alphawallet.token.tools.TokenDefinition;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -57,21 +73,25 @@ import java.util.List;
 import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
-
+import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class NFTAssetDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
 {
     private TokenFunctionViewModel viewModel;
     private Token token;
-    private Wallet wallet;
     private BigInteger tokenId;
+    private NFTAsset asset;
     private String sequenceId;
     private ActionSheetDialog confirmationDialog;
     private AWalletAlertDialog dialog;
     private NFTImageView tokenImage;
     private NFTAttributeLayout nftAttributeLayout;
+    private NFTAttributeLayout tsAttributeLayout;
     private TextView tokenDescription;
     private ActionMenuItemView refreshMenu;
     private ProgressBar progressBar;
@@ -90,10 +110,12 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private TokenInfoView tivLastSale;
     private TokenInfoView tivAveragePrice;
     private TokenInfoView tivFloorPrice;
+    private TokenInfoView tivRarityData;
     private Animation rotation;
     private ActivityResultLauncher<Intent> handleTransactionSuccess;
     private ActivityResultLauncher<Intent> getGasSettings;
     private boolean triggeredReload;
+    private long chainId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -108,14 +130,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         initIntents();
 
         initViewModel();
-
-        getIntentData();
-
-        setTitle(token.tokenInfo.name);
-
-        setupFunctionBar();
-
-        updateDefaultTokenData();
     }
 
     private void initIntents()
@@ -145,9 +159,13 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         super.onResume();
         if (viewModel != null)
         {
-            viewModel.prepare();
-            viewModel.getAsset(token, tokenId);
             progressBar.setVisibility(View.VISIBLE);
+            getIntentData();
+            tokenImage.onResume();
+        }
+        else
+        {
+            recreate();
         }
     }
 
@@ -156,12 +174,23 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         viewModel.onDestroy();
         super.onDestroy();
+        tokenImage.onDestroy();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
+    public void onPause()
     {
-        getMenuInflater().inflate(R.menu.menu_refresh, menu);
+        super.onPause();
+        tokenImage.onPause();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(@NonNull Menu menu)
+    {
+        if (asset == null || !asset.isAttestation())
+        {
+            getMenuInflater().inflate(R.menu.menu_refresh, menu);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -179,6 +208,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         tokenImage = findViewById(R.id.asset_image);
         nftAttributeLayout = findViewById(R.id.attributes);
+        tsAttributeLayout = findViewById(R.id.ts_attributes);
         tokenDescription = findViewById(R.id.token_description);
         descriptionLabel = findViewById(R.id.label_description);
         progressBar = findViewById(R.id.progress);
@@ -196,6 +226,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         tivLastSale = findViewById(R.id.last_sale);
         tivAveragePrice = findViewById(R.id.average_price);
         tivFloorPrice = findViewById(R.id.floor_price);
+        tivRarityData = findViewById(R.id.rarity);
 
         rotation = AnimationUtils.loadAnimation(this, R.anim.rotate_refresh);
         rotation.setRepeatCount(Animation.INFINITE);
@@ -203,13 +234,70 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void getIntentData()
     {
-        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
-        token = viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
-        wallet = getIntent().getParcelableExtra(C.Key.WALLET);
+        chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, EthereumNetworkBase.MAINNET_ID);
         tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
+        asset = getIntent().getParcelableExtra(C.EXTRA_NFTASSET);
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
+        if (C.ACTION_TOKEN_SHORTCUT.equals(getIntent().getAction()))
+        {
+            handleShortCut();
+        }
+        else
+        {
+            Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
+            viewModel.loadWallet(wallet.address);
+            token = resolveAssetToken();
+            setup();
+        }
+
+        viewModel.startGasPriceUpdate(chainId);
+    }
+
+    private Token resolveAssetToken()
+    {
+        if (asset != null && asset.isAttestation())
+        {
+            return viewModel.getTokenService().getAttestation(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS), asset.getAttestationID());
+        }
+        else
+        {
+            return viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        }
+    }
+
+    private void handleShortCut()
+    {
+        String walletAddress = getIntent().getStringExtra(C.Key.WALLET);
+        viewModel.loadWallet(walletAddress);
+        String tokenAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        token = viewModel.getTokensService().getToken(walletAddress, chainId, tokenAddress);
+        if (token == null)
+        {
+            ShortcutUtils.showConfirmationDialog(this, singletonList(tokenAddress), getString(R.string.remove_shortcut_while_token_not_found));
+        }
+        else
+        {
+            asset = token.getAssetForToken(tokenId);
+            setup();
+        }
+    }
+
+    private void setup()
+    {
         viewModel.checkForNewScript(token);
         viewModel.checkTokenScriptValidity(token);
+        setTitle(token.tokenInfo.name);
+        updateDefaultTokenData();
+
+        if (asset != null && asset.isAttestation())
+        {
+            setupAttestation();
+        }
+        else
+        {
+            viewModel.getAsset(token, tokenId);
+            viewModel.updateLocalAttributes(token, tokenId);
+        }
     }
 
     private void initViewModel()
@@ -217,26 +305,37 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel = new ViewModelProvider(this)
                 .get(TokenFunctionViewModel.class);
         viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
+        viewModel.gasEstimateError().observe(this, this::estimateError);
         viewModel.nftAsset().observe(this, this::onNftAsset);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
         viewModel.scriptUpdateInProgress().observe(this, this::startScriptDownload);
         viewModel.sig().observe(this, this::onSignature);
         viewModel.newScriptFound().observe(this, this::newScriptFound);
+        viewModel.walletUpdate().observe(this, this::setupFunctionBar);
     }
 
     private void newScriptFound(Boolean status)
     {
         CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
-        certificateToolbar.stopDownload();
         //determinate signature
-        if (token != null)
+        if (token != null && status)
         {
+            certificateToolbar.stopDownload();
             certificateToolbar.setVisibility(View.VISIBLE);
             viewModel.checkTokenScriptValidity(token);
 
-            //now re-load the verbs
-            setupFunctionBar();
+            setTitle(token.getTokenName(viewModel.getAssetDefinitionService(), 1));
+
+            //now re-load the verbs if already called. If wallet is null this won't complete
+            setupFunctionBar(viewModel.getWallet());
+
+            setupAttestation();
+        }
+        else
+        {
+            certificateToolbar.stopDownload();
+            setupAttestation();
         }
     }
 
@@ -261,14 +360,40 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
-    private void setupFunctionBar()
+    private void setupFunctionBar(Wallet wallet)
     {
-        if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
+        if (token != null && wallet != null && (BuildConfig.DEBUG || wallet.type != WalletType.WATCH))
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
             functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
             functionBar.revealButtons();
             functionBar.setWalletType(wallet.type);
+        }
+    }
+
+    private void completeAttestationTokenScriptSetup(TSAction action)
+    {
+        List<TokenScriptResult.Attribute> attestationAttrs = viewModel.getAssetDefinitionService().getAttestationAttrs(token, action, asset.getAttestationID());
+        if (attestationAttrs != null)
+        {
+            for (TokenScriptResult.Attribute attr : attestationAttrs)
+            {
+                token.setAttributeResult(tokenId, attr);
+            }
+        }
+    }
+
+    private void completeTokenScriptSetup()
+    {
+        final List<Attribute> attrs = new ArrayList<>();
+
+        if (viewModel.hasTokenScript(token))
+        {
+            viewModel.getAssetDefinitionService().resolveAttrs(token, new ArrayList<>(Collections.singleton(tokenId)), null)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(attrs::add, this::onError, () -> showTSAttributes(attrs))
+                    .isDisposed();
         }
     }
 
@@ -301,30 +426,61 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         {
             tivTokenId.setValue(sequenceId);
         }
-        else
+        else if (tokenId != null)
         {
             tivTokenId.setValue(tokenId.toString());
         }
 
         tivNetwork.setValue(token.getNetworkName());
 
-        tivContractAddress.setValue(Utils.formatAddress(token.tokenInfo.address));
+        tivContractAddress.setCopyableValue(token.tokenInfo.address);
+
+        switch (token.getInterfaceSpec())
+        {
+            case ERC721_LEGACY:
+            case ERC721:
+            case ERC721_ENUMERABLE:
+                tivTokenStandard.setValue(getString(R.string.erc721));
+                break;
+            case ERC1155:
+                tivTokenStandard.setValue(getString(R.string.erc1155));
+                break;
+            case ATTESTATION:
+                tivContractAddress.setVisibility(View.GONE);
+                break;
+            case ERC721_UNDETERMINED:
+            default:
+                break;
+        }
     }
 
-    private void loadAssetFromMetadata(NFTAsset asset)
+    private void loadAssetFromMetadata(NFTAsset loadedAsset)
     {
-        if (asset != null)
+        if (loadedAsset != null)
         {
-            updateTokenImage(asset);
+            updateTokenImage(loadedAsset);
 
-            addMetaDataInfo(asset);
+            addMetaDataInfo(loadedAsset);
 
-            nftAttributeLayout.bind(token, asset);
+            nftAttributeLayout.bind(token, loadedAsset);
 
             clearRefreshAnimation();
 
-            loadFromOpenSeaData(asset.getOpenSeaAsset());
+            loadFromOpenSeaData(loadedAsset.getOpenSeaAsset());
+
+            completeTokenScriptSetup();
         }
+    }
+
+    private void showTSAttributes(List<Attribute> attrs)
+    {
+        //should have resolved all the attrs
+        tsAttributeLayout.bindTSAttributes(attrs);
+    }
+
+    private void onError(Throwable throwable)
+    {
+        Timber.w(throwable);
     }
 
     private void updateTokenImage(NFTAsset asset)
@@ -367,7 +523,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (!TextUtils.isEmpty(description))
         {
             descriptionLabel.setVisibility(View.VISIBLE);
-            tokenDescription.setText(Html.fromHtml(description));
+            tokenDescription.setText(Html.fromHtml(description, FROM_HTML_MODE_LEGACY));
         }
     }
 
@@ -407,6 +563,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             nftAttributeLayout.bind(token, openSeaAsset.traits, 0);
         }
 
+        if (openSeaAsset.rarity != null && openSeaAsset.rarity.rank > 0)
+        {
+            tivRarityData.setValue("#" + openSeaAsset.rarity.rank);
+        }
+
         if (openSeaAsset.owner != null
                 && openSeaAsset.owner.user != null)
         {
@@ -431,23 +592,61 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         loadFromOpenSeaData(openSeaAsset);
     }
 
+    private void setupAttestation()
+    {
+        NFTAsset attnAsset = new NFTAsset();
+        TokenDefinition td = viewModel.getAssetDefinitionService().getAssetDefinition(token);
+        if (token.getInterfaceSpec() != ContractType.ATTESTATION)
+        {
+            return;
+        }
+        else if (td != null)
+        {
+            attnAsset.setupScriptElements(td);
+            attnAsset.setupScriptAttributes(td, token);
+            if (!displayTokenView(td))
+            {
+                tokenImage.setupTokenImage(attnAsset);
+            }
+            setTitle(attnAsset.getName());
+            if (!TextUtils.isEmpty(attnAsset.getDescription()))
+            {
+                tokenDescription.setVisibility(View.VISIBLE);
+                tokenDescription.setText(attnAsset.getDescription());
+            }
+        }
+        else
+        {
+            tokenImage.setAttestationImage(token);
+            token.addAssetElements(attnAsset, this);
+            tokenDescription.setVisibility(View.GONE);
+        }
+
+        progressBar.setVisibility(View.GONE);
+        tivTokenId.setVisibility(View.GONE);
+        showIssuer(((Attestation)token).getIssuer());
+
+        //now populate
+        nftAttributeLayout.bind(token, attnAsset);
+    }
+
     /**
      * Final return path
-     * @param transactionData write success hash back to ActionSheet
+     * @param transactionReturn write success hash back to ActionSheet
      */
-    private void txWritten(TransactionData transactionData)
+    private void txWritten(TransactionReturn transactionReturn)
     {
-        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+        confirmationDialog.transactionWritten(transactionReturn.hash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txReturn)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(ERROR);
         dialog.setTitle(R.string.error_transaction_failed);
-        dialog.setMessage(throwable.getMessage());
+        dialog.setMessage(txReturn.throwable.getMessage());
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();
@@ -473,8 +672,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
                 {
                     asset.setSelectedBalance(BigDecimal.ONE);
                 }
-                viewModel.getTransferIntent(this, token, Collections.singletonList(tokenId), new ArrayList<>(Collections.singletonList(asset)))
-                        .subscribe((Consumer<Intent>) handleTransactionSuccess::launch).isDisposed();
+                handleTransactionSuccess.launch(viewModel.getTransferIntent(this, token, singletonList(tokenId), new ArrayList<>(singletonList(asset))));
             }
         }
     }
@@ -483,15 +681,22 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
         //does the function have a view? If it's transaction only then handle here
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
+        if (functions == null) return;
         TSAction action = functions.get(function);
         token.clearResultMap();
+
+        BigInteger tokenId = selection.size() > 0 ? selection.get(0) : BigInteger.ONE;
 
         //handle TS function
         if (action != null && action.view == null && action.function != null)
         {
+            //test if we need to build attribute the list
+            completeAttestationTokenScriptSetup(action);
+            //viewModel.loadAttributesIfRequired();
+
             //open action sheet after we determine the gas limit
-            Web3Transaction web3Tx = viewModel.handleFunction(action, selection.get(0), token, this);
+            Web3Transaction web3Tx = viewModel.handleFunction(action, tokenId, token, this);
             if (web3Tx.gasLimit.equals(BigInteger.ZERO))
             {
                 calculateEstimateDialog();
@@ -506,7 +711,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
         else
         {
-            viewModel.showFunction(this, token, function, selection);
+            viewModel.showFunction(this, token, function, selection, asset);
         }
     }
 
@@ -521,43 +726,47 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         dialog.show();
     }
 
-    private void estimateError(final Web3Transaction w3tx)
+    private void estimateError(Pair<GasEstimate, Web3Transaction> estimate)
     {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(WARNING);
-        dialog.setTitle(R.string.confirm_transaction);
-        dialog.setMessage(R.string.error_transaction_may_fail);
-        dialog.setButtonText(R.string.button_ok);
+        dialog.setTitle(estimate.first.hasError() ?
+                R.string.dialog_title_gas_estimation_failed :
+                R.string.confirm_transaction
+        );
+        String message = estimate.first.hasError() ?
+                getString(R.string.dialog_message_gas_estimation_failed, estimate.first.getError()) :
+                getString(R.string.error_transaction_may_fail);
+        dialog.setMessage(message);
+        dialog.setButtonText(R.string.action_proceed);
         dialog.setSecondaryButtonText(R.string.action_cancel);
-        dialog.setButtonListener(v ->
-        {
+        dialog.setButtonListener(v -> {
+            Web3Transaction w3tx = estimate.second;
             BigInteger gasEstimate = GasService.getDefaultGasLimit(token, w3tx);
             checkConfirm(new Web3Transaction(w3tx.recipient, w3tx.contract, w3tx.value, w3tx.gasPrice, gasEstimate, w3tx.nonce, w3tx.payload, w3tx.description));
         });
-
-        dialog.setSecondaryButtonListener(v ->
-        {
-            dialog.dismiss();
-        });
-
+        dialog.setSecondaryButtonListener(v -> dialog.dismiss());
         dialog.show();
     }
 
     private void checkConfirm(Web3Transaction w3tx)
     {
-        if (w3tx.gasLimit.equals(BigInteger.ZERO))
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+        confirmationDialog = new ActionSheetDialog(this, w3tx, token, "", //TODO: Reverse resolve address
+                w3tx.recipient.toString(), viewModel.getTokenService(), this);
+        confirmationDialog.setURL("TokenScript");
+        confirmationDialog.setCanceledOnTouchOutside(false);
+        confirmationDialog.show();
+    }
+
+    private void showIssuer(String issuer)
+    {
+        if (!TextUtils.isEmpty(issuer))
         {
-            estimateError(w3tx);
-        }
-        else
-        {
-            if (dialog != null && dialog.isShowing()) dialog.dismiss();
-            confirmationDialog = new ActionSheetDialog(this, w3tx, token, "", //TODO: Reverse resolve address
-                    w3tx.recipient.toString(), viewModel.getTokenService(), this);
-            confirmationDialog.setURL("TokenScript");
-            confirmationDialog.setCanceledOnTouchOutside(false);
-            confirmationDialog.show();
+            ((TokenInfoView)findViewById(R.id.key_address)).setCopyableValue(issuer);
+            ((TokenInfoView)findViewById(R.id.key_address)).setVisibility(View.VISIBLE);
         }
     }
 
@@ -570,7 +779,13 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     @Override
     public void sendTransaction(Web3Transaction tx)
     {
-        viewModel.sendTransaction(tx, token.tokenInfo.chainId, ""); //return point is txWritten
+        viewModel.requestSignature(tx, viewModel.getWallet(), token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(viewModel.getWallet(), token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -595,5 +810,41 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
         return getGasSettings;
+    }
+
+    @Override
+    public WalletType getWalletType()
+    {
+        return viewModel.getWallet().type;
+    }
+
+    /***
+     * TokenScript view handling
+     */
+    private boolean displayTokenView(TokenDefinition td)
+    {
+        if (!td.hasTokenView())
+        {
+            return false;
+        }
+
+        try
+        {
+            //Attempt to display the token-view
+            Web3TokenView scriptView = findViewById(R.id.web3_tokenview);
+            LinearLayout webWrapper = findViewById(R.id.layout_webwrapper);
+            webWrapper.setVisibility(View.VISIBLE);
+            scriptView.setChainId(token.tokenInfo.chainId);
+            scriptView.setWalletAddress(new Address(token.getWallet()));
+
+            scriptView.renderTokenScriptView(token, new TicketRange(BigInteger.ONE, token.getAddress()), viewModel.getAssetDefinitionService(), ViewType.VIEW);
+        }
+        catch (Exception e)
+        {
+            //fillEmpty();
+            return false;
+        }
+
+        return true;
     }
 }

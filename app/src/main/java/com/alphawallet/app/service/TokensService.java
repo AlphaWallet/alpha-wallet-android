@@ -10,7 +10,7 @@ import android.util.Pair;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.C;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
@@ -21,6 +21,8 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
+import com.alphawallet.app.entity.tokendata.TokenUpdateType;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
@@ -78,7 +80,6 @@ public class TokensService
     private final ConcurrentLinkedQueue<Long> baseTokenCheck;
     private long openSeaCheckId;
     private boolean appHasFocus;
-    private boolean mainNetActive = true;
     private static boolean walletStartup = false;
     private long transferCheckChain;
     private final TokenFactory tokenFactory = new TokenFactory();
@@ -134,14 +135,14 @@ public class TokensService
 
             if (t != null && t.address.length() > 0 && (cachedToken == null || TextUtils.isEmpty(cachedToken.tokenInfo.name)))
             {
-                queryUnknownTokensDisposable = tokenRepository.update(t.address, t.chainId).toObservable() //fetch tokenInfo
-                        .filter(tokenInfo -> (!TextUtils.isEmpty(tokenInfo.name) || !TextUtils.isEmpty(tokenInfo.symbol)) && tokenInfo.chainId != 0)
-                        .map(tokenInfo -> { tokenInfo.isEnabled = false; return tokenInfo; }) //set default visibility to false
-                        .flatMap(tokenInfo -> tokenRepository.determineCommonType(tokenInfo).toObservable()
-                            .map(contractType -> tokenFactory.createToken(tokenInfo, contractType, ethereumNetworkRepository.getNetworkByChain(t.chainId).getShortName())))
+                ContractType type = tokenRepository.determineCommonType(new TokenInfo(t.address, "", "", 18, false, t.chainId)).blockingGet();
+
+                queryUnknownTokensDisposable = tokenRepository.update(t.address, t.chainId, type) //fetch tokenInfo
+                        .map(tokenInfo -> tokenFactory.createToken(tokenInfo, type, ethereumNetworkRepository.getNetworkByChain(t.chainId).getShortName()))
+                        .flatMap(token -> tokenRepository.updateTokenBalance(currentAddress, token))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
-                        .subscribe(this::finishAddToken, err -> onCheckError(err, t), this::finishTokenCheck);
+                        .subscribe(this::finishAddToken, err -> onCheckError(err, t));
             }
             else if (t == null)
             {
@@ -157,17 +158,9 @@ public class TokensService
         Timber.e(throwable);
     }
 
-    private void finishTokenCheck()
+    private void finishAddToken(BigDecimal balance)
     {
         queryUnknownTokensDisposable = null;
-    }
-
-    private void finishAddToken(Token token)
-    {
-        if (token != null && token.getInterfaceSpec() != ContractType.OTHER)
-        {
-            tokenStoreList.add(token);
-        }
     }
 
     public Token getToken(long chainId, String addr)
@@ -179,10 +172,10 @@ public class TokensService
     public void storeToken(Token token)
     {
         if (TextUtils.isEmpty(currentAddress) || token == null || token.getInterfaceSpec() == ContractType.OTHER) return;
-        tokenStoreDisposable = tokenRepository.checkInterface(new Token[] { token }, new Wallet(token.getWallet()))
+        tokenStoreDisposable = tokenRepository.checkInterface(token, new Wallet(token.getWallet()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(tkn -> Collections.addAll(tokenStoreList, tkn), this::onERC20Error);
+                .subscribe(tokenStoreList::add, this::onERC20Error);
     }
 
     public TokenTicker getTokenTicker(Token token)
@@ -215,6 +208,8 @@ public class TokensService
             stopUpdateCycle();
             addLockedTokens();
             if (openseaService != null) openseaService.resetOffsetRead(networkFilter);
+            tokenRepository.updateLocalAddress(newWalletAddr);
+            lastStartCycleTime = 0;
         }
     }
 
@@ -228,10 +223,32 @@ public class TokensService
                 .observeOn(Schedulers.newThread()).subscribe();
     }
 
-    public void startUpdateCycle()
+    private long lastStartCycleTime = 0;
+
+    public void restartUpdateCycle()
     {
         stopUpdateCycle();
-        if (!Utils.isAddressValid(currentAddress)) return;
+        lastStartCycleTime = 0;
+        startUpdateCycle();
+    }
+
+    public void startUpdateCycle()
+    {
+        if ((lastStartCycleTime + 1000) > System.currentTimeMillis())
+        {
+            return; // Block this refresh - we need to ensure the cycle restarts but within 1 second no need to restart
+        }
+        else
+        {
+            lastStartCycleTime = System.currentTimeMillis();
+        }
+
+        if (!Utils.isAddressValid(currentAddress))
+        {
+            return;
+        }
+
+        stopUpdateCycle();
 
         syncCount = 0;
 
@@ -239,7 +256,6 @@ public class TokensService
 
         eventTimer = Single.fromCallable(() -> {
             startupPass();
-            addUnresolvedContracts(ethereumNetworkRepository.getAllKnownContracts(getNetworkFilters()));
             checkIssueTokens();
             pendingTokenMap.clear();
             return true;
@@ -329,16 +345,13 @@ public class TokensService
 
     private void syncChainTickers(TokenCardMeta[] tokenList, int chainIndex)
     {
-        if (mainNetActive)
-        {
-            //go through all mainnet chains
-            NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
+        //go through all mainnet chains
+        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
 
-            for (int i = chainIndex; i < networks.length; i++)
-            {
-                NetworkInfo info = networks[i];
-                if (info.hasRealValue() && syncERC20Tickers(i, info.chainId, tokenList)) return;
-            }
+        for (int i = chainIndex; i < networks.length; i++)
+        {
+            NetworkInfo info = networks[i];
+            if (info.hasRealValue() && syncERC20Tickers(i, info.chainId, tokenList)) return;
         }
 
         //complete
@@ -524,10 +537,9 @@ public class TokensService
         tokenRepository.addImageUrl(networkId, address, imageUrl);
     }
 
-    public Single<TokenInfo> update(String address, long chainId) {
-        return tokenRepository.update(address, chainId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+    public Single<TokenInfo> update(String address, long chainId, ContractType type)
+    {
+        return tokenRepository.update(address, chainId, type);
     }
 
     private void checkIssueTokens()
@@ -545,21 +557,6 @@ public class TokensService
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe()
                 .isDisposed();
-    }
-
-    private void addUnresolvedContracts(List<ContractLocator> contractCandidates)
-    {
-        if (openseaService == null) return; //no need for this if syncing
-        if (contractCandidates != null && contractCandidates.size() > 0)
-        {
-            for (ContractLocator cl : contractCandidates)
-            {
-                if (getToken(cl.chainId, cl.address) == null)
-                {
-                    addUnknownTokenToCheck(new ContractAddress(cl.chainId, cl.address));
-                }
-            }
-        }
     }
 
     private void checkTokensBalance()
@@ -583,9 +580,67 @@ public class TokensService
         return tokenRepository.fetchChainBalance(walletAddress, chainId);
     }
 
+    public Single<TokenInfo> storeTokenInfo(Wallet wallet, TokenInfo tInfo, ContractType type)
+    {
+        return tokenRepository.determineCommonType(tInfo)
+                .map(contractType -> checkDefaultType(contractType, type))
+                        .flatMap(contractType -> tokenRepository.storeTokenInfo(wallet, tInfo, type));
+    }
+
+    public Single<TokenInfo> storeTokenInfoDirect(Wallet wallet, TokenInfo tInfo, ContractType type)
+    {
+        return tokenRepository.storeTokenInfo(wallet, tInfo, type);
+    }
+
+    //Fix undermined contract type
+    private ContractType checkDefaultType(ContractType contractType, ContractType defaultType)
+    {
+        switch (contractType)
+        {
+            case OTHER:
+            case ERC721_UNDETERMINED:
+                return defaultType;
+            default:
+                return contractType;
+        }
+    }
+
+    // Note that this routine works across different wallets, so there's no usage of currentAddress
+    public Single<Token[]> syncChainBalances(String walletAddress, TokenUpdateType updateType)
+    {
+        //update all chain balances
+        return Single.fromCallable(() -> {
+            List<Token> baseTokens = new ArrayList<>();
+            for (long chainId : networkFilter)
+            {
+                Token baseToken = tokenRepository.fetchToken(chainId, walletAddress, walletAddress);
+                if (baseToken == null)
+                {
+                    baseToken = ethereumNetworkRepository.getBlankOverrideToken(ethereumNetworkRepository.getNetworkByChain(chainId));
+                }
+                baseToken.setTokenWallet(walletAddress);
+                BigDecimal balance = baseToken.balance;
+                if (updateType == TokenUpdateType.ACTIVE_SYNC) balance = tokenRepository.updateTokenBalance(walletAddress, baseToken).blockingGet();
+                if (balance.compareTo(BigDecimal.ZERO) > 0)
+                {
+                    baseToken.balance = balance;
+                    baseTokens.add(baseToken);
+                }
+            }
+
+            return baseTokens.toArray(new Token[0]);
+        });
+    }
+
     private void onBalanceChange(BigDecimal newBalance, Token t)
     {
         boolean balanceChange = !newBalance.equals(t.balance);
+
+        if (newBalance.equals(BigDecimal.valueOf(-2)))
+        {
+            //token deleted
+            return;
+        }
 
         if (balanceChange && BuildConfig.DEBUG)
         {
@@ -613,7 +668,7 @@ public class TokensService
     private void checkChainVisibility(Token t)
     {
         //Switch this token chain on
-        if (!networkFilter.contains(t.tokenInfo.chainId) && EthereumNetworkRepository.hasRealValue(t.tokenInfo.chainId) == this.mainNetActive)
+        if (!networkFilter.contains(t.tokenInfo.chainId) && EthereumNetworkRepository.hasRealValue(t.tokenInfo.chainId))
         {
             Timber.tag(TAG).d("Detected balance");
             //activate this filter
@@ -649,40 +704,51 @@ public class TokensService
         NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(chainId);
 
         if (info.chainId == transferCheckChain) return; //currently checking this chainId in TransactionsNetworkClient
-
-        final Wallet wallet = new Wallet(currentAddress);
         
         Timber.tag(TAG).d("Fetch from opensea : " + currentAddress + " : " + info.getShortName());
 
         openSeaCheckId = info.chainId;
 
-        openSeaQueryDisposable = openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this)
-                .flatMap(tokens -> tokenRepository.checkInterface(tokens, wallet)) //check the token interface
-                .map(tokens -> tokenRepository.initNFTAssets(wallet, tokens))
-                .flatMap(tokens -> tokenRepository.storeTokens(wallet, tokens)) //store fetched tokens
+        openSeaQueryDisposable = callOpenSeaAPI(info)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(t -> checkedNetwork(info),
-                        this::chuckError);
+                .observeOn(Schedulers.io())
+                .subscribe(r -> {
+                    openSeaQueryDisposable = null;
+                    openSeaCheckId = 0;
+                }, this::openSeaCallError);
+    }
+
+    private void openSeaCallError(Throwable error)
+    {
+        Timber.w(error);
+        openSeaQueryDisposable = null;
+        openSeaCheckId = 0;
+    }
+
+    private Single<Boolean> callOpenSeaAPI(NetworkInfo info)
+    {
+        final Wallet wallet = new Wallet(currentAddress);
+
+        return Single.fromCallable(() -> {
+            openseaService.getTokens(currentAddress, info.chainId, info.getShortName(), this).toObservable()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .flatMap(Observable::fromArray)
+                    .blockingForEach(t -> tokenRepository.checkInterface(t, wallet)
+                            .map(token -> tokenRepository.initNFTAssets(wallet, token))
+                            .flatMap(token -> tokenRepository.storeTokens(wallet, new Token[]{token}))
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(Schedulers.io())
+                            .blockingGet()
+                    );
+
+            return true;
+        });
     }
 
     public boolean openSeaUpdateInProgress(long chainId)
     {
         return openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed() && openSeaCheckId == chainId;
-    }
-
-    private void checkedNetwork(NetworkInfo info)
-    {
-        openSeaQueryDisposable = null;
-        openSeaCheckId = 0;
-        Timber.tag(TAG).d("Checked " + info.name + " Opensea");
-    }
-
-    private void chuckError(@NotNull Throwable e)
-    {
-        openSeaCheckId = 0;
-        openSeaQueryDisposable = null;
-        Timber.e(e);
     }
 
     private void checkERC20(long chainId)
@@ -826,7 +892,7 @@ public class TokensService
 
             //simply multiply the weighting by the last diff.
             float updateFactor = weighting * (float) lastCheckDiff * (check.isEnabled ? 1 : 0.25f);
-            long cutoffCheck = 30*DateUtils.SECOND_IN_MILLIS / (check.isEnabled ? 1 : 10); //normal minimum update frequency for token 30 seconds, 5 minutes for hidden token
+            long cutoffCheck = check.calculateUpdateFrequency(); //normal minimum update frequency for token 30 seconds, 5 minutes for hidden token
 
             if (!check.isEthereum() && lastUpdateDiff > DateUtils.DAY_IN_MILLIS)
             {
@@ -897,25 +963,23 @@ public class TokensService
     private void setupFilters()
     {
         baseTokenCheck.clear();
-        mainNetActive = ethereumNetworkRepository.isMainNetSelected();
         if (!ethereumNetworkRepository.hasSetNetworkFilters()) //add all networks to a check list to check balances at wallet startup and refresh
         {
             //first blank all existing filters for zero balance tokens, as user hasn't specified which chains they want to see
-            blankFiltersForZeroBalance(mainNetActive);
+            blankFiltersForZeroBalance();
 
-            NetworkInfo[] networks = ethereumNetworkRepository.getAllActiveNetworks();
+            NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
             for (NetworkInfo info : networks) { baseTokenCheck.add(info.chainId); }
         }
     }
 
     /**
      * set up visibility only for tokens with balance, if all zero then add the default networks
-     * @param mainNetActive
      */
-    private void blankFiltersForZeroBalance(boolean mainNetActive)
+    private void blankFiltersForZeroBalance()
     {
         networkFilter.clear();
-        NetworkInfo[] networks = ethereumNetworkRepository.getAllActiveNetworks();
+        NetworkInfo[] networks = ethereumNetworkRepository.getAvailableNetworkList();
 
         if (!ethereumNetworkRepository.hasSetNetworkFilters())
         {
@@ -934,7 +998,7 @@ public class TokensService
             if (!networkFilter.contains(lockedChain)) networkFilter.add(lockedChain);
         }
 
-        if (networkFilter.size() == 0) networkFilter.add(ethereumNetworkRepository.getDefaultNetwork(mainNetActive));
+        if (networkFilter.size() == 0) networkFilter.add(ethereumNetworkRepository.getDefaultNetwork());
 
         //set network filter prefs
         ethereumNetworkRepository.setFilterNetworkList(networkFilter.toArray(new Long[0]));
@@ -971,51 +1035,24 @@ public class TokensService
     //Note that we can't go via the usual tokenStoreList method as we need to mark this token as enabled and locked visible
     private void addLockedTokens()
     {
-        mainNetActive = ethereumNetworkRepository.isMainNetSelected();
         final String wallet = currentAddress;
         //ensure locked tokens are displaying
         Observable.fromIterable(CustomViewSettings.getLockedTokens())
                 .forEach(info -> addToken(info, wallet)
-                        .flatMapCompletable(token -> enableToken(wallet, token))
+                        .flatMapCompletable(token -> enableToken(wallet, token.getContractAddress()))
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe())
                         .isDisposed();
     }
 
-    private Completable enableToken(String walletAddr, Token token)
+    public Completable enableToken(String walletAddr, ContractAddress cAddr)
     {
         return Completable.fromAction(() -> {
             final Wallet wallet = new Wallet(walletAddr);
-            tokenRepository.setEnable(wallet, token, true);
-            tokenRepository.setVisibilityChanged(wallet, token);
+            tokenRepository.setEnable(wallet, cAddr, true);
+            tokenRepository.setVisibilityChanged(wallet, cAddr);
         });
-    }
-
-    public Completable lockTokenVisibility(Token token)
-    {
-        return enableToken(currentAddress, token);
-    }
-
-    /**
-     * Timings for when there can be a check for new transactions
-     * @param t
-     * @return
-     */
-    private long getTokenTimeInterval(Token t)
-    {
-        long nextTimeCheck;
-
-        if (t.isEthereum())
-        {
-            nextTimeCheck = 30*DateUtils.SECOND_IN_MILLIS; //allow base chains to be checked about every 30 seconds
-        }
-        else
-        {
-            nextTimeCheck = t.getTransactionCheckInterval();
-        }
-
-        return nextTimeCheck;
     }
 
     public Realm getTickerRealmInstance()
@@ -1023,34 +1060,11 @@ public class TokensService
         return tokenRepository.getTickerRealmInstance();
     }
 
-    public boolean shouldDisplayPopularToken(TokenCardMeta tcm)
-    {
-        //Display popular token if
-        // - explicitly enabled
-        // - user has not altered the visibility and token has positive balance (user may not be aware of visibility controls).
-        if (ethereumNetworkRepository.getIsPopularToken(tcm.getChain(), tcm.getAddress()))
-        {
-            Token token = getToken(tcm.getChain(), tcm.getAddress());
-            return (token == null)
-                    || tokenRepository.isEnabled(token)
-                    || (!tokenRepository.hasVisibilityBeenChanged(token) && token.hasPositiveBalance());
-        }
-        else
-        {
-            return true;
-        }
-    }
-
     public void walletInFocus()
     {
         appHasFocus = true;
 
         //running or not?
-    }
-
-    public boolean isMainNetActive()
-    {
-        return mainNetActive;
     }
 
     public void walletOutOfFocus()
@@ -1068,12 +1082,12 @@ public class TokensService
         if (analyticsService != null)
         {
             AnalyticsProperties analyticsProperties = new AnalyticsProperties();
-            analyticsProperties.setData(gasSpeed);
-
-            analyticsService.track(C.AN_USE_GAS, analyticsProperties);
+            analyticsProperties.put(Analytics.PROPS_GAS_SPEED, gasSpeed);
+            analyticsService.track(Analytics.Action.USE_GAS_WIDGET.getValue(), analyticsProperties);
         }
     }
 
+    @NotNull
     public Token getTokenOrBase(long chainId, String address)
     {
         Token token = getToken(chainId, address);
@@ -1167,16 +1181,8 @@ public class TokensService
 
     public boolean startWalletSync(ServiceSyncCallback cb)
     {
-        if (ethereumNetworkRepository.isMainNetSelected())
-        {
-            setCompletionCallback(cb, 0);
-            return true;
-        }
-        else
-        {
-            completionCallback = cb;
-            return false;
-        }
+        setCompletionCallback(cb, 0);
+        return true;
     }
 
     public void setCompletionCallback(ServiceSyncCallback cb, int sync)
@@ -1187,7 +1193,6 @@ public class TokensService
 
         if (sync > 0)
         {
-            mainNetActive = true;
             baseTokenCheck.clear();
             networkFilter.clear();
 
@@ -1236,5 +1241,43 @@ public class TokensService
     public boolean hasLockedGas(long chainId)
     {
         return ethereumNetworkRepository.hasLockedGas(chainId);
+    }
+
+    public Single<Boolean> deleteTokens(List<TokenCardMeta> metasToDelete)
+    {
+        return Single.fromCallable(() -> {
+            tokenRepository.deleteRealmTokens(new Wallet(currentAddress), metasToDelete);
+            for (TokenCardMeta tcm : metasToDelete)
+            {
+                pendingTokenMap.remove(databaseKey(tcm.getChain(), tcm.getAddress()));
+            }
+            return true;
+        });
+    }
+
+    public Token getToken(String walletAddress, long chainId, String tokenAddress)
+    {
+        if (walletAddress == null)
+        {
+            walletAddress = currentAddress;
+        }
+        if (TextUtils.isEmpty(walletAddress) || TextUtils.isEmpty(tokenAddress)) return null;
+        else return tokenRepository.fetchToken(chainId, walletAddress, tokenAddress.toLowerCase());
+    }
+
+    public Token getAttestation(long chainId, String addr, String attnId)
+    {
+        //fetch attestation
+        return tokenRepository.fetchAttestation(chainId, currentAddress, addr.toLowerCase(), attnId);
+    }
+
+    public List<Token> getAttestations(long chainId, String address)
+    {
+        return tokenRepository.fetchAttestations(chainId, currentAddress, address);
+    }
+
+    public boolean isOnFocus()
+    {
+        return appHasFocus;
     }
 }

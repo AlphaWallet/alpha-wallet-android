@@ -1,0 +1,37 @@
+name: Unit test(Ubuntu)
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  merge_group:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: oracle
+          java-version: 17
+
+      - name: Run unit tests
+        run: sh ./build.sh
+
+      - name: Upload Test Reports Folder
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }} # IMPORTANT: Upload reports regardless of status
+        with:
+          name: ut-reports
+          path: app/build/reports/tests
+
+      - name: Upload coverage reports to Codecov
+        run: |
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          chmod +x codecov
+          ./codecov

@@ -13,7 +13,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.KeyProviderFactory;
-import com.alphawallet.app.repository.KeyProviderJNIImpl;
 import com.alphawallet.app.util.JsonUtils;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.google.gson.Gson;
@@ -40,7 +39,7 @@ import timber.log.Timber;
 
 public class OpenSeaService
 {
-    private static OkHttpClient httpClient;
+    private final OkHttpClient httpClient;
     private static final int PAGE_SIZE = 50;
     private final Map<String, String> imageUrls = new HashMap<>();
     private static final TokenFactory tf = new TokenFactory();
@@ -62,12 +61,13 @@ public class OpenSeaService
     {
         Request.Builder requestB = new Request.Builder()
                 .url(api)
-                .header("User-Agent", "Chrome/74.0.3729.169")
-                .method("GET", null)
-                .addHeader("Content-Type", "application/json");
+                .method("GET", null);
 
         String apiKey = KeyProviderFactory.get().getOpenSeaKey();
-        if (networkId != EthereumNetworkBase.RINKEBY_ID && !TextUtils.isEmpty(apiKey) && !apiKey.equals("..."))
+        if (!TextUtils.isEmpty(apiKey)
+                && !apiKey.equals("...")
+                && com.alphawallet.app.repository.EthereumNetworkBase.hasRealValue(networkId)
+        )
         {
             requestB.addHeader("X-API-KEY", apiKey);
         }
@@ -335,8 +335,15 @@ public class OpenSeaService
 
     public Single<String> getAsset(Token token, BigInteger tokenId)
     {
-        return Single.fromCallable(() ->
-                fetchAsset(token.tokenInfo.chainId, token.tokenInfo.address, tokenId.toString()));
+        if (!com.alphawallet.app.repository.EthereumNetworkBase.hasOpenseaAPI(token.tokenInfo.chainId))
+        {
+            return Single.fromCallable(() -> "");
+        }
+        else
+        {
+            return Single.fromCallable(() ->
+                    fetchAsset(token.tokenInfo.chainId, token.tokenInfo.address, tokenId.toString()));
+        }
     }
 
     public Single<String> getCollection(Token token, String slug)
@@ -349,27 +356,54 @@ public class OpenSeaService
     {
         String api = "";
         String ownerOption = "owner";
+
+        //TODO: Put these into a mapping
         if (networkId == EthereumNetworkBase.MAINNET_ID)
         {
             api = C.OPENSEA_ASSETS_API_MAINNET;
         }
-        else if (networkId == EthereumNetworkBase.RINKEBY_ID)
+        else if (networkId == EthereumNetworkBase.GOERLI_ID)
         {
-            api = C.OPENSEA_ASSETS_API_RINKEBY;
+            api = C.OPENSEA_ASSETS_API_TESTNET;
         }
-        else if (networkId == EthereumNetworkBase.MATIC_ID)
+        else if (networkId == EthereumNetworkBase.POLYGON_ID)
         {
             api = C.OPENSEA_ASSETS_API_MATIC;
             ownerOption = "owner_address";
         }
+        else if (networkId == EthereumNetworkBase.ARBITRUM_MAIN_ID)
+        {
+            api = C.OPENSEA_ASSETS_API_ARBITRUM;
+            ownerOption = "owner_address";
+        }
+        else if (networkId == EthereumNetworkBase.AVALANCHE_ID)
+        {
+            api = C.OPENSEA_ASSETS_API_AVALANCHE;
+            ownerOption = "owner_address";
+        }
+        else if (networkId == EthereumNetworkBase.KLAYTN_ID)
+        {
+            api = C.OPENSEA_ASSETS_API_KLAYTN;
+            ownerOption = "owner_address";
+        }
+        else if (networkId == EthereumNetworkBase.OPTIMISTIC_MAIN_ID)
+        {
+            api = C.OPENSEA_ASSETS_API_OPTIMISM;
+            ownerOption = "owner_address";
+        }
 
-        Uri.Builder builder = new Uri.Builder();
-        builder.encodedPath(api)
+        if (!TextUtils.isEmpty(api))
+        {
+            Uri.Builder builder = new Uri.Builder();
+            builder.encodedPath(api)
                 .appendQueryParameter(ownerOption, address)
                 .appendQueryParameter("limit", String.valueOf(PAGE_SIZE))
                 .appendQueryParameter("offset", String.valueOf(offset));
 
-        return executeRequest(networkId, builder.build().toString());
+            return executeRequest(networkId, builder.build().toString());
+        }
+
+        return JsonUtils.EMPTY_RESULT;
     }
 
     public String fetchAsset(long networkId, String contractAddress, String tokenId)
@@ -379,13 +413,29 @@ public class OpenSeaService
         {
             api = C.OPENSEA_SINGLE_ASSET_API_MAINNET + contractAddress + "/" + tokenId;
         }
-        else if (networkId == EthereumNetworkBase.RINKEBY_ID)
+        else if (networkId == EthereumNetworkBase.GOERLI_ID)
         {
-            api = C.OPENSEA_SINGLE_ASSET_API_RINKEBY + contractAddress + "/" + tokenId;
+            api = C.OPENSEA_SINGLE_ASSET_API_TESTNET + contractAddress + "/" + tokenId;
         }
-        else if (networkId == EthereumNetworkBase.MATIC_ID)
+        else if (networkId == EthereumNetworkBase.POLYGON_ID)
         {
             api = C.OPENSEA_SINGLE_ASSET_API_MATIC + contractAddress + "/" + tokenId;
+        }
+        else if (networkId == EthereumNetworkBase.ARBITRUM_MAIN_ID)
+        {
+            api = C.OPENSEA_SINGLE_ASSET_API_ARBITRUM + contractAddress + "/" + tokenId;
+        }
+        else if (networkId == EthereumNetworkBase.AVALANCHE_ID)
+        {
+            api = C.OPENSEA_SINGLE_ASSET_API_AVALANCHE + contractAddress + "/" + tokenId;
+        }
+        else if (networkId == EthereumNetworkBase.KLAYTN_ID)
+        {
+            api = C.OPENSEA_SINGLE_ASSET_API_KLAYTN + contractAddress + "/" + tokenId;
+        }
+        else if (networkId == EthereumNetworkBase.OPTIMISTIC_MAIN_ID)
+        {
+            api = C.OPENSEA_SINGLE_ASSET_API_OPTIMISM + contractAddress + "/" + tokenId;
         }
 
         return executeRequest(networkId, api);

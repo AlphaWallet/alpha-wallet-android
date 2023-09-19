@@ -2,7 +2,7 @@ package com.alphawallet.app.interact;
 
 import com.alphawallet.app.repository.TokenRepositoryType;
 import com.alphawallet.app.ui.widget.entity.ENSHandler;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 

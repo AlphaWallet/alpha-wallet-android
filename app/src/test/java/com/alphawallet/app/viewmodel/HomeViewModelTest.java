@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.alphawallet.app.repository.SharedPreferenceRepository;
+import com.alphawallet.shadows.ShadowApp;
 import com.alphawallet.shadows.ShadowRealm;
 
 import org.junit.Before;
@@ -15,7 +16,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(AndroidJUnit4.class)
-@Config(shadows = {ShadowRealm.class})
+@Config(shadows = {ShadowApp.class, ShadowRealm.class})
 public class HomeViewModelTest
 {
     private HomeViewModel homeViewModel;
@@ -24,7 +25,7 @@ public class HomeViewModelTest
     public void setUp() throws Exception
     {
         SharedPreferenceRepository sharedPreferenceRepository = new SharedPreferenceRepository(RuntimeEnvironment.getApplication());
-        homeViewModel = new HomeViewModel(sharedPreferenceRepository, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        homeViewModel = new HomeViewModel(sharedPreferenceRepository, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Test

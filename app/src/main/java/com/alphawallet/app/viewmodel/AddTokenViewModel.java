@@ -2,8 +2,10 @@ package com.alphawallet.app.viewmodel;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.format.DateUtils;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -13,12 +15,11 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
-import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.ImportTokenActivity;
@@ -26,24 +27,26 @@ import com.alphawallet.app.ui.SendActivity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 @HiltViewModel
-public class AddTokenViewModel extends BaseViewModel {
+public class AddTokenViewModel extends BaseViewModel
+{
 
     private final MutableLiveData<Wallet> wallet = new MutableLiveData<>();
-    private final MutableLiveData<TokenInfo> tokenInfo = new MutableLiveData<>();
     private final MutableLiveData<Long> switchNetwork = new MutableLiveData<>();
     private final MutableLiveData<Token> finalisedToken = new MutableLiveData<>();
-    private final MutableLiveData<Token> tokentype = new MutableLiveData<>();
+    private final MutableLiveData<Token> tokenType = new MutableLiveData<>();
     private final MutableLiveData<Boolean> noContract = new MutableLiveData<>();
     private final MutableLiveData<Integer> scanCount = new MutableLiveData<>();
 
@@ -52,25 +55,45 @@ public class AddTokenViewModel extends BaseViewModel {
 
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final GenericWalletInteract genericWalletInteract;
-    private final FetchTokensInteract fetchTokensInteract;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final AssetDefinitionService assetDefinitionService;
     private final TokensService tokensService;
-    private final PreferenceRepositoryType sharedPreference;
 
     private boolean foundNetwork;
     private int networkCount;
     private long primaryChainId = 1;
     private final List<Token> discoveredTokenList = new ArrayList<>();
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
-    public MutableLiveData<Wallet> wallet() {
+    public MutableLiveData<Wallet> wallet()
+    {
         return wallet;
     }
-    public MutableLiveData<Token> tokenType() { return tokentype; }
-    public LiveData<Long> switchNetwork() { return switchNetwork; }
-    public LiveData<Integer> chainScanCount() { return scanCount; }
-    public LiveData<Token> onToken() { return onToken; }
-    public LiveData<Token[]> allTokens() { return allTokens; }
+
+    public MutableLiveData<Token> tokenType()
+    {
+        return tokenType;
+    }
+
+    public LiveData<Long> switchNetwork()
+    {
+        return switchNetwork;
+    }
+
+    public LiveData<Integer> chainScanCount()
+    {
+        return scanCount;
+    }
+
+    public LiveData<Token> onToken()
+    {
+        return onToken;
+    }
+
+    public LiveData<Token[]> allTokens()
+    {
+        return allTokens;
+    }
 
     @Nullable
     Disposable scanNetworksDisposable;
@@ -80,19 +103,16 @@ public class AddTokenViewModel extends BaseViewModel {
     @Inject
     AddTokenViewModel(
             GenericWalletInteract genericWalletInteract,
-            FetchTokensInteract fetchTokensInteract,
             EthereumNetworkRepositoryType ethereumNetworkRepository,
             FetchTransactionsInteract fetchTransactionsInteract,
             AssetDefinitionService assetDefinitionService,
-            TokensService tokensService,
-            PreferenceRepositoryType sharedPreference) {
+            TokensService tokensService)
+    {
         this.genericWalletInteract = genericWalletInteract;
-        this.fetchTokensInteract = fetchTokensInteract;
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         this.assetDefinitionService = assetDefinitionService;
         this.tokensService = tokensService;
-        this.sharedPreference = sharedPreference;
     }
 
     public void saveTokens(List<Token> toSave)
@@ -131,7 +151,7 @@ public class AddTokenViewModel extends BaseViewModel {
 
     public void fetchToken(long chainId, String addr)
     {
-        tokensService.update(addr, chainId)
+        tokensService.update(addr, chainId, ContractType.NOT_SET)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::gotTokenUpdate, this::onError).isDisposed();
@@ -150,7 +170,10 @@ public class AddTokenViewModel extends BaseViewModel {
         finalisedToken.postValue(token);
     }
 
-    public NetworkInfo getNetworkInfo(long chainId) { return ethereumNetworkRepository.getNetworkByChain(chainId); }
+    public NetworkInfo getNetworkInfo(long chainId)
+    {
+        return ethereumNetworkRepository.getNetworkByChain(chainId);
+    }
 
     private void findWallet()
     {
@@ -158,7 +181,8 @@ public class AddTokenViewModel extends BaseViewModel {
                 .subscribe(wallet::setValue, this::onError);
     }
 
-    private void onTokensSetup(TokenInfo info) {
+    private void onTokensSetup(TokenInfo info)
+    {
         disposable = tokensService.addToken(info, wallet.getValue().address)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -176,7 +200,7 @@ public class AddTokenViewModel extends BaseViewModel {
     {
         checkNetworkCount();
         Token badToken = new Token(data, BigDecimal.ZERO, 0, "", ContractType.NOT_SET);
-        tokentype.postValue(badToken);
+        tokenType.postValue(badToken);
     }
 
     public void prepare()
@@ -222,6 +246,7 @@ public class AddTokenViewModel extends BaseViewModel {
         {
             if (!networkIds.contains(networkInfo.chainId)) networkIds.add(networkInfo.chainId);
         }
+
         return networkIds;
     }
 
@@ -245,6 +270,8 @@ public class AddTokenViewModel extends BaseViewModel {
 
             scanThreads.add(d);
         }
+
+        handler.postDelayed(this::stopScan, 60 * DateUtils.SECOND_IN_MILLIS);
     }
 
     private void testNetworkResult(final TokenInfo info, final ContractType type)
@@ -253,7 +280,9 @@ public class AddTokenViewModel extends BaseViewModel {
         {
             foundNetwork = true;
             disposable = tokensService
-                    .update(info.address, info.chainId)
+                    .update(info.address, info.chainId, type)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onTokensSetup, error -> checkType(error, info.chainId, info.address, type));
         }
         else
@@ -269,6 +298,8 @@ public class AddTokenViewModel extends BaseViewModel {
             if (!d.isDisposed()) d.dispose();
         }
         scanThreads.clear();
+        scanCount.postValue(0);
+        handler.removeCallbacksAndMessages(null);
     }
 
     private void onTestError(Throwable throwable)
@@ -312,5 +343,37 @@ public class AddTokenViewModel extends BaseViewModel {
     public AssetDefinitionService getAssetDefinitionService()
     {
         return assetDefinitionService;
+    }
+
+    public EthereumNetworkRepositoryType ethereumNetworkRepository()
+    {
+        return ethereumNetworkRepository;
+    }
+
+    public void selectExtraChains(List<Long> selectedChains)
+    {
+        //add new chains to chain selection
+        //get current list and add it on
+        HashSet<Long> uniqueList = new HashSet<>(selectedChains);
+        uniqueList.addAll(ethereumNetworkRepository.getFilterNetworkList());
+        ethereumNetworkRepository.setFilterNetworkList(uniqueList.toArray(new Long[0]));
+        ethereumNetworkRepository.commitPrefs();
+        tokensService.setupFilter(true);
+    }
+
+    /**
+     * Set all selected tokens enabled and visible.
+     * Note that we need to update the 'visibility changed' setting to mark the token as having explicitly been set visible.
+     * @param selected list of selected TCMs
+     */
+    public void markTokensEnabled(List<TokenCardMeta> selected)
+    {
+        if (wallet.getValue() == null) return;
+        Observable.fromIterable(selected)
+                .forEach(tcm -> tokensService.enableToken(wallet.getValue().address, tcm.getContractAddress())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(Schedulers.io())
+                        .subscribe())
+                .isDisposed();
     }
 }

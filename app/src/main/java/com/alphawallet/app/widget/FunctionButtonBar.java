@@ -3,10 +3,10 @@ package com.alphawallet.app.widget;
 import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -35,10 +35,12 @@ import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BuyCryptoInterface;
+import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ItemClick;
 import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -68,7 +70,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private final Semaphore functionMapComplete = new Semaphore(1);
     private Map<String, TSAction> functions;
     private NonFungibleAdapterInterface adapter;
-    private List<BigInteger> selection = new ArrayList<>();
+    private final List<BigInteger> selection = new ArrayList<>();
     private StandardFunctionInterface callStandardFunctions;
     private BuyCryptoInterface buyFunctionInterface;
     private int buttonCount;
@@ -162,11 +164,26 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     {
         callStandardFunctions = functionInterface;
         adapter = adp;
-        selection = tokenIds;
+        selection.clear();
+        if (tokenIds != null) selection.addAll(tokenIds);
+        resetButtonCount();
         this.token = token;
-        functions = assetSvs.getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        functions = assetSvs.getTokenFunctionMap(token);
         assetService = assetSvs;
-        getFunctionMap(assetSvs);
+        getFunctionMap(assetSvs, token.getInterfaceSpec());
+    }
+
+    public void setupAttestationFunctions(StandardFunctionInterface functionInterface, AssetDefinitionService assetSvs, Token token, NonFungibleAdapterInterface adp, List<BigInteger> tokenIds)
+    {
+        callStandardFunctions = functionInterface;
+        adapter = adp;
+        selection.clear();
+        selection.addAll(tokenIds);
+        resetButtonCount();
+        this.token = token;
+        functions = assetSvs.getAttestationFunctionMap(token);
+        assetService = assetSvs;
+        getFunctionMap(assetSvs, token.getInterfaceSpec());
     }
 
     /**
@@ -293,8 +310,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             }
             else
             {
-                List<BigInteger> selected = selection;
-                if (adapter != null) selected = adapter.getSelectedTokenIds(selection);
+                List<BigInteger> selected = getSelectionFromAdapter();
                 callStandardFunctions.handleTokenScriptFunction(function.buttonText, selected);
             }
         }
@@ -302,8 +318,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private boolean isSelectionValid(int buttonId)
     {
-        List<BigInteger> selected = selection;
-        if (adapter != null) selected = adapter.getSelectedTokenIds(selection);
+        List<BigInteger> selected = getSelectionFromAdapter();
         if (token == null || token.checkSelectionValidity(selected))
         {
             return true;
@@ -312,6 +327,18 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         {
             displayInvalidSelectionError();
             return false;
+        }
+    }
+
+    private List<BigInteger> getSelectionFromAdapter()
+    {
+        if (adapter != null)
+        {
+            return adapter.getSelectedTokenIds(selection);
+        }
+        else
+        {
+            return selection;
         }
     }
 
@@ -346,11 +373,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     {
         int maxSelect = 1;
 
-        if (!selected && tokenIds.containsAll(selection))
-        {
-            selection = new ArrayList<>();
-        }
-
         if (!selected) return;
 
         if (functions != null)
@@ -370,7 +392,8 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         if (maxSelect <= 1)
         {
-            selection = tokenIds;
+            selection.clear();
+            selection.addAll(tokenIds);
             if (adapter != null) adapter.setRadioButtons(true);
         }
     }
@@ -381,7 +404,8 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         //show radio buttons of all token groups
         if (adapter != null) adapter.setRadioButtons(true);
 
-        selection = tokenIds;
+        selection.clear();
+        selection.addAll(tokenIds);
         Vibrator vb = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         if (vb != null && vb.hasVibrator())
         {
@@ -557,7 +581,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         addTokenScriptFunctions(availableFunctions, token, tokenId);
 
         //If Token is Non-Fungible then display the custom functions first - usually these are more frequently used
-        if (!token.isNonFungible())
+        if (!token.isNonFungible() && token.getInterfaceSpec() != ContractType.ATTESTATION)
         {
             addStandardTokenFunctions(token);
         }
@@ -578,7 +602,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
         findViewById(R.id.layoutButtons).setVisibility(View.GONE);
 
-        if (!token.isNonFungible())
+        if (!token.isNonFungible() && token.getInterfaceSpec() != ContractType.ATTESTATION)
         {
             addFunction(new ItemClick(context.getString(R.string.generate_payment_request), R.string.generate_payment_request));
         }
@@ -586,7 +610,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private void addTokenScriptFunctions(Map<String, TSAction> availableFunctions, Token token, BigInteger tokenId)
     {
-        TokenDefinition td = assetService.getAssetDefinition(token.tokenInfo.chainId, token.getAddress());
+        TokenDefinition td = assetService.getAssetDefinition(token);
 
         if (td != null && tokenId != null && functions != null)
         {
@@ -621,7 +645,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
      */
     private boolean setupCustomTokenActions()
     {
-        if (token.tokenInfo.chainId == MATIC_ID && token.isNonFungible())
+        if (token.tokenInfo.chainId == POLYGON_ID && token.isNonFungible() || token.getInterfaceSpec() == ContractType.ATTESTATION)
         {
             return false;
         }
@@ -652,7 +676,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
                 return true;
             }
         }
-        else if (token.tokenInfo.chainId == MATIC_ID)
+        else if (token.tokenInfo.chainId == POLYGON_ID)
         {
             addFunction(R.string.swap_with_quickswap);
             return true;
@@ -660,18 +684,21 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         return false;
     }
 
-    private void getFunctionMap(AssetDefinitionService assetSvs)
+    private void getFunctionMap(AssetDefinitionService assetSvs, ContractType type)
     {
         try
         {
             functionMapComplete.acquire();
-        } catch (InterruptedException e)
+        }
+        catch (InterruptedException e)
         {
             Timber.e(e);
         }
 
+        findViewById(R.id.wait_buttons).setVisibility(View.VISIBLE);
+
         //get the available map for this collection
-        assetSvs.fetchFunctionMap(token)
+        assetSvs.fetchFunctionMap(token, selection, type)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(availabilityMap -> setupTokenMap(token, availabilityMap), this::onMapFetchError)
@@ -728,7 +755,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
     private void addBuyFunction()
     {
         if (token.tokenInfo.chainId == MAINNET_ID
-                || token.tokenInfo.chainId == XDAI_ID)
+                || token.tokenInfo.chainId == GNOSIS_ID)
         {
             addPurchaseVerb(token, onRampRepository);
         }

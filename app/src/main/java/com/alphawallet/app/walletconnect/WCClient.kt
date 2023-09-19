@@ -5,7 +5,7 @@ import com.alphawallet.app.walletconnect.entity.*
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject
-import com.alphawallet.token.tools.Numeric
+import com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.registerTypeAdapter
 import com.github.salomonbrys.kotson.typeToken
@@ -14,6 +14,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonSyntaxException
 import okhttp3.*
 import okio.ByteString
+import org.web3j.utils.Numeric
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -370,7 +371,10 @@ open class WCClient : WebSocketListener() {
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 handshakeId = request.id
                 remotePeerId = param.peerId
-                chainId = param.chainId
+                chainId = when (param.chainId.isNullOrEmpty()) {
+                    true -> MAINNET_ID.toString()
+                    false -> param.chainId
+                }
                 onSessionRequest(request.id, param.peerMeta)
             }
             WCMethod.SESSION_UPDATE -> {
@@ -386,7 +390,9 @@ open class WCClient : WebSocketListener() {
             WCMethod.ETH_PERSONAL_SIGN -> {
                 signRequest(request, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE)
             }
-            WCMethod.ETH_SIGN_TYPE_DATA -> {
+            WCMethod.ETH_SIGN_TYPE_DATA,
+            WCMethod.ETH_SIGN_TYPE_DATA_V3,
+            WCMethod.ETH_SIGN_TYPE_DATA_V4 -> {
                 signRequest(request, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE)
             }
             WCMethod.ETH_SIGN_TRANSACTION -> {
@@ -408,6 +414,7 @@ open class WCClient : WebSocketListener() {
             WCMethod.ADD_ETHEREUM_CHAIN -> {
                 handleAddChain(request)
             }
+            else -> {}
         }
     }
 

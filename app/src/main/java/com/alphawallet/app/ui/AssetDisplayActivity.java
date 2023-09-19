@@ -1,5 +1,8 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,8 +26,9 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.FinishReceiver;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.service.GasService;
@@ -40,22 +44,19 @@ import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.entity.ViewType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
 /**
  * Created by James on 22/01/2018.
@@ -155,7 +156,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         viewModel.checkTokenScriptValidity(token);
         token.clearResultMap();
 
-        if (token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
+        if (token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token))
         {
             loadItemViewHeight();
         }
@@ -194,7 +195,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     private void onNewScript(Boolean aBoolean)
     {
         //need to reload tokens, now we have an updated/new script
-        if (viewModel.getAssetDefinitionService().hasDefinition(token.tokenInfo.chainId, token.tokenInfo.address))
+        if (viewModel.getAssetDefinitionService().hasDefinition(token))
         {
             initWebViewCheck();
             handler.postDelayed(this, TOKEN_SIZING_DELAY);
@@ -210,7 +211,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         {
             BigInteger  tokenId = token.getArrayBalance().get(0);
             TicketRange data    = new TicketRange(tokenId, token.getAddress());
-            testView.renderTokenscriptView(token, data, viewModel.getAssetDefinitionService(), true);
+            testView.renderTokenScriptView(token, data, viewModel.getAssetDefinitionService(), ViewType.ITEM_VIEW);
             testView.setOnReadyCallback(this);
         }
         else
@@ -337,7 +338,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     public void handleTokenScriptFunction(String function, List<BigInteger> selection)
     {
         //does the function have a view? If it's transaction only then handle here
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token.tokenInfo.chainId, token.getAddress());
+        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
         TSAction action = functions.get(function);
         token.clearResultMap();
 
@@ -360,7 +361,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         }
         else
         {
-            viewModel.showFunction(this, token, function, selection);
+            viewModel.showFunction(this, token, function, selection, null);
         }
     }
 
@@ -383,11 +384,11 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
 
     /**
      * Final return path
-     * @param transactionData
+     * @param txData
      */
-    private void txWritten(TransactionData transactionData)
+    private void txWritten(TransactionReturn txData)
     {
-        confirmationDialog.transactionWritten(transactionData.txHash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+        confirmationDialog.transactionWritten(txData.hash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
     }
 
     private void calculateEstimateDialog()
@@ -441,7 +442,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         handler.removeCallbacks(this);
         progressView.setVisibility(View.GONE);
-        adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), this);
+        adapter = new NonFungibleTokenAdapter(functionBar, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService());
         functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, adapter, token.getArrayBalance());
         functionBar.setWalletType(wallet.type);
         tokenView.setAdapter(adapter);
@@ -535,7 +536,13 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, token.tokenInfo.chainId, ""); //return point is txWritten
+        viewModel.requestSignature(finalTx, wallet, token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(wallet, token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -563,5 +570,11 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
         return getGasSettings;
+    }
+
+    @Override
+    public WalletType getWalletType()
+    {
+        return wallet.type;
     }
 }

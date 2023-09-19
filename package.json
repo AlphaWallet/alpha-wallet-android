@@ -1,19 +1,19 @@
 {
   "name": "alpha-wallet-android",
   "version": "1.0.0",
-  "description": "Each module has its own README. Please click the name of the module to go to the corrisponding README file.",
+  "description": "Open source Ethereum wallet",
   "main": "gulpfile.js",
   "directories": {
     "lib": "lib"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AlphaWallet/alpha-wallet-android.git"
   },
-  "author": "",
+  "author": "Smart Token Labs",
   "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/AlphaWallet/alpha-wallet-android/issues"

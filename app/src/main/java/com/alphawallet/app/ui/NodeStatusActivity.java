@@ -2,7 +2,6 @@ package com.alphawallet.app.ui;
 
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import androidx.annotation.Nullable;
@@ -15,7 +14,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.ui.widget.adapter.NodeStatusAdapter;
 import com.alphawallet.app.viewmodel.NodeStatusViewModel;
 import com.alphawallet.app.widget.ActionSheetDialog;
-import com.alphawallet.app.widget.ActionSheetMode;
+import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.app.widget.StandardHeader;
 import com.alphawallet.ethereum.NetworkInfo;
 

@@ -1,8 +1,10 @@
 package com.alphawallet.app.service;
 
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.Signable;
+
+import org.web3j.crypto.RawTransaction;
 
 import java.math.BigInteger;
 
@@ -59,34 +61,19 @@ public interface AccountKeystoreService {
 			byte[] data,
 			long chainId);
 
-	/**
-	 * Sign transaction EIP1559
-	 * @param signer {@link Wallet}
-	 * @param toAddress transaction destination address
-	 * @param nonce
-	 * @return sign data
-	 */
-	Single<SignatureFromKey> signTransactionEIP1559(
-			Wallet signer,
-			String toAddress,
-			BigInteger amount,
-			BigInteger gasLimit,
-			BigInteger gasPremium,
-			BigInteger gasMax,
-			long nonce,
-			byte[] data,
-			long chainId);
+    Single<SignatureFromKey> signTransaction(
+            Wallet signer,
+            long chainId,
+            RawTransaction rtx);
 
 	Single<SignatureFromKey> signMessage(
 			Wallet signer,
-			Signable message,
-			long chainId);
+			Signable messaged);
 
-	Single<byte[]> signTransactionFast(
+	Single<byte[]> signMessageFast(
 			Wallet signer,
 			String password,
-			byte[] message,
-			long chainId);
+			byte[] message);
 
 	/**
 	 * Check if there is an address in the keystore

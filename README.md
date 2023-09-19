@@ -8,7 +8,6 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg )](https://github.com/AlphaWallet/alpha-wallet-android/graphs/commit-activity)
 ![GitHub contributors](https://img.shields.io/github/contributors/AlphaWallet/alpha-wallet-android.svg)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/AlphaWallet/alpha-wallet-android/blob/master/LICENSE)
-[![codecov](https://codecov.io/gh/AlphaWallet/alpha-wallet-android/branch/master/graph/badge.svg?token=IkoEb30CXq)](https://codecov.io/gh/AlphaWallet/alpha-wallet-android)
 
 AlphaWallet is an open source programmable blockchain apps platform. It's compatible with tokenisation framework TokenScript, offering businesses and their users in-depth token interaction, a clean white label user experience and advanced security options. Supports all Ethereum based networks.
 
@@ -21,8 +20,8 @@ AlphaWallet and TokenScript have been used by tokenisation projects like FIFA an
 
 ## About AlphaWallet - Features
 
-Easy to use and secure open source Ethereum wallet for Android and iOS, with native ERC20, ERC721, ERC1155 and ERC875 support. AlphaWallet supports all Ethereum based networks: Ethereum, xDai, Ethereum Classic, Artis, POA, Binance Smart Chain, Heco, Polygon, Avalanche, Fantom, L2 chains Optimistic and Arbitrum, and Palm.
-TestChains: Ropsten, Goerli, Kovan, Rinkeby, Sokol, Binance Test, Heco Test, Fuji (Avalanche test), Fantom Test, Polygon Test, Optimistic and Arbitrum Test, Cronos Test and Palm test.
+Easy to use and secure open source Ethereum wallet for Android and iOS, with native ERC20, ERC721, ERC1155 and ERC875 support. AlphaWallet supports all Ethereum based networks: Ethereum, xDai, Ethereum Classic, Binance Smart Chain, Heco, Polygon, Avalanche, Fantom, L2 chains Optimistic and Arbitrum, and Palm.
+TestChains: Goerli, Binance Test, Heco Test, Fuji (Avalanche test), Fantom Test, Polygon Test, Optimistic and Arbitrum Test, Cronos Test and Palm test.
 
 - Beginner Friendly
 - Secure Enclave Security
@@ -64,9 +63,15 @@ We want to give businesses the whitelabel tools they need to develop their ether
 1. [Download](https://developer.android.com/studio/) Android Studio.
 2. Clone this repository
 3. Obtain a free Infura API key and replace the one in build.gradle
-4. Build the project in AndroidStudio or Run `./gradlew build` to install tools and dependencies. See [BUILD.md](BUILD.md) for more details.
+4. Generate a GitHub [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with `read:packages, read:user` permission
+5. Edit `~/.gradle/gradle.properties` add blow properties:
+```properties
+gpr.user=Your GitHub Email
+gpr.key=The GitHub Personal Access Token you created in previous step
+```
+6. Build the project in AndroidStudio or Run `./gradlew build` to install tools and dependencies. See [BUILD.md](BUILD.md) for more details.
 
-You can also build it from the commandline just like other Android apps. Note that JDK 8 and 11 are the versions supported by Android.
+You can also build it from the commandline just like other Android apps. Note that JDK 17 is the version now supported by Android. We build with the JetBrains JDK.
 
 Find more information in our available [documentation](https://github.com/AlphaWallet/alpha-wallet-android/blob/master/docs/overview.md).
 

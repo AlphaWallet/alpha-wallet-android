@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.alphawallet.token.tools.Convert;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 
 /**
  * Created by James on 26/03/2018.

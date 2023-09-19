@@ -140,7 +140,7 @@ public class UniversalLinkTest
                 orders.add(data);
             }
 
-            String ownerAddress = "0x" + ecRecoverAddress();
+            String ownerAddress = Numeric.prependHexPrefix(ecRecoverAddress());
 
             //now try to read all the links
             for (OrderData data : orders) {

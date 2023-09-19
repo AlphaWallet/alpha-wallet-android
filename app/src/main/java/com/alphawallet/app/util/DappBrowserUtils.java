@@ -1,8 +1,8 @@
 package com.alphawallet.app.util;
 
 import static com.alphawallet.app.util.Utils.isValidUrl;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MATIC_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -28,7 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DappBrowserUtils {
+public class DappBrowserUtils
+{
     private static final String DAPPS_LIST_FILENAME = "dapps_list.json";
     private static final String MY_DAPPS_FILE = "mydapps";
     private static final String DAPPS_HISTORY_FILE = "dappshistory";
@@ -36,7 +37,8 @@ public class DappBrowserUtils {
     private static final String POLYGON_HOMEPAGE = "https://alphawallet.com/browser-item-category/polygon/";
 
     //TODO: Move to database
-    public static void saveToPrefs(Context context, List<DApp> myDapps) {
+    public static void saveToPrefs(Context context, List<DApp> myDapps)
+    {
         if (context != null)
         {
             //don't store custom dapps
@@ -63,7 +65,8 @@ public class DappBrowserUtils {
     }
 
     //TODO: Move to database
-    public static List<DApp> getMyDapps(Context context) {
+    public static List<DApp> getMyDapps(Context context)
+    {
         if (context == null) return new ArrayList<>();
 
         String myDappsJson = loadJsonData(MY_DAPPS_FILE, context);
@@ -71,8 +74,10 @@ public class DappBrowserUtils {
 
         List<DApp> dapps = getPrimarySites(context);
 
-        if (!TextUtils.isEmpty(myDappsJson)) {
-            dapps.addAll(new Gson().fromJson(myDappsJson, new TypeToken<ArrayList<DApp>>() {
+        if (!TextUtils.isEmpty(myDappsJson))
+        {
+            dapps.addAll(new Gson().fromJson(myDappsJson, new TypeToken<ArrayList<DApp>>()
+            {
             }.getType()));
         }
 
@@ -80,16 +85,21 @@ public class DappBrowserUtils {
     }
 
     //TODO: Remove this from prefs, add to database
-    public static List<DApp> getBrowserHistory(Context context) {
+    public static List<DApp> getBrowserHistory(Context context)
+    {
         if (context == null) return new ArrayList<>();
         String historyJson = loadJsonData(DAPPS_HISTORY_FILE, context);
         if (TextUtils.isEmpty(historyJson)) blankPrefEntry(context, C.DAPP_BROWSER_HISTORY); //blank legacy
 
         List<DApp> history;
-        if (historyJson.isEmpty()) {
+        if (historyJson.isEmpty())
+        {
             history = new ArrayList<>();
-        } else {
-            history = new Gson().fromJson(historyJson, new TypeToken<ArrayList<DApp>>() {
+        }
+        else
+        {
+            history = new Gson().fromJson(historyJson, new TypeToken<ArrayList<DApp>>()
+            {
             }.getType());
         }
 
@@ -112,7 +122,10 @@ public class DappBrowserUtils {
         List<DApp> recodeHistory = new ArrayList<>();
         for (DApp dapp : history)
         {
-            if (TextUtils.isEmpty(dapp.getUrl())) { continue; }
+            if (TextUtils.isEmpty(dapp.getUrl()))
+            {
+                continue;
+            }
             if (isValidUrl(dapp.getUrl()))
             {
                 recodeHistory.add(dapp);
@@ -157,7 +170,8 @@ public class DappBrowserUtils {
         {
             BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
             String line;
-            while ((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null)
+            {
                 sb.append(line).append("\n");
             }
             reader.close();
@@ -170,14 +184,16 @@ public class DappBrowserUtils {
         return sb.toString();
     }
 
-    public static void clearHistory(Context context) {
+    public static void clearHistory(Context context)
+    {
         if (context != null)
         {
             storeJsonData(DAPPS_HISTORY_FILE, "", context);
         }
     }
 
-    public static void addToHistory(Context context, DApp dapp) {
+    public static void addToHistory(Context context, DApp dapp)
+    {
         if (dapp == null || isWithinHomePage(dapp.getUrl())) return;
         List<DApp> history = new ArrayList<>(Collections.singletonList(dapp));
         history.addAll(getBrowserHistory(context));
@@ -196,32 +212,48 @@ public class DappBrowserUtils {
         saveHistory(context, history);
     }
 
-    public static void removeFromHistory(Context context, DApp dapp) {
+    public static void removeFromHistory(Context context, String url)
+    {
         List<DApp> history = getBrowserHistory(context);
 
-        for (DApp d : history) {
-            if (d.getName().equals(dapp.getName())) {
-                history.remove(d);
-                break;
+        List<Integer> removeList = new ArrayList<>();
+
+        for (int i = 0; i < history.size(); i++)
+        {
+            if (history.get(i).getUrl().equals(url))
+            {
+                removeList.add(i);
             }
+        }
+
+        removeList.sort((d1, d2) -> Integer.compare(d2, d1));
+
+        //remove in reverse order
+        for (Integer i : removeList)
+        {
+            history.remove((int)i);
         }
 
         saveHistory(context, history);
     }
 
-    public static String getIconUrl(String url) {
+    public static String getIconUrl(String url)
+    {
         return "https://www.google.com/s2/favicons?sz=128&domain=" + url;
     }
 
-    public static List<DApp> getDappsList(Context context) {
+    public static List<DApp> getDappsList(Context context)
+    {
         ArrayList<DApp> dapps;
         dapps = new Gson().fromJson(Utils.loadJSONFromAsset(context, DAPPS_LIST_FILENAME),
-                new TypeToken<List<DApp>>() {
+                new TypeToken<List<DApp>>()
+                {
                 }.getType());
         return dapps;
     }
 
-    private static void saveHistory(Context context, List<DApp> history) {
+    private static void saveHistory(Context context, List<DApp> history)
+    {
         if (context != null)
         {
             String dappHistory = new Gson().toJson(history);
@@ -259,7 +291,7 @@ public class DappBrowserUtils {
 
     public static String defaultDapp(long chainId)
     {
-        return (chainId == MATIC_ID || chainId == MATIC_TEST_ID) ? POLYGON_HOMEPAGE : DEFAULT_HOMEPAGE;
+        return (chainId == POLYGON_ID || chainId == POLYGON_TEST_ID) ? POLYGON_HOMEPAGE : DEFAULT_HOMEPAGE;
     }
 
     public static boolean isWithinHomePage(String url)

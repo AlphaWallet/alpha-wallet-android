@@ -10,9 +10,9 @@ import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_AD
 import static com.alphawallet.app.service.KeyService.AuthenticationLevel.STRONGBOX_NO_AUTHENTICATION;
 import static com.alphawallet.app.service.KeyService.AuthenticationLevel.TEE_NO_AUTHENTICATION;
 import static com.alphawallet.app.service.KeystoreAccountService.KEYSTORE_FOLDER;
+import static com.alphawallet.app.service.KeystoreAccountService.bytesFromSignature;
 import static com.alphawallet.app.service.LegacyKeystore.getLegacyPassword;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -42,10 +42,13 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.cryptokeys.KeyEncodingType;
 import com.alphawallet.app.entity.cryptokeys.KeyServiceException;
-import com.alphawallet.app.entity.cryptokeys.SignatureFromKey;
-import com.alphawallet.app.entity.cryptokeys.SignatureReturnType;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
+import com.alphawallet.hardware.HardwareCallback;
+import com.alphawallet.hardware.HardwareDevice;
+import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.hardware.SignatureReturnType;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
@@ -83,14 +86,13 @@ import wallet.core.jni.CoinType;
 import wallet.core.jni.Curve;
 import wallet.core.jni.HDWallet;
 import wallet.core.jni.Hash;
+import wallet.core.jni.Mnemonic;
 import wallet.core.jni.PrivateKey;
 
-@TargetApi(23)
-public class KeyService implements AuthenticationCallback, PinAuthenticationCallbackInterface
+public class KeyService implements AuthenticationCallback, PinAuthenticationCallbackInterface, HardwareCallback
 {
     private static final String TAG = "HDWallet";
     private static final int AUTHENTICATION_DURATION_SECONDS = 30;
-    public  static final String FAILED_SIGNATURE = "00000000000000000000000000000000000000000000000000000000000000000";
     private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM;
     private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_NONE;
 
@@ -112,7 +114,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         REQUESTING_SECURITY, NO_SCREENLOCK, ALREADY_LOCKED, ERROR, SUCCESSFULLY_UPGRADED
     }
 
-    public class UpgradeKeyResult
+    public static class UpgradeKeyResult
     {
         public final UpgradeKeyResultType result;
         public final String message;
@@ -133,6 +135,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     private static final int DEFAULT_KEY_STRENGTH = 128;
     private final Context context;
     private Activity activity;
+
+    private final HardwareDevice hardwareDevice;
 
     //Used for keeping the Ethereum account information between re-entrant calls
     private Wallet currentWallet;
@@ -158,6 +162,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         System.loadLibrary("TrustWalletCore");
         this.context = ctx;
         this.analyticsService = analyticsService;
+        this.hardwareDevice = new HardwareDevice(this);
         checkSecurity();
     }
 
@@ -234,7 +239,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         importCallback = callback;
 
         //cursory check for valid key import
-        if (!HDWallet.isValid(seedPhrase))
+        if (!Mnemonic.isValid(seedPhrase))
         {
             callback.walletValidated(null, KeyEncodingType.SEED_PHRASE_KEY, AuthenticationLevel.NOT_SET);
         }
@@ -300,6 +305,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         switch (wallet.type)
         {
+            case HARDWARE: //bypass this step as with hardware we obtain authentication simultaneously with signing
             case KEYSTORE_LEGACY:
                 signCallback.gotAuthorisation(true); //Legacy keys don't require authentication
                 break;
@@ -313,6 +319,24 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 signCallback.gotAuthorisation(false);
                 break;
         }
+    }
+
+    @Override
+    public void signedMessageFromHardware(SignatureFromKey returnSig)
+    {
+        signCallback.gotSignature(returnSig);
+    }
+
+    @Override
+    public void onCardReadStart()
+    {
+        //TODO: Display card read in progress
+    }
+
+    @Override
+    public void hardwareCardError(String message)
+    {
+        signCallback.signingError(message);
     }
 
     public void setRequireAuthentication()
@@ -362,8 +386,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     synchronized SignatureFromKey signData(Wallet wallet, byte[] TBSdata)
     {
         SignatureFromKey returnSig = new SignatureFromKey();
-        returnSig.sigType = SignatureReturnType.KEY_AUTHENTICATION_ERROR;
-        returnSig.signature = FAILED_SIGNATURE.getBytes();
 
         currentWallet = wallet;
         switch (wallet.type)
@@ -372,7 +394,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             case KEYSTORE:
                 returnSig = signWithKeystore(TBSdata);
                 break;
-
             case HDKEY:
                 try
                 {
@@ -390,6 +411,11 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 break;
             case WATCH:
                 returnSig.failMessage = context.getString(R.string.action_watch_account);
+                break;
+            case HARDWARE:
+                hardwareDevice.activateReader(activity);
+                hardwareDevice.setSigningData(org.web3j.crypto.Hash.sha3(TBSdata));
+                returnSig.sigType = SignatureReturnType.SIGNING_POSTPONED;
                 break;
             case NOT_DEFINED:
             case TEXT_MARKER:
@@ -581,13 +607,14 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      */
     private void importHDKey()
     {
+        boolean requiresAuthentication = !Utils.isRunningTest();
         //first recover the seed phrase from non-authlocked key. This removes the need to keep the seed phrase as a member on the heap
         // - making the key operation more secure
         try
         {
             String seedPhrase = unpackMnemonic();
             HDWallet newWallet = new HDWallet(seedPhrase, "");
-            boolean success = storeHDKey(newWallet, true);
+            boolean success = storeHDKey(newWallet, requiresAuthentication);
             String reportAddress = success ? currentWallet.address : null;
             importCallback.walletValidated(reportAddress, KeyEncodingType.SEED_PHRASE_KEY, authLevel);
         }
@@ -786,33 +813,18 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
     {
         try
         {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            {
-                keyGenerator.init(new KeyGenParameterSpec.Builder(
-                        keyAddress,
-                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                        .setBlockModes(BLOCK_MODE)
-                        .setKeySize(256)
-                        .setUserAuthenticationRequired(useAuthentication)
-                        .setInvalidatedByBiometricEnrollment(false)
-                        .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
-                        .setRandomizedEncryptionRequired(true)
-                        .setEncryptionPaddings(PADDING)
-                        .build());
-            }
-            else
-            {
-                keyGenerator.init(new KeyGenParameterSpec.Builder(
-                        keyAddress,
-                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                        .setBlockModes(BLOCK_MODE)
-                        .setKeySize(256)
-                        .setUserAuthenticationRequired(useAuthentication)
-                        .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
-                        .setRandomizedEncryptionRequired(true)
-                        .setEncryptionPaddings(PADDING)
-                        .build());
-            }
+            keyGenerator.init(new KeyGenParameterSpec.Builder(
+                    keyAddress,
+                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                    .setBlockModes(BLOCK_MODE)
+                    .setKeySize(256)
+                    .setUserAuthenticationRequired(useAuthentication)
+                    .setInvalidatedByBiometricEnrollment(false)
+                    .setUserAuthenticationValidityDurationSeconds(AUTHENTICATION_DURATION_SECONDS)
+                    .setRandomizedEncryptionRequired(true)
+                    .setEncryptionPaddings(PADDING)
+                    .build());
+
         }
         catch (IllegalStateException | InvalidAlgorithmParameterException e)
         {
@@ -825,7 +837,13 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
     private void checkAuthentication(Operation operation)
     {
-        //first check if the phone is unlocked
+        if (Utils.isRunningTest()) //running tests in debug build mode, we don't use key unlock
+        {
+            requireAuthentication = false;
+            authenticatePass(operation);
+            return;
+        }
+
         String dialogTitle;
         switch (operation)
         {
@@ -923,7 +941,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
                 return;
             case FINGERPRINT_NOT_VALIDATED:
                 vibrate();
-                Toast.makeText(context, R.string.fingerprint_authentication_failed, Toast.LENGTH_SHORT).show();
+                activity.runOnUiThread(() -> Toast.makeText(context, R.string.fingerprint_authentication_failed, Toast.LENGTH_SHORT).show());
                 break;
             case PIN_FAILED:
                 vibrate();
@@ -1066,6 +1084,8 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
      */
     private void createPassword(Operation operation)
     {
+        boolean requireAuthentication = !Utils.isRunningTest();
+
         //generate password
         byte[] newPassword = new byte[256];
         SecureRandom random;
@@ -1088,7 +1108,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
 
         random.nextBytes(newPassword);
 
-        boolean success = storeEncryptedBytes(newPassword, true, currentWallet.address);  //because we'll now only ever be importing keystore, always create with Auth if possible
+        boolean success = storeEncryptedBytes(newPassword, requireAuthentication, currentWallet.address);  //because we'll now only ever be importing keystore, always create with Auth if possible
 
         if (!success)
         {
@@ -1114,8 +1134,6 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         //2. construct credentials
         //3. sign
         SignatureFromKey returnSig = new SignatureFromKey();
-        returnSig.signature = FAILED_SIGNATURE.getBytes();
-        returnSig.sigType = SignatureReturnType.KEY_AUTHENTICATION_ERROR;
 
         try
         {
@@ -1135,7 +1153,7 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
             Credentials credentials = KeystoreAccountService.getCredentials(keyFolder, currentWallet.address, password);
             Sign.SignatureData signatureData = Sign.signMessage(
                     transactionBytes, credentials.getEcKeyPair());
-            returnSig.signature = KeystoreAccountService.bytesFromSignature(signatureData);
+            returnSig.signature = bytesFromSignature(signatureData);
             returnSig.sigType = SignatureReturnType.SIGNATURE_GENERATED; //only reach here if signature was generated correctly
         }
         catch (ServiceErrorException e)

@@ -13,8 +13,10 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.opensea.OpenSeaAsset;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.ui.widget.adapter.TSAttributesAdapter;
 import com.alphawallet.app.ui.widget.adapter.TraitsAdapter;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
+import com.alphawallet.token.entity.TokenScriptResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +53,13 @@ public class NFTAttributeLayout extends LinearLayout {
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         recyclerView.setAdapter(adapter);
         setAttributeLabel(token.tokenInfo.name, adapter.getItemCount());
+    }
+
+    public void bindTSAttributes(List<TokenScriptResult.Attribute> attrs)
+    {
+        TSAttributesAdapter adapter = new TSAttributesAdapter(attrs);
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        recyclerView.setAdapter(adapter);
     }
 
     private void setAttributeLabel(String tokenName, int size)

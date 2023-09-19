@@ -2,6 +2,8 @@ package com.alphawallet.app.ui;
 
 
 import static android.app.Activity.RESULT_OK;
+import static com.alphawallet.app.C.SIGNAL_NFT_SYNC;
+import static com.alphawallet.app.C.SYNC_STATUS;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -38,7 +41,9 @@ import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.NFTAssetsAdapter;
 import com.alphawallet.app.ui.widget.adapter.NonFungibleTokenAdapter;
 import com.alphawallet.app.ui.widget.divider.ItemOffsetDecoration;
+import com.alphawallet.app.util.ShortcutUtils;
 import com.alphawallet.app.viewmodel.NFTAssetsViewModel;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import java.math.BigInteger;
@@ -98,7 +103,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
             searchLayout = view.findViewById(R.id.layout_search_tokens);
 
-            gridItemDecoration = new ItemOffsetDecoration(recyclerView.getContext(), R.dimen.grid_divider_offset);
+            gridItemDecoration = new ItemOffsetDecoration(requireContext(), R.dimen.grid_divider_offset);
 
             if (hasTokenScriptOverride(token))
             {
@@ -116,18 +121,50 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
     {
         if (item.second.isCollection())
         {
-            handleTransactionSuccess.launch(viewModel.showAssetListDetails(getContext(), wallet, token, item.second));
+            handleTransactionSuccess.launch(viewModel.showAssetListDetails(requireContext(), wallet, token, item.second));
         }
         else
         {
-            handleTransactionSuccess.launch(viewModel.showAssetDetails(getContext(), wallet, token, item.first));
+            handleTransactionSuccess.launch(viewModel.showAssetDetails(requireContext(), wallet, token, item.first, item.second));
         }
+    }
+
+    @Override
+    public void onAssetLongClicked(Pair<BigInteger, NFTAsset> item)
+    {
+        showCreateShortcutsDialog(item);
+    }
+
+    private void showCreateShortcutsDialog(Pair<BigInteger, NFTAsset> asset)
+    {
+        AWalletAlertDialog cDialog = new AWalletAlertDialog(requireContext());
+        cDialog.setCancelable(true);
+        cDialog.setTitle(R.string.title_activity_confirmation);
+        cDialog.setMessage(getString(R.string.create_shortcut_for_token));
+        cDialog.setButtonText(R.string.ok);
+        cDialog.setButtonListener(v -> {
+            createShortcuts(asset);
+            cDialog.dismiss();
+        });
+        cDialog.setSecondaryButtonText(R.string.action_cancel);
+        cDialog.setSecondaryButtonListener(view -> cDialog.dismiss());
+        cDialog.show();
+    }
+
+    private void createShortcuts(Pair<BigInteger, NFTAsset> pair)
+    {
+        Intent intent = viewModel.showAssetDetails(requireContext(), wallet, token, pair.first, null);
+        intent.setAction(C.ACTION_TOKEN_SHORTCUT);
+        intent.putExtra(C.Key.WALLET, wallet.address);
+        ShortcutUtils.createShortcut(pair, intent, requireContext(), token);
+        Toast.makeText(requireContext(), R.string.toast_shortcut_created, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onTokenClick(View view, Token token, List<BigInteger> tokenIds, boolean selected)
     {
-        handleTransactionSuccess.launch(viewModel.showAssetDetails(getContext(), wallet, token, tokenIds.get(0)));
+        NFTAsset asset = token.getAssetForToken(tokenIds.get(0));
+        handleTransactionSuccess.launch(viewModel.showAssetDetails(requireContext(), wallet, token, tokenIds.get(0), asset));
     }
 
     @Override
@@ -143,15 +180,15 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
     public void showGridView()
     {
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         recyclerView.addItemDecoration(gridItemDecoration);
-        recyclerView.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.surface));
+        recyclerView.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.surface));
         initAndAttachAdapter(true);
     }
 
     public void showListView()
     {
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.removeItemDecoration(gridItemDecoration);
         recyclerView.setPadding(0, 0, 0, 0);
         initAndAttachAdapter(false);
@@ -162,21 +199,49 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
         if (hasTokenScriptOverride(token))
         {
             searchLayout.setVisibility(View.GONE);
-            adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), getActivity(), isGridView);
+            adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), isGridView);
         }
         else
         {
             searchLayout.setVisibility(View.VISIBLE);
-            adapter = new NFTAssetsAdapter(getActivity(), token, this, isGridView);
+            adapter = new NFTAssetsAdapter(getActivity(), token, this, viewModel.getOpenseaService(), isGridView);
             search.addTextChangedListener(setupTextWatcher((NFTAssetsAdapter)adapter));
+
+            attachAttestations();
         }
 
         recyclerView.setAdapter(adapter);
+        checkSyncStatus();
+    }
+
+    private void attachAttestations()
+    {
+        //has attestations?
+        List<Token> attns = viewModel.getTokensService().getAttestations(token.tokenInfo.chainId, token.getAddress());
+        if (attns.size() > 0)
+        {
+            ((NFTAssetsAdapter) adapter).attachAttestations(attns.toArray(new Token[0]));
+        }
+    }
+
+    private void checkSyncStatus()
+    {
+        if (token == null || token.getTokenAssets() == null) return;
+        Bundle result = new Bundle();
+        result.putBoolean(SYNC_STATUS, token.getTokenCount() != token.getTokenAssets().size());
+        getParentFragmentManager().setFragmentResult(SIGNAL_NFT_SYNC, result);
+        forceRedraw();
+    }
+
+    // This is a trick to fix a bug
+    private void forceRedraw()
+    {
+        search.setText("");
     }
 
     private boolean hasTokenScriptOverride(Token t)
     {
-        return viewModel.getAssetDefinitionService().hasTokenView(t.tokenInfo.chainId, t.getAddress(), AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME);
+        return viewModel.getAssetDefinitionService().hasTokenView(t, AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME);
     }
 
     private TextWatcher setupTextWatcher(NFTAssetsAdapter adapter)

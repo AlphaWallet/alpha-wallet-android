@@ -5,6 +5,7 @@ import org.junit.Test;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.SalesOrderMalformed;
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
@@ -91,7 +92,7 @@ public class UniversalLinkTypeTest
             assertEquals(data.expiry, expireTomorrow);
 
             //check signature
-            String ownerAddress = "0x" + ecRecoverAddress(); // get testKey address
+            String ownerAddress = Numeric.prependHexPrefix(ecRecoverAddress()); // get testKey address
             String recoveredOriginatorAddress = parser.getOwnerKey(data);
             assertEquals(ownerAddress, recoveredOriginatorAddress);
         }

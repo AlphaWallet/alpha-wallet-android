@@ -1,28 +1,40 @@
 package com.alphawallet.app.viewmodel;
 
 import android.app.Activity;
+import android.content.Intent;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.C;
+import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
 import com.alphawallet.app.entity.lifi.Quote;
-import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.lifi.SwapProvider;
+import com.alphawallet.app.entity.lifi.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.repository.SwapRepositoryType;
+import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.SwapService;
 import com.alphawallet.app.service.TokensService;
+import com.alphawallet.app.service.TransactionSendHandlerInterface;
+import com.alphawallet.app.ui.SelectRouteActivity;
+import com.alphawallet.app.ui.SelectSwapProvidersActivity;
+import com.alphawallet.app.ui.widget.entity.ProgressInfo;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Hex;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -35,6 +47,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -45,9 +58,11 @@ import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 @HiltViewModel
-public class SwapViewModel extends BaseViewModel
+public class SwapViewModel extends BaseViewModel implements TransactionSendHandlerInterface
 {
     private final AssetDefinitionService assetDefinitionService;
+    private final PreferenceRepositoryType preferenceRepository;
+    private final SwapRepositoryType swapRepository;
     private final TokensService tokensService;
     private final SwapService swapService;
     private final CreateTransactionInteract createTransactionInteract;
@@ -58,9 +73,9 @@ public class SwapViewModel extends BaseViewModel
     private final MutableLiveData<List<Connection>> connections = new MutableLiveData<>();
     private final MutableLiveData<Quote> quote = new MutableLiveData<>();
     private final MutableLiveData<Long> network = new MutableLiveData<>();
-    private final MutableLiveData<Integer> progressInfo = new MutableLiveData<>();
-    private final MutableLiveData<TransactionData> transactionFinalised = new MutableLiveData<>();
-    private final MutableLiveData<Throwable> transactionError = new MutableLiveData<>();
+    private final MutableLiveData<ProgressInfo> progressInfo = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
+    private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
 
     private Disposable chainsDisposable;
     private Disposable connectionsDisposable;
@@ -70,16 +85,22 @@ public class SwapViewModel extends BaseViewModel
     @Inject
     public SwapViewModel(
             AssetDefinitionService assetDefinitionService,
+            PreferenceRepositoryType preferenceRepository,
+            SwapRepositoryType swapRepository,
             TokensService tokensService,
             SwapService swapService,
             CreateTransactionInteract createTransactionInteract,
-            KeyService keyService)
+            KeyService keyService,
+            AnalyticsServiceType analyticsService)
     {
         this.assetDefinitionService = assetDefinitionService;
+        this.preferenceRepository = preferenceRepository;
+        this.swapRepository = swapRepository;
         this.tokensService = tokensService;
         this.swapService = swapService;
         this.createTransactionInteract = createTransactionInteract;
         this.keyService = keyService;
+        setAnalyticsService(analyticsService);
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -117,17 +138,17 @@ public class SwapViewModel extends BaseViewModel
         return network;
     }
 
-    public LiveData<Integer> progressInfo()
+    public LiveData<ProgressInfo> progressInfo()
     {
         return progressInfo;
     }
 
-    public LiveData<TransactionData> transactionFinalised()
+    public LiveData<TransactionReturn> transactionFinalised()
     {
         return transactionFinalised;
     }
 
-    public LiveData<Throwable> transactionError()
+    public LiveData<TransactionReturn> transactionError()
     {
         return transactionError;
     }
@@ -144,8 +165,7 @@ public class SwapViewModel extends BaseViewModel
 
     public void getChains()
     {
-        progressInfo.postValue(C.ProgressInfo.FETCHING_CHAINS);
-        progress.postValue(true);
+        progressInfo.postValue(new ProgressInfo(true, R.string.message_fetching_chains));
 
         chainsDisposable = swapService.getChains()
                 .subscribeOn(Schedulers.io())
@@ -153,10 +173,23 @@ public class SwapViewModel extends BaseViewModel
                 .subscribe(this::onChains, this::onChainsError);
     }
 
+    public String getSwapProviderUrl(String key)
+    {
+        List<SwapProvider> tools = getSwapProviders();
+        for (SwapProvider td : tools)
+        {
+            if (key.startsWith(td.key))
+            {
+                return td.url;
+            }
+        }
+
+        return "";
+    }
+
     public void getConnections(long from, long to)
     {
-        progressInfo.postValue(C.ProgressInfo.FETCHING_CONNECTIONS);
-        progress.postValue(true);
+        progressInfo.postValue(new ProgressInfo(true, R.string.message_fetching_connections));
 
         connectionsDisposable = swapService.getConnections(from, to)
                 .subscribeOn(Schedulers.io())
@@ -164,14 +197,14 @@ public class SwapViewModel extends BaseViewModel
                 .subscribe(this::onConnections, this::onConnectionsError);
     }
 
-    public void getQuote(Connection.LToken source, Connection.LToken dest, String address, String amount, String slippage)
+    public void getQuote(Token source, Token dest, String address, String amount, String slippage, String allowExchanges)
     {
+        if (!isValidAmount(amount)) return;
         if (hasEnoughBalance(source, amount))
         {
-            progressInfo.postValue(C.ProgressInfo.FETCHING_QUOTE);
-            progress.postValue(true);
+            progressInfo.postValue(new ProgressInfo(true, R.string.message_fetching_quote));
 
-            quoteDisposable = swapService.getQuote(source, dest, address, amount, slippage)
+            quoteDisposable = swapService.getQuote(source, dest, address, amount, slippage, allowExchanges)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onQuote, this::onQuoteError);
@@ -180,6 +213,19 @@ public class SwapViewModel extends BaseViewModel
         {
             error.postValue(new ErrorEnvelope(C.ErrorCode.INSUFFICIENT_BALANCE, ""));
         }
+    }
+
+    private boolean isValidAmount(String amount)
+    {
+        try
+        {
+            BigDecimal d = new BigDecimal(amount);
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+        return true;
     }
 
     private void onChainsError(Throwable t)
@@ -197,7 +243,7 @@ public class SwapViewModel extends BaseViewModel
         postError(C.ErrorCode.SWAP_QUOTE_ERROR, Objects.requireNonNull(t.getMessage()));
     }
 
-    public boolean hasEnoughBalance(Connection.LToken source, String amount)
+    public boolean hasEnoughBalance(Token source, String amount)
     {
         BigDecimal bal = new BigDecimal(getBalance(source));
         BigDecimal reqAmount = new BigDecimal(amount);
@@ -255,7 +301,7 @@ public class SwapViewModel extends BaseViewModel
             postError(C.ErrorCode.SWAP_CONNECTIONS_ERROR, Objects.requireNonNull(e.getMessage()));
         }
 
-        progress.postValue(false);
+        progressInfo.postValue(new ProgressInfo(false));
     }
 
     private void onQuote(String result)
@@ -270,7 +316,7 @@ public class SwapViewModel extends BaseViewModel
             quote.postValue(q);
         }
 
-        progress.postValue(false);
+        progressInfo.postValue(new ProgressInfo(false));
     }
 
     private void postError(int errorCode, String errorStr)
@@ -308,9 +354,9 @@ public class SwapViewModel extends BaseViewModel
                 && result.contains("tool");
     }
 
-    public String getBalance(Connection.LToken token)
+    public String getBalance(Token token)
     {
-        Token t;
+        com.alphawallet.app.entity.tokens.Token t;
         if (token.isNativeToken())
         {
             t = tokensService.getServiceToken(token.chainId);
@@ -332,17 +378,19 @@ public class SwapViewModel extends BaseViewModel
         keyService.getAuthenticationForSignature(wallet, activity, callback);
     }
 
-    public void sendTransaction(Quote quote, Wallet wallet, long chainId)
+    public void requestSignature(Quote quote, Wallet wallet, long chainId)
     {
-        sendTransaction(buildWeb3Transaction(quote), wallet, chainId);
+        createTransactionInteract.requestSignature(buildWeb3Transaction(quote), wallet, chainId, this);
     }
 
-    public void sendTransaction(Web3Transaction finalTx, Wallet wallet, long chainId)
+    public void requestSignature(Web3Transaction tx, Wallet wallet, long chainId)
     {
-        transactionDisposable = createTransactionInteract
-                .createWithSig2(wallet, finalTx, chainId)
-                .subscribe(transactionFinalised::postValue,
-                        transactionError::postValue);
+        createTransactionInteract.requestSignature(tx, wallet, chainId, this);
+    }
+
+    public void sendTransaction(Wallet wallet, long chainId, Web3Transaction w3Tx, SignatureFromKey signatureFromKey)
+    {
+        createTransactionInteract.sendTransaction(wallet, chainId, w3Tx, signatureFromKey);
     }
 
     public Web3Transaction buildWeb3Transaction(Quote quote)
@@ -358,6 +406,16 @@ public class SwapViewModel extends BaseViewModel
                 -1,
                 request.data
         );
+    }
+
+    public List<SwapProvider> getSwapProviders()
+    {
+        return swapRepository.getProviders();
+    }
+
+    public Set<String> getPreferredSwapProviders()
+    {
+        return preferenceRepository.getSelectedSwapProviders();
     }
 
     @Override
@@ -380,5 +438,61 @@ public class SwapViewModel extends BaseViewModel
             transactionDisposable.dispose();
         }
         super.onCleared();
+    }
+
+    public void getRoutes(Activity activity,
+                          ActivityResultLauncher<Intent> launcher,
+                          Token source,
+                          Token dest,
+                          String address,
+                          String amount,
+                          String slippage)
+    {
+        if (!isValidAmount(amount)) return;
+        if (hasEnoughBalance(source, amount))
+        {
+            Intent intent = new Intent(activity, SelectRouteActivity.class);
+            intent.putExtra("fromChainId", String.valueOf(source.chainId));
+            intent.putExtra("toChainId", String.valueOf(dest.chainId));
+            intent.putExtra("fromTokenAddress", String.valueOf(source.address));
+            intent.putExtra("toTokenAddress", String.valueOf(dest.address));
+            intent.putExtra("fromAddress", address);
+            intent.putExtra("fromAmount", BalanceUtils.getRawFormat(amount, source.decimals));
+            intent.putExtra("fromTokenDecimals", source.decimals);
+            intent.putExtra("slippage", slippage);
+            intent.putExtra("fromTokenSymbol", source.symbol);
+            intent.putExtra("fromTokenIcon", source.symbol);
+            intent.putExtra("fromTokenLogoUri", source.logoURI);
+            launcher.launch(intent);
+        }
+        else
+        {
+            error.postValue(new ErrorEnvelope(C.ErrorCode.INSUFFICIENT_BALANCE, ""));
+        }
+    }
+
+    public void prepare(Activity activity, ActivityResultLauncher<Intent> launcher)
+    {
+        if (getPreferredSwapProviders().isEmpty())
+        {
+            Intent intent = new Intent(activity, SelectSwapProvidersActivity.class);
+            launcher.launch(intent);
+        }
+        else
+        {
+            getChains();
+        }
+    }
+
+    @Override
+    public void transactionFinalised(TransactionReturn txData)
+    {
+        transactionFinalised.postValue(txData);
+    }
+
+    @Override
+    public void transactionError(TransactionReturn error)
+    {
+        transactionError.postValue(error);
     }
 }

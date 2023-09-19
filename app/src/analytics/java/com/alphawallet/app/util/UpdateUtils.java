@@ -20,7 +20,7 @@ public class UpdateUtils {
         appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE)
             {
-                messenger.updateReady(appUpdateInfo.availableVersionCode());
+                messenger.playStoreUpdateReady(appUpdateInfo.availableVersionCode());
             }
         });
     }

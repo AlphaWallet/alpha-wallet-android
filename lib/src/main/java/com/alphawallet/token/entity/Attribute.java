@@ -1,9 +1,12 @@
 package com.alphawallet.token.entity;
 
-import com.alphawallet.token.tools.Numeric;
+import static org.w3c.dom.Node.ELEMENT_NODE;
+
+import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.alphawallet.token.util.DateTime;
 import com.alphawallet.token.util.DateTimeFactory;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -17,8 +20,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
-import static org.w3c.dom.Node.ELEMENT_NODE;
 
 /**
  * Created by James on 9/05/2019.
@@ -445,8 +446,18 @@ public class Attribute {
      */
     public boolean isMultiTokenCall()
     {
+        return getTokenIdCount() > 1;
+    }
+
+    public boolean usesTokenId()
+    {
+        return getTokenIdCount() > 0;
+    }
+
+    private int getTokenIdCount()
+    {
         int tokenIdCount = 0;
-        if (function != null && function.parameters != null && function.parameters.size() > 1)
+        if (function != null && function.parameters != null)
         {
             for (MethodArg arg : function.parameters)
             {
@@ -454,7 +465,7 @@ public class Attribute {
             }
         }
 
-        return tokenIdCount > 1;
+        return tokenIdCount;
     }
 
     /**

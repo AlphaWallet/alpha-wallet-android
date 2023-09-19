@@ -17,11 +17,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.ActivityMeta;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.interact.ActivityDataInteract;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.repository.entity.RealmTransfer;
@@ -60,7 +60,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        LocaleUtils.setActiveLocale(getContext());
+        LocaleUtils.setActiveLocale(requireContext());
         View view = inflater.inflate(R.layout.fragment_transactions, container, false);
         toolbar(view);
         setToolbarTitle(R.string.activity_label);
@@ -159,7 +159,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         //summon realm items
         //get matching entries for this transaction
         RealmResults<RealmTransfer> transfers = realm.where(RealmTransfer.class)
-                .equalTo("hash", tm.hash)
+                .equalTo("hash", RealmTransfer.databaseKey(tm.chainId, tm.hash))
                 .findAll();
 
         if (transfers != null && transfers.size() > 0)
@@ -185,7 +185,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         SwipeRefreshLayout refreshLayout = view.findViewById(R.id.refresh_layout);
         systemView = view.findViewById(R.id.system_view);
         listView = view.findViewById(R.id.list);
-        listView.setLayoutManager(new LinearLayoutManager(getContext()));
+        listView.setLayoutManager(new LinearLayoutManager(requireContext()));
         listView.setAdapter(adapter);
         listView.addRecyclerListener(holder -> adapter.onRViewRecycled(holder));
 
@@ -205,7 +205,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     {
         if (adapter.isEmpty())
         {
-            EmptyTransactionsView emptyView = new EmptyTransactionsView(getContext(), this);
+            EmptyTransactionsView emptyView = new EmptyTransactionsView(requireContext(), this);
             systemView.showEmpty(emptyView);
         }
         else
@@ -221,6 +221,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         viewModel.prepare();
     }
 
+    @Override
     public void resetTokens()
     {
         if (adapter != null)
@@ -229,8 +230,13 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
             adapter.clear();
             viewModel.prepare();
         }
+        else
+        {
+            requireActivity().recreate();
+        }
     }
 
+    @Override
     public void addedToken(List<ContractLocator> tokenContracts)
     {
         if (adapter != null) adapter.updateItems(tokenContracts);
@@ -252,10 +258,11 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         super.onResume();
         if (viewModel == null)
         {
-            ((HomeActivity) getActivity()).resetFragment(WalletPage.ACTIVITY);
+            requireActivity().recreate();
         }
         else
         {
+            viewModel.track(Analytics.Navigation.ACTIVITY);
             viewModel.prepare();
         }
 
@@ -298,12 +305,14 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         if (realm != null && !realm.isClosed()) realm.close();
     }
 
+    @Override
     public void resetTransactions()
     {
         //called when we just refreshed the database
         refreshTransactionList();
     }
 
+    @Override
     public void scrollToTop()
     {
         if (listView != null) listView.smoothScrollToPosition(0);

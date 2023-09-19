@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui.widget.entity;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
 
 import android.content.Context;
 import android.os.Parcel;
@@ -37,7 +38,7 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
         this.transferDetail = transferDetail;
     }
 
-    public int getTitle(Transaction tx)
+    public int getTitle()
     {
         //catch standard Token events
         switch (eventName)
@@ -69,6 +70,11 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
             default:
                 return 0;
         }
+    }
+
+    public boolean isMintEvent()
+    {
+        return eventName.equals("received") && getDetailAddress().equals(ZERO_ADDRESS);
     }
 
     public String getOperationPrefix()
@@ -168,7 +174,7 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
                 EventResult eResult = resultMap.get("from");
                 if (eResult != null)
                 {
-                    if (tx != null && eResult.value.equals(ZERO_ADDRESS))
+                    if (tx != null && eResult.value.equals(ZERO_ADDRESS) && t != null)
                     {
                         return t.getFullName();
                     }
@@ -254,6 +260,34 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
         return eventName;
     }
 
+    public String getToAddress()
+    {
+        Map<String, EventResult> resultMap = getEventResultMap();
+        EventResult evTo = resultMap.get("to");
+        if (evTo != null)
+        {
+            return evTo.value;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public String getFromAddress()
+    {
+        Map<String, EventResult> resultMap = getEventResultMap();
+        EventResult evFrom = resultMap.get("from");
+        if (evFrom != null)
+        {
+            return evFrom.value;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     public StatusType getEventStatusType()
     {
         switch (eventName)
@@ -270,4 +304,47 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
         }
     }
 
+    public String getEventAmount(Token token, Transaction tx)
+    {
+        if (token == null)
+        {
+            return "";
+        }
+
+        if (tx != null)
+        {
+            tx.getDestination(token); //build decoded input
+        }
+
+        Map<String, EventResult> resultMap = getEventResultMap();
+        String value = "";
+        switch (eventName)
+        {
+            case "received":
+                value = "+ ";
+                //drop through
+            case "sent":
+                if (value.length() == 0) value = "- ";
+                if (resultMap.get("amount") != null)
+                {
+                    value = token.convertValue(value, resultMap.get("amount"), TRANSACTION_BALANCE_PRECISION);
+                }
+                break;
+            case "approvalObtained":
+            case "ownerApproved":
+                if (resultMap.get("value") != null)
+                {
+                    value = token.convertValue(value, resultMap.get("value"), TRANSACTION_BALANCE_PRECISION);
+                }
+                break;
+            default:
+                if (token != null && tx != null)
+                {
+                    value = token.isEthereum() ? token.getTransactionValue(tx, TRANSACTION_BALANCE_PRECISION) : tx.getOperationResult(token, TRANSACTION_BALANCE_PRECISION);
+                }
+                break;
+        }
+
+        return value;
+    }
 }

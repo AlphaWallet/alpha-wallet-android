@@ -28,6 +28,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.AddressMode;
 import com.alphawallet.app.entity.BuyCryptoInterface;
 import com.alphawallet.app.entity.StandardFunctionInterface;
@@ -48,7 +49,6 @@ import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
-import com.bumptech.glide.Glide;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -59,9 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -233,7 +230,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         final TokenGroup group = viewModel.getTokensService().getTokenGroup(token);
         //found a new tokenscript for this token, create a new meta with balance set to trigger view update; view will update the token name
         tokenViewAdapter.updateToken(new TokenCardMeta(token.tokenInfo.chainId, token.getAddress(), "force_update",
-                token.updateBlancaTime, token.lastTxCheck, token.getInterfaceSpec(), group), true);
+                token.updateBlancaTime, token.lastTxCheck, token.getInterfaceSpec(), group));
         viewModel.checkTokenScriptValidity(token); //check script signature
         CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
         certificateToolbar.stopDownload();
@@ -273,7 +270,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             }
         });
         tokenViewAdapter = new TokensAdapter(null, viewModel.getAssetDefinitionService(), viewModel.getTokensService(), null);
-        tokenViewAdapter.updateToken(tokenMeta, true);
+        tokenViewAdapter.updateToken(tokenMeta);
         tokenView.setAdapter(tokenViewAdapter);
         setTokenListener();
         setupButtons();
@@ -329,7 +326,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
                     playNotification();
                 }
 
-                tokenViewAdapter.updateToken(meta, true);
+                tokenViewAdapter.updateToken(meta);
             }
         });
     }
@@ -510,6 +507,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     {
         Intent intent = viewModel.getBuyIntent(wallet.address, token);
         setResult(RESULT_OK, intent);
+        viewModel.track(Analytics.Action.BUY_WITH_RAMP);
         finish();
     }
 

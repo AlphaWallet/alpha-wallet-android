@@ -131,7 +131,7 @@ public class ActivityHistoryList extends LinearLayout
         //summon realm items
         //get matching entries for this transaction
         RealmResults<RealmTransfer> transfers = realm.where(RealmTransfer.class)
-                .equalTo("hash", tm.hash)
+                .equalTo("hash", RealmTransfer.databaseKey(tm.chainId, tm.hash))
                 .findAll();
 
         if (transfers != null && transfers.size() > 0)
@@ -176,7 +176,9 @@ public class ActivityHistoryList extends LinearLayout
     {
         return realm.where(RealmTransaction.class)
                 .sort("timeStamp", Sort.DESCENDING)
-                .equalTo("input", "0x")
+                .beginGroup()
+                .equalTo("input", "0x").or().equalTo("input", "")
+                .endGroup()
                 .beginGroup()
                 .equalTo("to", wallet.address, Case.INSENSITIVE)
                 .or()

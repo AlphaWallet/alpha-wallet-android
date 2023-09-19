@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.ADDED_TOKEN;
+import static com.alphawallet.app.C.RESET_WALLET;
 import static com.alphawallet.app.ui.widget.holder.TokenHolder.CHECK_MARK;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 
@@ -8,24 +9,20 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.LongSparseArray;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
@@ -39,32 +36,35 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.ui.QRScanning.QRScanner;
+import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.AddTokenViewModel;
+import com.alphawallet.app.widget.AWBottomSheetDialog;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
+import com.alphawallet.app.widget.TestNetDialog;
 import com.alphawallet.token.tools.ParseMagicLink;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
+import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
 
-import dagger.hilt.android.AndroidEntryPoint;
-
 @AndroidEntryPoint
-public class AddTokenActivity extends BaseActivity implements AddressReadyCallback, StandardFunctionInterface, TokensAdapterCallback
+public class AddTokenActivity extends BaseActivity implements AddressReadyCallback, StandardFunctionInterface, TokensAdapterCallback, TestNetDialog.TestNetDialogCallback
 {
     private AddTokenViewModel viewModel;
 
@@ -85,6 +85,7 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     private RecyclerView recyclerView;
 
     private AWalletAlertDialog aDialog;
+    private AWBottomSheetDialog dialog;
     private final LongSparseArray<Token> tokenList = new LongSparseArray<>();
 
     @Override
@@ -162,13 +163,19 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         if ( getIntent().getStringExtra(C.EXTRA_QR_CODE) != null) {
             runOnUiThread(() -> onActivityResult(C.BARCODE_READER_REQUEST_CODE, Activity.RESULT_OK, getIntent()));
         }
+
+        String addressFromIntent = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        if (!TextUtils.isEmpty(addressFromIntent))
+        {
+            inputAddressView.setAddress(addressFromIntent);
+        }
     }
 
     private void gotToken(Token token)
     {
         TokenCardMeta tcm = new TokenCardMeta(token, CHECK_MARK);
         tcm.isEnabled = false;
-        adapter.updateToken(tcm, true);
+        adapter.updateToken(tcm);
     }
 
     private void gotAllTokens(Token[] tokens)
@@ -196,22 +203,6 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         {
             showProgress(false);
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_network, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        if (item.getItemId() == R.id.action_networks)
-        {
-            selectNetwork();
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -273,17 +264,22 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
     }
 
-    private void onSaved(Token result)
+    private void onSaved()
     {
         showProgress(false);
-        if (result != null)
+        List<TokenCardMeta> selected = adapter.getSelected();
+
+        if (selected.size() > 0)
         {
-            ContractLocator cr = new ContractLocator(result.getAddress(), result.tokenInfo.chainId);
+            TokenCardMeta result = selected.get(0);
+            ContractLocator cr = new ContractLocator(result.getAddress(), result.getChain());
             Intent iResult = new Intent();
             iResult.putParcelableArrayListExtra(ADDED_TOKEN, new ArrayList<>(Collections.singletonList(cr)));
+            iResult.putExtra(RESET_WALLET, true);
             setResult(RESULT_OK, iResult);
-            finish();
         }
+
+        finish();
     }
 
     private void onError(ErrorEnvelope errorEnvelope) {
@@ -321,28 +317,84 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
             lastCheck = address;
             showProgress(true);
             progressLayout.setVisibility(View.VISIBLE);
+            adapter.clear();
             viewModel.testNetworks(address);
         }
     }
 
-    private void onSave() {
+    private void onSave()
+    {
+        List<Long> activeChains = viewModel.ethereumNetworkRepository().getFilterNetworkList();
         List<TokenCardMeta> selected = adapter.getSelected();
+        HashSet<Long> chainsNotEnabled = new HashSet<>();
+        for (TokenCardMeta token : selected)
+        {
+            NetworkInfo info = viewModel.getNetworkInfo(token.getChain());
+            if (!activeChains.contains(info.chainId))
+            {
+                chainsNotEnabled.add(info.chainId);
+            }
+        }
+
+        viewModel.markTokensEnabled(selected);
+
+        if (chainsNotEnabled.size() == 0) // currently showing the required chains, only need to save new tokens
+        {
+            //store tokens
+            onSelectedChains(selected);
+        }
+        else // we should ask user to enable chains for selected tokens
+        {
+            showAddChainsDialog();
+        }
+    }
+
+    private void onSelectedChains(List<TokenCardMeta> selected)
+    {
         List<Token> toSave = new ArrayList<>();
         for (TokenCardMeta tcm : selected)
         {
             Token matchingToken = tokenList.get(tcm.getChain());
             if (matchingToken != null) toSave.add(matchingToken);
         }
+        viewModel.saveTokens(toSave);
+        onSaved();
+    }
 
-        if (toSave.size() > 0)
+    private void showAddChainsDialog()
+    {
+        if (dialog != null && dialog.isShowing())
         {
-            viewModel.saveTokens(toSave);
-            onSaved(toSave.get(0));
+            return;
         }
-        else
+
+        dialog = new AWBottomSheetDialog(this, new AWBottomSheetDialog.Callback()
         {
-            finish();
-        }
+            @Override
+            public void onClosed()
+            {
+
+            }
+
+            @Override
+            public void onConfirmed()
+            {
+                //add required chains
+                viewModel.selectExtraChains(getSelectedChains());
+                //did we add the tokens?
+                onSelectedChains(adapter.getSelected());
+            }
+
+            @Override
+            public void onCancelled()
+            {
+
+            }
+        });
+        dialog.setTitle(getString(R.string.enable_required_chains));
+        dialog.setContent(getString(R.string.enable_required_chains_message));
+        dialog.setConfirmButton(getString(R.string.dialog_ok));
+        dialog.show();
     }
 
     private void onNoContractFound(Boolean noContract)
@@ -367,18 +419,17 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
         }
     }
 
-    ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+    /*private final ActivityResultLauncher<ScanOptions> qrCodeScanner = super.registerForActivityResult(new ScanContract(),
             result -> {
-                long networkId = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, 1);
-                setupNetwork(networkId);
-            });
-
-    private void selectNetwork() {
-        Intent intent = new Intent(this, SelectNetworkActivity.class);
-        intent.putExtra(C.EXTRA_LOCAL_NETWORK_SELECT_FLAG, true);
-        intent.putExtra(C.EXTRA_CHAIN_ID, networkInfo.chainId);
-        getNetwork.launch(intent);
-    }
+                if(result.getContents() == null)
+                {
+                    Toast.makeText(this, R.string.toast_invalid_code, Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    viewModel.handleQRCode(this, result.getContents());
+                }
+            });*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -440,11 +491,11 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
                         inputAddressView.setAddress(extracted_address);
                     }
                     break;
-                case QRScanner.DENY_PERMISSION:
+                case QRScannerActivity.DENY_PERMISSION:
                     showCameraDenied();
                     break;
                 default:
-                    Timber.tag("SEND").e(String.format(getString(R.string.barcode_error_format),
+                    Timber.tag("SEND").e(getString(R.string.barcode_error_format,
                                                 "Code: " + resultCode
                     ));
                     break;
@@ -477,5 +528,32 @@ public class AddTokenActivity extends BaseActivity implements AddressReadyCallba
     public void onLongTokenClick(View view, Token token, List<BigInteger> tokenIds)
     {
 
+    }
+
+    @Override
+    public void onTestNetDialogClosed()
+    {
+
+    }
+
+    @Override
+    public void onTestNetDialogConfirmed(long chainId)
+    {
+        viewModel.selectExtraChains(getSelectedChains());
+        //did we add the tokens?
+        onSelectedChains(adapter.getSelected());
+    }
+
+    private List<Long> getSelectedChains()
+    {
+        HashSet<Long> selectedChains = new HashSet<>();
+
+        for (TokenCardMeta token : adapter.getSelected())
+        {
+            NetworkInfo info = viewModel.getNetworkInfo(token.getChain());
+            selectedChains.add(info.chainId);
+        }
+
+        return new ArrayList<>(selectedChains);
     }
 }

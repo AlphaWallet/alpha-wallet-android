@@ -16,6 +16,7 @@ import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -36,14 +37,15 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletPage;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.util.LocaleUtils;
 import com.alphawallet.app.util.UpdateUtils;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.NewSettingsViewModel;
 import com.alphawallet.app.widget.NotificationView;
 import com.alphawallet.app.widget.SettingsItemView;
@@ -58,60 +60,6 @@ import io.reactivex.schedulers.Schedulers;
 @AndroidEntryPoint
 public class NewSettingsFragment extends BaseFragment
 {
-    ActivityResultLauncher<Intent> handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                String keyBackup = "";
-                boolean noLockScreen = false;
-                Intent data = result.getData();
-                if (data != null) keyBackup = data.getStringExtra("Key");
-                if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
-
-                Bundle b = new Bundle();
-                b.putBoolean(C.HANDLE_BACKUP, result.getResultCode() == RESULT_OK);
-                b.putString("Key", keyBackup);
-                b.putBoolean("nolock", noLockScreen);
-                getParentFragmentManager().setFragmentResult(C.HANDLE_BACKUP, b);
-            });
-
-    ActivityResultLauncher<Intent> networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                //send instruction to restart tokenService
-                getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
-            });
-
-    ActivityResultLauncher<Intent> advancedSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                Intent data = result.getData();
-                if (data == null) return;
-                if (data.getBooleanExtra(RESET_WALLET, false))
-                {
-                    getParentFragmentManager().setFragmentResult(RESET_WALLET, new Bundle());
-                }
-                else if (data.getBooleanExtra(CHANGE_CURRENCY, false))
-                {
-                    getParentFragmentManager().setFragmentResult(CHANGE_CURRENCY, new Bundle());
-                }
-                else if (data.getBooleanExtra(CHANGED_LOCALE, false))
-                {
-                    getParentFragmentManager().setFragmentResult(CHANGED_LOCALE, new Bundle());
-                }
-            });
-
-    ActivityResultLauncher<Intent> updateLocale = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                updateLocale(result.getData());
-            });
-
-    ActivityResultLauncher<Intent> updateCurrency = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result ->
-            {
-                updateCurrency(result.getData());
-            });
-
     private NewSettingsViewModel viewModel;
     private LinearLayout walletSettingsLayout;
     private LinearLayout systemSettingsLayout;
@@ -137,17 +85,18 @@ public class NewSettingsFragment extends BaseFragment
     private ImageView closeBtn;
     private NotificationView notificationView;
     private MaterialCardView updateLayout;
-    private int pendingUpdate = 0;
+    private String pendingUpdate;
     private Wallet wallet;
+    private ActivityResultLauncher<Intent> handleBackupClick;
+    private ActivityResultLauncher<Intent> networkSettingsHandler;
+    private ActivityResultLauncher<Intent> advancedSettingsHandler;
+    private ActivityResultLauncher<Intent> updateLocale;
+    private ActivityResultLauncher<Intent> updateCurrency;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        viewModel = new ViewModelProvider(this)
-                .get(NewSettingsViewModel.class);
-        viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
-        viewModel.backUpMessage().observe(getViewLifecycleOwner(), this::backupWarning);
         LocaleUtils.setActiveLocale(getContext());
 
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
@@ -155,6 +104,8 @@ public class NewSettingsFragment extends BaseFragment
         toolbar(view);
 
         setToolbarTitle(R.string.toolbar_header_settings);
+
+        initViewModel();
 
         initializeSettings(view);
 
@@ -166,11 +117,74 @@ public class NewSettingsFragment extends BaseFragment
 
         initNotificationView(view);
 
-        checkPendingUpdate(view);
+        initResultLaunchers();
 
         getParentFragmentManager().setFragmentResult(SETTINGS_INSTANTIATED, new Bundle());
 
         return view;
+    }
+
+    private void initResultLaunchers()
+    {
+        handleBackupClick = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result ->
+                {
+                    String keyBackup = "";
+                    boolean noLockScreen = false;
+                    Intent data = result.getData();
+                    if (data != null) keyBackup = data.getStringExtra("Key");
+                    if (data != null) noLockScreen = data.getBooleanExtra("nolock", false);
+
+                    Bundle b = new Bundle();
+                    b.putBoolean(C.HANDLE_BACKUP, result.getResultCode() == RESULT_OK);
+                    b.putString("Key", keyBackup);
+                    b.putBoolean("nolock", noLockScreen);
+                    getParentFragmentManager().setFragmentResult(C.HANDLE_BACKUP, b);
+                });
+
+        networkSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result ->
+                {
+                    //send instruction to restart tokenService
+                    getParentFragmentManager().setFragmentResult(RESET_TOKEN_SERVICE, new Bundle());
+                });
+
+        advancedSettingsHandler = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result ->
+                {
+                    Intent data = result.getData();
+                    if (data == null) return;
+                    if (data.getBooleanExtra(RESET_WALLET, false))
+                    {
+                        getParentFragmentManager().setFragmentResult(RESET_WALLET, new Bundle());
+                    }
+                    else if (data.getBooleanExtra(CHANGE_CURRENCY, false))
+                    {
+                        getParentFragmentManager().setFragmentResult(CHANGE_CURRENCY, new Bundle());
+                    }
+                    else if (data.getBooleanExtra(CHANGED_LOCALE, false))
+                    {
+                        getParentFragmentManager().setFragmentResult(CHANGED_LOCALE, new Bundle());
+                    }
+                });
+        updateLocale = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result ->
+                {
+                    updateLocale(result.getData());
+                });
+        updateCurrency = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result ->
+                {
+                    updateCurrency(result.getData());
+                });
+    }
+
+    private void initViewModel()
+    {
+        viewModel = new ViewModelProvider(this)
+                .get(NewSettingsViewModel.class);
+        viewModel.defaultWallet().observe(getViewLifecycleOwner(), this::onDefaultWallet);
+        viewModel.backUpMessage().observe(getViewLifecycleOwner(), this::backupWarning);
     }
 
     private void initNotificationView(View view)
@@ -193,11 +207,37 @@ public class NewSettingsFragment extends BaseFragment
         }
     }
 
-    public void signalUpdate(int updateVersion)
+    @Override
+    public void signalPlayStoreUpdate(int updateVersion)
     {
         //add wallet update signal to adapter
+        pendingUpdate = String.valueOf(updateVersion);
+        checkPendingUpdate(getView(), true, v ->
+        {
+            UpdateUtils.pushUpdateDialog(getActivity());
+            updateLayout.setVisibility(View.GONE);
+            pendingUpdate = "";
+            if (getActivity() != null)
+            {
+                ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
+            }
+        });
+    }
+
+    @Override
+    public void signalExternalUpdate(String updateVersion)
+    {
         pendingUpdate = updateVersion;
-        checkPendingUpdate(getView());
+        checkPendingUpdate(getView(), false, v ->
+        {
+            pendingUpdate = "";
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(C.EXTERNAL_APP_DOWNLOAD_LINK));
+            if (getActivity() != null)
+            {
+                ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
+                getActivity().startActivity(intent);
+            }
+        });
     }
 
     private void initBackupWarningViews(View view)
@@ -259,7 +299,6 @@ public class NewSettingsFragment extends BaseFragment
 
         notificationsSetting =
                 new SettingsItemView.Builder(getContext())
-                        .withType(SettingsItemView.Type.TOGGLE)
                         .withIcon(R.drawable.ic_settings_notifications)
                         .withTitle(R.string.title_notifications)
                         .withListener(this::onNotificationsSettingClicked)
@@ -359,8 +398,6 @@ public class NewSettingsFragment extends BaseFragment
         appVersionText.setText(String.format(Locale.getDefault(), "%s (%d)", BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE));
         TextView tokenScriptVersionText = view.findViewById(R.id.text_tokenscript_compatibility);
         tokenScriptVersionText.setText(TOKENSCRIPT_CURRENT_SCHEMA);
-
-        notificationsSetting.setToggleState(viewModel.getNotificationState());
     }
 
     private void openShowSeedPhrase(Wallet wallet)
@@ -412,14 +449,10 @@ public class NewSettingsFragment extends BaseFragment
         this.wallet = wallet;
         if (wallet.address != null)
         {
-            if (!wallet.ENSname.isEmpty())
-            {
-                changeWalletSetting.setSubtitle(wallet.ENSname + " | " + wallet.address);
-            }
-            else
-            {
-                changeWalletSetting.setSubtitle(wallet.address);
-            }
+            String walletAddressDisplay = wallet.ENSname.isEmpty() ? wallet.address
+                    : wallet.ENSname + " | " + Utils.formatAddress(wallet.address);
+
+            changeWalletSetting.setSubtitle(walletAddressDisplay);
         }
 
         switch (wallet.authLevel)
@@ -476,14 +509,16 @@ public class NewSettingsFragment extends BaseFragment
         super.onResume();
         if (viewModel == null)
         {
-            ((HomeActivity) getActivity()).resetFragment(WalletPage.SETTINGS);
+            requireActivity().recreate();
         }
         else
         {
+            viewModel.track(Analytics.Navigation.SETTINGS);
             viewModel.prepare();
         }
     }
 
+    @Override
     public void backupSeedSuccess(boolean hasNoLock)
     {
         if (viewModel != null) viewModel.TestWalletBackup();
@@ -577,7 +612,8 @@ public class NewSettingsFragment extends BaseFragment
 
     private void onNotificationsSettingClicked()
     {
-        viewModel.setNotificationState(notificationsSetting.getToggleState());
+        Intent intent = new Intent(getActivity(), NotificationSettingsActivity.class);
+        requireActivity().startActivity(intent);
     }
 
     private void onBiometricsSettingClicked()
@@ -587,7 +623,7 @@ public class NewSettingsFragment extends BaseFragment
 
     private void onSelectNetworksSettingClicked()
     {
-        Intent intent = new Intent(getActivity(), SelectNetworkFilterActivity.class);
+        Intent intent = new Intent(getActivity(), NetworkToggleActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, false);
         networkSettingsHandler.launch(intent);
     }
@@ -613,36 +649,33 @@ public class NewSettingsFragment extends BaseFragment
     private void onWalletConnectSettingClicked()
     {
         Intent intent = new Intent(getActivity(), WalletConnectSessionActivity.class);
-        intent.putExtra("wallet", wallet);
         startActivity(intent);
     }
 
-    private void checkPendingUpdate(View view)
+    private void checkPendingUpdate(View view, boolean isFromPlayStore, View.OnClickListener listener)
     {
         if (updateLayout == null || view == null) return;
 
-        if (pendingUpdate > 0)
+        if (!TextUtils.isEmpty(pendingUpdate))
         {
             updateLayout.setVisibility(View.VISIBLE);
+            updateLayout.setOnClickListener(listener);
             TextView current = view.findViewById(R.id.text_detail_current);
             TextView available = view.findViewById(R.id.text_detail_available);
-            current.setText(getString(R.string.installed_version, String.valueOf(BuildConfig.VERSION_CODE)));
+            if (isFromPlayStore)
+            {
+                current.setText(getString(R.string.installed_version, String.valueOf(BuildConfig.VERSION_CODE)));
+            }
+            else
+            {
+                current.setText(getString(R.string.installed_version, BuildConfig.VERSION_NAME));
+            }
             available.setText(getString(R.string.available_version, String.valueOf(pendingUpdate)));
+
             if (getActivity() != null)
             {
                 ((HomeActivity) getActivity()).addSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
             }
-
-            updateLayout.setOnClickListener(v ->
-            {
-                UpdateUtils.pushUpdateDialog(getActivity());
-                updateLayout.setVisibility(View.GONE);
-                pendingUpdate = 0;
-                if (getActivity() != null)
-                {
-                    ((HomeActivity) getActivity()).removeSettingsBadgeKey(C.KEY_UPDATE_AVAILABLE);
-                }
-            });
         }
         else
         {

@@ -2,7 +2,6 @@ package com.alphawallet.app.ui.widget.holder;
 
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_CHANGE;
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.FIAT_VALUE;
-import static com.alphawallet.app.ui.widget.holder.WalletHolder.IS_MAINNET_ACTIVE;
 import static com.alphawallet.app.ui.widget.holder.WalletHolder.IS_SYNCED;
 
 import android.content.Intent;
@@ -12,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,11 +26,13 @@ import com.alphawallet.app.ui.WalletActionsActivity;
 import com.alphawallet.app.ui.widget.entity.AvatarWriteCallback;
 import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.widget.TokensBalanceView;
 import com.alphawallet.app.widget.UserAvatar;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import io.reactivex.disposables.Disposable;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -45,21 +47,23 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     private final ImageView defaultWalletIndicator;
     private final ImageView manageWalletBtn;
     private final UserAvatar walletIcon;
-    private final LinearLayout walletClickLayout;
+    private final RelativeLayout arrowRight;
     private final TextView walletBalanceText;
     private final TextView walletNameText;
     private final TextView walletAddressSeparator;
     private final TextView walletAddressText;
     private final TextView wallet24hChange;
+    private final TokensBalanceView tokensBalanceView;
     private final Realm realm;
     private RealmResults<RealmWalletData> realmUpdate;
-
     private final WalletClickCallback clickCallback;
     private Wallet wallet = null;
+    protected Disposable disposable;
 
     public WalletSummaryHolder(int resId, ViewGroup parent, WalletClickCallback callback, Realm realm)
     {
         super(resId, parent);
+
         defaultWalletIndicator = findViewById(R.id.image_default_indicator);
         manageWalletBtn = findViewById(R.id.manage_wallet_btn);
         walletIcon = findViewById(R.id.wallet_icon);
@@ -67,8 +71,9 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         walletNameText = findViewById(R.id.wallet_name);
         walletAddressSeparator = findViewById(R.id.wallet_address_separator);
         walletAddressText = findViewById(R.id.wallet_address);
-        walletClickLayout = findViewById(R.id.wallet_click_layer);
+        arrowRight = findViewById(R.id.container);
         wallet24hChange = findViewById(R.id.wallet_24h_change);
+        tokensBalanceView = findViewById(R.id.token_with_balance_view);
         clickCallback = callback;
         manageWalletLayout = findViewById(R.id.layout_manage_wallet);
         this.realm = realm;
@@ -82,8 +87,9 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 
         if (data != null)
         {
+            tokensBalanceView.blankView();
             wallet = fetchWallet(data);
-            walletClickLayout.setOnClickListener(this);
+            arrowRight.setOnClickListener(this);
             manageWalletLayout.setOnClickListener(this);
 
             if (addition.getBoolean(IS_DEFAULT_ADDITION, false))
@@ -135,21 +141,13 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
                 walletIcon.setWaiting();
             }
 
-            if (addition.getBoolean(IS_MAINNET_ACTIVE))
-            {
-                double fiatValue = addition.getDouble(FIAT_VALUE, 0.00);
-                double oldFiatValue = addition.getDouble(FIAT_CHANGE, 0.00);
+            double fiatValue = addition.getDouble(FIAT_VALUE, 0.00);
+            double oldFiatValue = addition.getDouble(FIAT_CHANGE, 0.00);
 
-                String balanceTxt = TickerService.getCurrencyString(fiatValue);
-
-                walletBalanceText.setText(balanceTxt);
-                setWalletChange(fiatValue != 0 ? ((fiatValue - oldFiatValue) / oldFiatValue) * 100.0 : 0.0);
-            }
-            else
-            {
-                walletBalanceText.setText("-");
-                wallet24hChange.setVisibility(View.GONE);
-            }
+            String balanceTxt = TickerService.getCurrencyString(fiatValue);
+            walletBalanceText.setVisibility(View.VISIBLE);
+            walletBalanceText.setText(balanceTxt);
+            setWalletChange(fiatValue != 0 ? ((fiatValue - oldFiatValue) / oldFiatValue) * 100.0 : 0.0);
 
             checkLastBackUpTime();
             startRealmListener();
@@ -183,7 +181,8 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     {
         realmUpdate = realm.where(RealmWalletData.class)
                 .equalTo("address", wallet.address).findAllAsync();
-        realmUpdate.addChangeListener(realmWallets -> {
+        realmUpdate.addChangeListener(realmWallets ->
+        {
             //update balance
             if (realmWallets.size() == 0) return;
             RealmWalletData realmWallet = realmWallets.first();
@@ -211,15 +210,18 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         RealmWalletData realmWallet = realm.where(RealmWalletData.class)
                 .equalTo("address", w.address)
                 .findFirst();
-
         if (realmWallet != null)
         {
             w.balance = realmWallet.getBalance();
             w.ENSname = realmWallet.getENSName();
             w.name = realmWallet.getName();
             w.ENSAvatar = realmWallet.getENSAvatar();
-        }
 
+            if (w.tokens != null)
+            {
+                tokensBalanceView.bindTokens(w.tokens);
+            }
+        }
         return w;
     }
 
@@ -264,7 +266,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         //if (wallet == null) { return; } //protect against click between constructor and bind
         switch (view.getId())
         {
-            case R.id.wallet_click_layer:
+            case R.id.container:
                 clickCallback.onWalletClicked(wallet);
                 break;
 

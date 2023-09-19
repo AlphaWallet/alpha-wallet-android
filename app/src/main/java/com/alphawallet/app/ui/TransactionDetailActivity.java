@@ -1,5 +1,9 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
+import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -8,38 +12,45 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Transaction;
-import com.alphawallet.app.entity.TransactionData;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.analytics.ActionSheetMode;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
+import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.ActionSheetDialog;
-import com.alphawallet.app.widget.ActionSheetMode;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.TokenIcon;
-import com.alphawallet.token.tools.Numeric;
+import com.alphawallet.hardware.SignatureFromKey;
+import org.web3j.utils.Numeric;
+
+import org.web3j.crypto.Keys;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -47,70 +58,141 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
-
-import timber.log.Timber;
-
-import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.ui.widget.holder.TransactionHolder.TRANSACTION_BALANCE_PRECISION;
-import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-
-import org.web3j.crypto.Keys;
-
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class TransactionDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
 {
     private TransactionDetailViewModel viewModel;
-
-    private Transaction transaction;
     private TextView amount;
-    private Token token;
-    private String chainName;
-    private Wallet wallet;
     private AWalletAlertDialog dialog;
     private FunctionButtonBar functionBar;
     private ActionSheetDialog confirmationDialog;
+    private final ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+        result -> confirmationDialog.setCurrentGasIndex(result));
+    private Transaction transaction;
+    private Wallet wallet;
+    private TextView txnTime;
+    private TextView blockNumberTxt;
+    private TextView network;
+    private LinearLayout gasFeeLayout;
+    private LinearLayout networkFeeLayout;
+    private TextView gasUsed;
+    private TextView networkFee;
+    private TextView feeUnit;
+    private LinearLayout gasPriceLayout;
+    private ProgressBar progressBar;
+    private CopyTextView toValue;
+    private CopyTextView fromValue;
+    private CopyTextView txHashView;
+    private ImageView networkIcon;
+    private ChainName chainNameTxt;
+    private LinearLayout tokenDetailsLayout;
+    private TokenIcon icon;
+    private CopyTextView address;
+    private TextView tokenName;
+    private TextView gasPriceTxt;
+    private LinearLayout extendedGas;
+    private TextView textGasMax;
+    private TextView textGasPriority;
+    private TextView operationNameTxt;
+    private TextView failed;
+    private TextView failedF;
+    private Token token;
+    private String txHash;
+    private long chainId;
     private String tokenAddress;
+    private boolean isFromNotification;
+    private TokenTransferData transferData;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_detail);
 
+        initViewModel();
+
+        initViews();
+
+        toolbar();
+
+        setTitle(getString(R.string.title_transaction_details));
+
+        txHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
+        chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
+        tokenAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+        isFromNotification = getIntent().getBooleanExtra(C.FROM_NOTIFICATION, false);
+        transferData = getIntent().getParcelableExtra(C.EXTRA_TRANSACTION_DATA);
+
+        viewModel.prepare(chainId);
+    }
+
+    private void initViews()
+    {
+        functionBar = findViewById(R.id.layoutButtons);
+        amount = findViewById(R.id.amount);
+        progressBar = findViewById(R.id.pending_spinner);
+        toValue = findViewById(R.id.to);
+        fromValue = findViewById(R.id.from);
+        txHashView = findViewById(R.id.txn_hash);
+        txnTime = findViewById(R.id.txn_time);
+        blockNumberTxt = findViewById(R.id.block_number);
+        network = findViewById(R.id.network);
+        gasFeeLayout = findViewById(R.id.layout_gas_fee);
+        networkFeeLayout = findViewById(R.id.layout_network_fee);
+        gasUsed = findViewById(R.id.gas_used);
+        networkFee = findViewById(R.id.network_fee);
+        feeUnit = findViewById(R.id.text_fee_unit);
+        gasPriceLayout = findViewById(R.id.layout_gas_price);
+        networkIcon = findViewById(R.id.network_icon);
+        chainNameTxt = findViewById(R.id.chain_name);
+        tokenDetailsLayout = findViewById(R.id.token_details);
+        icon = findViewById(R.id.token_icon);
+        address = findViewById(R.id.token_address);
+        tokenName = findViewById(R.id.token_name);
+        gasPriceTxt = findViewById(R.id.gas_price);
+        extendedGas = findViewById(R.id.layout_1559);
+        textGasMax = findViewById(R.id.text_gas_max);
+        textGasPriority = findViewById(R.id.text_priority_fee);
+        operationNameTxt = findViewById(R.id.text_operation_name);
+        failed = findViewById(R.id.failed);
+        failedF = findViewById(R.id.failedFace);
+    }
+
+    private void initViewModel()
+    {
         viewModel = new ViewModelProvider(this)
-                .get(TransactionDetailViewModel.class);
+            .get(TransactionDetailViewModel.class);
+        viewModel.wallet().observe(this, this::onWallet);
         viewModel.latestBlock().observe(this, this::onLatestBlock);
         viewModel.onTransaction().observe(this, this::onTransaction);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionError().observe(this, this::txError);
+    }
 
-        String txHash = getIntent().getStringExtra(C.EXTRA_TXHASH);
-        long chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
-        wallet = getIntent().getParcelableExtra(WALLET);
-        tokenAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
+    private void onWallet(Wallet wallet)
+    {
+        this.wallet = wallet;
+
         viewModel.fetchTransaction(wallet, txHash, chainId);
     }
 
     private void onTransaction(Transaction tx)
     {
         transaction = tx;
-        if (transaction == null) {
+        if (transaction == null)
+        {
             finish();
             return;
         }
-        toolbar();
-        setTitle();
-        viewModel.prepare(transaction.chainId, wallet.address);
-        functionBar = findViewById(R.id.layoutButtons);
 
         String blockNumber = transaction.blockNumber;
         if (transaction.isPending())
         {
             //how long has this TX been pending
-            findViewById(R.id.pending_spinner).setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
             blockNumber = "";
 
             viewModel.startPendingTimeDisplay(transaction.hash);
@@ -121,28 +203,34 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
         setupVisibilities();
 
-        amount = findViewById(R.id.amount);
-        CopyTextView toValue = findViewById(R.id.to);
-        CopyTextView fromValue = findViewById(R.id.from);
-        CopyTextView txHashView = findViewById(R.id.txn_hash);
-
-        fromValue.setText(transaction.from != null ? transaction.from : "");
-        toValue.setText(transaction.to != null ? transaction.to : "");
-        txHashView.setText(transaction.hash != null ? transaction.hash : "");
-        ((TextView) findViewById(R.id.txn_time)).setText(Utils.localiseUnixDate(getApplicationContext(), transaction.timeStamp));
-
-        ((TextView) findViewById(R.id.block_number)).setText(blockNumber);
-
-        chainName = viewModel.getNetworkName(transaction.chainId);
-        ((TextView) findViewById(R.id.network)).setText(chainName);
-        ((ImageView) findViewById(R.id.network_icon)).setImageResource(EthereumNetworkRepository.getChainLogo(transaction.chainId));
+        String from = (transferData != null) ? transferData.getFromAddress() : (transaction.from != null ? transaction.from : "");
+        fromValue.setText(from);
 
         token = viewModel.getToken(transaction.chainId, transaction.to);
 
+        String to = !TextUtils.isEmpty(transaction.getDestination(token)) ? transaction.getDestination(token) : (transaction.to != null ? transaction.to : "");
+
+        if (transferData != null)
+        {
+            String candidateTo = transferData.getToAddress();
+            to = candidateTo != null ? candidateTo : to;
+        }
+
+        toValue.setText(to);
+
+        String hash = transaction.hash != null ? transaction.hash : "";
+        txHashView.setText(hash);
+
+        txnTime.setText(Utils.localiseUnixDate(getApplicationContext(), transaction.timeStamp));
+
+        blockNumberTxt.setText(blockNumber);
+
+        network.setText(viewModel.getNetworkName(transaction.chainId));
+        networkIcon.setImageResource(EthereumNetworkRepository.getChainLogo(transaction.chainId));
+
         setupTokenDetails();
 
-        ChainName chainName = findViewById(R.id.chain_name);
-        chainName.setChainID(transaction.chainId);
+        chainNameTxt.setChainID(transaction.chainId);
 
         setOperationName();
 
@@ -152,15 +240,11 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
     private void setupTokenDetails()
     {
-        Token targetToken = viewModel.getToken(transaction.chainId, TextUtils.isEmpty(tokenAddress) ? transaction.to : tokenAddress );
+        Token targetToken = viewModel.getToken(transaction.chainId, TextUtils.isEmpty(tokenAddress) ? transaction.to : tokenAddress);
         if (targetToken.isEthereum()) return;
-        LinearLayout tokenDetailsLayout = findViewById(R.id.token_details);
         tokenDetailsLayout.setVisibility(View.VISIBLE);
-        TokenIcon icon = findViewById(R.id.token_icon);
         icon.bindData(targetToken, viewModel.getTokenService());
-        CopyTextView address = findViewById(R.id.token_address);
         address.setText(Keys.toChecksumAddress(targetToken.getAddress()));
-        TextView tokenName = findViewById(R.id.token_name);
         tokenName.setText(targetToken.getFullName());
     }
 
@@ -169,25 +253,18 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         if (latestTx.isPending())
         {
             long pendingTimeInSeconds = (System.currentTimeMillis() / 1000) - latestTx.timeStamp;
-            ((TextView) findViewById(R.id.block_number)).setText(getString(R.string.transaction_pending_for, Utils.convertTimePeriodInSeconds(pendingTimeInSeconds, this)));
+            blockNumberTxt.setText(getString(R.string.transaction_pending_for, Utils.convertTimePeriodInSeconds(pendingTimeInSeconds, this)));
         }
         else
         {
             transaction = latestTx;
-            ((TextView) findViewById(R.id.block_number)).setText(transaction.blockNumber);
-            findViewById(R.id.pending_spinner).setVisibility(View.GONE);
-            ((TextView) findViewById(R.id.txn_time)).setText(Utils.localiseUnixDate(getApplicationContext(), transaction.timeStamp));
+            blockNumberTxt.setText(transaction.blockNumber);
+            progressBar.setVisibility(View.GONE);
+            txnTime.setText(Utils.localiseUnixDate(getApplicationContext(), transaction.timeStamp));
             //update function bar
             functionBar.setupSecondaryFunction(this, R.string.action_open_etherscan);
             checkFailed();
         }
-    }
-
-    private void setTitle() {
-        findViewById(R.id.toolbar_title).setVisibility(View.VISIBLE);
-        ((TextView)findViewById(R.id.toolbar_title)).setText(R.string.title_transaction_details);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle("");
     }
 
     private void onLatestBlock(BigInteger latestBlock)
@@ -198,8 +275,8 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
             {
                 //how many confirmations?
                 BigInteger confirmations = latestBlock.subtract(new BigInteger(transaction.blockNumber));
-                String confirmation = transaction.blockNumber + " (" + confirmations.toString(10) + " " + getString(R.string.confirmations)  + ")";
-                ((TextView) findViewById(R.id.block_number)).setText(confirmation);
+                String confirmation = transaction.blockNumber + " (" + confirmations.toString(10) + " " + getString(R.string.confirmations) + ")";
+                blockNumberTxt.setText(confirmation);
             }
         }
         catch (Exception e)
@@ -216,26 +293,26 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         //any gas fee?
         if (gasFee.equals(BigDecimal.ZERO))
         {
-            findViewById(R.id.layout_gas_fee).setVisibility(View.GONE);
-            findViewById(R.id.layout_network_fee).setVisibility(View.GONE);
+            gasFeeLayout.setVisibility(View.GONE);
+            networkFeeLayout.setVisibility(View.GONE);
         }
         else
         {
-            findViewById(R.id.layout_gas_fee).setVisibility(View.VISIBLE);
-            findViewById(R.id.layout_network_fee).setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.gas_used)).setText(BalanceUtils.getScaledValue(new BigDecimal(transaction.gasUsed), 0, 0));
-            ((TextView) findViewById(R.id.network_fee)).setText(BalanceUtils.getScaledValue(BalanceUtils.weiToEth(gasFee), 0, 6));
-            ((TextView) findViewById(R.id.text_fee_unit)).setText(viewModel.getNetworkSymbol(transaction.chainId));
+            gasFeeLayout.setVisibility(View.VISIBLE);
+            networkFeeLayout.setVisibility(View.VISIBLE);
+            gasUsed.setText(BalanceUtils.getScaledValue(new BigDecimal(transaction.gasUsed), 0, 0));
+            networkFee.setText(BalanceUtils.getScaledValue(BalanceUtils.weiToEth(gasFee), 0, 6));
+            feeUnit.setText(viewModel.getNetworkSymbol(transaction.chainId));
         }
 
         if (gasPrice.equals(BigDecimal.ZERO))
         {
-            findViewById(R.id.layout_gas_price).setVisibility(View.GONE);
+            gasPriceLayout.setVisibility(View.GONE);
         }
         else
         {
-            findViewById(R.id.layout_gas_price).setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.gas_price)).setText(BalanceUtils.weiToGwei(gasPrice, 2));
+            gasPriceLayout.setVisibility(View.VISIBLE);
+            gasPriceTxt.setText(BalanceUtils.weiToGwei(gasPrice, 2));
         }
 
         if (!TextUtils.isEmpty(transaction.maxFeePerGas))
@@ -246,15 +323,9 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
     private void setup1559Visibilities()
     {
-        LinearLayout extendedGas = findViewById(R.id.layout_1559);
         extendedGas.setVisibility(View.VISIBLE);
-
-        TextView textGasMax = findViewById(R.id.text_gas_max);
-        TextView textGasPriority = findViewById(R.id.text_priority_fee);
-
         BigDecimal gasMax = getValue(transaction.maxFeePerGas);
         BigDecimal gasPriorityFee = getValue(transaction.maxPriorityFee);
-
         textGasMax.setText(BalanceUtils.weiToGwei(gasMax, 4));
         textGasPriority.setText(BalanceUtils.weiToGwei(gasPriorityFee, 4));
     }
@@ -285,20 +356,34 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
     private void setupWalletDetails()
     {
-        String operationName = token.getOperationName(transaction, this);
-        String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
-        amount.setText(Utils.isContractCall(this, operationName) ? "" : transactionOperation);
+        if (transferData != null)
+        {
+            amount.setText(transferData.getEventAmount(token, transaction));
+        }
+        else
+        {
+            String operationName = token.getOperationName(transaction, this);
+            String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
+            amount.setText(Utils.isContractCall(this, operationName) ? "" : transactionOperation);
+        }
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu_share, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_share) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == android.R.id.home)
+        {
+            onBackPressed();
+        }
+        else if (item.getItemId() == R.id.action_share)
+        {
             viewModel.shareTransactionDetail(this, transaction);
         }
         return super.onOptionsItemSelected(item);
@@ -321,23 +406,28 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     private void setOperationName()
     {
         String operationName = null;
-        if (token != null)
+        if (transferData != null)
+        {
+            operationName = getString(transferData.getTitle());
+        }
+        else if (token != null)
         {
             operationName = token.getOperationName(transaction, getApplicationContext());
         }
         else
         {
             //no token, did we send? If from == our wallet then we sent this
-            if (transaction.from.equalsIgnoreCase(wallet.address)) operationName = getString(R.string.sent);
+            if (transaction.from.equalsIgnoreCase(wallet.address))
+                operationName = getString(R.string.sent);
         }
 
         if (operationName != null)
         {
-            ((TextView)findViewById(R.id.text_operation_name)).setText(operationName);
+            operationNameTxt.setText(operationName);
         }
         else
         {
-            findViewById(R.id.text_operation_name).setVisibility(View.GONE);
+            operationNameTxt.setVisibility(View.GONE);
         }
     }
 
@@ -345,8 +435,6 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     {
         if (transaction.hasError())
         {
-            TextView failed = findViewById(R.id.failed);
-            TextView failedF = findViewById(R.id.failedFace);
             if (failed != null) failed.setVisibility(View.VISIBLE);
             if (failedF != null) failedF.setVisibility(View.VISIBLE);
         }
@@ -371,7 +459,6 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
     /**
      * Called to check if we're ready to send user to confirm screen / activity sheet popup
-     *
      */
     private void checkConfirm(ActionSheetMode mode)
     {
@@ -385,7 +472,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         }
 
         confirmationDialog = new ActionSheetDialog(this, w3tx, token, null,
-                transaction.to, viewModel.getTokenService(), this);
+            transaction.to, viewModel.getTokenService(), this);
         confirmationDialog.setupResendTransaction(mode);
         confirmationDialog.setCanceledOnTouchOutside(false);
         confirmationDialog.show();
@@ -421,7 +508,13 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.sendTransaction(finalTx, wallet, token.tokenInfo.chainId, transaction.hash); //return point is txWritten
+        viewModel.requestSignature(finalTx, wallet, token.tokenInfo.chainId);
+    }
+
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(wallet, token.tokenInfo.chainId, tx, signature);
     }
 
     @Override
@@ -437,9 +530,6 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         }
     }
 
-    ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            result -> confirmationDialog.setCurrentGasIndex(result));
-
     @Override
     public ActivityResultLauncher<Intent> gasSelectLauncher()
     {
@@ -447,28 +537,52 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     }
 
     @Override
-    public void notifyConfirm(String mode) { viewModel.actionSheetConfirm(mode); }
-
-    private void txWritten(TransactionData transactionData)
+    public WalletType getWalletType()
     {
-        confirmationDialog.transactionWritten(transactionData.txHash);
+        return wallet.type;
+    }
+
+    @Override
+    public void notifyConfirm(String mode)
+    {
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        viewModel.track(Analytics.Action.ACTION_SHEET_COMPLETED, props);
+    }
+
+    private void txWritten(TransactionReturn transactionReturn)
+    {
+        confirmationDialog.transactionWritten(transactionReturn.hash);
         //reset display to show new transaction (load transaction from database)
-        viewModel.fetchTransaction(wallet, transactionData.txHash, transaction.chainId);
+        viewModel.fetchTransaction(wallet, transactionReturn.hash, transaction.chainId);
     }
 
     //Transaction failed to be sent
-    private void txError(Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
         dialog = new AWalletAlertDialog(this);
         dialog.setIcon(ERROR);
         dialog.setTitle(R.string.error_transaction_failed);
-        dialog.setMessage(throwable.getMessage());
+        dialog.setMessage(txError.throwable.getMessage());
         dialog.setButtonText(R.string.button_ok);
         dialog.setButtonListener(v -> {
             dialog.dismiss();
         });
         dialog.show();
         confirmationDialog.dismiss();
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        if (isFromNotification)
+        {
+            new HomeRouter().open(this, true);
+        }
+        else
+        {
+            super.onBackPressed();
+        }
     }
 }

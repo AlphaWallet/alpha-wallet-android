@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        .imgbox {
+            display: grid;
+            width: 100%;
+            height: 100vh;
+        }
+        .center-fit {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            margin: auto;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="imgbox">
+        <model-viewer auto-rotate="true" autoplay="true" camera-controls="true" class="center-fit"
+             src="https://openseauserdata.com/files/d6fa8c76e36db32fcd7c735576f18243.glb" ar-status="not-presenting">
+        </model-viewer>
+        </div>
+    </body>
+</html>

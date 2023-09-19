@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:orientation="horizontal"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:layout_height="wrap_content">
+
+    <com.alphawallet.app.widget.TokenIcon
+        android:id="@+id/token_icon"
+        android:layout_width="@dimen/dp22"
+        android:layout_height="@dimen/dp22"
+        android:layout_gravity="center" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/title_set_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/dp5"
+        android:paddingEnd="@dimen/dp5"
+        android:textSize="@dimen/sp12" />
+
+
+</LinearLayout>

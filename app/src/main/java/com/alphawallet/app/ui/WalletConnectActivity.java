@@ -30,19 +30,25 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.ActionSheetStatus;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.CryptoFunctions;
-import com.alphawallet.app.entity.DAppFunction;
 import com.alphawallet.app.entity.NetworkInfo;
-import com.alphawallet.app.entity.SendTransactionInterface;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.analytics.ActionSheetSource;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.entity.walletconnect.SignType;
 import com.alphawallet.app.entity.walletconnect.WCRequest;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
+import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.WCEthereumSignMessage;
@@ -54,11 +60,14 @@ import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.ActionSheet;
 import com.alphawallet.app.widget.ActionSheetDialog;
+import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.app.widget.ChainName;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.TokenIcon;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SignMessageType;
@@ -69,10 +78,11 @@ import com.google.gson.Gson;
 import org.jetbrains.annotations.NotNull;
 import org.web3j.utils.Numeric;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -86,17 +96,17 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     public static final String WC_LOCAL_PREFIX = "wclocal:";
     public static final String WC_INTENT = "wcintent:";
     private static final String TAG = "WCClient";
-    private static final String DEFAULT_IDON = "https://example.walletconnect.org/favicon.ico";
+    private static final String DEFAULT_ICON = "https://example.walletconnect.org/favicon.ico";
     private static final long CONNECT_TIMEOUT = 10 * DateUtils.SECOND_IN_MILLIS; // 10 Seconds timeout
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final LocalBroadcastManager broadcastManager;
     private final long switchChainDialogCallbackId = 1;
-    WalletConnectViewModel viewModel;
+    private WalletConnectViewModel viewModel;
+    private LocalBroadcastManager broadcastManager;
     private WCClient client;
     private WCSession session;
     private WCPeerMeta peerMeta;
     private WCPeerMeta remotePeerMeta;
-    private ActionSheetDialog confirmationDialog;
+    private ActionSheet confirmationDialog;
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> confirmationDialog.setCurrentGasIndex(result));
     private AddEthereumChainPrompt addEthereumChainPrompt;
@@ -128,11 +138,14 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     private String signData;
     private WCEthereumSignMessage.WCSignType signType;
     private long chainIdOverride;
+
+    @Inject
+    AWWalletConnectClient awWalletConnectClient;
+
     ActivityResultLauncher<Intent> getNetwork = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getData() == null) return;
                 chainIdOverride = result.getData().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
-                Toast.makeText(this, getText(R.string.hint_network_name) + " " + EthereumNetworkBase.getShortChainName(chainIdOverride), Toast.LENGTH_LONG).show();
                 confirmationDialog.updateChain(chainIdOverride);
             });
     private boolean waitForWalletConnectSession = false;
@@ -184,15 +197,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                     Timber.tag(TAG).d("MSG: ADD CHAIN");
                     onAddChainRequest(intent);
                     break;
-
             }
         }
     };
-
-    public WalletConnectActivity()
-    {
-        broadcastManager = LocalBroadcastManager.getInstance(this);
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -396,6 +403,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.serviceReady().observe(this, this::onServiceReady);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionError().observe(this, this::txError);
+        viewModel.transactionSigned().observe(this, this::txSigned);
 
         viewModel.startService(this);
     }
@@ -520,7 +530,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 case MESSAGE:
                     if (watchOnly(rq.id)) return false;
                     runOnUiThread(() -> {
-                        onEthSign(rq.id, rq.sign);
+                        onEthSign(rq.id, rq.sign, useChainId);
                     });
                     break;
                 case SIGN_TX:
@@ -590,6 +600,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         filter.addAction(C.WALLET_CONNECT_CLIENT_TERMINATE);
         filter.addAction(C.WALLET_CONNECT_SWITCH_CHAIN);
         filter.addAction(C.WALLET_CONNECT_ADD_CHAIN);
+        if (broadcastManager == null) broadcastManager = LocalBroadcastManager.getInstance(this);
         broadcastManager.registerReceiver(walletConnectActionReceiver, filter);
     }
 
@@ -650,6 +661,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         });
         dialog.setCancelable(false);
         dialog.show();
+
+        viewModel.trackError(Analytics.Error.WALLET_CONNECT, getString(R.string.invalid_walletconnect_session));
     }
 
     private void initWalletConnectPeerMeta()
@@ -752,6 +765,53 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
 
         closeErrorDialog();
 
+        closeConfirmationDialog();
+
+        String displayIcon = (peer.getIcons().size() > 0) ? peer.getIcons().get(0) : DEFAULT_ICON;
+
+        chainIdOverride = chainIdOverride > 0 ? chainIdOverride : (chainId > 0 ? chainId : MAINNET_ID);
+
+        displaySessionRequestDetails(peer, chainIdOverride, displayIcon);
+
+        confirmationDialog = new ActionSheetDialog(this, peer, chainIdOverride, displayIcon, this);
+        if (confirmationDialog.getActionSheetStatus() == ActionSheetStatus.ERROR_INVALID_CHAIN)
+        {
+            showErrorDialogUnsupportedNetwork(id, chainIdOverride);
+            return;
+        }
+        else
+        {
+            confirmationDialog.show();
+            confirmationDialog.fullExpand();
+            viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_REQUEST);
+        }
+
+        if (confirmationDialog.isShowing() &&
+            !viewModel.isActiveNetwork(chainId) &&
+            !viewModel.isActiveNetwork(chainIdOverride))
+        {
+            openChainSelection();
+        }
+    }
+
+    private void displaySessionRequestDetails(WCPeerMeta peer, long chainId, String displayIcon)
+    {
+        Glide.with(this)
+            .load(displayIcon)
+            .circleCrop()
+            .into(icon);
+        peerName.setText(peer.getName());
+        textName.setText(peer.getName());
+        peerUrl.setText(peer.getUrl());
+        txCount.setText(R.string.empty);
+        chainName.setChainID(chainId);
+        chainIcon.setVisibility(View.VISIBLE);
+        chainIcon.bindData(chainId);
+        remotePeerMeta = peer;
+    }
+
+    private void closeConfirmationDialog()
+    {
         if (confirmationDialog != null)
         {
             if (confirmationDialog.isShowing())
@@ -759,31 +819,9 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 confirmationDialog.forceDismiss();
             }
         }
-
-        String[] accounts = {viewModel.getWallet().address};
-        String displayIcon = (peer.getIcons().size() > 0) ? peer.getIcons().get(0) : DEFAULT_IDON;
-
-        chainIdOverride = chainIdOverride > 0 ? chainIdOverride : (chainId > 0 ? chainId : MAINNET_ID);
-
-        Glide.with(this)
-                .load(displayIcon)
-                .circleCrop()
-                .into(icon);
-        peerName.setText(peer.getName());
-        textName.setText(peer.getName());
-        peerUrl.setText(peer.getUrl());
-        txCount.setText(R.string.empty);
-        chainName.setChainID(chainIdOverride);
-        chainIcon.setVisibility(View.VISIBLE);
-        chainIcon.bindData(chainIdOverride);
-        remotePeerMeta = peer;
-
-        confirmationDialog = new ActionSheetDialog(this, peer, chainId, displayIcon, this);
-        confirmationDialog.show();
-        confirmationDialog.fullExpand();
     }
 
-    private void onEthSign(Long id, WCEthereumSignMessage message)
+    private void onEthSign(Long id, WCEthereumSignMessage message, long chainId)
     {
         Signable signable = null;
         lastId = id;
@@ -801,13 +839,67 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 // Drop through
             case PERSONAL_MESSAGE:
                 signable = new EthereumMessage(message.getData(), peerUrl.getText().toString(), id, SignMessageType.SIGN_PERSONAL_MESSAGE);
+                doSignMessage(signable);
                 break;
             case TYPED_MESSAGE:
                 signable = new EthereumTypedMessage(message.getData(), peerUrl.getText().toString(), id, new CryptoFunctions());
+                if (signable.getChainId() != chainId)
+                {
+                    showErrorDialogIncompatibleNetwork(signable.getCallbackId(), signable.getChainId(), chainId);
+                }
+                else
+                {
+                    doSignMessage(signable);
+                }
                 break;
         }
+    }
 
-        doSignMessage(signable);
+    private void showErrorDialogUnsupportedNetwork(long callbackId, long chainId)
+    {
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            runOnUiThread(() -> {
+                closeErrorDialog();
+                dialog = new AWalletAlertDialog(this, AWalletAlertDialog.ERROR);
+                String message = getString(R.string.error_walletconnect_session_request_unsupported_network, String.valueOf(chainId));
+                dialog.setMessage(message);
+                dialog.setButton(R.string.action_close, v -> {
+                    dialog.dismiss();
+                    dismissed("", callbackId, false);
+                    finish();
+                });
+                dialog.setCancelable(false);
+                dialog.show();
+
+                viewModel.trackError(Analytics.Error.WALLET_CONNECT, message);
+            });
+        }
+    }
+
+    private void showErrorDialogIncompatibleNetwork(long callbackId, long requestingChainId, long activeChainId)
+    {
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        {
+            runOnUiThread(() -> {
+                closeErrorDialog();
+                dialog = new AWalletAlertDialog(this, AWalletAlertDialog.ERROR);
+                String message = EthereumNetworkBase.isChainSupported(requestingChainId) ?
+                    getString(R.string.error_eip712_incompatible_network,
+                        EthereumNetworkBase.getShortChainName(requestingChainId),
+                        EthereumNetworkBase.getShortChainName(activeChainId)) :
+                    getString(R.string.error_eip712_unsupported_network, String.valueOf(requestingChainId));
+                dialog.setMessage(message);
+                dialog.setButton(R.string.action_cancel, v -> {
+                    dialog.dismiss();
+                    dismissed("", callbackId, false);
+                });
+                dialog.setCancelable(false);
+                dialog.show();
+
+                viewModel.trackError(Analytics.Error.WALLET_CONNECT, message);
+            });
+        }
     }
 
     private void onFailure(@NonNull Throwable throwable)
@@ -824,106 +916,81 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         });
         dialog.setCancelable(false);
         dialog.show();
+
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ERROR_MESSAGE, throwable.getMessage());
+        viewModel.track(Analytics.Action.WALLET_CONNECT_TRANSACTION_FAILED, props);
     }
 
     private void doSignMessage(final Signable signable)
     {
-        final DAppFunction dappFunction = new DAppFunction()
-        {
-            @Override
-            public void DAppError(Throwable error, Signable message)
-            {
-                showErrorDialog(error.getMessage());
-                confirmationDialog.dismiss();
-                if (fromDappBrowser) switchToDappBrowser();
-                requestId = 0;
-                lastId = 0;
-                signData = null;
-            }
-
-            @Override
-            public void DAppReturn(byte[] data, Signable message)
-            {
-                //store sign
-                viewModel.recordSign(signable, getSessionId(), () -> {
-                    viewModel.approveRequest(getApplication(), getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
-                    confirmationDialog.success();
-                    if (fromDappBrowser)
-                    {
-                        confirmationDialog.forceDismiss();
-                        switchToDappBrowser();
-                    }
-                    requestId = 0;
-                    lastId = 0;
-                    signData = null;
-                    updateSignCount();
-                });
-            }
-        };
-
-        signCallback = new SignAuthenticationCallback()
-        {
-            @Override
-            public void gotAuthorisation(boolean gotAuth)
-            {
-                viewModel.signMessage(
-                        signable,
-                        dappFunction);
-            }
-
-            @Override
-            public void gotAuthorisationForSigning(boolean gotAuth, Signable messageToSign)
-            {
-                if (gotAuth)
-                {
-                    viewModel.signMessage(
-                            signable,
-                            dappFunction);
-                }
-                else
-                {
-                    cancelAuthentication();
-                }
-            }
-
-            @Override
-            public void cancelAuthentication()
-            {
-                requestId = 0;
-                showErrorDialogCancel(getString(R.string.title_dialog_error), getString(R.string.message_authentication_failed));
-                viewModel.rejectRequest(getApplication(), getSessionId(), lastId, getString(R.string.message_authentication_failed));
-                confirmationDialog.dismiss();
-                if (fromDappBrowser) switchToDappBrowser();
-            }
-        };
-
-        confirmationDialog = new ActionSheetDialog(this, this, signCallback, signable);
-        confirmationDialog.setCanceledOnTouchOutside(false);
+        confirmationDialog = new ActionSheetSignDialog(this, this, signable);
         confirmationDialog.show();
+
+        viewModel.track(Analytics.Action.WALLET_CONNECT_SIGN_MESSAGE_REQUEST);
+    }
+
+    @Override
+    public void signingComplete(SignatureFromKey signature, Signable signable)
+    {
+        viewModel.recordSign(signable, getSessionId(), () -> {
+            viewModel.approveRequest(getApplication(), getSessionId(), signable.getCallbackId(), Numeric.toHexString(signature.signature));
+            confirmationDialog.success();
+            if (fromDappBrowser)
+            {
+                confirmationDialog.forceDismiss();
+                switchToDappBrowser();
+            }
+            requestId = 0;
+            lastId = 0;
+            signData = null;
+            updateSignCount();
+        });
+    }
+
+    @Override
+    public void signingFailed(Throwable error, Signable message)
+    {
+        showErrorDialog(error.getMessage());
+        confirmationDialog.dismiss();
+        if (fromDappBrowser) switchToDappBrowser();
+        requestId = 0;
+        lastId = 0;
+        signData = null;
+    }
+
+    @Override
+    public WalletType getWalletType()
+    {
+        return viewModel.getWallet().type;
     }
 
     private void onEthSignTransaction(Long id, WCEthereumTransaction transaction, long chainId)
     {
         lastId = id;
-        final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
+        final Web3Transaction w3Tx = new Web3Transaction(transaction, id, SignType.SIGN_TX);
         final ActionSheetDialog confDialog = generateTransactionRequest(w3Tx, chainId);
         if (confDialog != null)
         {
             confirmationDialog = confDialog;
             confirmationDialog.setSignOnly(); //sign transaction only
             confirmationDialog.show();
+
+            viewModel.track(Analytics.Action.WALLET_CONNECT_SIGN_TRANSACTION_REQUEST);
         }
     }
 
     private void onEthSendTransaction(Long id, WCEthereumTransaction transaction, long chainId)
     {
         lastId = id;
-        final Web3Transaction w3Tx = new Web3Transaction(transaction, id);
+        final Web3Transaction w3Tx = new Web3Transaction(transaction, id, SignType.SEND_TX);
         final ActionSheetDialog confDialog = generateTransactionRequest(w3Tx, chainId);
         if (confDialog != null)
         {
             confirmationDialog = confDialog;
             confirmationDialog.show();
+
+            viewModel.track(Analytics.Action.WALLET_CONNECT_SEND_TRANSACTION_REQUEST);
         }
     }
 
@@ -943,8 +1010,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 confDialog.setCanceledOnTouchOutside(false);
                 confDialog.waitForEstimate();
 
-                viewModel.calculateGasEstimate(viewModel.getWallet(), Numeric.hexStringToByteArray(w3Tx.payload),
-                        chainId, w3Tx.recipient.toString(), new BigDecimal(w3Tx.value), w3Tx.gasLimit)
+                viewModel.calculateGasEstimate(viewModel.getWallet(), w3Tx, chainId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(confDialog::setGasEstimate,
@@ -967,8 +1033,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         Timber.tag(TAG).d(": Terminate Session: %s", getSessionId());
         if (client != null && session != null && client.isConnected())
         {
+            viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_ENDED);
             client.killSession();
             viewModel.disconnectSession(this, client.sessionId());
+            awWalletConnectClient.updateNotification();
             handler.postDelayed(this::finish, 5000);
         }
         else
@@ -988,6 +1056,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     public void onResume()
     {
         super.onResume();
+        viewModel.track(Analytics.Navigation.WALLET_CONNECT_SESSION_DETAIL);
         //see if the session is active
         setupClient(getSessionId());
         startMessageCheck();
@@ -1016,6 +1085,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 });
                 dialog.setCancelable(false);
                 dialog.show();
+
+                viewModel.track(Analytics.Action.WALLET_CONNECT_CONNECTION_TIMEOUT);
             });
         }
     }
@@ -1036,6 +1107,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 });
                 dialog.setCancelable(false);
                 dialog.show();
+
+                viewModel.trackError(Analytics.Error.WALLET_CONNECT, message);
             });
         }
     }
@@ -1052,6 +1125,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 dialog.setButton(R.string.action_cancel, v -> dialog.dismiss());
                 dialog.setCancelable(false);
                 dialog.show();
+
+                viewModel.trackError(Analytics.Error.WALLET_CONNECT, message);
             });
         }
     }
@@ -1108,6 +1183,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 });
                 dialog.setCancelable(false);
                 dialog.show();
+
+                viewModel.trackError(Analytics.Error.WALLET_CONNECT, message);
             });
         }
     }
@@ -1138,7 +1215,6 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             {
                 handleTransactionCallback(resultCode, data);
             }
-            else if (signCallback != null) signCallback.gotAuthorisation(true);
         }
         else
         {
@@ -1194,35 +1270,55 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void sendTransaction(Web3Transaction finalTx)
     {
-        final SendTransactionInterface callback = new SendTransactionInterface()
+        viewModel.requestSignature(finalTx, viewModel.getWallet(), viewModel.getChainId(getSessionId()));
+    }
+
+    /**
+     * Complete Hardware sendTx/signTx
+     */
+    @Override
+    public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
+    {
+        viewModel.sendTransaction(viewModel.getWallet(), viewModel.getChainId(getSessionId()), tx, signature);
+    }
+
+    @Override
+    public void completeSignTransaction(Web3Transaction w3Tx, SignatureFromKey signature)
+    {
+        viewModel.signTransaction(viewModel.getChainId(getSessionId()), w3Tx, signature);
+    }
+
+    public void txWritten(TransactionReturn txReturn)
+    {
+        viewModel.recordSignTransaction(getApplicationContext(), txReturn.tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
+        viewModel.approveRequest(getApplication(), getSessionId(), txReturn.tx.leafPosition, txReturn.hash);
+        confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
+        if (fromDappBrowser) switchToDappBrowser();
+        confirmationDialog.transactionWritten(txReturn.hash);
+        requestId = 0;
+        updateSignCount();
+
+        viewModel.track(Analytics.Action.WALLET_CONNECT_TRANSACTION_SUCCESS);
+    }
+
+    private void txSigned(TransactionReturn sigData)
+    {
+        if (sigData != null)
         {
-            @Override
-            public void transactionSuccess(Web3Transaction web3Tx, String hashData)
+            viewModel.recordSignTransaction(getApplicationContext(), sigData.tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
+            viewModel.approveRequest(getApplication(), getSessionId(), sigData.tx.leafPosition, sigData.hash);
+            confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
+            if (fromDappBrowser)
             {
-                viewModel.recordSignTransaction(getApplicationContext(), web3Tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
-                viewModel.approveRequest(getApplication(), getSessionId(), web3Tx.leafPosition, hashData);
-                confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
-                if (fromDappBrowser) switchToDappBrowser();
-                confirmationDialog.transactionWritten(hashData);
-                requestId = 0;
-                updateSignCount();
+                switchToDappBrowser();
             }
-
-            @Override
-            public void transactionError(long callbackId, Throwable error)
-            {
-                displayTransactionError(error);
-                confirmationDialog.dismiss();
-                viewModel.rejectRequest(getApplication(), getSessionId(), lastId, getString(R.string.message_authentication_failed));
-                requestId = 0;
-            }
-        };
-
-        viewModel.sendTransaction(finalTx, viewModel.getChainId(getSessionId()), callback);
+            requestId = 0;
+            updateSignCount();
+        }
     }
 
     //Transaction failed to be sent
-    private void displayTransactionError(final Throwable throwable)
+    private void txError(TransactionReturn txError)
     {
         if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
         {
@@ -1231,12 +1327,20 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
                 dialog = new AWalletAlertDialog(this, AWalletAlertDialog.ERROR);
                 dialog.setTitle(R.string.invalid_walletconnect_session);
                 dialog.setTitle(R.string.error_transaction_failed);
-                dialog.setMessage(throwable.getMessage());
+                dialog.setMessage(txError.throwable.getMessage());
                 dialog.setButtonText(R.string.button_ok);
-                dialog.setButtonListener(v -> dialog.dismiss());
+                dialog.setButtonListener(v -> {
+                    dialog.dismiss();
+                    if (fromDappBrowser) switchToDappBrowser();
+                });
                 dialog.show();
+
+                AnalyticsProperties props = new AnalyticsProperties();
+                props.put(Analytics.PROPS_ERROR_MESSAGE, txError.throwable.getMessage());
+                viewModel.track(Analytics.Action.WALLET_CONNECT_TRANSACTION_FAILED, props);
             });
         }
+        //TODO: Report error fail to WalletConnect
     }
 
     @Override
@@ -1246,6 +1350,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         if (!actionCompleted)
         {
             viewModel.rejectRequest(this, getSessionId(), callbackId, getString(R.string.message_reject_request));
+            viewModel.track(Analytics.Action.WALLET_CONNECT_TRANSACTION_CANCELLED);
         }
 
         if (fromDappBrowser) switchToDappBrowser();
@@ -1256,7 +1361,10 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void notifyConfirm(String mode)
     {
-        viewModel.actionSheetConfirm(mode);
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        props.put(Analytics.PROPS_ACTION_SHEET_SOURCE, ActionSheetSource.WALLET_CONNECT.getValue());
+        viewModel.track(Analytics.Action.ACTION_SHEET_COMPLETED, props);
     }
 
     @Override
@@ -1268,31 +1376,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     @Override
     public void signTransaction(Web3Transaction tx)
     {
-        DAppFunction dappFunction = new DAppFunction()
-        {
-            @Override
-            public void DAppError(Throwable error, Signable message)
-            {
-                showErrorDialog(error.getMessage());
-                confirmationDialog.dismiss();
-                if (fromDappBrowser) switchToDappBrowser();
-                requestId = 0;
-            }
-
-            @Override
-            public void DAppReturn(byte[] data, Signable message)
-            {
-                viewModel.recordSignTransaction(getApplicationContext(), tx, String.valueOf(viewModel.getChainId(getSessionId())), getSessionId());
-                viewModel.approveRequest(getApplication(), getSessionId(), message.getCallbackId(), Numeric.toHexString(data));
-                confirmationDialog.transactionWritten(getString(R.string.dialog_title_sign_transaction));
-                if (fromDappBrowser) switchToDappBrowser();
-                requestId = 0;
-                updateSignCount();
-            }
-        };
-
-        viewModel.signTransaction(getBaseContext(), tx, dappFunction, peerUrl.getText().toString(), viewModel.getChainId(getSessionId()));
-        if (fromDappBrowser) switchToDappBrowser();
+        viewModel.requestSignatureOnly(tx, viewModel.getWallet(), viewModel.getChainId(getSessionId()));
     }
 
     @Override
@@ -1311,6 +1395,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
         infoLayout.setVisibility(View.VISIBLE);
         chainIdOverride = selectedChain;
         setupClient(getSessionId()); //should populate this activity
+        viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_APPROVED);
         if (fromDappBrowser)
         {
             //switch back to dappBrowser
@@ -1322,6 +1407,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     public void denyWalletConnect()
     {
         client.rejectSession(getString(R.string.message_reject_request));
+        viewModel.track(Analytics.Action.WALLET_CONNECT_SESSION_REJECTED);
         finish();
     }
 
@@ -1329,7 +1415,7 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
     public void openChainSelection()
     {
         ActionSheetCallback.super.openChainSelection();
-        Intent intent = new Intent(WalletConnectActivity.this, SelectNetworkActivity.class);
+        Intent intent = new Intent(WalletConnectActivity.this, NetworkChooserActivity.class);
         intent.putExtra(C.EXTRA_SINGLE_ITEM, true);
         intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
         getNetwork.launch(intent);
@@ -1354,6 +1440,8 @@ public class WalletConnectActivity extends BaseActivity implements ActionSheetCa
             confirmationDialog.setCanceledOnTouchOutside(false);
             confirmationDialog.show();
             confirmationDialog.fullExpand();
+
+            viewModel.track(Analytics.Action.WALLET_CONNECT_SWITCH_NETWORK_REQUEST);
         }
         catch (Exception e)
         {

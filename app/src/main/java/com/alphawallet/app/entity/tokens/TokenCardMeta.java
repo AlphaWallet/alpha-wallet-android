@@ -8,7 +8,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
@@ -18,11 +17,9 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.TokensService;
-import com.alphawallet.app.ui.widget.holder.TokenHolder;
+import com.alphawallet.token.entity.ContractAddress;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.math.BigInteger;
 
 /**
  * Created by JB on 12/07/2020.
@@ -46,18 +43,39 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type, TokenGroup group)
     {
-        this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress);
+        this(chainId, tokenAddress, balance, timeStamp, svs, name, symbol, type, group, "");
+    }
+
+    public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, AssetDefinitionService svs, String name, String symbol, ContractType type, TokenGroup group, String attnId)
+    {
+        this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress)
+                + (!TextUtils.isEmpty(attnId) ? ("-" + attnId) : "") + (group == TokenGroup.ATTESTATION ? Attestation.ATTESTATION_SUFFIX : "");
         this.lastUpdate = timeStamp;
         this.type = type;
         this.balance = balance;
-        this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum());
+        this.nameWeight = calculateTokenNameWeight(chainId, tokenAddress, svs, name, symbol, isEthereum(), group, Math.abs(attnId.hashCode()));
         this.filterText = symbol + "'" + name;
         this.group = group;
     }
 
+    public String getAttestationId()
+    {
+        //should end with ATTESTATION_SUFFIX
+        if (tokenId.endsWith(Attestation.ATTESTATION_SUFFIX))
+        {
+            int sepIndex = tokenId.indexOf("-");
+            sepIndex = tokenId.indexOf("-", sepIndex+1);
+            return tokenId.substring(sepIndex+1, tokenId.length() - 4);
+        }
+        else
+        {
+            return "";
+        }
+    }
+
     public TokenCardMeta(long chainId, String tokenAddress, String balance, long timeStamp, long lastTxUpdate, ContractType type, TokenGroup group)
     {
-        this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress);
+        this.tokenId = TokensRealmSource.databaseKey(chainId, tokenAddress) + (group == TokenGroup.ATTESTATION ? Attestation.ATTESTATION_SUFFIX : "");
         this.lastUpdate = timeStamp;
         this.lastTxUpdate = lastTxUpdate;
         this.type = type;
@@ -74,7 +92,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         this.lastTxUpdate = token.lastTxCheck;
         this.type = token.getInterfaceSpec();
         this.balance = token.balance.toString();
-        this.nameWeight = calculateTokenNameWeight(token.tokenInfo.chainId, token.tokenInfo.address, null, token.getName(), token.getSymbol(), isEthereum());
+        this.nameWeight = calculateTokenNameWeight(token.tokenInfo.chainId, token.tokenInfo.address, null, token.getName(), token.getSymbol(), isEthereum(), token.group, 0);
         this.filterText = filterText;
         this.group = token.group;
         this.isEnabled = TextUtils.isEmpty(filterText) || !filterText.equals(CHECK_MARK);
@@ -96,6 +114,11 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public long getNameWeight()
     {
         return nameWeight;
+    }
+
+    public ContractAddress getContractAddress()
+    {
+        return new ContractAddress(getChain(), getAddress());
     }
 
     public static long groupWeight(TokenGroup group)
@@ -150,11 +173,10 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     public long getChain()
     {
-        int chainPos = tokenId.lastIndexOf('-') + 1;
-        if (chainPos < tokenId.length())
+        String[] parts = tokenId.split("-");
+        if (parts.length > 1)
         {
-            String chainStr = tokenId.substring(chainPos);
-            return Long.parseLong(chainStr);
+            return Long.parseLong(parts[1]);
         }
         else
         {
@@ -162,9 +184,22 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         }
     }
 
-    private long calculateTokenNameWeight(long chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth)
+    public BigInteger getTokenID()
     {
-        int weight = 1000; //ensure base eth types are always displayed first
+        String[] parts = tokenId.split("-");
+        if (parts.length > 2)
+        {
+            return new BigInteger(parts[2]);
+        }
+        else
+        {
+            return BigInteger.ZERO;
+        }
+    }
+
+    private long calculateTokenNameWeight(long chainId, String tokenAddress, AssetDefinitionService svs, String tokenName, String symbol, boolean isEth, TokenGroup group, int attnId)
+    {
+        long weight = 1000; //ensure base eth types are always displayed first
         String name = svs != null ? svs.getTokenName(chainId, tokenAddress, 1) : null;
         if (name != null)
         {
@@ -208,6 +243,11 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         weight += tokenAddress.hashCode()%1753; //prime modulus factor for disambiguation
 
         if (weight < 2) weight = 2;
+
+        if (group == TokenGroup.ATTESTATION)
+        {
+            weight += (attnId + 1);
+        }
 
         return weight;
     }
@@ -261,10 +301,11 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     {
         float updateWeight = 0;
         //calculate balance update time
+        long timeDiff = (System.currentTimeMillis() - lastUpdate) / DateUtils.SECOND_IN_MILLIS;
+
         if (isEthereum())
         {
-            long currentTime = System.currentTimeMillis();
-            if (lastUpdate < currentTime - 30 * DateUtils.SECOND_IN_MILLIS)
+            if (timeDiff > 30)
             {
                 updateWeight = 2.0f;
             }
@@ -278,15 +319,15 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
             if (isNFT())
             {
                 //ERC721 types which usually get their balance from opensea. Still need to check the balance for stale tokens to spot a positive -> zero balance transition
-                updateWeight = 0.25f;
+                updateWeight = (timeDiff > 30) ? 0.25f : 0.01f;
             }
             else if (isEnabled)
             {
-                updateWeight = hasPositiveBalance() ? 1.0f : 0.5f; //30 seconds
+                updateWeight = hasPositiveBalance() ? 1.0f : 0.1f; //30 seconds
             }
             else
             {
-                updateWeight = 0.25f; //1 minute
+                updateWeight = 0.1f; //1 minute
             }
         }
         return updateWeight;
@@ -306,5 +347,13 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
     public boolean equals(TokenCardMeta other)
     {
         return (tokenId.equalsIgnoreCase(other.tokenId));
+    }
+
+    //30 seconds for enabled with balance, 120 seconds for enabled zero balance, 300 for not enabled
+    //Note that if we pick up a balance change for non-enabled token that hasn't been locked out, it'll appear with the transfer sweep
+    public long calculateUpdateFrequency()
+    {
+        long timeInSeconds = isEnabled ? (hasPositiveBalance() ? 30 : 120) : 300;
+        return timeInSeconds * DateUtils.SECOND_IN_MILLIS;
     }
 }

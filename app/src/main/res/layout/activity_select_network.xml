@@ -15,6 +15,7 @@
         android:layout_below="@id/toolbar" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/network_scroller"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/separator">
@@ -31,7 +32,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:headerText="@string/mainnet"
-                app:showSwitch="true" />
+                app:showSwitch="false" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/main_list"

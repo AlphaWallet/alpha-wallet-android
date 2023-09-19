@@ -16,6 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.AuthenticationCallback;
 import com.alphawallet.app.entity.AuthenticationFailType;
@@ -25,11 +26,12 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
+import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BackupKeyViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
-import com.alphawallet.token.tools.Numeric;
+import org.web3j.utils.Numeric;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.web3j.crypto.Credentials;
@@ -409,6 +411,12 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
     // Always use the ActionSheet + implement ActionSheetCallback as per SendActivity, NFTAssetDetailActivity etc
     private void doUnlock(UnlockCallback cb)
     {
+        if (BuildConfig.DEBUG /*&& Utils.isRunningTest()*/) //running tests in debug build mode, we don't use key unlock
+        {
+            cb.carryOn(true);
+            return;
+        }
+
         SignTransactionDialog unlockTx = new SignTransactionDialog(this);
         unlockTx.getAuthentication(new AuthenticationCallback()
         {

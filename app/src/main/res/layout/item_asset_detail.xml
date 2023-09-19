@@ -14,17 +14,18 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="@dimen/standard_16"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingVertical="@dimen/standard_16"
+        android:paddingStart="@dimen/standard_16"
+        android:paddingEnd="@dimen/mini_4">
 
         <TextView
-            style="@style/Aw.Typography.Label"
+            style="@style/Aw.Typography.Label.Widget"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/standard_16"
-            android:layout_weight="1"
-            android:gravity="start"
+            android:layout_weight="@integer/widget_label"
+            android:gravity="start|center_vertical"
             android:text="@string/token_text" />
 
         <TextView
@@ -32,7 +33,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/small_12"
-            android:layout_weight="3.5"
+            android:layout_weight="@integer/widget_content"
             android:gravity="start"
             tools:text="Self Portrait (2021)" />
 
@@ -41,7 +42,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:layout_weight="0.6"
+            android:layout_weight="@integer/widget_control"
             android:background="@color/transparent"
             android:padding="@dimen/mini_4"
             android:scaleType="fitCenter"
@@ -71,8 +72,7 @@
         <com.alphawallet.app.widget.NFTImageView
             android:id="@+id/asset_image"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:gravity="center"
+            android:layout_height="wrap_content"
             custom:webview_height="250" />
 
         <TextView
@@ -81,7 +81,7 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginTop="@dimen/small_12"
-            android:layout_weight="3.5"
+            android:layout_weight="@integer/widget_content"
             tools:text="Self Portrait (2021)" />
 
         <TextView

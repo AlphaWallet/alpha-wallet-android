@@ -1,0 +1,23 @@
+name: Run CheckStyle
+on: pull_request, merge_group
+
+jobs:
+  checkstyle_job:
+    runs-on: ubuntu-latest
+    name: Checkstyle job
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Run check style
+        uses: nikitasavinov/checkstyle-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          checkstyle_config: '.github/checkstyle-rules.xml'
+          reporter: 'github-pr-review'
+#          filter_mode: 'file' # https://github.com/nikitasavinov/checkstyle-action
+          fail_on_error: true
+          level: 'error'
+          tool_name: 'CheckStyle'

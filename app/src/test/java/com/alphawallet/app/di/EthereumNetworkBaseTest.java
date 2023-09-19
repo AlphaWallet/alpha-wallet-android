@@ -20,15 +20,15 @@ public class EthereumNetworkBaseTest
     @Test
     public void should_getNodeURLByNetworkId_when_use_production_key()
     {
-        assertThat(EthereumNetworkBase.getNodeURLByNetworkId(61L), equalTo("https://www.ethercluster.com/etc"));
-        assertThat(EthereumNetworkBase.getNodeURLByNetworkId(100L), equalTo("https://rpc.ankr.com/gnosis"));
+        assertThat(EthereumNetworkBase.getNodeURLByNetworkId(61L), equalTo(EthereumNetworkBase.CLASSIC_RPC_URL));
+        assertThat(EthereumNetworkBase.getNodeURLByNetworkId(100L), equalTo(com.alphawallet.ethereum.EthereumNetworkBase.XDAI_RPC_URL));
     }
 
     @Test
     public void should_construct_infura_url_when_getNodeURLByNetworkId_given_production_key()
     {
         assertThat(EthereumNetworkBase.getNodeURLByNetworkId(1L), equalTo("https://mainnet.infura.io/v3/fake-key-for-testing"));
-        assertThat(EthereumNetworkBase.getNodeURLByNetworkId(3L), equalTo("https://ropsten.infura.io/v3/fake-key-for-testing"));
+        assertThat(EthereumNetworkBase.getNodeURLByNetworkId(5L), equalTo("https://goerli.infura.io/v3/fake-key-for-testing"));
     }
 
     @Test

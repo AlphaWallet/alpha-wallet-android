@@ -2,7 +2,10 @@ package com.alphawallet.token.tools;
 
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
+import com.alphawallet.token.entity.ActionModifier;
 import com.alphawallet.token.entity.As;
+import com.alphawallet.token.entity.AttestationDefinition;
+import com.alphawallet.token.entity.AttestationValidation;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.ContractInfo;
 import com.alphawallet.token.entity.EthereumTransaction;
@@ -27,6 +30,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.EntityReference;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.DynamicBytes;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -47,14 +59,15 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-public class TokenDefinition {
-    protected Document xml;
+public class TokenDefinition
+{
     public final Map<String, Attribute> attributes = new HashMap<>();
     protected Locale locale;
 
     public final Map<String, ContractInfo> contracts = new HashMap<>();
+    public final Map<String, AttestationDefinition> attestations = new HashMap<>();
     public final Map<String, TSAction> actions = new HashMap<>();
-    private Map<String, String> labels = new HashMap<>(); // store plural etc for token name
+    private final Map<String, String> labels = new HashMap<>(); // store plural etc for token name
     private final Map<String, NamedType> namedTypeLookup = new HashMap<>(); //used to protect against name collision
     private final TSTokenViewHolder tokenViews = new TSTokenViewHolder();
     private final Map<String, TSSelection> selections = new HashMap<>();
@@ -74,6 +87,9 @@ public class TokenDefinition {
 
     public static final String TOKENSCRIPT_ERROR = "<h2 style=\"color:rgba(207, 0, 15, 1);\">TokenScript Error</h2>";
     private static final String LEGACY_WARNING_TEMPLATE = "<html>" + TOKENSCRIPT_ERROR + "<h3>ts:${ERR1} is deprecated.<br/>Use ts:${ERR2}</h3>";
+
+    public static final String UNCHANGED_SCRIPT = "<unchanged>";
+    public static final String NO_SCRIPT = "<blank_script>";
 
     /* the following are incorrect, waiting to be further improved
      with suitable XML, because none of these String typed class variables
@@ -111,6 +127,11 @@ public class TokenDefinition {
     }
 
     public Map<String, TSActivityView> getActivityCards() { return activityCards; }
+
+    public AttestationDefinition getAttestation()
+    {
+        return attestations.get(holdingToken);
+    }
 
     public EventDefinition parseEvent(Element resolve) throws SAXException
     {
@@ -155,6 +176,10 @@ public class TokenDefinition {
         }
         function.method = resolve.getAttribute("function");
         function.as = parseAs(resolve);
+        if (function.as == As.Unknown)
+        {
+            function.namedTypeReturn = resolve.getAttribute("as");
+        }
         addFunctionInputs(function, resolve);
         function.syntax = syntax;
         return function;
@@ -189,8 +214,10 @@ public class TokenDefinition {
                 return As.Mapping;
             case "address":
                 return As.Address;
-            default: // "unsigned"
+            case "uint":
                 return As.Unsigned;
+            default: // "unsigned"
+                return As.Unknown;
         }
     }
 
@@ -238,6 +265,81 @@ public class TokenDefinition {
         }
 
         return false;
+    }
+
+    //If there's no tokenId input in the call use tokenId 0
+    public BigInteger useZeroForTokenIdAgnostic(String attributeName, BigInteger tokenId)
+    {
+        Attribute attr = attributes.get(attributeName);
+
+        if (!attr.usesTokenId())
+        {
+            return BigInteger.ZERO;
+        }
+        else
+        {
+            return tokenId;
+        }
+    }
+
+    public List<String> getAttestationIdFields()
+    {
+        if (attestations.size() > 0)
+        {
+            return getAttestation().replacementFieldIds;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public List<String> getAttestationCollectionKeys()
+    {
+        if (attestations.size() > 0)
+        {
+            return getAttestation().collectionKeys;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public String getAttestationSchemaUID()
+    {
+        if (getAttestation() != null)
+        {
+            return getAttestation().schemaUID;
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public byte[] getAttestationCollectionPreHash()
+    {
+        if (getAttestation() != null)
+        {
+            return getAttestation().getCollectionIdPreHash();
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public boolean matchCollection(String attestationCollectionId)
+    {
+        if (getAttestation() != null)
+        {
+            return getAttestation().matchCollection(attestationCollectionId);
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public enum Syntax {
@@ -351,6 +453,7 @@ public class TokenDefinition {
     public TokenDefinition()
     {
         holdingToken = null;
+        nameSpace = NO_SCRIPT;
     }
 
     public TokenDefinition(InputStream xmlAsset, Locale locale, ParseResult result) throws IllegalArgumentException, IOException, SAXException {
@@ -390,6 +493,7 @@ public class TokenDefinition {
         {
             parseTags(xml);
             extractSignedInfo(xml);
+            //scanAttestation(xml);
         }
         catch (IOException|SAXException e)
         {
@@ -414,13 +518,13 @@ public class TokenDefinition {
                 {
                     case "origins":
                         TSOrigins origin = parseOrigins(element); //parseOrigins(element);
-                        if (origin.isType(TSOriginType.Contract)) holdingToken = origin.getOriginName();
+                        if (origin.isType(TSOriginType.Contract) || origin.isType(TSOriginType.Attestation)) holdingToken = origin.getOriginName();
                         break;
                     case "contract":
                         handleAddresses(element);
                         break;
                     case "label":
-                        labels = extractLabelTag(element);
+                        labels.putAll(extractLabelTag(element));
                         break;
                     case "selection":
                         TSSelection selection = parseSelection(element);
@@ -439,6 +543,10 @@ public class TokenDefinition {
                         {
                             attributes.put(attr.name, attr);
                         }
+                        break;
+                    case "attestation":
+                        AttestationDefinition attestation = scanAttestation(element);
+                        attestations.put(attestation.name, attestation);
                         break;
                     default:
                         break;
@@ -501,6 +609,7 @@ public class TokenDefinition {
                 switch (card.getLocalName())
                 {
                     case "token":
+                    case "token-card":
                         processTokenCardElements(card);
                         break;
                     case "card":
@@ -660,6 +769,8 @@ public class TokenDefinition {
 
     private void extractCard(Element card) throws Exception
     {
+        TSAction action;
+        TSActivityView activity;
         String type = card.getAttribute("type");
         switch (type)
         {
@@ -667,15 +778,35 @@ public class TokenDefinition {
                 processTokenCardElements(card);
                 break;
             case "action":
-                TSAction action = handleAction(card);
+                action = handleAction(card);
                 actions.put(action.name, action);
+                setModifier(action, card);
                 break;
             case "activity":
-                TSActivityView activity = processActivityView(card);
+                activity = processActivityView(card);
                 activityCards.put(card.getAttribute("name"), activity);
                 break;
             default:
                 throw new SAXException("Unexpected card type found: " + type);
+        }
+
+
+    }
+
+    private void setModifier(TSAction action, Element card) throws Exception
+    {
+        String modifier = card.getAttribute("modifier");
+        switch (modifier)
+        {
+            case "attestation":
+                action.modifier = ActionModifier.ATTESTATION;
+                break;
+            case "NONE":
+            case "":
+                action.modifier = ActionModifier.NONE;
+                break;
+            default:
+                throw new SAXException("Unexpected modifier found: " + modifier);
         }
     }
 
@@ -821,6 +952,307 @@ public class TokenDefinition {
         return; // even if the document is signed, often it doesn't have KeyName
     }
 
+    private AttestationDefinition scanAttestation(Node attestationNode) throws SAXException
+    {
+        Element element = (Element) attestationNode;
+        String name = element.getAttribute("name");
+        AttestationDefinition attn = new AttestationDefinition(name);
+
+        for (Node n = attestationNode.getFirstChild(); n != null; n = n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE) continue;
+            Element attnElement = (Element) n;
+
+            switch (attnElement.getLocalName())
+            {
+                case "meta":
+                    //read elements of the metadata
+                    attn.addMetaData(attnElement);
+                    break;
+                case "display":
+                    handleAttestationDisplay(attnElement);
+                    break;
+                case "eas":
+                    ContractInfo info = attn.addAttributes(attnElement);
+                    if (info != null)
+                    {
+                        contracts.put(attn.name, info);
+                    }
+                    break;
+                case "key":
+                    attn.handleKey(attnElement);
+                    break;
+                case "collectionFields":
+                    attn.handleCollectionFields(attnElement);
+                    break;
+                case "idFields":
+                    attn.handleReplacementField(attnElement);
+                    break;
+                case "struct":
+                case "ProofOfKnowledge":
+                    //attn.members.add(parseAttestationStruct(attnElement));
+                    //attestation.add(parseAttestationStruct(attnElement));
+                    break;
+                case "origins": //TODO: Recode this
+                    //attn.origin = parseOrigins(attnElement);
+                    //advance to function
+                    Element functionElement = getFirstChildElement(attnElement);
+                    attn.function = parseFunction(functionElement, Syntax.IA5String);
+                    attn.function.as = parseAs(functionElement);
+                    break;
+            }
+        }
+
+        return attn;
+    }
+
+    private void handleAttestationDisplay(Element attnElement)
+    {
+
+    }
+
+    private List<AttnElement> parseAttestationStructMembers(Node attnStruct)
+    {
+        //get struct list
+        List<AttnElement> attnList = new ArrayList<>();
+
+        for(Node n = attnStruct.getFirstChild(); n!=null; n=n.getNextSibling())
+        {
+            if (n.getNodeType() != ELEMENT_NODE) continue;
+            Element e = (Element) n;
+            AttnElement attnE = parseAttestationStruct(e);
+            attnList.add(attnE);
+        }
+
+        return attnList;
+    }
+
+    private String getElementName(Node attribute)
+    {
+        String name = "";
+        if (attribute.hasAttributes())
+        {
+            for (int i = 0; i < attribute.getAttributes().getLength(); i++)
+            {
+                Node node = attribute.getAttributes().item(i);
+                switch (node.getLocalName())
+                {
+                    case "name":
+                        name = node.getTextContent();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return name;
+    }
+
+    public AttestationValidation getValidation(List<Type> values)
+    {
+        //legacy attestations should only have one type
+        AttestationDefinition attn = null;
+        if (attestations.size() > 0)
+        {
+            attn = (AttestationDefinition)attestations.values().toArray()[0];
+        }
+
+        if (attn == null || !namedTypeLookup.containsKey(attn.function.namedTypeReturn))
+        {
+            return null;
+        }
+
+        //get namedType for return
+        NamedType nType = namedTypeLookup.get(attn.function.namedTypeReturn);
+        AttestationValidation.Builder builder = new AttestationValidation.Builder();
+
+        //find issuerkey
+        ContractInfo issuerKey = contracts.get("_IssuerKey");
+        builder.issuerKey(issuerKey != null ? issuerKey.getFirstAddress() : null);
+
+        int index = 0;
+
+        for (NamedType.SequenceElement element : nType.sequence)
+        {
+            //handle magic values plus generic
+            switch (element.name)
+            {
+                case "_issuerValid":
+                    builder.issuerValid((Boolean)values.get(index++).getValue());
+                    break;
+                case "_issuerAddress":
+                    builder.issuerAddress((String)values.get(index++).getValue());
+                    break;
+                case "_subjectAddress":
+                    builder.subjectAddress((String)values.get(index++).getValue());
+                    break;
+                case "_attestationId":
+                    builder.attestationId((BigInteger)values.get(index++).getValue());
+                    break;
+                case "isValid":
+                    builder.isValid((Boolean)values.get(index++).getValue());
+                    break;
+                default:
+                    builder.additional(element.name, (Type<?>)values.get(index++).getValue());
+                    break;
+            }
+        }
+
+        return builder.build();
+    }
+
+    public List<TypeReference<?>> getAttestationReturnTypes()
+    {
+        List<TypeReference<?>> returnTypes = new ArrayList<>();
+        AttestationDefinition attn = null;
+        if (attestations.size() > 0)
+        {
+            attn = (AttestationDefinition)attestations.values().toArray()[0];
+        }
+
+        if (attn == null || !namedTypeLookup.containsKey(attn.function.namedTypeReturn))
+        {
+            return returnTypes;
+        }
+
+        //get namedType for return
+        NamedType nType = namedTypeLookup.get(attn.function.namedTypeReturn);
+
+        //add output params
+        for (NamedType.SequenceElement element : nType.sequence)
+        {
+            switch (element.type)
+            {
+                case "uint":
+                case "uint256":
+                    returnTypes.add(new TypeReference<Uint256>() {});
+                    break;
+                case "bytes32":
+                    returnTypes.add(new TypeReference<Bytes32>() {});
+                    break;
+                case "bytes":
+                    returnTypes.add(new TypeReference<DynamicBytes>() {});
+                    break;
+                case "string":
+                    returnTypes.add(new TypeReference<Utf8String>() {});
+                    break;
+                case "address":
+                    returnTypes.add(new TypeReference<Address>() {});
+                    break;
+                case "bool":
+                    returnTypes.add(new TypeReference<Bool>() {});
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return returnTypes;
+    }
+
+    private AttnElement parseAttestationStruct(Node attnElement)
+    {
+        AttnElement thisElement = new AttnElement();
+        thisElement.name = getElementName(attnElement);
+        String type = processTypeName(attnElement.getLocalName());
+        switch (type)
+        {
+            case "struct":
+                thisElement.type = AttnStructType.STRUCT;
+                thisElement.members = parseAttestationStructMembers(attnElement);
+                break;
+            case "UTF8-String":
+                thisElement.type = AttnStructType.UTF8_STRING;
+                break;
+            case "ASN1-Integer":
+                thisElement.type = AttnStructType.ASN1_INTEGER;
+                break;
+            case "Octet-String":
+                thisElement.type = AttnStructType.OCTET_STRING;
+                break;
+            case "signature":
+                thisElement.type = AttnStructType.SIGNATURE;
+                break;
+            case "DER-Enum":
+                thisElement.type = AttnStructType.DER_ENUM;
+                break;
+            case "SubjectPublicKeyInfo":
+                thisElement.type = AttnStructType.SUBJECT_PUBLIC_KEY;
+                break;
+            case "ProofOfKnowledge":
+                thisElement.type = AttnStructType.PROOF_OF_KNOWLEDGE;
+                thisElement.members = parseAttestationStructMembers(attnElement);
+                break;
+            case "timestamp":
+                thisElement.type = AttnStructType.TIMESTAMP;
+                break;
+            case "bytes":
+                thisElement.type = AttnStructType.BYTES;
+                break;
+            case "uint":
+                thisElement.type = AttnStructType.UINT;
+                break;
+            case "string":
+                thisElement.type = AttnStructType.STRING;
+                break;
+            case "address":
+                thisElement.type = AttnStructType.ADDRESS;
+                break;
+            case "bool":
+                thisElement.type = AttnStructType.BOOL;
+                break;
+            default:
+                break;
+        }
+
+        return thisElement;
+    }
+
+    private String processTypeName(String tag)
+    {
+        if (tag.startsWith("uint") || tag.startsWith("int"))
+        {
+            return "uint";
+        }
+        else if (tag.startsWith("bytes"))
+        {
+            return "bytes";
+        }
+        else
+        {
+            return tag;
+        }
+    }
+
+    private enum AttnStructType
+    {
+        STRUCT,
+        SUBJECT_PUBLIC_KEY,
+        PROOF_OF_KNOWLEDGE,
+        SIGNATURE,
+        UTF8_STRING,
+        ASN1_INTEGER,
+        OCTET_STRING,
+        DER_ENUM,
+        DER_OBJECT,
+        TIMESTAMP,
+        //Ethereum return types
+        ADDRESS,
+        BYTES,
+        STRING,
+        UINT,
+        BOOL,
+    }
+
+    private static class AttnElement
+    {
+        public String name;
+        public String data;
+        public AttnStructType type;
+        public List<AttnElement> members;
+    }
+
     public String getKeyName() {
         return this.keyName;
     }
@@ -960,6 +1392,11 @@ public class TokenDefinition {
                     tsOrigins = new TSOrigins.Builder(TSOriginType.Event)
                                     .name(ev.type.name)
                                     .event(ev).build();
+                    break;
+                case "attestation":
+                    String attestationName = element.getAttribute("name");
+                    tsOrigins = new TSOrigins.Builder(TSOriginType.Attestation)
+                                    .name(attestationName).build();
                     break;
                 default:
                     throw new SAXException("Unknown Origin Type: '" + element.getLocalName() + "'" );
@@ -1194,7 +1631,7 @@ public class TokenDefinition {
         tse.ref = input.getAttribute("ref");
         tse.value = input.getTextContent();
         tse.localRef = input.getAttribute("local-ref");
-        return tse;    
+        return tse;
 }
 
     private void processDataInputs(FunctionDefinition fd, Element input)

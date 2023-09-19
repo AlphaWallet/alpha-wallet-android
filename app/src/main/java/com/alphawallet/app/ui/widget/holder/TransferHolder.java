@@ -120,6 +120,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
     private void bindView(TokenTransferData data, Transaction tx)
     {
         txLoad.setVisibility(View.GONE);
+        findViewById(R.id.token_name_detail).setVisibility(View.GONE);
 
         String sym = token != null ? token.getShortSymbol() : getContext().getString(R.string.eth);
         String itemView = null;
@@ -151,12 +152,18 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
             value.setText(getString(R.string.valueSymbol, transactionValue, sym));
         }
 
-        CharSequence typeValue = Utils.createFormattedValue(getContext(), getTitle(data), token);
+        CharSequence typeValue = Utils.createFormattedValue(getTitle(data), token);
 
         type.setText(typeValue);
         address.setText(data.getDetail(getContext(), tx, token, itemView));
         tokenIcon.setStatusIcon(data.getEventStatusType());
         tokenIcon.setChainIcon(token.tokenInfo.chainId);
+
+        //check if this is a mint, in which case we already display token name
+        if (!data.isMintEvent())
+        {
+            setTokenDetailName(token);
+        }
 
         //timestamp
         date.setText(Utils.localiseUnixTime(getContext(), data.getTimeStampSeconds()));

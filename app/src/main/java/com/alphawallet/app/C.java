@@ -237,6 +237,7 @@ public abstract class C {
     public static final String REDDIT_PACKAGE_NAME = "com.reddit.frontpage";
     public static final String INSTAGRAM_PACKAGE_NAME = "com.instagram.android";
     public static final String FROM_NOTIFICATION = "from_notification";
+    public static final int SHORT_SYMBOL_LENGTH = 5;
 
     public interface ErrorCode {
 

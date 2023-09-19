@@ -72,6 +72,11 @@ public class TokenTransferData extends ActivityMeta implements Parcelable
         }
     }
 
+    public boolean isMintEvent()
+    {
+        return eventName.equals("received") && getDetailAddress().equals(ZERO_ADDRESS);
+    }
+
     public String getOperationPrefix()
     {
         switch (eventName)

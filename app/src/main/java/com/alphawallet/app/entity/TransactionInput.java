@@ -620,11 +620,11 @@ public class TransactionInput
         {
             if (!token.isEthereum())
             {
-                operationValue = operationValue + " " + token.getSymbol();
+                operationValue = operationValue + " " + token.getShortSymbol();
             }
             else if (!TextUtils.isEmpty(operationValue))
             {
-                operationValue = operationValue + " " + token.getSymbol();
+                operationValue = operationValue + " " + token.getShortSymbol();
             }
             else
             {

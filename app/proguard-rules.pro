@@ -29,6 +29,7 @@
 -dontskipnonpubliclibraryclasses
 -dontskipnonpubliclibraryclassmembers
 -dontpreverify
+-allowaccessmodification
 -verbose
 -printseeds seeds.txt
 -printusage unused.txt
@@ -36,13 +37,22 @@
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
 
 #---------------Begin: proguard configuration for support library  ----------
+-keepclassmembers class * extends android.content.Context {
+    public void *(android.view.View);
+    public void *(android.view.MenuItem);
+}
 
 -keepclasseswithmembernames,includedescriptorclasses class * {
     native <methods>;
 }
 
-#trust wallet
--keep class wallet.core.jni.** { *; }
+#trust library
+-keep class wallet.core.jni.HDWallet { *; }
+-keep class wallet.core.jni.Hash { *; }
+-keep class wallet.core.jni.Curve { *; }
+-keep class wallet.core.jni.CoinType { *; }
+-keep class wallet.core.jni.Mnemonic { *; }
+-keep class wallet.core.jni.PrivateKey { *; }
 -keep class wallet.core.jni.proto.** { *; }
 -keep class org.web3j.** { *; }
 

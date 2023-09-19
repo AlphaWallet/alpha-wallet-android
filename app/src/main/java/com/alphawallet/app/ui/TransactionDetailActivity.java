@@ -35,6 +35,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
+import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import com.alphawallet.app.util.BalanceUtils;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.TransactionDetailViewModel;
@@ -103,6 +104,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     private long chainId;
     private String tokenAddress;
     private boolean isFromNotification;
+    private TokenTransferData transferData;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -122,6 +124,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         chainId = getIntent().getLongExtra(C.EXTRA_CHAIN_ID, MAINNET_ID);
         tokenAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
         isFromNotification = getIntent().getBooleanExtra(C.FROM_NOTIFICATION, false);
+        transferData = getIntent().getParcelableExtra(C.EXTRA_TRANSACTION_DATA);
 
         viewModel.prepare(chainId);
     }
@@ -200,10 +203,19 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
         setupVisibilities();
 
-        String from = transaction.from != null ? transaction.from : "";
+        String from = (transferData != null) ? transferData.getFromAddress() : (transaction.from != null ? transaction.from : "");
         fromValue.setText(from);
 
-        String to = transaction.to != null ? transaction.to : "";
+        token = viewModel.getToken(transaction.chainId, transaction.to);
+
+        String to = !TextUtils.isEmpty(transaction.getDestination(token)) ? transaction.getDestination(token) : (transaction.to != null ? transaction.to : "");
+
+        if (transferData != null)
+        {
+            String candidateTo = transferData.getToAddress();
+            to = candidateTo != null ? candidateTo : to;
+        }
+
         toValue.setText(to);
 
         String hash = transaction.hash != null ? transaction.hash : "";
@@ -215,8 +227,6 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
         network.setText(viewModel.getNetworkName(transaction.chainId));
         networkIcon.setImageResource(EthereumNetworkRepository.getChainLogo(transaction.chainId));
-
-        token = viewModel.getToken(transaction.chainId, transaction.to);
 
         setupTokenDetails();
 
@@ -346,9 +356,16 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
 
     private void setupWalletDetails()
     {
-        String operationName = token.getOperationName(transaction, this);
-        String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
-        amount.setText(Utils.isContractCall(this, operationName) ? "" : transactionOperation);
+        if (transferData != null)
+        {
+            amount.setText(transferData.getEventAmount(token, transaction));
+        }
+        else
+        {
+            String operationName = token.getOperationName(transaction, this);
+            String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
+            amount.setText(Utils.isContractCall(this, operationName) ? "" : transactionOperation);
+        }
     }
 
     @Override
@@ -389,7 +406,11 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
     private void setOperationName()
     {
         String operationName = null;
-        if (token != null)
+        if (transferData != null)
+        {
+            operationName = getString(transferData.getTitle());
+        }
+        else if (token != null)
         {
             operationName = token.getOperationName(transaction, getApplicationContext());
         }

@@ -26,6 +26,8 @@ import com.alphawallet.app.widget.TokenIcon;
 import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.token.entity.ContractAddress;
 
+import java.util.Locale;
+
 public class TransactionHolder extends BinderViewHolder<TransactionMeta> implements View.OnClickListener
 {
     public static final int VIEW_TYPE = 1003;
@@ -41,13 +43,11 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     private final TextView value;
     private final TextView supplemental;
     private final TokensService tokensService;
-    private final LinearLayout transactionBackground;
     private final FetchTransactionsInteract transactionsInteract;
     private final AssetDefinitionService assetService;
 
     private Transaction transaction;
     private String defaultAddress;
-    private boolean fromTokenView;
 
     public TransactionHolder(ViewGroup parent, TokensService service, FetchTransactionsInteract interact, AssetDefinitionService svs)
     {
@@ -58,7 +58,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         type = findViewById(R.id.type);
         value = findViewById(R.id.value);
         supplemental = findViewById(R.id.supplimental);
-        transactionBackground = findViewById(R.id.layout_background);
         tokensService = service;
         transactionsInteract = interact;
         assetService = svs;
@@ -70,12 +69,12 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     {
         defaultAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
         supplemental.setText("");
-        fromTokenView = false;
 
         //fetch data from database
         transaction = transactionsInteract.fetchCached(defaultAddress, data.hash);
 
-        if (this.transaction == null) {
+        if (this.transaction == null)
+        {
             return;
         }
 
@@ -89,11 +88,13 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         String transactionOperation = token.getTransactionResultValue(transaction, TRANSACTION_BALANCE_PRECISION);
         boolean shouldShowToken = token.shouldShowSymbol(transaction);
         value.setText(transactionOperation);
-        CharSequence typeValue = Utils.createFormattedValue(getContext(), operationName, shouldShowToken ? token : null);
-
+        CharSequence typeValue = Utils.createFormattedValue(operationName, shouldShowToken ? token : null);
         type.setText(typeValue);
         //set address or contract name
         setupTransactionDetail(token);
+
+        //Display further token details if required
+        setTokenDetailName(token);
 
         //set colours and up/down arrow
         tokenIcon.bindData(token, assetService);
@@ -114,12 +115,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     {
         String detailStr = token.getTransactionDetail(getContext(), transaction, tokensService);
         address.setText(detailStr);
-    }
-
-    @Override
-    public void setFromTokenView()
-    {
-        fromTokenView = true;
     }
 
     private Token getOperationToken()

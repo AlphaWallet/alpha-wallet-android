@@ -73,6 +73,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -174,10 +175,10 @@ public class Utils
     {
         if (TextUtils.isEmpty(text)) return "";
         text = text.trim();
-        int index;
-        for (index = 0; index < text.length(); index++)
+        int index = 1;
+        for (; index < text.length(); index++)
         {
-            if (!Character.isLetterOrDigit(text.charAt(index))) break;
+            if ((!Character.isLetterOrDigit(text.charAt(index)) && index > 4) || Character.isWhitespace(text.charAt(index))) break;
         }
 
         return text.substring(0, index).trim();
@@ -190,7 +191,7 @@ public class Utils
         String firstWord = getFirstWord(text);
         if (!TextUtils.isEmpty(firstWord))
         {
-            return firstWord.substring(0, Math.min(firstWord.length(), 4)).toUpperCase();
+            return firstWord.substring(0, Math.min(firstWord.length(), 5));
         }
         else
         {
@@ -204,7 +205,7 @@ public class Utils
         String firstWord = getFirstWord(text);
         if (!TextUtils.isEmpty(firstWord))
         {
-            return firstWord.substring(0, Math.min(firstWord.length(), 5)).toUpperCase();
+            return firstWord.substring(0, Math.min(firstWord.length(), C.SHORT_SYMBOL_LENGTH));
         }
         else
         {
@@ -298,7 +299,7 @@ public class Utils
         return sb;
     }
 
-    public static CharSequence createFormattedValue(Context ctx, String operationName, Token token)
+    public static CharSequence createFormattedValue(String operationName, Token token)
     {
         String symbol = token != null ? token.getShortSymbol() : "";
         boolean needsBreak = false;

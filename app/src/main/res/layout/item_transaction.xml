@@ -70,14 +70,40 @@
             android:visibility="visible"
             tools:text="+1.0 ETH" />
 
+        <View
+                android:id="@+id/view_insert"
+                android:layout_width="match_parent"
+                android:layout_below="@id/value_layout"
+                android:layout_alignStart="@id/value_layout"
+                android:layout_height="@dimen/micro_2"/>
+
+        <TextView
+                android:id="@+id/token_name_detail"
+                style="@style/Aw.Typography.Sub.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/view_insert"
+                android:layout_alignStart="@id/value_layout"
+                android:layout_toStartOf="@id/supplimental"
+                android:ellipsize="end"
+                android:visibility="gone"
+                tools:visibility="gone"
+                tools:text="Beluga Labs Concurrency" />
+
+        <View
+                android:id="@+id/view_insert2"
+                android:layout_width="match_parent"
+                android:layout_below="@id/token_name_detail"
+                android:layout_alignStart="@id/value_layout"
+                android:layout_height="@dimen/micro_2"/>
+
         <TextView
             android:id="@+id/address"
             style="@style/Aw.Typography.Sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/value_layout"
+            android:layout_below="@id/view_insert2"
             android:layout_alignStart="@id/value_layout"
-            android:layout_marginTop="@dimen/mini_4"
             android:layout_toStartOf="@id/supplimental"
             android:ellipsize="end"
             tools:text="0x123456778 ... 3434" />

@@ -155,7 +155,7 @@ public class AAATokenScriptCertificateTest extends BaseE2ETest
         onView(withId(R.id.coordinator)).perform(ViewActions.swipeUp());
 
         //Select token
-        click(withSubstring("OFFIC"), 20);
+        click(withSubstring("OFFICE"), 20);
 
         //Wait for cert to resolve
         //click certificate

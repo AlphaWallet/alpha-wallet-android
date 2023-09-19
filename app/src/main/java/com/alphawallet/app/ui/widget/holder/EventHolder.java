@@ -51,11 +51,9 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     private final AssetDefinitionService assetDefinition;
     private final AdapterCallback refreshSignaller;
     private Token token;
-    private BigInteger tokenId = BigInteger.ZERO;
     private final FetchTransactionsInteract fetchTransactionsInteract;
     private final TokensService tokensService;
     private String eventKey;
-    private boolean fromTokenView;
     private Transaction transaction;
 
     public EventHolder(ViewGroup parent, TokensService service, FetchTransactionsInteract interact,
@@ -77,11 +75,10 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
     @Override
     public void bind(@Nullable EventMeta data, @NonNull Bundle addition)
     {
-        fromTokenView = false;
         String walletAddress = addition.getString(DEFAULT_ADDRESS_ADDITIONAL);
         //pull event details from DB
         eventKey = TokensRealmSource.eventActivityKey(data.hash, data.eventName);
-        tokenId = BigInteger.ZERO;
+        findViewById(R.id.token_name_detail).setVisibility(View.GONE);
 
         RealmAuxData eventData = fetchTransactionsInteract.fetchEvent(walletAddress, eventKey);
         transaction = fetchTransactionsInteract.fetchCached(walletAddress, data.hash);
@@ -117,7 +114,7 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
             value.setText(getString(R.string.valueSymbol, transactionValue, sym));
         }
 
-        CharSequence typeValue = Utils.createFormattedValue(getContext(), getTitle(eventData), token);
+        CharSequence typeValue = Utils.createFormattedValue(getTitle(eventData), token);
 
         type.setText(typeValue);
         //symbol.setText(sym);
@@ -128,12 +125,6 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         //timestamp
         date.setText(Utils.localiseUnixTime(getContext(), eventData.getResultTime()));
         date.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void setFromTokenView()
-    {
-        fromTokenView = true;
     }
 
     private String getEventAmount(RealmAuxData eventData, Transaction tx)

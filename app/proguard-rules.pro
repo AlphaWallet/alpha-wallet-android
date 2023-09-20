@@ -19,6 +19,7 @@
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 -keepattributes SourceFile,LineNumberTable
+-keepattributes AnnotationDefault,RuntimeVisibleAnnotations
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
@@ -39,6 +40,11 @@
 -dontwarn jnr.posix.**
 -dontwarn org.slf4j.**
 
+-keepattributes Signature
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+-if interface * { @retrofit2.http.* public *** *(...); }
+-keep,allowoptimization,allowshrinking,allowobfuscation class <3>
 
 #---------------Begin: proguard configuration for support library  ----------
 -keepclassmembers class * extends android.content.Context {
@@ -65,6 +71,7 @@
 -keep class com.alphawallet.app.web3.** { *; }
 -keep class com.alphawallet.app.web3j.** { *; }
 -keep class com.alphawallet.app.entity.** { *; }
+-keep class io.stormbird.wallet.model.api.** { *; }
 
 -keep public class java.beans.* { *; }
 -keep class jnr.unixsocket.* { *; }

@@ -36,6 +36,10 @@
 -printmapping mapping.txt
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
 
+-dontwarn jnr.posix.**
+-dontwarn org.slf4j.**
+
+
 #---------------Begin: proguard configuration for support library  ----------
 -keepclassmembers class * extends android.content.Context {
     public void *(android.view.View);
@@ -54,7 +58,6 @@
 -keep class wallet.core.jni.Mnemonic { *; }
 -keep class wallet.core.jni.PrivateKey { *; }
 -keep class wallet.core.jni.proto.** { *; }
--keep class org.web3j.** { *; }
 
 #entities, jsInterface & listeners
 -keep class com.alphawallet.token.** { *; }
@@ -62,6 +65,24 @@
 -keep class com.alphawallet.app.web3.** { *; }
 -keep class com.alphawallet.app.web3j.** { *; }
 -keep class com.alphawallet.app.entity.** { *; }
+
+-keep public class java.beans.* { *; }
+-keep class jnr.unixsocket.* { *; }
+-keep class org.java_websocket.client.*
+-keep class org.java_websocket.handshake.*
+
+-keepclassmembers class org.web3j.protocol.** { *; }
+-keepclassmembers class org.web3j.crypto.* { *; }
+
+-keep class * extends org.web3j.abi.TypeReference
+-keep class * extends org.web3j.abi.datatypes.Type
+
+-dontwarn org.bouncycastle.jce.provider.X509LDAPCertStoreSpi
+-dontwarn org.bouncycastle.x509.util.LDAPStoreHelper
+
+-keep class java.beans.Transient.** {*;}
+-keep class java.beans.ConstructorProperties.** {*;}
+-keep class java.nio.file.Path.** {*;}
 
 -repackageclasses
 #-dontobfuscate

@@ -1159,13 +1159,7 @@ public class Utils
         if (!TextUtils.isEmpty(attestation))
         {
             //try decode without conversion
-            inflate = inflateData(attestation);
-            if (!TextUtils.isEmpty(inflate))
-            {
-                return inflate;
-            }
-            String decoded = attestation.replace("_", "/").replace("-", "+");
-            inflate = inflateData(decoded);
+            inflate = wrappedInflateData(attestation);
             if (!TextUtils.isEmpty(inflate))
             {
                 return inflate;
@@ -1174,14 +1168,14 @@ public class Utils
 
         //now check via pulling params directly
         attestation = extractParam(data, SMART_PASS_PREFIX);
-        inflate = inflateData(attestation);
+        inflate = wrappedInflateData(attestation);
         if (!TextUtils.isEmpty(inflate))
         {
             return inflate;
         }
 
         attestation = extractParam(data, ATTESTATION_PREFIX);
-        return inflateData(attestation);
+        return wrappedInflateData(attestation);
     }
 
     public static boolean hasEASAttestation(String data)
@@ -1352,6 +1346,18 @@ public class Utils
             );
 
         return new Gson().toJson(easAttestation);
+    }
+
+    private static String wrappedInflateData(String deflatedData)
+    {
+        String inflatedData = inflateData(deflatedData);
+        if (TextUtils.isEmpty(inflatedData))
+        {
+            deflatedData = deflatedData.replace("_", "/").replace("-", "+");
+            inflatedData = inflateData(deflatedData);
+        }
+
+        return inflatedData;
     }
 
     public static String inflateData(String deflatedData)

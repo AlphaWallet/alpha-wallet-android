@@ -25,17 +25,25 @@ public class ApiV1Request
         final HttpUrl url = HttpUrl.parse(urlString);
         if (url != null)
         {
-            for (Method method : ApiV1.VALID_METHODS)
+            try
             {
-                if (method.getPath().equals(url.encodedPath()))
+                String encodedPath = url.encodedPath();
+                for (Method method : ApiV1.VALID_METHODS)
                 {
-                    this.isValid = true;
-                    this.requestUrl = url;
-                    this.method = method;
-                    this.redirectUrl = url.queryParameter(ApiV1.RequestParams.REDIRECT_URL);
-                    final String metadataJson = url.queryParameter(ApiV1.RequestParams.METADATA);
-                    this.metadata = new Gson().fromJson(metadataJson, Metadata.class);
+                    if (method.getPath().equals(encodedPath))
+                    {
+                        this.isValid = true;
+                        this.requestUrl = url;
+                        this.method = method;
+                        this.redirectUrl = url.queryParameter(ApiV1.RequestParams.REDIRECT_URL);
+                        final String metadataJson = url.queryParameter(ApiV1.RequestParams.METADATA);
+                        this.metadata = new Gson().fromJson(metadataJson, Metadata.class);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                //continue
             }
         }
         else

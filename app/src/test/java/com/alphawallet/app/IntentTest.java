@@ -31,12 +31,17 @@ public class IntentTest
                 "%3D6ce01accc21d0b59752107d3d43c303ee7ccbdb5f418923c9b12742630f4c792";
         String walletconnectTest2 = "wc:d3995aaf65b26f95e6047aa93dec800255b6d763823472238b8137dc3ff519c3%402%3Frelay-protocol%3Dirn%26symKey" +
                 "%3D6ce01accc21d0b59752107d3d43c303ee7ccbdb5f418923c9b12742630f4c792";
+        String walletconnectTest3 = "awallet://wc?uri=wc%3A5f577f99-2f54-40f7-9463-7ff640772090%401%3Fbridge%3Dhttps%253A%252F%252Fwalletconnect.depay.com%26key%3D1938aa2c9d4104c91cbc60e94631cf769c96ebad1ea2fc30e18ba09e39bc3c0b";
 
         DeepLinkRequest request = DeepLinkService.parseIntent(walletconnectTest1, null);
         assertTrue(request.type == DeepLinkType.WALLETCONNECT);
         assertTrue(request.data.startsWith("wc:"));
 
         request = DeepLinkService.parseIntent(walletconnectTest2, null);
+        assertTrue(request.type == DeepLinkType.WALLETCONNECT);
+        assertTrue(request.data.startsWith("wc:"));
+
+        request = DeepLinkService.parseIntent(walletconnectTest3, null);
         assertTrue(request.type == DeepLinkType.WALLETCONNECT);
         assertTrue(request.data.startsWith("wc:"));
 

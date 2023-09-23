@@ -26,6 +26,7 @@ public class DeepLinkService
 {
     public static final String AW_APP = "https://aw.app/";
     public static final String WC_PREFIX = "wc?uri=";
+    public static final String AW_PREFIX = "awallet://";
     public static DeepLinkRequest parseIntent(String importData, Intent startIntent)
     {
         if (TextUtils.isEmpty(importData))
@@ -40,9 +41,10 @@ public class DeepLinkService
             return new DeepLinkRequest(DeepLinkType.SMARTPASS, importData);
         }
 
-        if (importData.startsWith(AW_APP + WC_PREFIX))
+        if (importData.startsWith(AW_APP + WC_PREFIX) || importData.startsWith(AW_PREFIX + WC_PREFIX))
         {
-            return new DeepLinkRequest(DeepLinkType.WALLETCONNECT, importData.substring((AW_APP + WC_PREFIX).length()));
+            int prefixIndex = importData.indexOf(WC_PREFIX) + WC_PREFIX.length();
+            return new DeepLinkRequest(DeepLinkType.WALLETCONNECT, importData.substring(prefixIndex));
         }
 
         if (importData.startsWith(NotificationService.AWSTARTUP))

@@ -649,6 +649,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 CustomNetworks cn = new Gson().fromJson(networks, CustomNetworks.class);
                 this.list = cn.list;
                 this.mapToTestNet = cn.mapToTestNet;
+                if (list == null)
+                {
+                    return;
+                }
+
                 checkCustomNetworkSetting();
 
                 for (NetworkInfo info : list)

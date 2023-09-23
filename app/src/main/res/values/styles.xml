@@ -198,6 +198,10 @@
         <item name="android:textAppearance">@style/Aw.Typography</item>
     </style>
 
+    <style name="Widget.App.CheckBox" parent="Widget.MaterialComponents.CompoundButton.CheckBox">
+        <item name="buttonTint">@color/selector_button_tint</item>
+    </style>
+
     <style name="Aw.Component.Card" parent="">
         <item name="android:background">@color/active_session_card_background</item>
     </style>

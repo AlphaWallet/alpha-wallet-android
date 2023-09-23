@@ -66,7 +66,12 @@ public class ContractInteract
     {
         //1. get TokenURI (check for non-standard URI - check "tokenURI" and "uri")
         String responseValue = callSmartContractFunction(token.tokenInfo.chainId, getTokenURI(tokenId), token.getAddress(), token.getWallet());
-        if (responseValue == null) responseValue = callSmartContractFunction(token.tokenInfo.chainId, getTokenURI2(tokenId), token.getAddress(), token.getWallet());
+        if (responseValue == null)
+        {
+            responseValue = callSmartContractFunction(token.tokenInfo.chainId, getTokenURI2(tokenId), token.getAddress(), token.getWallet());
+        }
+
+        responseValue = Utils.parseResponseValue(responseValue, tokenId); //ensure {id} is honoured as per ERC1155 rules
         String metaData = loadMetaData(responseValue);
         if (!TextUtils.isEmpty(metaData))
         {

@@ -30,6 +30,8 @@ public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickLis
     {
         toolbar = view.findViewById(R.id.toolbar);
         toolbarTitle = toolbar.findViewById(R.id.toolbar_title);
+
+        toolbar.setOnClickListener(this::onToolbarClicked);
     }
 
     protected void toolbar(View view)
@@ -119,6 +121,11 @@ public class BaseFragment extends Fragment implements Toolbar.OnMenuItemClickLis
 
     public void onItemClick(String url)
     {
+    }
+
+    public void onToolbarClicked(View view)
+    {
+
     }
 
     public void signalPlayStoreUpdate(int updateVersion)

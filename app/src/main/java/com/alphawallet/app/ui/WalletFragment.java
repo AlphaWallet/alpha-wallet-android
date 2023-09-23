@@ -5,7 +5,11 @@ import static com.alphawallet.app.C.ADDED_TOKEN;
 import static com.alphawallet.app.C.ErrorCode.EMPTY_COLLECTION;
 import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.ui.HomeActivity.RESET_TOKEN_SERVICE;
+import static com.alphawallet.app.ui.MyAddressActivity.KEY_ADDRESS;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.drawable.ColorDrawable;
@@ -72,6 +76,8 @@ import com.alphawallet.app.widget.UserAvatar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+
+import org.web3j.crypto.Keys;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -899,6 +905,19 @@ public class WalletFragment extends BaseFragment implements
 
             background.draw(c);
             icon.draw(c);
+        }
+    }
+
+    @Override
+    public void onToolbarClicked(View view)
+    {
+        //can we do it this way?
+        //copy address
+        ClipboardManager clipboard = (ClipboardManager) requireActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(KEY_ADDRESS, Keys.toChecksumAddress(viewModel.getWalletAddr()));
+        if (clipboard != null)
+        {
+            clipboard.setPrimaryClip(clip);
         }
     }
 }

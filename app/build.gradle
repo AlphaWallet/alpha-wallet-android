@@ -73,8 +73,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 247
-        versionName "3.68"
+        versionCode 248
+        versionName "3.69"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 24
@@ -159,7 +159,7 @@ android {
         }
 
         release {
-            minifyEnabled true
+            minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 

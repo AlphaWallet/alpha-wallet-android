@@ -28,6 +28,7 @@ import android.util.TypedValue;
 import android.webkit.URLUtil;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
 import androidx.fragment.app.FragmentActivity;
 
@@ -67,6 +68,7 @@ import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -93,6 +95,7 @@ public class Utils
     private static final String ALPHAWALLET_ICON_REPO = ALPHAWALLET_REPO_NAME + ICON_REPO_ADDRESS_TOKEN + TOKEN_LOGO;
     private static final String ATTESTATION_PREFIX = "#attestation=";
     private static final String SMART_PASS_PREFIX = "ticket=";
+    private static final String TOKEN_ID_CODE = "{id}";
 
     public static int dp2px(Context context, int dp)
     {
@@ -1451,5 +1454,18 @@ public class Utils
         }
 
         return istest;
+    }
+
+    public static String parseResponseValue(@Nullable String metaDataURI, BigInteger tokenId)
+    {
+        if (metaDataURI != null && metaDataURI.contains(TOKEN_ID_CODE))
+        {
+            String formattedTokenId = Numeric.toHexStringNoPrefixZeroPadded(tokenId, 64);
+            return metaDataURI.replace(TOKEN_ID_CODE, formattedTokenId);
+        }
+        else
+        {
+            return metaDataURI;
+        }
     }
 }

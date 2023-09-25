@@ -1924,7 +1924,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void txWritten(TransactionReturn txData)
     {
-        confirmationDialog.transactionWritten(txData.hash);
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+        {
+            confirmationDialog.transactionWritten(txData.hash);
+        }
+
         web3.onSignTransactionSuccessful(txData);
     }
 

@@ -625,7 +625,8 @@ public class TokenDefinition
         }
     }
 
-    public Element getViewContent(String name){
+    public Element getViewContent(String name)
+    {
         return this.viewContent.get(name);
     }
 
@@ -776,7 +777,8 @@ public class TokenDefinition
         }
     }
 
-    public boolean isSchemaLessThanMinimum(){
+    public boolean isSchemaLessThanMinimum()
+    {
 
         if (nameSpace == null)
             return true;
@@ -792,7 +794,9 @@ public class TokenDefinition
                 Date schemaDate = format.parse(TOKENSCRIPT_MINIMUM_SCHEMA);
 
                 return thisDate.before(schemaDate);
-            } catch (Exception e){
+            }
+            catch (Exception e)
+            {
                 return true;
             }
         }

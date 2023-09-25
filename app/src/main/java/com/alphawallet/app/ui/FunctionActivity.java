@@ -173,7 +173,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                 injectedView = tokenView.injectStyleAndWrapper(injectedView, action.style + "\n" + action.view.getStyle());
 
                 String base64 = Base64.encodeToString(injectedView.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
-                tokenView.loadData(base64 + (!Objects.equals(action.view.getUrlFragment(), "") ? "#"+action.view.getUrlFragment() : ""), "text/html; charset=utf-8", "base64");
+                tokenView.loadData(base64 + (!Objects.equals(action.view.getUrlFragment(), "") ? "#" + action.view.getUrlFragment() : ""), "text/html; charset=utf-8", "base64");
             } else {
                 tokenView.loadUrl(action.view.getUrl());
             }

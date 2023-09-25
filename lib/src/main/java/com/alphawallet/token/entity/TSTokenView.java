@@ -30,7 +30,8 @@ public class TSTokenView
         this.tokenDef = tokenDef;
     }
 
-    private void generateTokenView(Element element){
+    private void generateTokenView(Element element)
+    {
 
         if (!Objects.equals(this.getUrl(), "")){
             return;
@@ -77,7 +78,8 @@ public class TSTokenView
         style += lStyle;
     }
 
-    public String getTokenView(){
+    public String getTokenView()
+    {
         if (tokenView.isEmpty()){
             generateTokenView(this.element);
         }
@@ -85,7 +87,8 @@ public class TSTokenView
         return tokenView;
     }
 
-    public String getStyle(){
+    public String getStyle()
+    {
         if (style.isEmpty()){
             generateTokenView(this.element);
         }
@@ -93,11 +96,13 @@ public class TSTokenView
         return style;
     }
 
-    public String getUrl(){
+    public String getUrl()
+    {
         return this.element.getAttribute("url");
     }
 
-    public String getUrlFragment(){
+    public String getUrlFragment()
+    {
         return this.element.getAttribute("urlFragment");
     }
 

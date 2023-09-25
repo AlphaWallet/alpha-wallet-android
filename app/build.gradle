@@ -313,7 +313,7 @@ dependencies {
     analyticsImplementation 'com.google.android.play:core:1.10.3'
     analyticsImplementation 'com.google.firebase:firebase-analytics:21.3.0'
     analyticsImplementation 'com.mixpanel.android:mixpanel-android:5.8.4'
-    analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.4.1'
+    analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.4.3'
 
     // Notifications: NB there appears to be an incompatibility in the newer builds of firebase-messaging.
     // Update when resolved.

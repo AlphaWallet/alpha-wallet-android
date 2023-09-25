@@ -24,6 +24,7 @@ import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.entity.RealmAttestation;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.DeepLinkService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.util.Utils;
@@ -79,9 +80,8 @@ public class ImportAttestation
     private final RealmManager realmManager;
     private final OkHttpClient client;
     private final KeyProvider keyProvider = KeyProviderFactory.get();
-    public static final String SMART_PASS_URL = "https://aw.app/openurl?url=";
+    public static final String SMART_PASS_URL = DeepLinkService.AW_APP + "openurl?url=";
     public static final String DELETE_KEY = "DELETE";
-
     private static final String SMART_PASS_API = "https://backend.smartlayer.network/passes/pass-installed-in-aw";
     private static final String SMART_PASS_API_DEV = "https://d2a5tt41o5qmyt.cloudfront.net/passes/pass-installed-in-aw";
 

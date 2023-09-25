@@ -51,6 +51,7 @@ import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.DeepLinkRequest;
 import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.HomeCommsInterface;
@@ -65,6 +66,7 @@ import com.alphawallet.app.entity.attestation.SmartPassReturn;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
+import com.alphawallet.app.service.DeepLinkService;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -111,7 +113,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public static final int DAPP_BARCODE_READER_REQUEST_CODE = 1;
     public static final String STORED_PAGE = "currentPage";
     public static final String RESET_TOKEN_SERVICE = "HOME_reset_ts";
-    public static final String AW_MAGICLINK = "aw.app/";
     public static final String AW_MAGICLINK_DIRECT = "openurl?url=";
     private static boolean updatePrompt = false;
     private final FragmentStateAdapter pager2Adapter;
@@ -130,7 +131,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     private TutoShowcase backupWalletDialog;
     private boolean isForeground;
     private volatile boolean tokenClicked = false;
-    private String openLink;
+    private String openLink = null;
+    private String openToken = null;
     private AWalletAlertDialog wcProgressDialog;
     private final ActivityResultLauncher<String> requestPermissionLauncher =
         registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -322,14 +324,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 
         if (data != null)
         {
-            String importData = data.toString();
-            String importPath = null;
-            if (importData.startsWith("content://"))
-            {
-                importPath = data.getPath();
-            }
-
-            checkIntents(importData, importPath, intent);
+            checkIntents(data.toString(), intent);
         }
 
         Intent i = new Intent(this, PriceAlertsService.class);
@@ -483,18 +478,10 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         super.onNewIntent(startIntent);
         Uri data = startIntent.getData();
-        String importPath = null;
-        String importData = null;
 
         if (data != null)
         {
-            importData = data.toString();
-            if (importData.startsWith("content://"))
-            {
-                importPath = data.getPath();
-            }
-
-            checkIntents(importData, importPath, startIntent);
+            checkIntents(data.toString(), startIntent);
         }
     }
 
@@ -870,10 +857,15 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (!TextUtils.isEmpty(openLink)) //delayed open link from intent - safe now that all fragments have been initialised
         {
             showPage(DAPP_BROWSER);
-            DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
-            if (!dappFrag.isDetached()) dappFrag.loadDirect(openLink);
+            getFragment(DAPP_BROWSER).switchNetworkAndLoadUrl(0, openLink);
             openLink = null;
             viewModel.storeCurrentFragmentId(-1);
+        }
+        else if (!TextUtils.isEmpty(openToken))
+        {
+            showPage(WALLET);
+            getFragment(WALLET).setImportFilename(openToken);
+            openToken = null;
         }
         else if (getIntent().getBooleanExtra(C.Key.FROM_SETTINGS, false))
         {
@@ -1121,75 +1113,18 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         inset.show(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
     }
 
-    private void checkIntents(String importData, String importPath, Intent startIntent)
+    private void checkIntents(String importData, Intent startIntent)
     {
-        try
+        //decode deeplink and handle
+        DeepLinkRequest request = DeepLinkService.parseIntent(importData, startIntent);
+        switch (request.type)
         {
-            if (importData != null) importData = Utils.universalURLDecode(importData);
-
-            if (importData != null && viewModel.handleSmartPass(this, importData))
-            {
-                //Complete
-            }
-            else if (importData != null && importData.startsWith(NotificationService.AWSTARTUP))
-            {
-                importData = importData.substring(NotificationService.AWSTARTUP.length());
-                //move window to token if found
-                getFragment(WALLET).setImportFilename(importData);
-            }
-            else if (startIntent.getStringExtra("url") != null)
-            {
-                DappBrowserFragment dappFrag = (DappBrowserFragment) getFragment(DAPP_BROWSER);
-                String url = startIntent.getStringExtra("url");
-                showPage(DAPP_BROWSER);
-                if (!dappFrag.isDetached()) dappFrag.loadDirect(url);
-            }
-            else if (importData != null && importData.length() > 22 && importData.contains(AW_MAGICLINK))
-            {
-                // Deeplink-based Wallet API
-                ApiV1Request request = new ApiV1Request(importData);
-                if (request.isValid())
-                {
-                    Intent intent = new Intent(this, ApiV1Activity.class);
-                    intent.putExtra(C.Key.API_V1_REQUEST_URL, importData);
-                    viewModel.track(Analytics.Action.DEEP_LINK_API_V1);
-                    startActivity(intent);
-                    return;
-                }
-
-                int directLinkIndex = importData.indexOf(AW_MAGICLINK_DIRECT);
-                if (directLinkIndex > 0)
-                {
-                    //get link
-                    String link = importData.substring(directLinkIndex + AW_MAGICLINK_DIRECT.length());
-                    if (getSupportFragmentManager().getFragments().size() >= DAPP_BROWSER.ordinal())
-                    {
-                        viewModel.track(Analytics.Action.DEEP_LINK);
-                        showPage(DAPP_BROWSER);
-                        //if (!dappFrag.isDetached()) dappFrag.loadDirect(link);
-                    }
-                    else
-                    {
-                        openLink = link; //open link once fragments are initialised
-                    }
-                }
-                else
-                {
-                    ParseMagicLink parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
-                    if (parser.parseUniversalLink(importData).chainId > 0)
-                    {
-                        new ImportTokenRouter().open(this, importData);
-                        finish();
-                    }
-                }
-            }
-            else if (importData != null && importData.startsWith("wc:"))
-            {
+            case WALLETCONNECT:
                 //Determine if any action is required; if this is not a pairing request then ignore for now
-                if (importData.contains("relay-protocol"))
+                if (request.data.contains("relay-protocol"))
                 {
                     Intent intent = new Intent(this, WalletConnectV2Activity.class);
-                    intent.putExtra("url", importData);
+                    intent.putExtra("url", request.data);
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(intent);
                 }
@@ -1197,19 +1132,48 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 {
                     walletConnectRequestPending();
                 }
-            }
-            else if (importPath != null)
-            {
+                break;
+            case SMARTPASS:
+                viewModel.handleSmartPass(this, request.data);
+                break;
+            case URL_REDIRECT:
+                viewModel.track(Analytics.Action.DEEP_LINK);
+                if (fragmentsInitialised())
+                {
+                    showPage(DAPP_BROWSER);
+                    getFragment(DAPP_BROWSER).switchNetworkAndLoadUrl(0, request.data);
+                }
+                else
+                {
+                    openLink = request.data; //open link once fragments are initialised
+                }
+                break;
+            case TOKEN_NOTIFICATION:
+                if (fragmentsInitialised())
+                {
+                    showPage(WALLET);
+                    getFragment(WALLET).setImportFilename(request.data);
+                }
+                else
+                {
+                    openToken = request.data; //open token once fragments are initialised
+                }
+                break;
+            case WALLET_API_DEEPLINK:
+                Intent intent = new Intent(this, ApiV1Activity.class);
+                intent.putExtra(C.Key.API_V1_REQUEST_URL, request.data);
+                viewModel.track(Analytics.Action.DEEP_LINK_API_V1);
+                startActivity(intent);
+                break;
+            case LEGACY_MAGICLINK:
+                new ImportTokenRouter().open(this, request.data);
+                finish();
+                break;
+            case IMPORT_SCRIPT:
                 viewModel.importScriptFile(this, startIntent);
-            }
-        }
-        catch (SalesOrderMalformed s)
-        {
-            //No report, expected
-        }
-        catch (Exception e)
-        {
-            Timber.tag("Intent").w(e);
+                break;
+            case INVALID_LINK:
+                break;
         }
     }
 
@@ -1314,6 +1278,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         {
             return WalletPage.values().length;
         }
+    }
+
+    private boolean fragmentsInitialised()
+    {
+        return getSupportFragmentManager().getFragments().size() >= SETTINGS.ordinal();
     }
 
     @Override

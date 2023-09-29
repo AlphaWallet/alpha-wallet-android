@@ -46,6 +46,11 @@ import com.journeyapps.barcodescanner.ScanOptions;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.StructuredDataEncoder;
@@ -71,6 +76,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -1069,6 +1075,44 @@ public class Utils
         calculatedAddressAsBytes = Arrays.copyOfRange(calculatedAddressAsBytes,
                 12, calculatedAddressAsBytes.length);
         return Keys.toChecksumAddress(Numeric.toHexString(calculatedAddressAsBytes));
+    }
+
+    public static <T> List<Type> decodeDynamicArray(String output)
+    {
+        List<TypeReference<Type>> adaptive = org.web3j.abi.Utils.convert(Collections.singletonList(new TypeReference<DynamicArray<Utf8String>>() {}));
+        try
+        {
+            return FunctionReturnDecoder.decode(output, adaptive);
+        }
+        catch (Exception e)
+        {
+            // Expected
+        }
+
+        return new ArrayList<>();
+    }
+
+    public static <T> List<T> asAList(List<Type> responseValues, T convert)
+    {
+        List<T> converted = new ArrayList<>();
+        if (responseValues.isEmpty())
+        {
+            return converted;
+        }
+
+        for (Object objUri : ((DynamicArray) responseValues.get(0)).getValue())
+        {
+            try
+            {
+                converted.add((T) ((Type<?>) objUri).getValue().toString());
+            }
+            catch (ClassCastException e)
+            {
+                //
+            }
+        }
+
+        return converted;
     }
 
     public static boolean isJson(String value)

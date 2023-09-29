@@ -1,5 +1,6 @@
 package com.alphawallet.app.entity;
 
+import static com.alphawallet.app.repository.TokenRepository.callSmartContractFuncAdaptiveArray;
 import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
 
 import android.text.TextUtils;
@@ -18,6 +19,7 @@ import org.web3j.abi.datatypes.generated.Uint256;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
@@ -37,12 +39,9 @@ public class ContractInteract
         this.token = token;
     }
 
-    public Single<String> getScriptFileURI()
+    public Single<List<String>> getScriptFileURI()
     {
-        return Single.fromCallable(() -> {
-            String contractURI = callSmartContractFunction(token.tokenInfo.chainId, getScriptURI(), token.getAddress(), token.getWallet());
-            return contractURI != null ? contractURI : "";
-        }).observeOn(Schedulers.io());
+        return Single.fromCallable(() -> callSmartContractFuncAdaptiveArray(token.tokenInfo.chainId, getScriptURI(), token.getAddress(), token.getWallet())).observeOn(Schedulers.io());
     }
 
     private String loadMetaData(String tokenURI)

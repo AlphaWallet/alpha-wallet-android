@@ -1078,7 +1078,7 @@ public class Token
         });
     }
 
-    public Single<String> getScriptURI()
+    public Single<List<String>> getScriptURI()
     {
         return contractInteract.getScriptFileURI();
     }

@@ -1262,17 +1262,30 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     //Call contract and check for script
     private Single<File> fetchTokenScriptFromContract(Token token, MutableLiveData<Boolean> updateFlag)
     {
+        //Allow for arrays of URI, check each in turn for multiple and return the first valid entry
         return token.getScriptURI()
-                .map(uri -> {
-                    if (!TextUtils.isEmpty(uri) && updateFlag != null)
+                .map(uriList -> {
+                    for (String uri : uriList)
                     {
-                        updateFlag.postValue(true);
+                        //early return for unchanged IPFS
+                        if (matchesExistingScript(token, uri))
+                        {
+                            break; // return script unchanged / not found
+                        }
+                        //download each in turn, return first valid script
+                        if (!TextUtils.isEmpty(uri) && updateFlag != null)
+                        {
+                            updateFlag.postValue(true);
+                        }
+                        Pair<String, Boolean> scriptCandidate = downloadScript(uri, 0);
+                        if (!TextUtils.isEmpty(scriptCandidate.first))
+                        {
+                            return new Pair<>(uri, scriptCandidate);
+                        }
                     }
 
-                    return uri;
+                    return new Pair<>("", new Pair<>("", false));
                 })
-                .map(uri -> compareExistingScript(token, uri))
-                .map(uri -> new Pair<>(uri, downloadScript(uri, 0)))
                 .map(scriptData -> storeEntry(token, scriptData));
     }
 
@@ -1341,10 +1354,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return storeFile;
     }
 
-    private String compareExistingScript(Token token, String uri)
+    private boolean matchesExistingScript(Token token, String uri)
     {
         //TODO: calculate and use the IPFS CID to validate existing script against IPFS locator
-        String returnUri = uri;
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
             String entryKey = token.getTSKey(); //getTSDataKey(token.tokenInfo.chainId, token.tokenInfo.address);
@@ -1361,7 +1373,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     && entry.getIpfsPath().equals(uri)
                     && tsf.exists())
             {
-                returnUri = UNCHANGED_SCRIPT;
+                return true;
             }
         }
         catch (Exception e)
@@ -1369,7 +1381,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             Timber.w(e);
         }
 
-        return returnUri;
+        return false;
     }
 
     private Single<File> tryServerIfRequired(File contractScript, String address)

@@ -11,14 +11,12 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.repository.EthereumNetworkBase;
-import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmAttestation;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.AttestationDefinition;
 import com.alphawallet.token.entity.AttestationValidation;
 import com.alphawallet.token.entity.AttestationValidationStatus;
 import com.alphawallet.token.entity.TokenScriptResult;
-import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.gson.Gson;
 
@@ -30,12 +28,14 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.StructuredDataEncoder;
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -901,12 +901,12 @@ public class Attestation extends Token
     }
 
     @Override
-    public Single<String> getScriptURI()
+    public Single<List<String>> getScriptURI()
     {
         MemberData memberData = additionalMembers.get(SCHEMA_DATA_PREFIX + SCRIPT_URI);
         if (memberData != null && !TextUtils.isEmpty(memberData.getString()))
         {
-            return Single.fromCallable(memberData::getString);
+            return Single.fromCallable(() -> Collections.singletonList(memberData.getString()));
         }
         else
         {

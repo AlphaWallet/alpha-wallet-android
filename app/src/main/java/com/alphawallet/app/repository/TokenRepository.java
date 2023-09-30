@@ -3,6 +3,7 @@ package com.alphawallet.app.repository;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
+import static java.util.Arrays.asList;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -1058,7 +1059,7 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     public static byte[] createTokenTransferData(String to, BigInteger tokenAmount) {
-        List<Type> params = Arrays.asList(new Address(to), new Uint256(tokenAmount));
+        List<Type> params = asList(new Address(to), new Uint256(tokenAmount));
         List<TypeReference<?>> returnTypes = Collections.singletonList(new TypeReference<Bool>() {});
         Function function = new Function("transfer", params, returnTypes);
         String encodedFunction = FunctionEncoder.encode(function);
@@ -1082,7 +1083,7 @@ public class TokenRepository implements TokenRepositoryType {
     public static byte[] createERC721TransferFunction(String from, String to, String token, BigInteger tokenId)
     {
         List<TypeReference<?>> returnTypes = Collections.emptyList();
-        List<Type> params = Arrays.asList(new Address(from), new Address(to), new Uint256(tokenId));
+        List<Type> params = asList(new Address(from), new Address(to), new Uint256(tokenId));
         Function function = new Function("safeTransferFrom", params, returnTypes);
 
         String encodedFunction = FunctionEncoder.encode(function);
@@ -1107,7 +1108,7 @@ public class TokenRepository implements TokenRepositoryType {
     {
         Function function = new Function(
                 "dropCurrency",
-                Arrays.asList(new org.web3j.abi.datatypes.generated.Uint32(order.nonce),
+                asList(new org.web3j.abi.datatypes.generated.Uint32(order.nonce),
                               new org.web3j.abi.datatypes.generated.Uint32(order.amount),
                               new org.web3j.abi.datatypes.generated.Uint32(order.expiry),
                               new org.web3j.abi.datatypes.generated.Uint8(v),
@@ -1354,6 +1355,37 @@ public class TokenRepository implements TokenRepositoryType {
         }
 
         return null;
+    }
+
+    public static List<String> callSmartContractFuncAdaptiveArray(long chainId,
+                                                   Function function, String contractAddress, String walletAddr)
+    {
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        try
+        {
+            org.web3j.protocol.core.methods.request.Transaction transaction
+                    = createEthCallTransaction(walletAddr, contractAddress, encodedFunction);
+            EthCall response = getWeb3jService(chainId).ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+
+            List<Type> responseValues = FunctionReturnDecoder.decode(response.getValue(), function.getOutputParameters());
+            List<Type> responseValuesArray = Utils.decodeDynamicArray(response.getValue());
+
+            if (!responseValuesArray.isEmpty()) // if arrays are found, return these as the filter is more strict
+            {
+                return (List<String>)Utils.asAList(responseValuesArray, " ");
+            }
+            if (!responseValues.isEmpty())
+            {
+                return Collections.singletonList(responseValues.get(0).getValue().toString());
+            }
+        }
+        catch (Exception e)
+        {
+            //
+        }
+
+        return new ArrayList<>();
     }
 
     public static List callSmartContractFunctionArray(long chainId,

@@ -17,7 +17,7 @@ public class TSTokenViewHolder
         TSTokenView v = views.get(viewName);
         if (v != null)
         {
-            return v.tokenView;
+            return v.getTokenView();
         }
         else
         {
@@ -28,6 +28,6 @@ public class TSTokenViewHolder
     public String getViewStyle(String viewName)
     {
         TSTokenView v = views.get(viewName);
-        return (globalStyle != null ? globalStyle : "") + (v != null ? v.style : "");
+        return (globalStyle != null ? globalStyle : "") + (v != null ? v.getStyle() : "");
     }
 }

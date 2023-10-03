@@ -100,7 +100,7 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         if (td != null && td.getActivityCards().containsKey(eventData.getFunctionId()))
         {
             TSTokenView view = td.getActivityCards().get(eventData.getFunctionId()).getView(ASSET_SUMMARY_VIEW_NAME);
-            if (view != null) itemView = view.tokenView;
+            if (view != null) itemView = view.getTokenView();
         }
 
         String transactionValue = getEventAmount(eventData, transaction);

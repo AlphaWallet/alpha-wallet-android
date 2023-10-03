@@ -7,6 +7,10 @@ import org.w3c.dom.Node;
 import static org.w3c.dom.Node.ELEMENT_NODE;
 import static org.w3c.dom.Node.TEXT_NODE;
 
+import com.alphawallet.token.tools.TokenDefinition;
+
+import java.util.Objects;
+
 /**
  * Holds an individual Token View which consists of style and HTML view code
  *
@@ -14,11 +18,26 @@ import static org.w3c.dom.Node.TEXT_NODE;
  */
 public class TSTokenView
 {
-    public final String tokenView;
-    public final String style;
+    private String tokenView = "";
+    private String style = "";
 
-    public TSTokenView(Element element)
+    private Element element;
+    private TokenDefinition tokenDef;
+
+    public TSTokenView(Element element, TokenDefinition tokenDef)
     {
+        this.element = element;
+        this.tokenDef = tokenDef;
+    }
+
+    private void generateTokenView(Element element)
+    {
+
+        if (!Objects.equals(this.getUrl(), ""))
+        {
+            return;
+        }
+
         String lStyle = "";
         String lView = "";
         for (int i = 0; i < element.getChildNodes().getLength(); i++)
@@ -33,6 +52,11 @@ public class TSTokenView
                         case "style":
                             //record the style for this
                             lStyle += getHTMLContent(child);
+                            break;
+                        case "viewContent":
+                            String name = child.getAttributes().getNamedItem("name").getTextContent();
+                            Element content = this.tokenDef.getViewContent(name);
+                            generateTokenView(content);
                             break;
                         default:
                             lView += getElementHTML(child);
@@ -51,8 +75,38 @@ public class TSTokenView
             }
         }
 
-        tokenView = lView;
-        style = lStyle;
+        tokenView += lView;
+        style += lStyle;
+    }
+
+    public String getTokenView()
+    {
+        if (tokenView.isEmpty())
+        {
+            generateTokenView(this.element);
+        }
+
+        return tokenView;
+    }
+
+    public String getStyle()
+    {
+        if (style.isEmpty())
+        {
+            generateTokenView(this.element);
+        }
+
+        return style;
+    }
+
+    public String getUrl()
+    {
+        return this.element.getAttribute("url");
+    }
+
+    public String getUrlFragment()
+    {
+        return this.element.getAttribute("urlFragment");
     }
 
     public TSTokenView(String style, String view)

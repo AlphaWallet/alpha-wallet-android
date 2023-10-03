@@ -78,6 +78,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -166,12 +167,17 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             TSAction action = functions.get(actionMethod);
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
 
-            String injectedView = tokenView.injectWeb3TokenInit(action.view.tokenView, tokenAttrs, tokenId);
-            injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
-            injectedView = tokenView.injectStyleAndWrapper(injectedView, action.style + "\n" + action.view.style);
+            if (Objects.equals(action.view.getUrl(), ""))
+            {
+                String injectedView = tokenView.injectWeb3TokenInit(action.view.getTokenView(), tokenAttrs, tokenId);
+                injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
+                injectedView = tokenView.injectStyleAndWrapper(injectedView, action.style + "\n" + action.view.getStyle());
 
-            String base64 = Base64.encodeToString(injectedView.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
-            tokenView.loadData(base64, "text/html; charset=utf-8", "base64");
+                String base64 = Base64.encodeToString(injectedView.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+                tokenView.loadData(base64 + (!Objects.equals(action.view.getUrlFragment(), "") ? "#" + action.view.getUrlFragment() : ""), "text/html; charset=utf-8", "base64");
+            } else {
+                tokenView.loadUrl(action.view.getUrl());
+            }
         }
         catch (Exception e)
         {

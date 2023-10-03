@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_MINIMUM_SCHEMA;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -550,8 +551,8 @@ public class TokenscriptFunctionTest implements ParseResult {
 
     @Test
     public void entryTokenNameSpaceShouldBeCorrect() {
-        String currentNamespace = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
-        assertTrue("should match the latest namespace", entryToken.nameSpace.equals(currentNamespace));
+        String currentNamespace = "http://tokenscript.org/" + TOKENSCRIPT_MINIMUM_SCHEMA + "/tokenscript";
+        assertTrue("should match the minimum namespace", entryToken.nameSpace.equals(currentNamespace));
     }
 
     @Override

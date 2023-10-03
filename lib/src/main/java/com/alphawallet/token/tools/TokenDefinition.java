@@ -344,6 +344,16 @@ public class TokenDefinition
         }
     }
 
+    public void addLocalAttr(Attribute attr)
+    {
+        tokenViews.localAttributeTypes.put(attr.name, attr); //TODO: Refactor as it appears this doesn't respect scope
+    }
+
+    public void addGlobalStyle(Element element)
+    {
+        tokenViews.globalStyle = getHTMLContent(element); //TODO: Refactor this as it appears global style is located elsewhere. This may have been deprecated
+    }
+
     public enum Syntax {
         DirectoryString, IA5String, Integer, GeneralizedTime,
         Boolean, BitString, CountryString, JPEG, NumericString
@@ -612,7 +622,8 @@ public class TokenDefinition
                 {
                     case "token":
                     case "token-card":
-                        processTokenCardElements(card);
+                        TSTokenView tv = new TSTokenView(card, this);
+                        tokenViews.views.put(tv.getLabel(), tv);
                         break;
                     case "card":
                         extractCard(card);
@@ -659,42 +670,6 @@ public class TokenDefinition
         }
 
         return activityView;
-    }
-
-    private void processTokenCardElements(Element card) throws Exception
-    {
-        NodeList ll = card.getChildNodes();
-
-        for (int j = 0; j < ll.getLength(); j++)
-        {
-            Node node = ll.item(j);
-            if (node.getNodeType() != ELEMENT_NODE)
-                continue;
-
-            Element element = (Element) node;
-            switch (node.getLocalName())
-            {
-                case "attribute":
-                    Attribute attr = new Attribute(element, this);
-                    tokenViews.localAttributeTypes.put(attr.name, attr);
-                    break;
-                case "view": //TODO: Localisation
-                case "item-view":
-                    TSTokenView v = new TSTokenView(element, this);
-                    tokenViews.views.put(node.getLocalName(), v);
-                    break;
-                case "view-iconified":
-                    throw new SAXException("Deprecated <view-iconified> used in <ts:token>. Replace with <item-view>");
-                case "style":
-                    tokenViews.globalStyle = getHTMLContent(element);
-                    break;
-                case "script":
-                    //misplaced script tag
-                    throw new SAXException("Misplaced <script> tag in <ts:token>");
-                default:
-                    throw new SAXException("Unknown tag <" + node.getLocalName() + "> tag in tokens");
-            }
-        }
     }
 
     private String getLocalisedEntry(Map<String, String> attrEntry)
@@ -814,7 +789,8 @@ public class TokenDefinition
         switch (type)
         {
             case "token":
-                processTokenCardElements(card);
+                TSTokenView tv = new TSTokenView(card, this);
+                tokenViews.views.put(tv.getLabel(), tv);
                 break;
             case "action":
                 action = handleAction(card);

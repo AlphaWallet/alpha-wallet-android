@@ -33,7 +33,8 @@ public class TSTokenView
     private void generateTokenView(Element element)
     {
 
-        if (!Objects.equals(this.getUrl(), "")){
+        if (!Objects.equals(this.getUrl(), ""))
+        {
             return;
         }
 
@@ -80,7 +81,8 @@ public class TSTokenView
 
     public String getTokenView()
     {
-        if (tokenView.isEmpty()){
+        if (tokenView.isEmpty())
+        {
             generateTokenView(this.element);
         }
 
@@ -89,7 +91,8 @@ public class TSTokenView
 
     public String getStyle()
     {
-        if (style.isEmpty()){
+        if (style.isEmpty())
+        {
             generateTokenView(this.element);
         }
 

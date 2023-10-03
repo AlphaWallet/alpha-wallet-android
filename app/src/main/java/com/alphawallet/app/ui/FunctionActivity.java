@@ -167,7 +167,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             TSAction action = functions.get(actionMethod);
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
 
-            if (Objects.equals(action.view.getUrl(), "")){
+            if (Objects.equals(action.view.getUrl(), ""))
+            {
                 String injectedView = tokenView.injectWeb3TokenInit(action.view.getTokenView(), tokenAttrs, tokenId);
                 injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
                 injectedView = tokenView.injectStyleAndWrapper(injectedView, action.style + "\n" + action.view.getStyle());

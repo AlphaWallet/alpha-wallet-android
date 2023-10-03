@@ -781,7 +781,9 @@ public class TokenDefinition
     {
 
         if (nameSpace == null)
+        {
             return true;
+        }
 
         int dateIndex = nameSpace.indexOf(TOKENSCRIPT_BASE_URL) + TOKENSCRIPT_BASE_URL.length();
         int lastSeparator = nameSpace.lastIndexOf("/");

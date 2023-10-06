@@ -49,16 +49,13 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class NFTActivity extends BaseActivity implements StandardFunctionInterface
 {
     private NFTViewModel viewModel;
-
     private Wallet wallet;
     private Token token;
     private FunctionButtonBar functionBar;
     private boolean isGridView;
-
     private MenuItem sendMultipleTokensMenuItem;
     private MenuItem switchToGridViewMenuItem;
     private MenuItem switchToListViewMenuItem;
-
     private NFTAssetsFragment assetsFragment;
 
     private final ActivityResultLauncher<Intent> handleTransactionSuccess = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -84,7 +81,7 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
         initViewModel();
         getIntentData();
         setTitle(token.tokenInfo.name);
-        isGridView = !hasTokenScriptOverride(token);
+        isGridView = !hasTokenScriptOverride(token) && token.isERC875();
         setupViewPager();
 
         //check NFT events, expedite balance update

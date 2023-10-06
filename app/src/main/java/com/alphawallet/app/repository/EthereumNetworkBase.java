@@ -1051,14 +1051,27 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     /**
      * This is used so as not to leak API credentials to web3; XInfuraAPI is the backup API key checked into github
      *
-     * @param networkId
+     * @param chainId
      * @return
      */
-    public static String getDefaultNodeURL(long networkId)
+    public static String getDefaultNodeURL(long chainId)
     {
-        NetworkInfo info = networkMap.get(networkId);
-        if (info != null) return info.rpcServerUrl;
-        else return "";
+        NetworkInfo info = networkMap.get(chainId);
+
+        if (info == null)
+        {
+            return "";
+        }
+
+        int index = info.rpcServerUrl.indexOf(INFURA_ENDPOINT);
+        if (index > 0)
+        {
+            return info.rpcServerUrl.substring(0, index + INFURA_ENDPOINT.length()) + keyProvider.getTertiaryInfuraKey();
+        }
+        else
+        {
+            return info.backupNodeUrl != null ? info.backupNodeUrl : info.rpcServerUrl;
+        }
     }
 
     public static long getNetworkIdFromName(String name)

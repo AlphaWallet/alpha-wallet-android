@@ -259,6 +259,8 @@ dependencies {
     implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
     implementation 'com.google.zxing:core:3.5.2'
 
+    implementation 'com.gu.android:toolargetool:0.3.0'
+
     // Sugar
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 

@@ -1730,6 +1730,17 @@ public class TokenDefinition
         return tokenViews.getView(viewTag);
     }
 
+    public TSTokenView getTSTokenView(String type)
+    {
+        TSTokenView view = tokenViews.views.get(type);
+        if (view == null && tokenViews.views.size() > 0)
+        {
+            view = tokenViews.views.values().iterator().next();
+        }
+
+        return view;
+    }
+
     public String getTokenViewStyle(String viewTag)
     {
         return tokenViews.getViewStyle(viewTag);

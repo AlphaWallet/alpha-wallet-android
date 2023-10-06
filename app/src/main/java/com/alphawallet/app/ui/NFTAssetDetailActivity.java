@@ -172,8 +172,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     @Override
     protected void onDestroy()
     {
-        viewModel.onDestroy();
         super.onDestroy();
+        viewModel.onDestroy();
         tokenImage.onDestroy();
     }
 
@@ -182,6 +182,12 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         super.onPause();
         tokenImage.onPause();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle bundle)
+    {
+        super.onSaveInstanceState(bundle);
     }
 
     @Override
@@ -291,7 +297,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
         if (asset != null && asset.isAttestation())
         {
-            setupAttestation();
+            setupAttestation(viewModel.getAssetDefinitionService().getAssetDefinition(token));
         }
         else
         {
@@ -315,11 +321,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel.walletUpdate().observe(this, this::setupFunctionBar);
     }
 
-    private void newScriptFound(Boolean status)
+    private void newScriptFound(TokenDefinition td)
     {
         CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
         //determinate signature
-        if (token != null && status)
+        if (token != null && td != null)
         {
             certificateToolbar.stopDownload();
             certificateToolbar.setVisibility(View.VISIBLE);
@@ -330,12 +336,19 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             //now re-load the verbs if already called. If wallet is null this won't complete
             setupFunctionBar(viewModel.getWallet());
 
-            setupAttestation();
+            if (token.getInterfaceSpec() == ContractType.ATTESTATION)
+            {
+                setupAttestation(td);
+            }
+            else
+            {
+                displayTokenView(td, tokenId);
+            }
         }
         else
         {
             certificateToolbar.stopDownload();
-            setupAttestation();
+            setupAttestation(null);
         }
     }
 
@@ -417,7 +430,10 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void onNftAsset(NFTAsset asset)
     {
-        loadAssetFromMetadata(asset);
+        if (token != null)
+        {
+            loadAssetFromMetadata(asset);
+        }
     }
 
     private void updateDefaultTokenData()
@@ -587,15 +603,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         clearRefreshAnimation();
     }
 
-    private void onOpenSeaAsset(OpenSeaAsset openSeaAsset)
-    {
-        loadFromOpenSeaData(openSeaAsset);
-    }
-
-    private void setupAttestation()
+    private void setupAttestation(TokenDefinition td)
     {
         NFTAsset attnAsset = new NFTAsset();
-        TokenDefinition td = viewModel.getAssetDefinitionService().getAssetDefinition(token);
         if (token.getInterfaceSpec() != ContractType.ATTESTATION)
         {
             return;
@@ -604,7 +614,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         {
             attnAsset.setupScriptElements(td);
             attnAsset.setupScriptAttributes(td, token);
-            if (!displayTokenView(td))
+            if (!displayTokenView(td, BigInteger.ONE))
             {
                 tokenImage.setupTokenImage(attnAsset);
             }
@@ -821,7 +831,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     /***
      * TokenScript view handling
      */
-    private boolean displayTokenView(TokenDefinition td)
+    private boolean displayTokenView(TokenDefinition td, BigInteger tokenId)
     {
         if (!td.hasTokenView())
         {
@@ -837,7 +847,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             scriptView.setChainId(token.tokenInfo.chainId);
             scriptView.setWalletAddress(new Address(token.getWallet()));
 
-            scriptView.renderTokenScriptView(token, new TicketRange(BigInteger.ONE, token.getAddress()), viewModel.getAssetDefinitionService(), ViewType.VIEW);
+            scriptView.renderTokenScriptView(token, new TicketRange(tokenId, token.getAddress()), viewModel.getAssetDefinitionService(), ViewType.VIEW);
         }
         catch (Exception e)
         {

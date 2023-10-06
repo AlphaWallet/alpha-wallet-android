@@ -32,7 +32,6 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.SharedPreferenceRepository;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmTransaction;
-import com.alphawallet.app.service.SignatureLookupService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.TransactionSuccessActivity;
@@ -52,11 +51,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
-import timber.log.Timber;
 
 /**
  * Created by JB on 17/11/2020.
@@ -503,8 +499,18 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
     private String getERC721TokenId()
     {
-        if (!token.isERC721()) return "";
-        return token.getTransferValueRaw(transaction.transactionInput).toString();
+        if (!token.isERC721())
+        {
+            return "";
+        }
+        else if (actionSheetCallback.getTokenId().compareTo(BigInteger.ZERO) > 0)
+        {
+            return actionSheetCallback.getTokenId().toString();
+        }
+        else
+        {
+            return token.getTransferValueRaw(transaction.transactionInput).toString();
+        }
     }
 
     /**

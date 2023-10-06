@@ -57,6 +57,7 @@ import com.alphawallet.token.entity.ParseResult;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TSSelection;
+import com.alphawallet.token.entity.TSTokenView;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptContext;
 import com.alphawallet.token.entity.TokenscriptElement;
@@ -688,12 +689,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void updateAttributeResult(Token token, TokenDefinition td, Attribute attr, BigInteger tokenId)
     {
-        ContractAddress useAddress = new ContractAddress(attr.function); //always use the function attribute's address
-        tokenscriptUtility.fetchResultFromEthereum(token, useAddress, attr, tokenId, td, this) // Fetch function result from blockchain
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe(txResult -> storeAuxData(getWalletAddr(), txResult))
-                .isDisposed();
+        if (attr != null && attr.function != null)
+        {
+            ContractAddress useAddress = new ContractAddress(attr.function); //always use the function attribute's address
+            tokenscriptUtility.fetchResultFromEthereum(token, useAddress, attr, tokenId, td, this) // Fetch function result from blockchain
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io())
+                    .subscribe(txResult -> storeAuxData(getWalletAddr(), txResult))
+                    .isDisposed();
+        }
     }
 
     public void addLocalRefs(Map<String, String> refs)
@@ -2136,6 +2140,19 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
+    public TSTokenView getTSTokenView(Token token, String type)
+    {
+        TokenDefinition td = getAssetDefinition(token);
+        if (td != null)
+        {
+            return td.getTSTokenView(type);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     public String getTokenView(Token token, String type)
     {
         String viewHTML = "";
@@ -2652,14 +2669,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             if (tokenAsset.getBackgroundColor() != null)
                 TokenScriptResult.addPair(attrs, "background_colour", URLEncoder.encode(tokenAsset.getBackgroundColor(), "utf-8"));
             if (tokenAsset.getThumbnail() != null)
-                TokenScriptResult.addPair(attrs, "image_preview_url", URLEncoder.encode(tokenAsset.getThumbnail(), "utf-8"));
+                TokenScriptResult.addPair(attrs, "image_preview_url", tokenAsset.getThumbnail());
             if (tokenAsset.getDescription() != null)
                 TokenScriptResult.addPair(attrs, "description", URLEncoder.encode(tokenAsset.getDescription(), "utf-8"));
             if (tokenAsset.getExternalLink() != null)
-                TokenScriptResult.addPair(attrs, "external_link", URLEncoder.encode(tokenAsset.getExternalLink(), "utf-8"));
+                TokenScriptResult.addPair(attrs, "external_link", tokenAsset.getExternalLink());
             //if (tokenAsset.getTraits() != null) TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
             if (tokenAsset.getName() != null)
-                TokenScriptResult.addPair(attrs, "metadata_name", URLEncoder.encode(tokenAsset.getName(), "utf-8"));
+                TokenScriptResult.addPair(attrs, "metadata_name", tokenAsset.getName());
         }
         catch (UnsupportedEncodingException e)
         {

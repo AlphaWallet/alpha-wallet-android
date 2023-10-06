@@ -91,6 +91,7 @@ import com.github.florent37.tutoshowcase.TutoShowcase;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 import com.walletconnect.android.CoreClient;
+import com.gu.toolargetool.TooLargeTool;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
 
@@ -276,6 +277,8 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.splashReset().observe(this, this::onRequireInit);
         viewModel.defaultWallet().observe(this, this::onDefaultWallet);
         viewModel.updateAvailable().observe(this, this::onUpdateAvailable);
+
+        TooLargeTool.startLogging(getApplication());
 
         if (CustomViewSettings.hideDappBrowser())
         {

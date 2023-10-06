@@ -105,7 +105,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
             gridItemDecoration = new ItemOffsetDecoration(requireContext(), R.dimen.grid_divider_offset);
 
-            if (hasTokenScriptOverride(token))
+            if (hasTokenScriptOverride(token) && token.isERC875())
             {
                 showListView();
             }
@@ -196,7 +196,7 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
     private void initAndAttachAdapter(boolean isGridView)
     {
-        if (hasTokenScriptOverride(token))
+        if (hasTokenScriptOverride(token) && token.isERC875())
         {
             searchLayout.setVisibility(View.GONE);
             adapter = new NonFungibleTokenAdapter(this, token, viewModel.getAssetDefinitionService(), viewModel.getOpenseaService(), isGridView);

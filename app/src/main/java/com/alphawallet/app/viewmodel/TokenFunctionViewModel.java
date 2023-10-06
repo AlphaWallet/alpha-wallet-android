@@ -111,7 +111,7 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     private final MutableLiveData<Token> insufficientFunds = new MutableLiveData<>();
     private final MutableLiveData<String> invalidAddress = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> newScriptFound = new MutableLiveData<>();
+    private final MutableLiveData<TokenDefinition> newScriptFound = new MutableLiveData<>();
     private final MutableLiveData<Wallet> walletUpdate = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
@@ -185,7 +185,7 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         return walletUpdate;
     }
 
-    public LiveData<Boolean> newScriptFound()
+    public LiveData<TokenDefinition> newScriptFound()
     {
         return newScriptFound;
     }
@@ -601,13 +601,13 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         switch (td.nameSpace)
         {
             case UNCHANGED_SCRIPT:
-                newScriptFound.postValue(false);
+                newScriptFound.postValue(null);
                 break;
             case NO_SCRIPT:
                 scriptUpdateInProgress.postValue(false);
                 break;
             default:
-                newScriptFound.postValue(true);
+                newScriptFound.postValue(td);
                 break;
         }
     }
@@ -1011,5 +1011,4 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
             TokenScriptResult.addPair(attrs, attribute);
         }
     }
-
 }

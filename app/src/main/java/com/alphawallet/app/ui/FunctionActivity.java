@@ -84,6 +84,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
+import com.gu.toolargetool.TooLargeTool;
 
 /**
  * Created by James on 4/04/2019.
@@ -282,6 +283,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_script_view);
         setupViews();
+
+        TooLargeTool.startLogging(getApplication());
     }
 
     private void setupViews()
@@ -406,13 +409,15 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void checkTokenScriptElement(CalcJsValueCallback cb, TSAction action, TokenscriptElement e)
     {
-        if (e.ref != null && e.ref.length() > 0 && action.attributes != null)
+        String refName = !TextUtils.isEmpty(e.localRef) ? e.localRef : e.ref; //favour the localRef, then ref
+
+        if (!TextUtils.isEmpty(refName) && action.attributes != null)
         {
-            Attribute attr = action.attributes.get(e.ref);
+            Attribute attr = action.attributes.get(refName);
             if (attr != null && attr.userInput)
             {
                 resolveInputCheckCount++;
-                evaluateJavaScript(cb, e.ref, e, attr);
+                evaluateJavaScript(cb, refName, e, attr);
             }
         }
     }
@@ -459,6 +464,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             confirmationDialog.setCanceledOnTouchOutside(false);
             confirmationDialog.show();
         }
+    }
+
+    @Override
+    public BigInteger getTokenId()
+    {
+        return tokenId;
     }
 
     private void calculateEstimateDialog()

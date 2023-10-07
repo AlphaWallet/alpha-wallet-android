@@ -44,6 +44,7 @@ import com.alphawallet.app.web3.entity.PageReadyCallback;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.Signable;
+import com.alphawallet.token.entity.TSTokenView;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.ViewType;
@@ -56,6 +57,7 @@ import java.io.StringReader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Objects;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -493,14 +495,19 @@ public class Web3TokenView extends WebView
                 break;
         }
 
-        String view = assetService.getTokenView(token, viewName);
-        if (TextUtils.isEmpty(view)) view = buildViewError(token, range, viewName);
-        String style = assetService.getTokenViewStyle(token, viewName);
+        TSTokenView tokenView = assetService.getTSTokenView(token, viewName);
+
+        String view = tokenView.getTokenView();
+        if (TextUtils.isEmpty(view))
+        {
+            view = buildViewError(token, range, viewName);
+        }
+        String style = tokenView.getStyle();
         unencodedPage = injectWeb3TokenInit(view, attrs.toString(), range.tokenIds.get(0));
         unencodedPage = injectStyleAndWrapper(unencodedPage, style); //style injected last so it comes first
 
         String base64 = android.util.Base64.encodeToString(unencodedPage.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
-        loadData(base64, "text/html; charset=utf-8", "base64");
+        loadData(base64 + (!Objects.equals(tokenView.getUrlFragment(), "") ? "#" + tokenView.getUrlFragment() : ""), "text/html; charset=utf-8", "base64");
 
         if (realmAuxUpdates != null) realmAuxUpdates.removeAllChangeListeners();
         //TODO: Re-do this to use the JavaScript minimal interface

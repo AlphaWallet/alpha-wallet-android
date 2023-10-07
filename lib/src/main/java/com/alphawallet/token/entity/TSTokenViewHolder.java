@@ -14,7 +14,7 @@ public class TSTokenViewHolder
 
     public String getView(String viewName)
     {
-        TSTokenView v = views.get(viewName);
+        TSTokenView v = getViewOrDefault(viewName);
         if (v != null)
         {
             return v.getTokenView();
@@ -27,7 +27,18 @@ public class TSTokenViewHolder
 
     public String getViewStyle(String viewName)
     {
-        TSTokenView v = views.get(viewName);
+        TSTokenView v = getViewOrDefault(viewName);
         return (globalStyle != null ? globalStyle : "") + (v != null ? v.getStyle() : "");
+    }
+
+    private TSTokenView getViewOrDefault(String viewName)
+    {
+        TSTokenView v = views.get(viewName);
+        if (v == null && views.size() > 0)
+        {
+            v = views.values().iterator().next();
+        }
+
+        return v;
     }
 }

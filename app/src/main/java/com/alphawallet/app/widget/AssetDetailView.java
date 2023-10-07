@@ -77,7 +77,6 @@ public class AssetDetailView extends LinearLayout
 
         layoutHolder.setVisibility(View.VISIBLE);
         assetName.setText(asset.getName());
-        imageView.setupTokenImage(asset);
 
         assetDescription.setText(asset.getDescription());
 
@@ -88,12 +87,15 @@ public class AssetDetailView extends LinearLayout
                 {
                     layoutDetails.setVisibility(View.VISIBLE);
                     assetDetails.setImageResource(R.drawable.ic_expand_less_black);
+                    imageView.setupTokenImage(asset);
+                    imageView.setVisibility(View.VISIBLE);
                     if (actionSheetInterface != null) actionSheetInterface.fullExpand();
                 }
                 else
                 {
                     layoutDetails.setVisibility(View.GONE);
                     assetDetails.setImageResource(R.drawable.ic_expand_more);
+                    imageView.setVisibility(View.GONE);
                 }
             });
         }

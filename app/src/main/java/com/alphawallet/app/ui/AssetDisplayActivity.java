@@ -49,6 +49,7 @@ import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.ViewType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
+import com.alphawallet.token.tools.TokenDefinition;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -192,10 +193,10 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         }
     }
 
-    private void onNewScript(Boolean aBoolean)
+    private void onNewScript(TokenDefinition td)
     {
         //need to reload tokens, now we have an updated/new script
-        if (viewModel.getAssetDefinitionService().hasDefinition(token))
+        if (td != null)
         {
             initWebViewCheck();
             handler.postDelayed(this, TOKEN_SIZING_DELAY);

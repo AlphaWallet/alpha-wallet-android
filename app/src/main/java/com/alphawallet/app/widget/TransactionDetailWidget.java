@@ -75,7 +75,7 @@ public class TransactionDetailWidget extends LinearLayout
         disposable = svc.getFunctionName(w3tx.payload)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(this::onResult);
+                .subscribe(this::onResult, error -> { });
 
         layoutHolder.setOnClickListener(v -> {
             if (layoutDetails.getVisibility() == View.GONE)

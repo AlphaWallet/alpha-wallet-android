@@ -1,4 +1,4 @@
-package com.alphawallet.token.web.Service;
+package com.alphawallet.web.Service;
 
 import java.math.BigInteger;
 import java.security.SignatureException;
@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import com.alphawallet.token.entity.CryptoFunctionsInterface;
 import com.alphawallet.token.entity.ProviderTypedData;
-import com.alphawallet.token.web.Ethereum.web3j.StructuredDataEncoder;
+import com.alphawallet.web.Ethereum.web3j.StructuredDataEncoder;
 
 import java.util.Base64;
 import java.util.HashMap;

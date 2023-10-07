@@ -1,8 +1,8 @@
-package com.alphawallet.token.web.Service;
+package com.alphawallet.web.Service;
 
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
-import static com.alphawallet.token.web.AppSiteController.getInfuraKey;
+import static com.alphawallet.web.AppSiteController.getInfuraKey;
 
 public class EthRPCNodes
 {

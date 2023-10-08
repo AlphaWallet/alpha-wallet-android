@@ -609,7 +609,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     @Override
     public void onSaveInstanceState(@NonNull Bundle savedInstanceState)
     {
-        super.onSaveInstanceState(new Bundle());
+        super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putInt(STORED_PAGE, viewPager.getCurrentItem());
         if (getSelectedItem() != null)
         {

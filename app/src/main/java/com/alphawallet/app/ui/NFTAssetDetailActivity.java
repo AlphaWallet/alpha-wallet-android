@@ -195,12 +195,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     }
 
     @Override
-    public void onSaveInstanceState(Bundle bundle)
-    {
-        super.onSaveInstanceState(bundle);
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(@NonNull Menu menu)
     {
         if (asset == null || !asset.isAttestation())

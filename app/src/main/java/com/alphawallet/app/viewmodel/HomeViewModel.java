@@ -40,6 +40,7 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.analytics.QrScanResultType;
 import com.alphawallet.app.entity.attestation.ImportAttestation;
+import com.alphawallet.app.entity.attestation.SmartPassReturn;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -655,8 +656,11 @@ public class HomeViewModel extends BaseViewModel
                 Request request = getRequest();
                 Single.fromCallable(getGitHubReleases(request)).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread()).subscribe((releases) -> {
-                        doShowWhatsNewDialog(context, releases);
-                        preferenceRepository.setLastVersionCode(versionCode);
+                        if (!releases.isEmpty())
+                        {
+                            doShowWhatsNewDialog(context, releases);
+                            preferenceRepository.setLastVersionCode(versionCode);
+                        }
                     }).isDisposed();
             }
         }
@@ -870,17 +874,24 @@ public class HomeViewModel extends BaseViewModel
         return () ->
         {
             try (okhttp3.Response response = httpClient.newCall(request)
-                .execute())
+                    .execute())
             {
-                return new Gson().fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>()
+                if (response.code() / 100 == 2)
                 {
-                }.getType());
+                    return new Gson().fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>()
+                    {
+                    }.getType());
+                }
+                else
+                {
+                    return new ArrayList<>();
+                }
             }
             catch (Exception e)
             {
                 Timber.e(e);
             }
-            return null;
+            return new ArrayList<>();
         };
     }
 

@@ -661,10 +661,16 @@ public class HomeViewModel extends BaseViewModel
                             doShowWhatsNewDialog(context, releases);
                             preferenceRepository.setLastVersionCode(versionCode);
                         }
+                    }, e -> {
+                        Timber.e(e);
                     }).isDisposed();
             }
         }
         catch (PackageManager.NameNotFoundException e)
+        {
+            Timber.e(e);
+        }
+        catch (Exception e)
         {
             Timber.e(e);
         }
@@ -848,24 +854,31 @@ public class HomeViewModel extends BaseViewModel
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((releases) -> {
-                            if (!releases.isEmpty())
+                            try
                             {
-                                GitHubRelease latestRelease = releases.get(0);
-                                if (latestRelease != null)
+                                if (!releases.isEmpty())
                                 {
-                                    String latestTag = latestRelease.getTagName();
-                                    if (latestRelease.getTagName().charAt(0) == 'v')
+                                    GitHubRelease latestRelease = releases.get(0);
+                                    if (latestRelease != null)
                                     {
-                                        latestTag = latestTag.substring(1);
-                                    }
-                                    Version latest = new Version(latestTag);
-                                    Version installed = new Version(BuildConfig.VERSION_NAME);
+                                        String latestTag = latestRelease.getTagName();
+                                        if (latestRelease.getTagName().charAt(0) == 'v')
+                                        {
+                                            latestTag = latestTag.substring(1);
+                                        }
+                                        Version latest = new Version(latestTag);
+                                        Version installed = new Version(BuildConfig.VERSION_NAME);
 
-                                    if (latest.compareTo(installed) > 0)
-                                    {
-                                        updateAvailable.postValue(latest.get());
+                                        if (latest.compareTo(installed) > 0)
+                                        {
+                                            updateAvailable.postValue(latest.get());
+                                        }
                                     }
                                 }
+                            }
+                            catch (Exception e)
+                            {
+                                e.printStackTrace();
                             }
                         }, Timber::e
                 ).isDisposed();

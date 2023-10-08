@@ -40,7 +40,6 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.analytics.QrScanResultType;
 import com.alphawallet.app.entity.attestation.ImportAttestation;
-import com.alphawallet.app.entity.attestation.SmartPassReturn;
 import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.CurrencyRepositoryType;
@@ -101,6 +100,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -141,6 +141,7 @@ public class HomeViewModel extends BaseViewModel
     private ParseMagicLink parser;
     private BottomSheetDialog dialog;
     private long qrReadTime = Long.MAX_VALUE;
+    private Disposable githubRead;
 
     @Inject
     HomeViewModel(
@@ -184,6 +185,10 @@ public class HomeViewModel extends BaseViewModel
     protected void onCleared()
     {
         super.onCleared();
+        if (githubRead != null && !githubRead.isDisposed())
+        {
+            githubRead.dispose();
+        }
     }
 
     public LiveData<Transaction[]> transactions()
@@ -654,27 +659,22 @@ public class HomeViewModel extends BaseViewModel
             if (preferenceRepository.getLastVersionCode(versionCode) < versionCode)
             {
                 Request request = getRequest();
-                Single.fromCallable(getGitHubReleases(request)).subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread()).subscribe((releases) -> {
+                githubRead = Single.fromCallable(getGitHubReleases(request))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe((releases) -> {
                         if (!releases.isEmpty())
                         {
                             doShowWhatsNewDialog(context, releases);
                             preferenceRepository.setLastVersionCode(versionCode);
                         }
-                    }, e -> {
-                        Timber.e(e);
-                    }).isDisposed();
+                    }, Timber::w);
             }
         }
         catch (PackageManager.NameNotFoundException e)
         {
             Timber.e(e);
         }
-        catch (Exception e)
-        {
-            Timber.e(e);
-        }
-
     }
 
     private void doShowWhatsNewDialog(Context context, List<GitHubRelease> releases)
@@ -850,38 +850,29 @@ public class HomeViewModel extends BaseViewModel
     public void checkLatestGithubRelease()
     {
         Request request = getRequest();
-        Single.fromCallable(getGitHubReleases(request))
+        githubRead = Single.fromCallable(getGitHubReleases(request))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((releases) -> {
-                            try
+                    if (!releases.isEmpty())
+                    {
+                        GitHubRelease latestRelease = releases.get(0);
+                        if (latestRelease != null)
+                        {
+                            String latestTag = latestRelease.getTagName();
+                            if (latestRelease.getTagName().charAt(0) == 'v')
                             {
-                                if (!releases.isEmpty())
-                                {
-                                    GitHubRelease latestRelease = releases.get(0);
-                                    if (latestRelease != null)
-                                    {
-                                        String latestTag = latestRelease.getTagName();
-                                        if (latestRelease.getTagName().charAt(0) == 'v')
-                                        {
-                                            latestTag = latestTag.substring(1);
-                                        }
-                                        Version latest = new Version(latestTag);
-                                        Version installed = new Version(BuildConfig.VERSION_NAME);
+                                latestTag = latestTag.substring(1);
+                            }
+                            Version latest = new Version(latestTag);
+                            Version installed = new Version(BuildConfig.VERSION_NAME);
 
-                                        if (latest.compareTo(installed) > 0)
-                                        {
-                                            updateAvailable.postValue(latest.get());
-                                        }
-                                    }
-                                }
-                            }
-                            catch (Exception e)
+                            if (latest.compareTo(installed) > 0)
                             {
-                                e.printStackTrace();
+                                updateAvailable.postValue(latest.get());
                             }
-                        }, Timber::e
-                ).isDisposed();
+                        }
+                    }}, Timber::w);
     }
 
     @NonNull

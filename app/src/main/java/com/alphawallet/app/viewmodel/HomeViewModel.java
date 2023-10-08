@@ -845,27 +845,30 @@ public class HomeViewModel extends BaseViewModel
     {
         Request request = getRequest();
         Single.fromCallable(getGitHubReleases(request))
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe((releases) -> {
-                    GitHubRelease latestRelease = releases.get(0);
-                    if (latestRelease != null)
-                    {
-                        String latestTag = latestRelease.getTagName();
-                        if (latestRelease.getTagName().charAt(0) == 'v')
-                        {
-                            latestTag = latestTag.substring(1);
-                        }
-                        Version latest = new Version(latestTag);
-                        Version installed = new Version(BuildConfig.VERSION_NAME);
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((releases) -> {
+                            if (!releases.isEmpty())
+                            {
+                                GitHubRelease latestRelease = releases.get(0);
+                                if (latestRelease != null)
+                                {
+                                    String latestTag = latestRelease.getTagName();
+                                    if (latestRelease.getTagName().charAt(0) == 'v')
+                                    {
+                                        latestTag = latestTag.substring(1);
+                                    }
+                                    Version latest = new Version(latestTag);
+                                    Version installed = new Version(BuildConfig.VERSION_NAME);
 
-                        if (latest.compareTo(installed) > 0)
-                        {
-                            updateAvailable.postValue(latest.get());
-                        }
-                    }
-                }, Timber::e
-            ).isDisposed();
+                                    if (latest.compareTo(installed) > 0)
+                                    {
+                                        updateAvailable.postValue(latest.get());
+                                    }
+                                }
+                            }
+                        }, Timber::e
+                ).isDisposed();
     }
 
     @NonNull

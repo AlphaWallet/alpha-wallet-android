@@ -13,8 +13,10 @@ import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -116,6 +118,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private ActivityResultLauncher<Intent> getGasSettings;
     private boolean triggeredReload;
     private long chainId;
+    private Web3TokenView tokenScriptView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -182,6 +185,13 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     {
         super.onPause();
         tokenImage.onPause();
+        if (tokenScriptView != null && tokenScriptView.getVisibility() == View.VISIBLE)
+        {
+            LinearLayout webWrapper = findViewById(R.id.layout_webwrapper);
+            webWrapper.removeView(tokenScriptView);
+            tokenScriptView.destroy();
+            tokenScriptView = null;
+        }
     }
 
     @Override
@@ -244,19 +254,32 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         tokenId = new BigInteger(getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
         asset = getIntent().getParcelableExtra(C.EXTRA_NFTASSET);
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
+        String walletAddress = getWalletFromIntent();
+        viewModel.loadWallet(walletAddress);
         if (C.ACTION_TOKEN_SHORTCUT.equals(getIntent().getAction()))
         {
-            handleShortCut();
+            handleShortCut(walletAddress);
         }
         else
         {
-            Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
-            viewModel.loadWallet(wallet.address);
             token = resolveAssetToken();
             setup();
         }
 
         viewModel.startGasPriceUpdate(chainId);
+    }
+
+    private String getWalletFromIntent()
+    {
+        Wallet w = getIntent().getParcelableExtra(C.Key.WALLET);
+        if (w != null)
+        {
+            return w.address;
+        }
+        else
+        {
+            return getIntent().getStringExtra(C.Key.WALLET);
+        }
     }
 
     private Token resolveAssetToken()
@@ -271,10 +294,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
-    private void handleShortCut()
+    private void handleShortCut(String walletAddress)
     {
-        String walletAddress = getIntent().getStringExtra(C.Key.WALLET);
-        viewModel.loadWallet(walletAddress);
         String tokenAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
         token = viewModel.getTokensService().getToken(walletAddress, chainId, tokenAddress);
         if (token == null)
@@ -319,13 +340,14 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel.sig().observe(this, this::onSignature);
         viewModel.newScriptFound().observe(this, this::newScriptFound);
         viewModel.walletUpdate().observe(this, this::setupFunctionBar);
+        viewModel.attrFetchComplete().observe(this, this::displayTokenView);
     }
 
     private void newScriptFound(TokenDefinition td)
     {
         CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
         //determinate signature
-        if (token != null && td != null)
+        if (token != null && td.isChanged())
         {
             certificateToolbar.stopDownload();
             certificateToolbar.setVisibility(View.VISIBLE);
@@ -342,7 +364,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             }
             else
             {
-                displayTokenView(td, tokenId);
+                displayTokenView(td);
             }
         }
         else
@@ -614,7 +636,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         {
             attnAsset.setupScriptElements(td);
             attnAsset.setupScriptAttributes(td, token);
-            if (!displayTokenView(td, BigInteger.ONE))
+            if (!displayTokenView(td))
             {
                 tokenImage.setupTokenImage(attnAsset);
             }
@@ -831,30 +853,29 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     /***
      * TokenScript view handling
      */
-    private boolean displayTokenView(TokenDefinition td, BigInteger tokenId)
+    private boolean displayTokenView(final TokenDefinition td)
     {
-        if (!td.hasTokenView())
-        {
-            return false;
-        }
-
+        boolean couldDisplay = false;
         try
         {
-            //Attempt to display the token-view
-            Web3TokenView scriptView = findViewById(R.id.web3_tokenview);
             LinearLayout webWrapper = findViewById(R.id.layout_webwrapper);
-            webWrapper.setVisibility(View.VISIBLE);
-            scriptView.setChainId(token.tokenInfo.chainId);
-            scriptView.setWalletAddress(new Address(token.getWallet()));
+            tokenScriptView = new Web3TokenView(this);
+            tokenScriptView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-            scriptView.renderTokenScriptView(token, new TicketRange(tokenId, token.getAddress()), viewModel.getAssetDefinitionService(), ViewType.VIEW);
+            if (tokenScriptView.renderTokenScriptView(token, new TicketRange(tokenId, token.getAddress()), viewModel.getAssetDefinitionService(), ViewType.VIEW, td))
+            {
+                webWrapper.setVisibility(View.VISIBLE);
+                tokenScriptView.setChainId(token.tokenInfo.chainId);
+                tokenScriptView.setWalletAddress(new Address(token.getWallet()));
+                webWrapper.addView(tokenScriptView);
+                couldDisplay = true;
+            }
         }
         catch (Exception e)
         {
             //fillEmpty();
-            return false;
         }
 
-        return true;
+        return couldDisplay;
     }
 }

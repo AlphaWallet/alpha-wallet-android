@@ -26,7 +26,6 @@ import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.opensea.OpenSeaAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.CreateTransactionInteract;
@@ -66,13 +65,13 @@ import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
-import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.TokenDefinition;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -112,13 +111,12 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     private final MutableLiveData<String> invalidAddress = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
     private final MutableLiveData<TokenDefinition> newScriptFound = new MutableLiveData<>();
+    private final MutableLiveData<TokenDefinition> attrFetchComplete = new MutableLiveData<>();
     private final MutableLiveData<Wallet> walletUpdate = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionFinalised = new MutableLiveData<>();
     private final MutableLiveData<TransactionReturn> transactionError = new MutableLiveData<>();
     private final MutableLiveData<Web3Transaction> gasEstimateComplete = new MutableLiveData<>();
     private final MutableLiveData<Pair<GasEstimate, Web3Transaction>> gasEstimateError = new MutableLiveData<>();
-    private final MutableLiveData<List<OpenSeaAsset.Trait>> traits = new MutableLiveData<>();
-    private final MutableLiveData<AssetContract> assetContract = new MutableLiveData<>();
     private final MutableLiveData<NFTAsset> nftAsset = new MutableLiveData<>();
     private final MutableLiveData<Boolean> scriptUpdateInProgress = new MutableLiveData<>();
     private Wallet wallet;
@@ -188,6 +186,11 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     public LiveData<TokenDefinition> newScriptFound()
     {
         return newScriptFound;
+    }
+
+    public LiveData<TokenDefinition> attrFetchComplete()
+    {
+        return attrFetchComplete;
     }
 
     public LiveData<Boolean> scriptUpdateInProgress()
@@ -601,7 +604,8 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         switch (td.nameSpace)
         {
             case UNCHANGED_SCRIPT:
-                newScriptFound.postValue(null);
+                td.nameSpace = UNCHANGED_SCRIPT;
+                newScriptFound.postValue(td);
                 break;
             case NO_SCRIPT:
                 scriptUpdateInProgress.postValue(false);
@@ -925,13 +929,17 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
             return;
         }
         TokenDefinition td = assetDefinitionService.getAssetDefinition(token);
+        if (td == null)
+        {
+            return;
+        }
         List<Attribute> localAttrList = assetDefinitionService.getLocalAttributes(td, availableActions);
 
         //now refresh all these attrs
         assetDefinitionService.refreshAttributes(token, td, availableActions.keySet().stream().findFirst().get(), localAttrList)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(v -> { }, this::onError)
+                .subscribe(v -> attrFetchComplete.postValue(td), this::onError)
                 .isDisposed();
     }
 

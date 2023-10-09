@@ -84,7 +84,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
-import com.gu.toolargetool.TooLargeTool;
 
 /**
  * Created by James on 4/04/2019.
@@ -111,16 +110,23 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private TSAction action;
     private ActionSheet confirmationDialog;
 
-    private void initViews() {
+    private void initViews()
+    {
         actionMethod = getIntent().getStringExtra(C.EXTRA_STATE);
         String tokenIdStr = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
-        if (tokenIdStr == null || tokenIdStr.length() == 0) tokenIdStr = "0";
+        if (tokenIdStr == null || tokenIdStr.length() == 0)
+        {
+            tokenIdStr = "0";
+        }
 
         Wallet wallet = getIntent().getParcelableExtra(C.Key.WALLET);
         asset = getIntent().getParcelableExtra(C.EXTRA_NFTASSET);
-        if (wallet == null) {
+        if (wallet == null)
+        {
             viewModel.getCurrentWallet();
-        } else {
+        }
+        else
+        {
             viewModel.loadWallet(wallet.address);
         }
 
@@ -168,7 +174,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             TSAction action = functions.get(actionMethod);
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
 
-            if (Objects.equals(action.view.getUrl(), ""))
+            if (TextUtils.isEmpty(Objects.requireNonNull(action).view.getUrl()))
             {
                 String injectedView = tokenView.injectWeb3TokenInit(action.view.getTokenView(), tokenAttrs, tokenId);
                 injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
@@ -176,7 +182,9 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
                 String base64 = Base64.encodeToString(injectedView.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
                 tokenView.loadData(base64 + (!Objects.equals(action.view.getUrlFragment(), "") ? "#" + action.view.getUrlFragment() : ""), "text/html; charset=utf-8", "base64");
-            } else {
+            }
+            else
+            {
                 tokenView.loadUrl(action.view.getUrl());
             }
         }
@@ -282,14 +290,16 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_script_view);
-        setupViews();
-
-        TooLargeTool.startLogging(getApplication());
     }
 
     private void setupViews()
     {
         initViewModel();
+        resumeViews();
+    }
+
+    private void resumeViews()
+    {
         initViews();
         toolbar();
         setTitle(actionMethod);
@@ -302,11 +312,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         super.onResume();
         if (viewModel == null)
         {
-            initViews();
+            setupViews();
         }
 
         if (parsePass == 0)
         {
+            resumeViews();
             parsePass = 1;
             viewModel.getAssetDefinitionService().clearResultMap();
             args.clear();
@@ -666,6 +677,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         super.onPause();
         viewModel.resetSignDialog();
+        tokenView.destroy();
     }
 
     public void onSaveInstanceState(@NonNull Bundle savedInstanceState)

@@ -95,13 +95,16 @@ public class TokenScriptFile extends File
         return active || resourceFile;
     }
 
-
     public String calcMD5()
+    {
+        return calcMD5(getInputStream());
+    }
+
+    public static String calcMD5(InputStream fis)
     {
         StringBuilder sb = new StringBuilder();
         try
         {
-            InputStream fis = getInputStream();
             MessageDigest digest = MessageDigest.getInstance("MD5");
 
             byte[] byteArray = new byte[1024];

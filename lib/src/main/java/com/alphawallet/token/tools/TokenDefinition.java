@@ -354,6 +354,11 @@ public class TokenDefinition
         tokenViews.globalStyle = getHTMLContent(element); //TODO: Refactor this as it appears global style is located elsewhere. This may have been deprecated
     }
 
+    public boolean isChanged()
+    {
+        return (nameSpace != null && !nameSpace.equals(UNCHANGED_SCRIPT) && !nameSpace.equals(NO_SCRIPT));
+    }
+
     public enum Syntax {
         DirectoryString, IA5String, Integer, GeneralizedTime,
         Boolean, BitString, CountryString, JPEG, NumericString

@@ -183,7 +183,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         if (fetchedViewHeight < 100)
         {
-            initWebViewCheck();
+            initWebViewCheck(viewModel.getAssetDefinitionService().getAssetDefinition(token));
             handler.postDelayed(this, TOKEN_SIZING_DELAY); //wait 3 seconds until ending height check
         }
         else
@@ -196,14 +196,14 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     private void onNewScript(TokenDefinition td)
     {
         //need to reload tokens, now we have an updated/new script
-        if (td != null)
+        if (td != null && td.isChanged())
         {
-            initWebViewCheck();
+            initWebViewCheck(td);
             handler.postDelayed(this, TOKEN_SIZING_DELAY);
         }
     }
 
-    private void initWebViewCheck()
+    private void initWebViewCheck(TokenDefinition td)
     {
         checkVal = 0;
         itemViewHeight = 0;
@@ -212,7 +212,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         {
             BigInteger  tokenId = token.getArrayBalance().get(0);
             TicketRange data    = new TicketRange(tokenId, token.getAddress());
-            testView.renderTokenScriptView(token, data, viewModel.getAssetDefinitionService(), ViewType.ITEM_VIEW);
+            testView.renderTokenScriptView(token, data, viewModel.getAssetDefinitionService(), ViewType.ITEM_VIEW, td);
             testView.setOnReadyCallback(this);
         }
         else

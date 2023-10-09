@@ -100,6 +100,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -140,6 +141,7 @@ public class HomeViewModel extends BaseViewModel
     private ParseMagicLink parser;
     private BottomSheetDialog dialog;
     private long qrReadTime = Long.MAX_VALUE;
+    private Disposable githubRead;
 
     @Inject
     HomeViewModel(
@@ -183,6 +185,10 @@ public class HomeViewModel extends BaseViewModel
     protected void onCleared()
     {
         super.onCleared();
+        if (githubRead != null && !githubRead.isDisposed())
+        {
+            githubRead.dispose();
+        }
     }
 
     public LiveData<Transaction[]> transactions()
@@ -653,18 +659,22 @@ public class HomeViewModel extends BaseViewModel
             if (preferenceRepository.getLastVersionCode(versionCode) < versionCode)
             {
                 Request request = getRequest();
-                Single.fromCallable(getGitHubReleases(request)).subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread()).subscribe((releases) -> {
-                        doShowWhatsNewDialog(context, releases);
-                        preferenceRepository.setLastVersionCode(versionCode);
-                    }).isDisposed();
+                githubRead = Single.fromCallable(getGitHubReleases(request))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe((releases) -> {
+                        if (!releases.isEmpty())
+                        {
+                            doShowWhatsNewDialog(context, releases);
+                            preferenceRepository.setLastVersionCode(versionCode);
+                        }
+                    }, Timber::w);
             }
         }
         catch (PackageManager.NameNotFoundException e)
         {
             Timber.e(e);
         }
-
     }
 
     private void doShowWhatsNewDialog(Context context, List<GitHubRelease> releases)
@@ -840,28 +850,29 @@ public class HomeViewModel extends BaseViewModel
     public void checkLatestGithubRelease()
     {
         Request request = getRequest();
-        Single.fromCallable(getGitHubReleases(request))
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe((releases) -> {
-                    GitHubRelease latestRelease = releases.get(0);
-                    if (latestRelease != null)
+        githubRead = Single.fromCallable(getGitHubReleases(request))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((releases) -> {
+                    if (!releases.isEmpty())
                     {
-                        String latestTag = latestRelease.getTagName();
-                        if (latestRelease.getTagName().charAt(0) == 'v')
+                        GitHubRelease latestRelease = releases.get(0);
+                        if (latestRelease != null)
                         {
-                            latestTag = latestTag.substring(1);
-                        }
-                        Version latest = new Version(latestTag);
-                        Version installed = new Version(BuildConfig.VERSION_NAME);
+                            String latestTag = latestRelease.getTagName();
+                            if (latestRelease.getTagName().charAt(0) == 'v')
+                            {
+                                latestTag = latestTag.substring(1);
+                            }
+                            Version latest = new Version(latestTag);
+                            Version installed = new Version(BuildConfig.VERSION_NAME);
 
-                        if (latest.compareTo(installed) > 0)
-                        {
-                            updateAvailable.postValue(latest.get());
+                            if (latest.compareTo(installed) > 0)
+                            {
+                                updateAvailable.postValue(latest.get());
+                            }
                         }
-                    }
-                }, Timber::e
-            ).isDisposed();
+                    }}, Timber::w);
     }
 
     @NonNull
@@ -870,17 +881,24 @@ public class HomeViewModel extends BaseViewModel
         return () ->
         {
             try (okhttp3.Response response = httpClient.newCall(request)
-                .execute())
+                    .execute())
             {
-                return new Gson().fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>()
+                if (response.code() / 100 == 2)
                 {
-                }.getType());
+                    return new Gson().fromJson(response.body().string(), new TypeToken<List<GitHubRelease>>()
+                    {
+                    }.getType());
+                }
+                else
+                {
+                    return new ArrayList<>();
+                }
             }
             catch (Exception e)
             {
                 Timber.e(e);
             }
-            return null;
+            return new ArrayList<>();
         };
     }
 

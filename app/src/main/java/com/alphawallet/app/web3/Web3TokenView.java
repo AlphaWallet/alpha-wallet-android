@@ -434,7 +434,7 @@ public class Web3TokenView extends WebView
         if (td != null && td.holdingToken != null)
         {
             //use webview
-            renderTokenScriptView(token, range, assetService, iconified);
+            renderTokenScriptView(token, range, assetService, iconified, td);
         }
         else
         {
@@ -458,9 +458,13 @@ public class Web3TokenView extends WebView
         loadData(displayData, "text/html", "utf-8");
     }
 
-    public void renderTokenScriptView(Token token, TicketRange range, AssetDefinitionService assetService, ViewType itemView)
+    public boolean renderTokenScriptView(Token token, TicketRange range, AssetDefinitionService assetService, ViewType itemView, final TokenDefinition td)
     {
         BigInteger tokenId = range.tokenIds.get(0);
+        if (!td.hasTokenView())
+        {
+            return false;
+        }
 
         final StringBuilder attrs = assetService.getTokenAttrs(token, tokenId, range.tokenIds.size());
 
@@ -468,8 +472,10 @@ public class Web3TokenView extends WebView
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(token, throwable, range),
-                           () -> displayTicket(token, assetService, attrs, itemView, range))
+                           () -> displayTicket(token, assetService, attrs, itemView, range, td))
                 .isDisposed();
+
+        return true;
     }
 
     /**
@@ -480,7 +486,7 @@ public class Web3TokenView extends WebView
      * @param iconified
      * @param range
      */
-    private void displayTicket(Token token, AssetDefinitionService assetService, StringBuilder attrs, ViewType iconified, TicketRange range)
+    private void displayTicket(Token token, AssetDefinitionService assetService, StringBuilder attrs, ViewType iconified, TicketRange range, final TokenDefinition td)
     {
         setVisibility(View.VISIBLE);
         String viewName;
@@ -495,7 +501,7 @@ public class Web3TokenView extends WebView
                 break;
         }
 
-        TSTokenView tokenView = assetService.getTSTokenView(token, viewName);
+        TSTokenView tokenView = td.getTSTokenView(viewName);
 
         String view = tokenView.getTokenView();
         if (TextUtils.isEmpty(view))
@@ -517,9 +523,10 @@ public class Web3TokenView extends WebView
         realmAuxUpdates = RealmAuxData.getEventListener(realm, token, range.tokenIds.get(0), 1, lastUpdateTime);
         realmAuxUpdates.addChangeListener(realmAux -> {
             if (realmAux.size() == 0) return;
-            //reload token view, updated event will be fetched from DB
-            displayTicketHolder(token, range, assetService, iconified);
+            renderTicketHolder(token, td, range, assetService, iconified);
         });
+
+        invalidate();
     }
 
     private long getLastUpdateTime(Realm realm, Token token, BigInteger tokenId)
@@ -533,6 +540,22 @@ public class Web3TokenView extends WebView
         }
 
         return lastResultTime + 1;
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        if (realmAuxUpdates != null)
+        {
+            realmAuxUpdates.removeAllChangeListeners();
+            if (!realmAuxUpdates.getRealm().isClosed())
+            {
+                realmAuxUpdates.getRealm().close();
+            }
+        }
+
+        loadData("", "text/html", "utf-8");
     }
 
     @Override

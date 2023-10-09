@@ -81,6 +81,7 @@ import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -93,6 +94,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1304,6 +1306,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         String tempFileKey = token.getTSKey();
 
+        if (!checkFileDiff(tempFileKey, scriptData.second))
+        {
+            return new File(UNCHANGED_SCRIPT);
+        }
+
         File tempStoreFile = storeFile(tempFileKey, scriptData.second);
 
         TokenScriptFile tsf = new TokenScriptFile(context, tempStoreFile.getAbsolutePath());
@@ -2072,6 +2079,27 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return sig;
     }
 
+    private boolean checkFileDiff(String address, Pair<String, Boolean> result)
+    {
+        if (result.first == null || result.first.length() < 10)
+        {
+            return false;
+        }
+
+        //calc MD5 of this new script
+        String newMD5Hash = TokenScriptFile.calcMD5(new ByteArrayInputStream(result.first.getBytes(StandardCharsets.UTF_8)));
+        TokenScriptFile tsf = new TokenScriptFile(context, defineDownloadTSFile(address).getAbsolutePath());
+
+        if (tsf.exists())
+        {
+            return !tsf.calcMD5().equals(newMD5Hash);
+        }
+        else
+        {
+            return true;
+        }
+    }
+
     /**
      * Use internal directory to store contracts fetched from the server
      *
@@ -2082,13 +2110,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      */
     private File storeFile(String address, Pair<String, Boolean> result) throws IOException
     {
-        if (result.first == null || result.first.length() < 10) return new File("");
+        if (result.first == null || result.first.length() < 10)
+        {
+            return new File("");
+        }
 
-        String fName = address + TS_EXTENSION;
-
-        //Store received files in the internal storage area - no need to ask for permissions
-        File file = new File(context.getFilesDir(), fName);
-
+        File file = defineDownloadTSFile(address);
         FileOutputStream fos = new FileOutputStream(file);
         OutputStream os = new BufferedOutputStream(fos);
         os.write(result.first.getBytes());
@@ -2105,6 +2132,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return file;
+    }
+
+    private File defineDownloadTSFile(String address)
+    {
+        String fName = address + TS_EXTENSION;
+        //Store received files in the internal storage area - no need to ask for permissions
+        return new File(context.getFilesDir(), fName);
     }
 
     public boolean hasDefinition(Token token)

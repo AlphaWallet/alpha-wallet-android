@@ -45,7 +45,7 @@
             <LinearLayout
                     android:id="@+id/layout_webwrapper"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginStart="@dimen/tiny_8"
                     android:layout_marginTop="@dimen/standard_16"

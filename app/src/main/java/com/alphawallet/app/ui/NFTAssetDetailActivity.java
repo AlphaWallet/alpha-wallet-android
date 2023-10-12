@@ -854,7 +854,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         {
             LinearLayout webWrapper = findViewById(R.id.layout_webwrapper);
             tokenScriptView = new Web3TokenView(this);
-            tokenScriptView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            tokenScriptView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
             if (tokenScriptView.renderTokenScriptView(token, new TicketRange(tokenId, token.getAddress()), viewModel.getAssetDefinitionService(), ViewType.VIEW, td))
             {

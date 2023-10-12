@@ -222,10 +222,12 @@
 
         <activity
                 android:name=".ui.TokenFunctionActivity"
+                android:hardwareAccelerated="true"
                 android:label="@string/token_function" />
 
         <activity
                 android:name=".ui.FunctionActivity"
+                android:hardwareAccelerated="true"
                 android:label="@string/token_function" />
 
         <activity

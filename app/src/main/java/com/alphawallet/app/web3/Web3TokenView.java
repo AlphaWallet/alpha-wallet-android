@@ -2,6 +2,7 @@ package com.alphawallet.app.web3;
 
 import static androidx.webkit.WebSettingsCompat.FORCE_DARK_OFF;
 import static androidx.webkit.WebSettingsCompat.FORCE_DARK_ON;
+import static androidx.webkit.WebSettingsCompat.setAlgorithmicDarkeningAllowed;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
 import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
@@ -16,6 +17,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
+import android.webkit.JsPromptResult;
+import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -125,18 +128,9 @@ public class Web3TokenView extends WebView
                                                + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
         WebView.setWebContentsDebuggingEnabled(true);
 
-        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK))
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING))
         {
-            switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
-            {
-                case Configuration.UI_MODE_NIGHT_YES:
-                    WebSettingsCompat.setForceDark(getSettings(), FORCE_DARK_ON);
-                    break;
-                case Configuration.UI_MODE_NIGHT_NO:
-                case Configuration.UI_MODE_NIGHT_UNDEFINED:
-                    WebSettingsCompat.setForceDark(getSettings(), FORCE_DARK_OFF);
-                    break;
-            }
+            WebSettingsCompat.setAlgorithmicDarkeningAllowed(getSettings(), true);
         }
 
         setScrollBarSize(0);
@@ -152,8 +146,6 @@ public class Web3TokenView extends WebView
                 this,
                 innerOnSignPersonalMessageListener,
                 innerOnSetValuesListener), "alpha");
-
-        super.setWebViewClient(tokenScriptClient);
 
         setWebChromeClient(new WebChromeClient()
         {
@@ -191,7 +183,16 @@ public class Web3TokenView extends WebView
                 }
                 return true;
             }
+
+            @Override
+            public boolean onJsAlert(WebView view, String url, String message, JsResult result)
+            {
+                result.cancel();
+                return true;
+            }
         });
+
+        setWebViewClient(tokenScriptClient);
     }
 
     public void showError(String error)
@@ -199,12 +200,6 @@ public class Web3TokenView extends WebView
         showingError = true;
         setVisibility(View.VISIBLE);
         loadData(error, "text/html", "utf-8");
-    }
-
-    @Override
-    public void setWebChromeClient(WebChromeClient client)
-    {
-        super.setWebChromeClient(client);
     }
 
     @JavascriptInterface
@@ -227,6 +222,19 @@ public class Web3TokenView extends WebView
                     public void onCloseWindow(WebView window)
                     {
                         callback.functionSuccess();
+                    }
+
+                    @Override
+                    public boolean onConsoleMessage(ConsoleMessage msg)
+                    {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onJsAlert(WebView view, String url, String message, JsResult result)
+                    {
+                        result.cancel();
+                        return true;
                     }
                 }
         );
@@ -385,11 +393,11 @@ public class Web3TokenView extends WebView
         }
 
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url)
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request)
         {
             if (assetHolder != null)
             {
-                return assetHolder.overridePageLoad(view, url);
+                return assetHolder.overridePageLoad(view, request.getUrl().toString());
             }
             else
             {

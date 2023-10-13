@@ -2,6 +2,8 @@ package com.alphawallet.app.ui;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +42,7 @@ import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.divider.ListDivider;
 import com.alphawallet.app.viewmodel.WalletConnectViewModel;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
+import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
@@ -231,27 +234,23 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     private void dialogConfirmDelete(WalletConnectSessionItem session)
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        AlertDialog dialog = builder.setTitle(R.string.title_delete_session)
-                .setMessage(getString(R.string.delete_session, session.name))
-                .setPositiveButton(R.string.delete, (d, w) -> {
-                    viewModel.deleteSession(session, new AWWalletConnectClient.WalletConnectV2Callback()
-                    {
-                        @Override
-                        public void onSessionDisconnected()
-                        {
-                            runOnUiThread(() -> {
-                                awWalletConnectClient.updateNotification();
-                            });
-                        }
-                    });
-                })
-                .setNegativeButton(R.string.action_cancel, (d, w) -> {
-                    d.dismiss();
-                })
-                .setCancelable(false)
-                .create();
-        dialog.show();
+        AWalletAlertDialog cDialog = new AWalletAlertDialog(this);
+        cDialog.setCancelable(true);
+        cDialog.setTitle(R.string.title_delete_session);
+        cDialog.setMessage(getString(R.string.delete_session, session.name));
+        cDialog.setButtonText(R.string.delete);
+        cDialog.setButtonListener(v -> viewModel.deleteSession(session, new AWWalletConnectClient.WalletConnectV2Callback()
+        {
+            @Override
+            public void onSessionDisconnected()
+            {
+                runOnUiThread(() -> awWalletConnectClient.updateNotification());
+            }
+        }));
+        cDialog.setSecondaryButtonText(R.string.action_cancel);
+        cDialog.setSecondaryButtonListener(view -> cDialog.dismiss());
+        cDialog.setCancelable(false);
+        cDialog.show();
     }
 
     private void startConnectionCheck()

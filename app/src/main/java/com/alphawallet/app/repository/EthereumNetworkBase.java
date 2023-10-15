@@ -33,6 +33,9 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.HOLESKY_FALLBACK_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.HOLESKY_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.HOLESKY_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_TESTNET_ID;
@@ -41,6 +44,10 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BAOBAB_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BAOBAB_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_RPC;
+import static com.alphawallet.ethereum.EthereumNetworkBase.LINEA_FREE_RPC;
+import static com.alphawallet.ethereum.EthereumNetworkBase.LINEA_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.LINEA_TEST_FREE_RPC;
+import static com.alphawallet.ethereum.EthereumNetworkBase.LINEA_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_RPC;
@@ -156,6 +163,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String ARBITRUM_FALLBACK_MAINNET_RPC = usesProductionKey ? FREE_ARBITRUM_RPC_URL : "https://arbitrum-mainnet.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
     public static final String PALM_RPC_FALLBACK_URL = usesProductionKey ? FREE_PALM_RPC_URL : "https://palm-mainnet.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
     public static final String PALM_TEST_RPC_FALLBACK_URL = usesProductionKey ? FREE_PALM_RPC_URL : "https://palm-testnet.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
+    public static final String LINEA_FALLBACK_RPC = usesProductionKey ? LINEA_FREE_RPC : "https://linea.drpc.org";
+    public static final String LINEA_RPC = usesProductionKey ? "https://linea-mainnet.infura.io/v3/" + keyProvider.getInfuraKey() : LINEA_FALLBACK_RPC;
+    public static final String LINEA_TEST_RPC = usesProductionKey ? "https://linea-goerli.infura.io/v3/" + keyProvider.getInfuraKey() : LINEA_TEST_FREE_RPC;
 
     //Note that AlphaWallet now uses a double node configuration. See class AWHttpService comment 'try primary node'.
     //If you supply a main RPC and secondary it will try the secondary if the primary node times out after 10 seconds.
@@ -180,13 +190,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //If your wallet prioritises xDai for example, you may want to move the XDAI_ID to the front of this list,
     //Then xDai would appear as the first token at the top of the wallet
     private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
-            MAINNET_ID, GNOSIS_ID, POLYGON_ID, ROOTSTOCK_MAINNET_ID, CLASSIC_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
+            MAINNET_ID, GNOSIS_ID, POLYGON_ID, ROOTSTOCK_MAINNET_ID, CLASSIC_ID, LINEA_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
             FANTOM_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID, OKX_ID));
 
     private static final List<Long> testnetList = new ArrayList<>(Arrays.asList(
-            GOERLI_ID, BINANCE_TEST_ID, HECO_TEST_ID, ROOTSTOCK_TESTNET_ID, CRONOS_TEST_ID, OPTIMISM_GOERLI_TEST_ID, ARBITRUM_GOERLI_TEST_ID, KLAYTN_BAOBAB_ID,
-            FANTOM_TEST_ID, IOTEX_TESTNET_ID, FUJI_TEST_ID, POLYGON_TEST_ID, MILKOMEDA_C1_TEST_ID,
-            SEPOLIA_TESTNET_ID, AURORA_TESTNET_ID, PALM_TEST_ID));
+            SEPOLIA_TESTNET_ID, POLYGON_TEST_ID, HOLESKY_ID, GOERLI_ID, BINANCE_TEST_ID, HECO_TEST_ID,
+            ROOTSTOCK_TESTNET_ID, CRONOS_TEST_ID, OPTIMISM_GOERLI_TEST_ID, ARBITRUM_GOERLI_TEST_ID, LINEA_TEST_ID, KLAYTN_BAOBAB_ID,
+            FANTOM_TEST_ID, IOTEX_TESTNET_ID, FUJI_TEST_ID, MILKOMEDA_C1_TEST_ID,
+            AURORA_TESTNET_ID, PALM_TEST_ID));
 
     private static final List<Long> deprecatedNetworkList = new ArrayList<>(Arrays.asList(
             // Add deprecated testnet IDs here
@@ -359,6 +370,19 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "", ROOTSTOCK_TESTNET_ID, "",
                     ""));
 
+            put(LINEA_ID, new NetworkInfo(C.LINEA_NAME, C.ETH_SYMBOL,
+                    LINEA_RPC,
+                    "https://lineascan.build/tx/", LINEA_ID, LINEA_FALLBACK_RPC,
+                    "https://api.lineascan.build/api?"));
+            put(LINEA_TEST_ID, new NetworkInfo(C.LINEA_TESTNET_NAME, C.ETH_SYMBOL,
+                    LINEA_TEST_RPC,
+                    "https://goerli.lineascan.build/tx/", LINEA_TEST_ID, LINEA_TEST_FREE_RPC,
+                    "https://api-testnet.lineascan.build/api?"));
+            put(HOLESKY_ID, new NetworkInfo(C.HOLESKY_TESTNET_NAME, C.HOLESKY_TEST_SYMBOL,
+                    HOLESKY_RPC_URL,
+                    "https://holesky.etherscan.io/tx/", HOLESKY_ID, HOLESKY_FALLBACK_URL,
+                    "https://api-holesky.etherscan.io/api?"));
+
             // Add deprecated networks after this line
         }
     };
@@ -404,6 +428,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(OKX_ID, R.drawable.ic_okx);
             put(ROOTSTOCK_MAINNET_ID, R.drawable.ic_rootstock_logo);
             put(ROOTSTOCK_TESTNET_ID, R.drawable.ic_rootstock_test_logo);
+            put(LINEA_ID, R.drawable.ic_icons_linea);
+            put(LINEA_TEST_ID, R.drawable.ic_icons_linea_testnet);
+            put(HOLESKY_ID, R.drawable.ic_icons_holesky);
         }
     };
 
@@ -444,6 +471,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(OKX_ID, R.drawable.ic_okx);
             put(ROOTSTOCK_MAINNET_ID, R.drawable.ic_rootstock_logo);
             put(ROOTSTOCK_TESTNET_ID, R.drawable.ic_rootstock_test_logo);
+            put(LINEA_ID, R.drawable.ic_icons_linea);
+            put(LINEA_TEST_ID, R.drawable.ic_icons_linea_testnet);
+            put(HOLESKY_ID, R.drawable.ic_icons_holesky);
         }
     };
 
@@ -484,6 +514,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(OKX_ID, R.color.okx);
             put(ROOTSTOCK_MAINNET_ID, R.color.rootstock);
             put(ROOTSTOCK_TESTNET_ID, R.color.rootstock);
+            put(LINEA_ID, R.color.black);
+            put(LINEA_TEST_ID, R.color.pinkish_grey);
+            put(HOLESKY_ID, R.color.azure);
         }
     };
 

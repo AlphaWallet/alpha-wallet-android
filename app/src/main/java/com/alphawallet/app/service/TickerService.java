@@ -12,6 +12,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.LINEA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
@@ -28,6 +29,7 @@ import androidx.annotation.Nullable;
 
 import com.alphawallet.app.entity.CoinGeckoTicker;
 import com.alphawallet.app.entity.DexGuruTicker;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
@@ -443,8 +445,13 @@ public class TickerService
     {
         if (chainId == MAINNET_ID)
         {
-            ethTickers.put(ARBITRUM_MAIN_ID, ticker);
-            ethTickers.put(OPTIMISTIC_MAIN_ID, ticker);
+            for (Map.Entry<Long, String> entry : chainPairs.entrySet())
+            {
+                if (entry.getValue().equals("ethereum"))
+                {
+                    ethTickers.put(entry.getKey(), ticker);
+                }
+            }
         }
     }
 
@@ -713,6 +720,7 @@ public class TickerService
         put(MILKOMEDA_C1_ID, "cardano");
         put(CRONOS_MAIN_ID, "cronos");
         put(ROOTSTOCK_MAINNET_ID, "rootstock");
+        put(LINEA_ID, "linea");
     }};
 
     private static final Map<Long, String> dexGuruChainIdToAPISymbol = new HashMap<Long, String>()
@@ -729,6 +737,7 @@ public class TickerService
     }
 
     // Update from https://api.coingecko.com/api/v3/coins/list
+    // If ticker is pegged against ethereum (L2's) then use 'ethereum' here.
     public static final Map<Long, String> chainPairs = new HashMap<>()
     {{
         put(MAINNET_ID, "ethereum");
@@ -748,6 +757,7 @@ public class TickerService
         put(CRONOS_MAIN_ID, "crypto-com-chain");
         put(OKX_ID, "okb");
         put(ROOTSTOCK_MAINNET_ID, "rootstock");
+        put(LINEA_ID, "ethereum");
     }};
 
     public static boolean validateCoinGeckoAPI(Token token)

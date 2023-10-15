@@ -125,6 +125,11 @@ public class AWHttpService extends HttpService
             requestBody = RequestBody.create("", MEDIA_TYPE_TEXT);
         }
 
+        if (url.contains("stormbird"))
+        {
+            System.out.println("YOLESS");
+        }
+
         okhttp3.Request httpRequest =
                 new okhttp3.Request.Builder()
                         .url(url)

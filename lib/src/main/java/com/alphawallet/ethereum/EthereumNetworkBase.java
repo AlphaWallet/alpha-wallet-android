@@ -43,6 +43,9 @@ public abstract class EthereumNetworkBase
     public static final long OKX_ID = 66;
     public static final long ROOTSTOCK_MAINNET_ID = 30;
     public static final long ROOTSTOCK_TESTNET_ID = 31;
+    public static final long HOLESKY_ID = 17000;
+    public static final long LINEA_ID = 59144;
+    public static final long LINEA_TEST_ID = 59140;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -79,6 +82,10 @@ public abstract class EthereumNetworkBase
     public static final String OKX_RPC_URL = "https://exchainrpc.okex.org";
     public static final String ROOTSTOCK_MAINNET_RPC_URL = "https://public-node.rsk.co";
     public static final String ROOTSTOCK_TESTNET_RPC_URL = "https://public-node.testnet.rsk.co";
+    public static final String HOLESKY_RPC_URL = "https://rpc.holesky.ethpandaops.io";
+    public static final String HOLESKY_FALLBACK_URL = "https://holesky.rpc.thirdweb.com";
+    public static final String LINEA_FREE_RPC = "https://linea.drpc.org";
+    public static final String LINEA_TEST_FREE_RPC = "https://rpc.goerli.linea.build";
 
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>()
     {
@@ -155,6 +162,13 @@ public abstract class EthereumNetworkBase
                     ROOTSTOCK_MAINNET_ID, false));
             put(ROOTSTOCK_TESTNET_ID, new NetworkInfo("Rootstock (Test)", "tBTC", ROOTSTOCK_TESTNET_RPC_URL, "",
                     ROOTSTOCK_TESTNET_ID, false));
+
+            put(LINEA_ID, new NetworkInfo("Linea", "ETH", LINEA_FREE_RPC, "https://lineascan.build/tx/",
+                    LINEA_ID, false));
+            put(LINEA_TEST_ID, new NetworkInfo("Linea (Test)", "ETH", LINEA_TEST_FREE_RPC, "https://goerli.lineascan.build/tx/",
+                    LINEA_TEST_ID, false));
+            put(HOLESKY_ID, new NetworkInfo("Rootstock (Test)", "HolETH", HOLESKY_RPC_URL, "https://holesky.etherscan.io/tx/",
+                    HOLESKY_ID, false));
         }
     };
 

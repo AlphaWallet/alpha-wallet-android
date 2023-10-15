@@ -55,6 +55,9 @@ public abstract class C {
     public static final String OKX_NETWORK_NAME = "OKXChain Mainnet";
     public static final String ROOTSTOCK_NETWORK_NAME = "Rootstock";
     public static final String ROOTSTOCK_TESTNET_NAME = "Rootstock (Test)";
+    public static final String LINEA_NAME = "Linea";
+    public static final String LINEA_TESTNET_NAME = LINEA_NAME + " (Test)";
+    public static final String HOLESKY_TESTNET_NAME = "Holesky (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -87,6 +90,7 @@ public abstract class C {
     public static final String OKX_SYMBOL = "OKT";
     public static final String ROOTSTOCK_SYMBOL = "RBTC";
     public static final String ROOTSTOCK_TEST_SYMBOL = "tBTC";
+    public static final String HOLESKY_TEST_SYMBOL = "Hol" + ETH_SYMBOL;
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 

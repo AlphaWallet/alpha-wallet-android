@@ -1,13 +1,10 @@
 package com.alphawallet.app.service;
 
-import static com.alphawallet.app.entity.WalletPage.DAPP_BROWSER;
-import static com.alphawallet.app.entity.WalletPage.WALLET;
 import static com.alphawallet.app.ui.HomeActivity.AW_MAGICLINK_DIRECT;
 
 import android.content.Intent;
 import android.text.TextUtils;
 
-import com.alphawallet.app.analytics.Analytics;
 import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
 import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.DeepLinkRequest;
@@ -16,8 +13,6 @@ import com.alphawallet.app.entity.EIP681Type;
 import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.attestation.ImportAttestation;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.router.ImportTokenRouter;
-import com.alphawallet.app.ui.DappBrowserFragment;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.ParseMagicLink;
@@ -26,12 +21,28 @@ public class DeepLinkService
 {
     public static final String AW_APP = "https://aw.app/";
     public static final String WC_PREFIX = "wc?uri=";
+    public static final String WC_COMMAND = "wc:";
     public static final String AW_PREFIX = "awallet://";
+    public static final String OPEN_URL_PREFIX = "openURL?q=";
+
     public static DeepLinkRequest parseIntent(String importData, Intent startIntent)
     {
+        boolean isOpenURL = false;
+
         if (TextUtils.isEmpty(importData))
         {
             return checkIntents(startIntent);
+        }
+
+        if (importData.startsWith(AW_PREFIX)) //strip AW_PREFIX
+        {
+            importData = importData.substring(AW_PREFIX.length());
+        }
+
+        if (importData.startsWith(OPEN_URL_PREFIX))
+        {
+            isOpenURL = true;
+            importData = importData.substring(OPEN_URL_PREFIX.length());
         }
 
         importData = Utils.universalURLDecode(importData);
@@ -41,10 +52,15 @@ public class DeepLinkService
             return new DeepLinkRequest(DeepLinkType.SMARTPASS, importData);
         }
 
-        if (importData.startsWith(AW_APP + WC_PREFIX) || importData.startsWith(AW_PREFIX + WC_PREFIX))
+        if (importData.startsWith(AW_APP + WC_PREFIX) || importData.startsWith(WC_PREFIX))
         {
             int prefixIndex = importData.indexOf(WC_PREFIX) + WC_PREFIX.length();
             return new DeepLinkRequest(DeepLinkType.WALLETCONNECT, importData.substring(prefixIndex));
+        }
+
+        if (importData.startsWith(WC_COMMAND))
+        {
+            return new DeepLinkRequest(DeepLinkType.WALLETCONNECT, importData);
         }
 
         if (importData.startsWith(NotificationService.AWSTARTUP))
@@ -84,6 +100,11 @@ public class DeepLinkService
             return new DeepLinkRequest(DeepLinkType.IMPORT_SCRIPT, null);
         }
 
+        //finally check if it's a plain openURL
+        if (isOpenURL && Utils.isValidUrl(importData))
+        {
+            return new DeepLinkRequest(DeepLinkType.URL_REDIRECT, importData);
+        }
 
         // finally see if there was a url in the intent (with non empty importData) or bail with invalid link
         return checkIntents(startIntent);
@@ -124,13 +145,20 @@ public class DeepLinkService
     private static boolean checkSmartPass(String importData)
     {
         QRResult result = null;
-        if (importData != null && importData.startsWith(ImportAttestation.SMART_PASS_URL))
+        if (importData != null)
         {
-            importData = importData.substring(ImportAttestation.SMART_PASS_URL.length()); //chop off leading URL
-            result = new QRResult(importData);
-            result.type = EIP681Type.EAS_ATTESTATION;
+            if (importData.startsWith(ImportAttestation.SMART_PASS_URL))
+            {
+                importData = importData.substring(ImportAttestation.SMART_PASS_URL.length()); //chop off leading URL
+            }
+
             String taglessAttestation = Utils.parseEASAttestation(importData);
-            result.functionDetail = Utils.toAttestationJson(taglessAttestation);
+            if (taglessAttestation != null && taglessAttestation.length() > 0)
+            {
+                result = new QRResult(importData);
+                result.type = EIP681Type.EAS_ATTESTATION;
+                result.functionDetail = Utils.toAttestationJson(taglessAttestation);
+            }
         }
 
         return result != null && !TextUtils.isEmpty(result.functionDetail);

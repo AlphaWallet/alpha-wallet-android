@@ -243,6 +243,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
     implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation "androidx.core:core-splashscreen:1.0.1"
 
     // Http client
     implementation "com.squareup.okhttp3:okhttp:4.11.0"

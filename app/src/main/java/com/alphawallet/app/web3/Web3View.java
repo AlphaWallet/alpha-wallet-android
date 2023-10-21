@@ -15,6 +15,8 @@ import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.webkit.WebSettingsCompat;
+import androidx.webkit.WebViewFeature;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.entity.TransactionReturn;
@@ -200,22 +202,11 @@ public class Web3View extends WebView {
                 innerOnEthCallListener,
                 innerAddChainListener,
                 innerOnWalletActionListener), "alpha");
-        
-//        Removing this block for now.
-//        TODO: Figure out if we should support dark mode for external websites
-//        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK))
-//        {
-//            switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
-//            {
-//                case Configuration.UI_MODE_NIGHT_YES:
-//                    WebSettingsCompat.setForceDark(getSettings(), FORCE_DARK_ON);
-//                    break;
-//                case Configuration.UI_MODE_NIGHT_NO:
-//                case Configuration.UI_MODE_NIGHT_UNDEFINED:
-//                    WebSettingsCompat.setForceDark(getSettings(), FORCE_DARK_OFF);
-//                    break;
-//            }
-//        }
+
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING))
+        {
+            WebSettingsCompat.setAlgorithmicDarkeningAllowed(getSettings(), true);
+        }
     }
 
     @Nullable
@@ -390,16 +381,6 @@ public class Web3View extends WebView {
             loadingError = true;
             if (externalClient != null)
                 externalClient.onReceivedError(view, request, error);
-        }
-
-        @RequiresApi(api = Build.VERSION_CODES.N)
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request)
-        {
-            redirect = true;
-
-            return externalClient.shouldOverrideUrlLoading(view, request)
-                    || internalClient.shouldOverrideUrlLoading(view, request);
         }
     }
 }

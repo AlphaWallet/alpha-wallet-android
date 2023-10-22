@@ -31,8 +31,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_RPC_URL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_TEST_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HOLESKY_FALLBACK_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HOLESKY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HOLESKY_RPC_URL;
@@ -194,7 +192,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             FANTOM_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID, OKX_ID));
 
     private static final List<Long> testnetList = new ArrayList<>(Arrays.asList(
-            SEPOLIA_TESTNET_ID, POLYGON_TEST_ID, HOLESKY_ID, GOERLI_ID, BINANCE_TEST_ID, HECO_TEST_ID,
+            SEPOLIA_TESTNET_ID, POLYGON_TEST_ID, HOLESKY_ID, GOERLI_ID, BINANCE_TEST_ID,
             ROOTSTOCK_TESTNET_ID, CRONOS_TEST_ID, OPTIMISM_GOERLI_TEST_ID, ARBITRUM_GOERLI_TEST_ID, LINEA_TEST_ID, KLAYTN_BAOBAB_ID,
             FANTOM_TEST_ID, IOTEX_TESTNET_ID, FUJI_TEST_ID, MILKOMEDA_C1_TEST_ID,
             AURORA_TESTNET_ID, PALM_TEST_ID));
@@ -263,10 +261,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     HECO_RPC_URL,
                     "https://hecoinfo.com/tx/", HECO_ID,
                     HECO_RPC_URL, "https://api.hecoinfo.com/api?"));
-            put(HECO_TEST_ID, new NetworkInfo(C.HECO_TEST_NETWORK, C.HECO_SYMBOL,
-                    HECO_TEST_RPC_URL,
-                    "https://testnet.hecoinfo.com/tx/", HECO_TEST_ID,
-                    HECO_TEST_RPC_URL, "https://testnet.hecoinfo.com/api?"));
             put(AVALANCHE_ID, new NetworkInfo(C.AVALANCHE_NETWORK, C.AVALANCHE_SYMBOL,
                     AVALANCHE_RPC_URL,
                     "https://cchain.explorer.avax.network/tx/", AVALANCHE_ID,
@@ -400,8 +394,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(GOERLI_ID, R.drawable.ic_goerli);
             put(BINANCE_MAIN_ID, R.drawable.ic_binance_logo);
             put(BINANCE_TEST_ID, R.drawable.ic_icons_tokens_bnb_testnet);
-            put(HECO_ID, R.drawable.ic_heco_logo);
-            put(HECO_TEST_ID, R.drawable.ic_icons_tokens_heco_testnet);
+            put(HECO_ID, R.drawable.ic_icons_heco);
             put(FANTOM_ID, R.drawable.ic_fantom);
             put(FANTOM_TEST_ID, R.drawable.ic_icons_fantom_test);
             put(AVALANCHE_ID, R.drawable.ic_icons_tokens_avalanche);
@@ -443,8 +436,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(GOERLI_ID, R.drawable.ic_goerli);
             put(BINANCE_MAIN_ID, R.drawable.ic_icons_network_bsc);
             put(BINANCE_TEST_ID, R.drawable.ic_icons_tokens_bnb_testnet);
-            put(HECO_ID, R.drawable.ic_icons_network_heco);
-            put(HECO_TEST_ID, R.drawable.ic_icons_tokens_heco_testnet);
+            put(HECO_ID, R.drawable.ic_icons_heco);
             put(FANTOM_ID, R.drawable.ic_icons_network_fantom);
             put(FANTOM_TEST_ID, R.drawable.ic_icons_fantom_test);
             put(AVALANCHE_ID, R.drawable.ic_icons_network_avalanche);
@@ -487,7 +479,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(BINANCE_MAIN_ID, R.color.binance_main);
             put(BINANCE_TEST_ID, R.color.binance_test);
             put(HECO_ID, R.color.heco_main);
-            put(HECO_TEST_ID, R.color.heco_test);
             put(FANTOM_ID, R.color.fantom_main);
             put(FANTOM_TEST_ID, R.color.fantom_test);
             put(AVALANCHE_ID, R.color.avalanche_main);

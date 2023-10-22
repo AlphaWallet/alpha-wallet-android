@@ -16,7 +16,6 @@ public abstract class EthereumNetworkBase
     public static final long BINANCE_TEST_ID = 97;
     public static final long BINANCE_MAIN_ID = 56;
     public static final long HECO_ID = 128;
-    public static final long HECO_TEST_ID = 256;
     public static final long FANTOM_ID = 250;
     public static final long FANTOM_TEST_ID = 4002;
     public static final long AVALANCHE_ID = 43114;
@@ -54,8 +53,7 @@ public abstract class EthereumNetworkBase
     public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
     public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed.binance.org";
-    public static final String HECO_RPC_URL = "https://http-mainnet.hecochain.com";
-    public static final String HECO_TEST_RPC_URL = "https://http-testnet.hecochain.com";
+    public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
     public static final String AVALANCHE_RPC_URL = "https://api.avax.network/ext/bc/C/rpc";
     public static final String FUJI_TEST_RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc";
     public static final String FANTOM_RPC_URL = "https://rpcapi.fantom.network";
@@ -104,9 +102,6 @@ public abstract class EthereumNetworkBase
                     BINANCE_MAIN_ID, false));
             put(HECO_ID, new NetworkInfo("Heco", "HT", HECO_RPC_URL, "https://hecoinfo.com/tx/",
                     HECO_ID, false));
-            put(HECO_TEST_ID, new NetworkInfo("Heco (Test)", "HT", HECO_TEST_RPC_URL, "https://testnet.hecoinfo.com/tx/",
-                    HECO_TEST_ID, false));
-
             put(AVALANCHE_ID, new NetworkInfo("Avalanche Mainnet C-Chain", "AVAX", AVALANCHE_RPC_URL, "https://cchain.explorer.avax.network/tx/",
                     AVALANCHE_ID, false));
             put(FUJI_TEST_ID, new NetworkInfo("Avalanche FUJI C-Chain (Test)", "AVAX", FUJI_TEST_RPC_URL, "https://cchain.explorer.avax-test.network/tx/",

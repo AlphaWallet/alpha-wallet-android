@@ -28,7 +28,6 @@ public abstract class C {
     public static final String BINANCE_TEST_NETWORK = "BSC TestNet";
     public static final String BINANCE_MAIN_NETWORK = "Binance (BSC)";
     public static final String HECO_MAIN_NETWORK = "Heco";
-    public static final String HECO_TEST_NETWORK = "Heco (Test)";
     public static final String FANTOM_NETWORK = "Fantom Opera";
     public static final String FANTOM_TEST_NETWORK = "Fantom (Test)";
     public static final String AVALANCHE_NETWORK = "Avalanche";

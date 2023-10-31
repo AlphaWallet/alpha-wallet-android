@@ -9,6 +9,8 @@ public class KeyProviderJNIImpl implements KeyProvider
 
     public native String getInfuraKey();
 
+    public native String getTSInfuraKey();
+
     public native String getSecondaryInfuraKey();
 
     public native String getTertiaryInfuraKey();

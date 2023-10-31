@@ -224,6 +224,27 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
+    @Override
+    public String getTokenScriptRPC(long chainId)
+    {
+        NetworkInfo info = getNetworkByChain(chainId);
+
+        if (info == null)
+        {
+            return "";
+        }
+
+        int index = info.rpcServerUrl.indexOf(INFURA_ENDPOINT);
+        if (index > 0)
+        {
+            return info.rpcServerUrl.substring(0, index + INFURA_ENDPOINT.length()) + keyProvider.getTSInfuraKey();
+        }
+        else
+        {
+            return info.backupNodeUrl != null ? info.backupNodeUrl : info.rpcServerUrl;
+        }
+    }
+
     public static boolean isInfura(String rpcServerUrl)
     {
         return rpcServerUrl.contains(INFURA_ENDPOINT);

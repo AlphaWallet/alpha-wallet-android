@@ -675,10 +675,6 @@ public class TokenRepository implements TokenRepositoryType {
 
     private BigDecimal getEthBalance(Wallet wallet, long chainId)
     {
-        if (chainId == 17000)
-        {
-            System.out.println("YOLESS");
-        }
         try {
             return new BigDecimal(getService(chainId).ethGetBalance(wallet.address, DefaultBlockParameterName.LATEST)
                     .send()

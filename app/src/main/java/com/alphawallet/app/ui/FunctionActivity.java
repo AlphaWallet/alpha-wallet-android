@@ -621,6 +621,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         LinearLayout successOverlay = findViewById(R.id.layout_success_overlay);
         if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
+        tokenView.destroy();
         handler.postDelayed(closer, 1000);
     }
 
@@ -630,6 +631,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
      */
     private void txWritten(TransactionReturn transactionReturn)
     {
+        tokenView.destroy();
         confirmationDialog.transactionWritten(transactionReturn.hash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
     }
 
@@ -677,7 +679,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         super.onPause();
         viewModel.resetSignDialog();
-        tokenView.destroy();
     }
 
     public void onSaveInstanceState(@NonNull Bundle savedInstanceState)
@@ -937,6 +938,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         else
         {
             setResult(RESULT_CANCELED, intent);
+            tokenView.destroy();
             finish();
         }
     }

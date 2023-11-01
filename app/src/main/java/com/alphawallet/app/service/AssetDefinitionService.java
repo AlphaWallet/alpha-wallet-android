@@ -804,18 +804,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         String address = elements[0];
         long chainId = Long.parseLong(elements[1]);
-        //try cache
-        if (cachedDefinition != null)
+
+        if (checkCachedDefinition(chainId, address) != null)
         {
-            //only match holding token
-            ContractInfo holdingContracts = cachedDefinition.contracts.get(cachedDefinition.holdingToken);
-            if (holdingContracts != null && holdingContracts.addresses.containsKey(chainId))
-            {
-                for (String addr : holdingContracts.addresses.get(chainId))
-                {
-                    if (addr.equalsIgnoreCase(address.toLowerCase())) return cachedDefinition;
-                }
-            }
+            return cachedDefinition;
         }
 
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
@@ -844,6 +836,24 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         return result;
+    }
+
+    private TokenDefinition checkCachedDefinition(long chainId, String address)
+    {
+        if (cachedDefinition != null)
+        {
+            //only match holding token
+            ContractInfo holdingContracts = cachedDefinition.contracts.get(cachedDefinition.holdingToken);
+            if (holdingContracts != null && holdingContracts.addresses.containsKey(chainId))
+            {
+                for (String addr : holdingContracts.addresses.get(chainId))
+                {
+                    if (addr.equalsIgnoreCase(address.toLowerCase())) return cachedDefinition;
+                }
+            }
+        }
+
+        return null;
     }
 
     public TokenScriptFile getTokenScriptFile(long chainId, String address)
@@ -1031,10 +1041,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             return null;
         }
 
+        if (checkCachedDefinition(token.tokenInfo.chainId, token.getAddress()) != null)
+        {
+            return cachedDefinition;
+        }
+
         try
         {
             TokenScriptFile tsf = getTokenScriptFile(token);
-            return parseFile(tsf.getInputStream());
+            cachedDefinition = parseFile(tsf.getInputStream());
+            return cachedDefinition;
         }
         catch (Exception e)
         {
@@ -1217,7 +1233,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 boolean isDebugOverride = tsf.isDebug();
                 //remove all old definitions & certificates
                 updateScriptEntriesInRealm(originContracts, isDebugOverride, tsf.calcMD5(), schemaUID);
-                cachedDefinition = null;
+                cachedDefinition = td;
                 return tsf;
         }).flatMap(tt -> cacheSignature(tsf))
           .map(a -> fileLoadComplete(originContracts, tsf, td));
@@ -3109,7 +3125,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             try
             {
-                TokenDefinition td = parseFile(tf.getInputStream());
+                TokenDefinition td;
+                if (checkCachedDefinition(token.tokenInfo.chainId, token.getAddress()) != null)
+                {
+                    td = cachedDefinition;
+                }
+                else
+                {
+                    td = parseFile(tf.getInputStream());
+                    cachedDefinition = td;
+                }
+
                 return Single.fromCallable(() -> td);
             }
             catch (Exception ignored)

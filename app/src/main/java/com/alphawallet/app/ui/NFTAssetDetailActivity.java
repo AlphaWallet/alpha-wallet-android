@@ -861,6 +861,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
                 webWrapper.setVisibility(View.VISIBLE);
                 tokenScriptView.setChainId(token.tokenInfo.chainId);
                 tokenScriptView.setWalletAddress(new Address(token.getWallet()));
+                tokenScriptView.setRpcUrl(viewModel.getBrowserRPC(token.tokenInfo.chainId));
                 webWrapper.addView(tokenScriptView);
                 couldDisplay = true;
             }

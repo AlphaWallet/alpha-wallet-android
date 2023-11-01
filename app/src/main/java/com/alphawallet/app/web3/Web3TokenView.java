@@ -404,12 +404,6 @@ public class Web3TokenView extends WebView
                 return false;
             }
         }
-
-        @Override
-        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error)
-        {
-            showError(RENDERING_ERROR.replace("${ERR1}", error.getDescription()));
-        }
     }
 
     // Rendering

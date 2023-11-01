@@ -103,6 +103,12 @@ public class KeyProviderMockImpl implements KeyProvider
     }
 
     @Override
+    public String getTSInfuraKey()
+    {
+        return FAKE_KEY_FOR_TESTING;
+    }
+
+    @Override
     public String getUnstoppableDomainsKey()
     {
         return FAKE_KEY_FOR_TESTING;

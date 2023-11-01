@@ -34,6 +34,8 @@ public interface KeyProvider
 
     String getInfuraSecret();
 
+    String getTSInfuraKey();
+
     String getUnstoppableDomainsKey();
 
     String getOkLinkKey();

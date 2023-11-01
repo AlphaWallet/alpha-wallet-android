@@ -66,6 +66,9 @@ public class KeyProviderMockNonProductionImpl implements KeyProvider
     }
 
     @Override
+    public String getTSInfuraKey() { return null; }
+
+    @Override
     public String getRampKey()
     {
         return null;

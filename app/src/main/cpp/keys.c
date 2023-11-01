@@ -233,6 +233,18 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getInfuraSecret(JNIEnv *e
 }
 
 JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getTSInfuraKey(JNIEnv *env, jobject thiz) {
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, tokenscriptInfuraKey);
+#elif (HAS_INFURA == 1)
+    return (*env)->NewStringUTF(env, INFURA_Q);
+#else
+    const jstring key = "da3717f25f824cc1baa32d812386d93f";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getUnstoppableDomainsKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)

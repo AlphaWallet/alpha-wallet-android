@@ -240,13 +240,9 @@ public class Web3TokenView extends WebView
         );
     }
 
-    public void setChainId(long chainId) {
-        jsInjectorClient.setChainId(chainId);
-    }
-
-    public void setRpcUrl(@NonNull String useRPC)
+    public void setChainId(long chainId)
     {
-        jsInjectorClient.setRpcUrl(useRPC);
+        jsInjectorClient.setTSChainId(chainId);
     }
 
     public void onSignPersonalMessageSuccessful(@NotNull Signable message, String signHex) {

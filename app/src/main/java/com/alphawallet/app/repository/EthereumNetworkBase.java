@@ -203,48 +203,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     private static final String INFURA_ENDPOINT = ".infura.io/v3/";
 
-    @Override
-    public String getDappBrowserRPC(long chainId)
-    {
-        NetworkInfo info = getNetworkByChain(chainId);
-
-        if (info == null)
-        {
-            return "";
-        }
-
-        int index = info.rpcServerUrl.indexOf(INFURA_ENDPOINT);
-        if (index > 0)
-        {
-            return info.rpcServerUrl.substring(0, index + INFURA_ENDPOINT.length()) + keyProvider.getTertiaryInfuraKey();
-        }
-        else
-        {
-            return info.backupNodeUrl != null ? info.backupNodeUrl : info.rpcServerUrl;
-        }
-    }
-
-    @Override
-    public String getTokenScriptRPC(long chainId)
-    {
-        NetworkInfo info = getNetworkByChain(chainId);
-
-        if (info == null)
-        {
-            return "";
-        }
-
-        int index = info.rpcServerUrl.indexOf(INFURA_ENDPOINT);
-        if (index > 0)
-        {
-            return info.rpcServerUrl.substring(0, index + INFURA_ENDPOINT.length()) + keyProvider.getTSInfuraKey();
-        }
-        else
-        {
-            return info.backupNodeUrl != null ? info.backupNodeUrl : info.rpcServerUrl;
-        }
-    }
-
     public static boolean isInfura(String rpcServerUrl)
     {
         return rpcServerUrl.contains(INFURA_ENDPOINT);
@@ -1101,6 +1059,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
      */
     public static String getDefaultNodeURL(long chainId)
     {
+        return getNodeRPC(keyProvider.getTertiaryInfuraKey(), chainId);
+    }
+    public static String getTSNodeURL(long chainId)
+    {
+        return getNodeRPC(keyProvider.getTSInfuraKey(), chainId);
+    }
+
+    private static String getNodeRPC(String infuraKey, long chainId)
+    {
         NetworkInfo info = networkMap.get(chainId);
 
         if (info == null)
@@ -1111,7 +1078,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         int index = info.rpcServerUrl.indexOf(INFURA_ENDPOINT);
         if (index > 0)
         {
-            return info.rpcServerUrl.substring(0, index + INFURA_ENDPOINT.length()) + keyProvider.getTertiaryInfuraKey();
+            return info.rpcServerUrl.substring(0, index + INFURA_ENDPOINT.length()) + infuraKey;
         }
         else
         {

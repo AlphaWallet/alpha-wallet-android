@@ -454,14 +454,18 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
     private void updateDefaultTokenData()
     {
+        String displayTokenId = "";
         if (!TextUtils.isEmpty(sequenceId))
         {
-            tivTokenId.setValue(sequenceId);
+            displayTokenId = sequenceId;
         }
         else if (tokenId != null)
         {
-            tivTokenId.setValue(tokenId.toString());
+            displayTokenId = tokenId.toString();
         }
+
+        tivTokenId.setValue(displayTokenId);
+        tivTokenId.setCopyableValue(displayTokenId);
 
         tivNetwork.setValue(token.getNetworkName());
 
@@ -861,7 +865,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
                 webWrapper.setVisibility(View.VISIBLE);
                 tokenScriptView.setChainId(token.tokenInfo.chainId);
                 tokenScriptView.setWalletAddress(new Address(token.getWallet()));
-                tokenScriptView.setRpcUrl(viewModel.getBrowserRPC(token.tokenInfo.chainId));
                 webWrapper.addView(tokenScriptView);
                 couldDisplay = true;
             }

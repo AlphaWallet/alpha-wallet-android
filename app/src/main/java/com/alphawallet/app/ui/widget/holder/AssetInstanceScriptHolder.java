@@ -53,6 +53,7 @@ public class AssetInstanceScriptHolder extends BinderViewHolder<TicketRange> imp
         clickWrapper = findViewById(R.id.click_layer);
         itemSelect = findViewById(R.id.radioBox);
         token = t;
+        tokenView.setChainId(t.tokenInfo.chainId);
         tokenView.setOnReadyCallback(this);
         this.iconified = iconified;
     }

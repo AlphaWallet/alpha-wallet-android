@@ -145,7 +145,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.setWalletAddress(new Address(token.getWallet()));
         tokenView.setupWindowCallback(this);
-        tokenView.setRpcUrl(viewModel.getBrowserRPC(token.tokenInfo.chainId));
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSignPersonalMessageListener(this);
         tokenView.setOnSetValuesListener(this);

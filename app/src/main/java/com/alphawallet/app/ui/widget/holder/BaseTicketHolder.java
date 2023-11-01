@@ -28,19 +28,18 @@ public class BaseTicketHolder extends BinderViewHolder<TicketRange> implements V
     private TokensAdapterCallback tokensAdapterCallback;
     private final AssetDefinitionService assetService; //need to cache this locally, unless we cache every string we need in the constructor
 
-    private final View activityView;
     protected final RelativeLayout ticketLayout;
 
     public BaseTicketHolder(int resId, ViewGroup parent, Token ticket, AssetDefinitionService service) {
         super(resId, parent);
 
-        activityView = this.itemView;
         tokenView = findViewById(R.id.web3_tokenview);
         webWrapper = findViewById(R.id.layout_webwrapper);
         itemView.setOnClickListener(this);
         ticketLayout = findViewById(R.id.layout_select_ticket);
         assetService = service;
         token = ticket;
+        tokenView.setChainId(ticket.tokenInfo.chainId);
         tokenView.setOnReadyCallback(this);
     }
 

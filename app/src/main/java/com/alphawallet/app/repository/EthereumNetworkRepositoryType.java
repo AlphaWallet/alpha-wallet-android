@@ -51,8 +51,6 @@ public interface EthereumNetworkRepositoryType {
     String getCurrentWalletAddress();
     boolean hasSetNetworkFilters();
     void setHasSetNetworkFilters();
-    String getDappBrowserRPC(long chainId);
-    String getTokenScriptRPC(long chainId);
 
     void saveCustomRPCNetwork(String networkName, String rpcUrl, long chainId, String symbol, String blockExplorerUrl, String explorerApiUrl, boolean isTestnet, Long oldChainId);
     void removeCustomRPCNetwork(long chainId);

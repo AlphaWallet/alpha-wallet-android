@@ -101,6 +101,7 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         tv.setVisibility(View.VISIBLE);
 
         //given a webview populate with rendered token
+        tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.displayTicketHolder(token, ticketRange.range, viewModel.getAssetDefinitionService());
         tokenView.setOnReadyCallback(this);
         tokenView.setLayout(token, ViewType.ITEM_VIEW);

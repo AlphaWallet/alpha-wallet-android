@@ -212,6 +212,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         {
             BigInteger  tokenId = token.getArrayBalance().get(0);
             TicketRange data    = new TicketRange(tokenId, token.getAddress());
+            testView.setChainId(token.tokenInfo.chainId);
             testView.renderTokenScriptView(token, data, viewModel.getAssetDefinitionService(), ViewType.ITEM_VIEW, td);
             testView.setOnReadyCallback(this);
         }

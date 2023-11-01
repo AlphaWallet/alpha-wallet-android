@@ -416,12 +416,6 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
         }
     }
 
-    // Use the backup node if avail
-    public String getNetworkNodeRPC(long chainId)
-    {
-        return ethereumNetworkRepository.getDappBrowserRPC(chainId);
-    }
-
     public NetworkInfo getNetworkInfo(long chainId)
     {
         return ethereumNetworkRepository.getNetworkByChain(chainId);

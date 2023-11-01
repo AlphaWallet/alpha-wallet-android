@@ -902,11 +902,6 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         }
     }
 
-    public String getBrowserRPC(long chainId)
-    {
-        return ethereumNetworkRepository.getTokenScriptRPC(chainId);
-    }
-
     public boolean hasTokenScript(Token token)
     {
         return token != null && assetDefinitionService.getAssetDefinition(token) != null;

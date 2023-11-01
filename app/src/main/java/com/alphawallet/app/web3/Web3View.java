@@ -235,11 +235,6 @@ public class Web3View extends WebView {
         loadInterface = iFace;
     }
 
-    public void setRpcUrl(@NonNull String rpcUrl)
-    {
-        webViewClient.getJsInjectorClient().setRpcUrl(rpcUrl);
-    }
-
     public void setOnSignTransactionListener(@Nullable OnSignTransactionListener onSignTransactionListener)
     {
         this.onSignTransactionListener = onSignTransactionListener;

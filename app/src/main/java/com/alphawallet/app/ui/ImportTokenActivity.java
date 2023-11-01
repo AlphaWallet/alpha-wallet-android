@@ -349,6 +349,10 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         importTickets.setVisibility(View.VISIBLE);
         importTickets.setAlpha(1.0f);
         MagicLinkData data = viewModel.getSalesOrder();
+        if (token != null)
+        {
+            tokenView.setChainId(token.tokenInfo.chainId);
+        }
 
         switch (data.contractType)
         {

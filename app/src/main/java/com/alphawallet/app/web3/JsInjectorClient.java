@@ -34,17 +34,13 @@ public class JsInjectorClient {
     private static final String DEFAULT_MIME_TYPE = "text/html";
     private final static String JS_TAG_TEMPLATE = "<script type=\"text/javascript\">%1$s%2$s</script>";
 
-    private final Context context;
-    private final OkHttpClient httpClient;
-
-    private long chainId = 1;
+    private long chainId;
     private Address walletAddress;
-    //Note: this default RPC is overridden before injection
-    private String rpcUrl = EthereumNetworkRepository.getDefaultNodeURL(MAINNET_ID);
+
+    private String rpcUrl;
 
     public JsInjectorClient(Context context) {
-        this.context = context;
-        this.httpClient = createHttpClient();
+
     }
 
     public Address getWalletAddress() {
@@ -59,16 +55,17 @@ public class JsInjectorClient {
         return chainId;
     }
 
-    public void setChainId(long chainId) {
+    public void setChainId(long chainId)
+    {
         this.chainId = chainId;
+        this.rpcUrl = EthereumNetworkRepository.getDefaultNodeURL(chainId);
     }
 
-    public String getRpcUrl() {
-        return rpcUrl;
-    }
-
-    public void setRpcUrl(String rpcUrl) {
-        this.rpcUrl = rpcUrl;
+    // Set ChainId for TokenScript inject
+    public void setTSChainId(long chainId)
+    {
+        this.chainId = chainId;
+        this.rpcUrl = EthereumNetworkRepository.getTSNodeURL(chainId);
     }
 
     public String initJs(Context context)
@@ -86,7 +83,7 @@ public class JsInjectorClient {
         String initSrc = loadFile(ctx, R.raw.init_token);
         //put the view in here
         String tokenIdWrapperName = "token-card-" + tokenId.toString(10);
-        initSrc = String.format(initSrc, tokenContent, walletAddress, EthereumNetworkRepository.getDefaultNodeURL(chainId), chainId, tokenIdWrapperName);
+        initSrc = String.format(initSrc, tokenContent, walletAddress, rpcUrl, chainId, tokenIdWrapperName);
         //now insert this source into the view
         // note that the <div> is not closed because it is closed in injectStyleAndWrap().
         String wrapper = "<div id=\"token-card-" + tokenId.toString(10) + "\" class=\"token-card\">";
@@ -216,11 +213,5 @@ public class JsInjectorClient {
             contentType = contentType.trim();
         }
         return contentType;
-    }
-
-    private OkHttpClient createHttpClient() {
-        return new OkHttpClient.Builder()
-                .cookieJar(new WebViewCookieJar())
-                .build();
     }
 }

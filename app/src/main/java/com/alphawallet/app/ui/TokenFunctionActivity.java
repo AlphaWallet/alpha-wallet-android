@@ -92,6 +92,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
 
         TicketRange data = new TicketRange(idList, token.tokenInfo.address, false);
 
+        tokenView.setChainId(token.tokenInfo.chainId);
         tokenView.displayTicketHolder(token, data, viewModel.getAssetDefinitionService(), ViewType.VIEW);
         tokenView.setOnReadyCallback(this);
         tokenView.setOnSetValuesListener(this);

@@ -721,10 +721,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private void onDefaultWallet(Wallet wallet)
     {
         this.wallet = wallet;
-        if (activeNetwork != null)
+        if (activeNetwork != null && wallet != null)
         {
             boolean needsReload = loadOnInit == null;
-            setupWeb3();
+            setupWeb3(wallet);
             if (needsReload) reloadPage();
         }
     }
@@ -745,7 +745,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         updateNetworkMenuItem();
         viewModel.setNetwork(chainId);
         startBalanceListener();
-        setupWeb3();
+        setupWeb3(wallet);
         web3.resetView();
         web3.reload();
     }
@@ -816,10 +816,10 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         });
     }
 
-    private void setupWeb3()
+    private void setupWeb3(Wallet wallet)
     {
+        if (wallet == null) { return; }
         web3.setChainId(activeNetwork.chainId);
-        web3.setRpcUrl(viewModel.getNetworkNodeRPC(activeNetwork.chainId));
         web3.setWalletAddress(new Address(wallet.address));
 
         web3.setWebChromeClient(new WebChromeClient()

@@ -139,8 +139,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private static final String BUNDLED_SCRIPT = "bundled";
     private static final long CHECK_TX_LOGS_INTERVAL = 20;
     private static final String EIP5169_ISSUER = "EIP5169-IPFS";
-    private static final String EIP5169_CERTIFIER = "Smart Token Labs";
-    private static final String EIP5169_KEY_OWNER = "Contract Owner"; //TODO Source this from the contract via owner()
     private static final String TS_EXTENSION = ".tsml";
     private final Context context;
     private final IPFSServiceType ipfsService;
@@ -250,7 +248,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         handledHashes.add(tsf.calcMD5()); //add the hash of the new file
                         //re-parse script, file hash has changed
                         final TokenDefinition td = parseFile(tsf.getInputStream());
-                        cacheSignature(tsf)
+                        cacheSignature(tsf, td)
                                 .map(definition -> getOriginContracts(td))
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(Schedulers.io())
@@ -291,7 +289,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         final String hash = tsf.calcMD5();
                         if (handledHashes.contains(hash)) return; //already handled this?
                         final TokenDefinition td = parseFile(tsf.getInputStream());
-                        cacheSignature(file)
+                        cacheSignature(file, td)
                                 .map(definition -> getOriginContracts(td))
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(Schedulers.io())
@@ -1177,7 +1175,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() > (assetChecked.get(correctedAddress) + 1000L * 60L * 60L)))
         {
             fetchXMLFromServer(correctedAddress)
-                    .flatMap(this::cacheSignature)
                     .flatMap(this::handleNewTSFile)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -1235,7 +1232,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 updateScriptEntriesInRealm(originContracts, isDebugOverride, tsf.calcMD5(), schemaUID);
                 cachedDefinition = td;
                 return tsf;
-        }).flatMap(tt -> cacheSignature(tsf))
+        }).flatMap(tt -> cacheSignature(tsf, td))
           .map(a -> fileLoadComplete(originContracts, tsf, td));
     }
 
@@ -1368,7 +1365,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 }
 
                 entry.setFileHash(fileHash);
-                if (scriptData.second.second) entry.setIpfsPath(scriptData.first); //if sourced from IPFS store path
+                entry.setIpfsPath(scriptData.first); //store scriptUri path
                 entry.setFilePath(storeFile.getAbsolutePath());
                 entry.setSchemaUID(td.getAttestationSchemaUID());
             });
@@ -1377,6 +1374,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             Timber.w(e);
         }
+
+        //check signature using the endpoint associated with scriptUri
+        //otherwise we use the endpoint that takes the full encoded file
+        
 
         return storeFile;
     }
@@ -2000,7 +2001,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     /* Add cached signature if uncached files found. */
-    private Single<File> cacheSignature(File file)
+    private Single<File> cacheSignature(File file, TokenDefinition td)
     {
         if (file.getName().equals(UNCHANGED_SCRIPT))
         {
@@ -2018,7 +2019,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 if (sig == null || sig.keyName == null)
                 {
                     //fetch signature and store in realm
-                    sig = alphaWalletService.checkTokenScriptSignature(tsf);
+                    sig = checkTokenScriptSignature(file, td, "");
                     tsf.determineSignatureType(sig);
                     storeCertificateData(hash, sig);
                 }
@@ -2026,6 +2027,24 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             return file;
         });
+    }
+
+    private XMLDsigDescriptor checkTokenScriptSignature(File file, TokenDefinition td, String scriptUri)
+    {
+        XMLDsigDescriptor sig;
+        ContractInfo info = td.contracts.get(td.holdingToken);
+        if (TextUtils.isEmpty(scriptUri))
+        {
+            TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
+            sig = alphaWalletService.checkTokenScriptSignature(tsf.getInputStream(), info.getfirstChainId(), info.getFirstAddress());
+        }
+        else
+        {
+            //String scriptUri, long chainId, String address
+            sig = alphaWalletService.checkTokenScriptSignature(scriptUri, info.getfirstChainId(), info.getFirstAddress());
+        }
+
+        return sig;
     }
 
     private void storeCertificateData(String hash, XMLDsigDescriptor sig) throws RealmException
@@ -2084,15 +2103,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private XMLDsigDescriptor IPFSSigDescriptor()
     {
-        XMLDsigDescriptor sig = new XMLDsigDescriptor();
-        sig.issuer = EIP5169_ISSUER;
-        sig.certificateName = EIP5169_CERTIFIER;
-        sig.keyName = EIP5169_KEY_OWNER;
-        sig.keyType = "ECDSA";
-        sig.result = "Pass";
-        sig.subject = "";
-        sig.type = SigReturnType.SIGNATURE_PASS;
-        return sig;
+        return new XMLDsigDescriptor(EIP5169_ISSUER);
     }
 
     private boolean checkFileDiff(String address, Pair<String, Boolean> result)
@@ -2508,16 +2519,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public Single<XMLDsigDescriptor> getSignatureData(Token token)
     {
         TokenScriptFile tsf = getTokenScriptFile(token);
-        return getSignatureData(tsf);
+        return getSignatureData(tsf, token.tokenInfo.chainId, token.tokenInfo.address);
     }
 
     public Single<XMLDsigDescriptor> getSignatureData(long chainId, String contractAddress)
     {
         TokenScriptFile tsf = getTokenScriptFile(chainId, contractAddress);
-        return getSignatureData(tsf);
+        return getSignatureData(tsf, chainId, contractAddress);
     }
 
-    private Single<XMLDsigDescriptor> getSignatureData(TokenScriptFile tsf)
+    private Single<XMLDsigDescriptor> getSignatureData(TokenScriptFile tsf, long chainId, String contractAddress)
     {
         return Single.fromCallable(() -> {
             XMLDsigDescriptor sigDescriptor = new XMLDsigDescriptor();
@@ -2530,7 +2541,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 XMLDsigDescriptor sig = getCertificateFromRealm(hash);
                 if (sig == null || (sig.result != null && sig.result.equalsIgnoreCase("fail")))
                 {
-                    sig = alphaWalletService.checkTokenScriptSignature(tsf);
+                    sig = alphaWalletService.checkTokenScriptSignature(tsf.getInputStream(), chainId, contractAddress);
                     tsf.determineSignatureType(sig);
                     storeCertificateData(hash, sig);
                 }
@@ -3147,7 +3158,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         //try the contractURI, then server
         return fetchTokenScriptFromContract(token, updateFlag)
                 .flatMap(file -> tryServerIfRequired(file, token.getAddress().toLowerCase()))
-                .flatMap(this::cacheSignature)
                 .flatMap(this::handleNewTSFile)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

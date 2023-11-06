@@ -244,9 +244,9 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    AlphaWalletService provideFeemasterService(OkHttpClient okHttpClient, TransactionRepositoryType transactionRepository, Gson gson)
+    AlphaWalletService provideFeemasterService(OkHttpClient okHttpClient, Gson gson)
     {
-        return new AlphaWalletService(okHttpClient, transactionRepository, gson);
+        return new AlphaWalletService(okHttpClient, gson);
     }
 
     @Singleton

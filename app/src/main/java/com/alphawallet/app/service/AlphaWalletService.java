@@ -3,24 +3,31 @@ package com.alphawallet.app.service;
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.token.tools.ParseMagicLink.currencyLink;
 import static com.alphawallet.token.tools.ParseMagicLink.spawnable;
+import static org.web3j.protocol.http.HttpService.JSON_MEDIA_TYPE;
 
-import com.alphawallet.app.entity.CryptoFunctions;
+import android.util.Base64;
+
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Ticket;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
-import com.alphawallet.app.repository.TransactionRepositoryType;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.MagicLinkData;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import org.json.JSONObject;
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
 
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,38 +35,47 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 import timber.log.Timber;
 
 public class AlphaWalletService
 {
     private final OkHttpClient httpClient;
-    private final TransactionRepositoryType transactionRepository;
     private final Gson gson;
     private ParseMagicLink parser;
-
     private static final String API = "api/";
     private static final String XML_VERIFIER_ENDPOINT = "https://aw.app/api/v1/verifyXMLDSig";
+    private static final String TSML_VERIFIER_ENDPOINT_STAGING = "https://doobtvjcpb8dc.cloudfront.net/tokenscript/validate";
+    private static final String TSML_VERIFIER_ENDPOINT = "https://api.smarttokenlabs.com/";
     private static final String XML_VERIFIER_PASS = "pass";
     private static final MediaType MEDIA_TYPE_TOKENSCRIPT
             = MediaType.parse("text/xml; charset=UTF-8");
 
     public AlphaWalletService(OkHttpClient httpClient,
-                              TransactionRepositoryType transactionRepository,
                               Gson gson) {
         this.httpClient = httpClient;
-        this.transactionRepository = transactionRepository;
         this.gson = gson;
     }
 
-    private void initParser()
+    private static class StatusElement
     {
-        if (parser == null)
+        String type;
+        String status;
+        String statusText;
+        String signingKey;
+
+        public XMLDsigDescriptor getXMLDsigDescriptor()
         {
-            parser = new ParseMagicLink(new CryptoFunctions(), EthereumNetworkRepository.extraChains());
+            XMLDsigDescriptor sig = new XMLDsigDescriptor();
+            sig.result = status;
+            sig.issuer = signingKey;
+            sig.certificateName = statusText;
+            sig.keyType = type;
+
+            return sig;
         }
     }
 
@@ -82,46 +98,44 @@ public class AlphaWalletService
 
     /**
      * Use API to determine tokenscript validity
-     * @param tokenScriptFile
+     * @param scriptUri
+     * @param chainId
+     * @param address
      * @return
      */
-    public XMLDsigDescriptor checkTokenScriptSignature(File tokenScriptFile)
+    public XMLDsigDescriptor checkTokenScriptSignature(String scriptUri, long chainId, String address)
     {
         XMLDsigDescriptor dsigDescriptor = new XMLDsigDescriptor();
         dsigDescriptor.result = "fail";
         try
         {
-            RequestBody body = RequestBody.Companion.create(tokenScriptFile, MEDIA_TYPE_TOKENSCRIPT);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("sourceType", "scriptUri");
+            jsonObject.put("sourceId", chainId + "-" + Keys.toChecksumAddress(address));
+            jsonObject.put("sourceUrl", scriptUri);
+            RequestBody body = RequestBody.create(jsonObject.toString(), JSON_MEDIA_TYPE);
 
-            RequestBody requestBody = new MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-                    .addFormDataPart("file", "tokenscript", body)
-                    .build();
+            okhttp3.Response response = getTSValidationCheck(body);
 
-            Request request = new Request.Builder().url(XML_VERIFIER_ENDPOINT)
-                    .post(requestBody)
-                    .build();
-
-            okhttp3.Response response = httpClient.newCall(request).execute();
-
-            String result = response.body().string();
-            JsonObject obj = gson.fromJson(result, JsonObject.class);
-            if (obj.has("error") || !obj.has("result")) return dsigDescriptor;
-
-            String queryResult = obj.get("result").getAsString();
-            if (queryResult.equals(XML_VERIFIER_PASS))
+            if ((response.code() / 100) == 2)
             {
-                dsigDescriptor = gson.fromJson(result, XMLDsigDescriptor.class);
-                //interpret subject to get the primary certifying body
-                String[] certifiers = dsigDescriptor.subject.split(",");
-                if (certifiers[0] != null && certifiers[0].length() > 3 && certifiers[0].startsWith("CN="))
+                String result = response.body().string();
+                JsonObject obj = gson.fromJson(result, JsonObject.class);
+                if (obj.has("error"))
+                    return dsigDescriptor;
+
+                JsonObject overview = obj.getAsJsonObject("overview");
+                if (overview != null)
                 {
-                    dsigDescriptor.certificateName = certifiers[0].substring(3);
+                    JsonArray statuses = overview.getAsJsonArray("originStatuses");
+                    if (statuses.size() == 0)
+                    {
+                        return dsigDescriptor;
+                    }
+
+                    StatusElement status1 = gson.fromJson(statuses.get(0), StatusElement.class);
+                    return status1.getXMLDsigDescriptor();
                 }
-            }
-            else
-            {
-                dsigDescriptor.subject = obj.get("failureReason").getAsString();
             }
         }
         catch (Exception e)
@@ -130,6 +144,89 @@ public class AlphaWalletService
         }
 
         return dsigDescriptor;
+    }
+
+    public XMLDsigDescriptor checkTokenScriptSignature(InputStream inputStream, long chainId, String address)
+    {
+        XMLDsigDescriptor dsigDescriptor = new XMLDsigDescriptor();
+        dsigDescriptor.result = "fail";
+        try
+        {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("sourceType", "scriptUri");
+            jsonObject.put("sourceId", chainId + "-" + Keys.toChecksumAddress(address));
+            jsonObject.put("sourceUrl", "");
+            jsonObject.put("base64Xml", streamToBase64(inputStream));
+            RequestBody body = RequestBody.create(jsonObject.toString(), JSON_MEDIA_TYPE);
+
+            okhttp3.Response response = getTSValidationCheck(body);
+
+            if ((response.code() / 100) == 2)
+            {
+                String result = response.body().string();
+                JsonObject obj = gson.fromJson(result, JsonObject.class);
+                if (obj.has("error"))
+                    return dsigDescriptor;
+
+                JsonObject overview = obj.getAsJsonObject("overview");
+                if (overview != null)
+                {
+                    JsonArray statuses = overview.getAsJsonArray("originStatuses");
+                    if (statuses.size() == 0)
+                    {
+                        return dsigDescriptor;
+                    }
+
+                    StatusElement status1 = gson.fromJson(statuses.get(0), StatusElement.class);
+                    return status1.getXMLDsigDescriptor();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
+
+        return dsigDescriptor;
+    }
+
+    private String streamToBase64(InputStream inputStream) throws Exception
+    {
+        StringBuilder sb = new StringBuilder();
+        try (Reader reader = new BufferedReader(new InputStreamReader
+                (inputStream, StandardCharsets.UTF_8)))
+        {
+            int c;
+            while ((c = reader.read()) != -1)
+            {
+                sb.append((char) c);
+            }
+        }
+
+        byte[] base64Encoded = Base64.encode(sb.toString().getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+
+        return new String(base64Encoded);
+    }
+
+    private Response getTSValidationCheck(RequestBody body) throws Exception
+    {
+        Request request = new Request.Builder().url(TSML_VERIFIER_ENDPOINT)
+                .post(body)
+                .build();
+
+        okhttp3.Response response = httpClient.newCall(request).execute();
+
+        if ((response.code() / 100) != 2)
+        {
+            //try staging endpoint
+            request = new Request.Builder().url(TSML_VERIFIER_ENDPOINT_STAGING)
+                    .post(body)
+                    .build();
+
+            response = httpClient.newCall(request).execute();
+        }
+
+        return response;
     }
 
     private Observable<Integer> sendFeemasterCurrencyTransaction(String url, long networkId, String address, MagicLinkData order)

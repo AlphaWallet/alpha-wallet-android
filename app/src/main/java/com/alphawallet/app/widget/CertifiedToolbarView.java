@@ -42,6 +42,8 @@ public class CertifiedToolbarView extends MaterialToolbar
 
         SigReturnType type = sigData.type != null ? sigData.type : SigReturnType.NO_TOKENSCRIPT;
 
+        downloadSpinner.setVisibility(View.GONE);
+
         lockResource = 0;
 
         switch (type)

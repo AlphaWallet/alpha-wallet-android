@@ -159,42 +159,17 @@ public class TokenScriptFile extends File
     public void determineSignatureType(XMLDsigDescriptor sigDescriptor)
     {
         boolean isDebug = isDebug();
-        if (sigDescriptor.result.equals("pass"))
-        {
-            if (isDebug) sigDescriptor.type = SigReturnType.DEBUG_SIGNATURE_PASS;
-            else sigDescriptor.type = SigReturnType.SIGNATURE_PASS;
-        }
-        else
-        {
-            setFailedIssuer(isDebug, sigDescriptor);
-        }
-    }
-
-    private void setFailedIssuer(boolean isDebug, XMLDsigDescriptor sigDescriptor)
-    {
+        String keyName;
         if (isDebug)
         {
-            sigDescriptor.keyName = context.getString(R.string.debug_script);
+            keyName = context.getString(R.string.debug_script);
         }
         else
         {
-            sigDescriptor.keyName = context.getString(R.string.unsigned_script);
+            keyName = context.getString(R.string.unsigned_script);
         }
 
-        if (sigDescriptor.subject != null && sigDescriptor.subject.contains("Invalid"))
-        {
-            if (isDebug)
-                sigDescriptor.type = SigReturnType.DEBUG_SIGNATURE_INVALID;
-            else
-                sigDescriptor.type = SigReturnType.SIGNATURE_INVALID;
-        }
-        else
-        {
-            if (isDebug)
-                sigDescriptor.type = SigReturnType.DEBUG_NO_SIGNATURE;
-            else
-                sigDescriptor.type = SigReturnType.NO_SIGNATURE;
-        }
+        sigDescriptor.setKeyDetails(isDebug, keyName);
     }
 
     public boolean fileChanged(String fileHash)

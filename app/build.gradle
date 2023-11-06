@@ -73,8 +73,8 @@ android {
         }
     }
     defaultConfig {
-        versionCode 250
-        versionName "3.71"
+        versionCode 251
+        versionName "3.72"
 
         applicationId "io.stormbird.wallet"
         minSdkVersion 24
@@ -252,7 +252,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
-    implementation 'androidx.recyclerview:recyclerview:1.3.1'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'androidx.biometric:biometric:1.1.0'
     implementation 'androidx.gridlayout:gridlayout:1.0.0'
 
@@ -278,7 +278,7 @@ dependencies {
     implementation "com.google.dagger:hilt-android:2.48"
     annotationProcessor "com.google.dagger:hilt-compiler:2.48"
 
-    // WebKit - for WebView Dark Mode
+    // WebKit - for WebView Dark Mode (NB Can't be upgraded from 1.7.0 until migration to Gradle 8)
     implementation 'androidx.webkit:webkit:1.7.0'
 
     //Use Leak Canary for debug builds only
@@ -312,9 +312,9 @@ dependencies {
     analyticsImplementation 'com.google.android.play:core:1.10.3'
 
     analyticsImplementation 'com.google.android.play:core:1.10.3'
-    analyticsImplementation 'com.google.firebase:firebase-analytics:21.3.0'
+    analyticsImplementation 'com.google.firebase:firebase-analytics:21.5.0'
     analyticsImplementation 'com.mixpanel.android:mixpanel-android:5.8.4'
-    analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.4.3'
+    analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.5.1'
 
     // Notifications: NB there appears to be an incompatibility in the newer builds of firebase-messaging.
     // Update when resolved.

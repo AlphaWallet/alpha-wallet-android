@@ -511,6 +511,7 @@ public class TokenDefinition
             parseTags(xml);
             extractSignedInfo(xml);
             //scanAttestation(xml);
+            checkOrigin();
         }
         catch (IOException|SAXException e)
         {
@@ -520,6 +521,15 @@ public class TokenDefinition
         {
             e.printStackTrace(); //catch other type of exception not thrown by this function.
             result.parseMessage(ParseResult.ParseResultId.PARSE_FAILED);
+        }
+    }
+
+    private void checkOrigin() throws SAXException
+    {
+        ContractInfo thisScript = contracts.get(holdingToken);
+        if (thisScript == null)
+        {
+            throw new SAXException("PARSE ERROR: Origins Token '" + holdingToken + "' not defined.");
         }
     }
 
@@ -534,8 +544,11 @@ public class TokenDefinition
                 switch (element.getLocalName())
                 {
                     case "origins":
-                        TSOrigins origin = parseOrigins(element); //parseOrigins(element);
-                        if (origin.isType(TSOriginType.Contract) || origin.isType(TSOriginType.Attestation)) holdingToken = origin.getOriginName();
+                        TSOrigins origin = parseOrigins(element);
+                        if (origin.isType(TSOriginType.Contract) || origin.isType(TSOriginType.Attestation))
+                        {
+                            holdingToken = origin.getOriginName();
+                        }
                         break;
                     case "contract":
                         handleAddresses(element);

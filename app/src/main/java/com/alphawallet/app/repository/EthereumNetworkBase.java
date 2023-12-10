@@ -262,7 +262,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(POLYGON_TEST_ID, new NetworkInfo(C.POLYGON_TEST_NETWORK, C.POLYGON_SYMBOL,
                     MUMBAI_TEST_RPC_URL,
                     "https://mumbai.polygonscan.com/tx/", POLYGON_TEST_ID,
-                    MUMBAI_FALLBACK_RPC_URL, " https://api-testnet.polygonscan.com/api?"));
+                    MUMBAI_FALLBACK_RPC_URL, "https://api-testnet.polygonscan.com/api?"));
             put(OPTIMISTIC_MAIN_ID, new NetworkInfo(C.OPTIMISTIC_NETWORK, C.ETH_SYMBOL,
                     OPTIMISTIC_MAIN_URL,
                     "https://optimistic.etherscan.io/tx/", OPTIMISTIC_MAIN_ID, OPTIMISTIC_MAIN_FALLBACK_URL,

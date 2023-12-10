@@ -3130,6 +3130,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     //Import script from scriptURI
     public Single<TokenDefinition> checkServerForScript(Token token, MutableLiveData<Boolean> updateFlag)
     {
+        if (token == null)
+        {
+            return Single.fromCallable(TokenDefinition::new);
+        }
+
         TokenScriptFile tf = getTokenScriptFile(token);
 
         if ((tf != null && tf.exists()) && !isInSecureZone(tf))

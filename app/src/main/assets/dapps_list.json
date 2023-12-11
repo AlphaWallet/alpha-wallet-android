@@ -1,7 +1,9 @@
 [
+  {"name": "TokenScript", "description": "Smart Token Labs TokenScript Viewer", "url": "https://viewer.tokenscript.org/", "category": "Infrastructure"},
+  {"name": "SmartLayer", "description": "Smart Token Labs Smart Layer Network", "url": "https://smartlayer.network", "category": "Infrastructure"},
   {"name": "Aave", "description": "A decentralized non-custodial liquidity protocol where users can participate as depositors or borrowers", "url": "https://app.aave.com/", "category": "Finance"},
   {"name": "Tbull", "description": "A Utility Token on Binance Smart Chain for Payments for Services", "url": "tbull.live", "category": "Utility"},
-  {"name": "Rare Coin", "description": "Free Crypto Faucet & Yeild Farming", "url": "make.rare.claims", "category": "Tool"},
+  {"name": "Rare Coin", "description": "Free Crypto Faucet & Yield Farming", "url": "make.rare.claims", "category": "Tool"},
   {"name": "Eporio", "description": "The cheaper marketplace for NFT - Non Fungible Tokens", "url": "https://epor.io", "category": "Marketplace"},
   {"name": "DeFiBox", "description": "one-stop DeFi asset, data and protocols aggregation platform", "url": "https://www.defibox.com/index?utm_source=2189969", "category": "Tool"},
   {"name": "TokenSets", "description": "Enhance your portfolio with automated asset management strategies.", "url": "https://www.tokensets.com/", "category": "Finance"},

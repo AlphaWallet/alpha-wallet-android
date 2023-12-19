@@ -1395,7 +1395,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     .equalTo("instanceKey", entryKey)
                     .findFirst();
 
-            if (entry != null && !TextUtils.isEmpty(entry.getFileHash())
+            if (entry != null && Utils.isIPFS(entry.getIpfsPath())
+                    && !TextUtils.isEmpty(entry.getFileHash())
                     && !TextUtils.isEmpty(entry.getFilePath())
                     && !TextUtils.isEmpty(entry.getIpfsPath())
                     && entry.getIpfsPath().equals(uri)

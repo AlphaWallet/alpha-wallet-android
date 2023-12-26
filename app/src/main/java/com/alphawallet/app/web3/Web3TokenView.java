@@ -29,6 +29,8 @@ import androidx.webkit.WebViewFeature;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.UpdateType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
@@ -57,6 +59,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -84,11 +87,15 @@ public class Web3TokenView extends WebView
     private RealmResults<RealmAuxData> realmAuxUpdates;
 
     protected WebCompletionCallback keyPressCallback;
+    @Nullable
+    private Disposable buildViewAttrs;
 
     @Nullable
     private OnSignPersonalMessageListener onSignPersonalMessageListener;
     @Nullable
     private OnSetValuesListener onSetValuesListener;
+
+    private String attrResults;
 
     public Web3TokenView(@NonNull Context context) {
         super(context);
@@ -450,7 +457,8 @@ public class Web3TokenView extends WebView
         loadData(displayData, "text/html", "utf-8");
     }
 
-    public boolean renderTokenScriptView(Token token, TicketRange range, AssetDefinitionService assetService, ViewType itemView, final TokenDefinition td)
+    public boolean renderTokenScriptView(Token token, TicketRange range, AssetDefinitionService assetService, ViewType itemView,
+                                         final TokenDefinition td)
     {
         BigInteger tokenId = range.tokenIds.get(0);
         if (!td.hasTokenView())
@@ -458,14 +466,15 @@ public class Web3TokenView extends WebView
             return false;
         }
 
+        attrResults = "";
+
         final StringBuilder attrs = assetService.getTokenAttrs(token, tokenId, range.tokenIds.size());
 
-        assetService.resolveAttrs(token, null, tokenId, assetService.getTokenViewLocalAttributes(token), itemView)
+        buildViewAttrs = assetService.resolveAttrs(token, null, tokenId, assetService.getTokenViewLocalAttributes(token), itemView, UpdateType.USE_CACHE)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(token, throwable, range),
-                           () -> displayTicket(token, assetService, attrs, itemView, range, td))
-                .isDisposed();
+                           () -> displayTokenView(token, assetService, attrs, itemView, range, td));
 
         return true;
     }
@@ -478,7 +487,7 @@ public class Web3TokenView extends WebView
      * @param iconified
      * @param range
      */
-    private void displayTicket(Token token, AssetDefinitionService assetService, StringBuilder attrs, ViewType iconified, TicketRange range, final TokenDefinition td)
+    private void displayTokenView(Token token, AssetDefinitionService assetService, StringBuilder attrs, ViewType iconified, TicketRange range, final TokenDefinition td)
     {
         setVisibility(View.VISIBLE);
         String viewName;
@@ -534,6 +543,11 @@ public class Web3TokenView extends WebView
         return lastResultTime + 1;
     }
 
+    public String getAttrResults()
+    {
+        return attrResults;
+    }
+
     @Override
     public void onPause()
     {
@@ -562,6 +576,11 @@ public class Web3TokenView extends WebView
             {
                 realmAuxUpdates.getRealm().close();
             }
+        }
+
+        if (buildViewAttrs != null && !buildViewAttrs.isDisposed())
+        {
+            buildViewAttrs.dispose();
         }
     }
 
@@ -600,5 +619,6 @@ public class Web3TokenView extends WebView
     private void onAttr(TokenScriptResult.Attribute attribute, StringBuilder attrs)
     {
         TokenScriptResult.addPair(attrs, attribute.id, attribute.text);
+        attrResults += attribute.text;
     }
 }

@@ -28,4 +28,6 @@ public interface StandardFunctionInterface
     default void showWaitSpinner(boolean show) { }
 
     default void handleFunctionDenied(String denialMessage) { }
+
+    default void completeFunctionSetup() { }
 }

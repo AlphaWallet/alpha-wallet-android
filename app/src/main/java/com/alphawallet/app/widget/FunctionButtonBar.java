@@ -39,6 +39,7 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.ItemClick;
 import com.alphawallet.app.entity.OnRampContract;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.UpdateType;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
@@ -698,7 +699,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         findViewById(R.id.wait_buttons).setVisibility(View.VISIBLE);
 
         //get the available map for this collection
-        assetSvs.fetchFunctionMap(token, selection, type)
+        assetSvs.fetchFunctionMap(token, selection, type, UpdateType.UPDATE_IF_REQUIRED)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(availabilityMap -> setupTokenMap(token, availabilityMap), this::onMapFetchError)
@@ -728,6 +729,8 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
             populateButtons(token, tokenId);
             showButtons();
         }
+
+        callStandardFunctions.completeFunctionSetup();
     }
 
     private void showButtons()

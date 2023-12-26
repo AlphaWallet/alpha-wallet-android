@@ -32,6 +32,7 @@ import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionReturn;
+import com.alphawallet.app.entity.UpdateType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -219,7 +220,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         //Add attestation attributes
         attrs.append(viewModel.addAttestationAttrs(asset, token, action));
 
-        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs)
+        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs, UpdateType.USE_CACHE)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onAttr, this::onError, () -> displayFunction(attrs.toString()))
@@ -392,7 +393,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             @Override
             public void unresolvedSymbolError(String value)
             {
-                Timber.d("ATTR/FA: Resolve: ERROR: " + value);
+                Timber.d("ATTR/FA: Resolve: ERROR: %s", value);
                 tokenScriptError(value, null);
             }
         };
@@ -1000,15 +1001,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     {
                         callback.unresolvedSymbolError(value);
                     }
-                });
-    }
-
-    private void repopulateInputField(String key, String value)
-    {
-        tokenView.evaluateJavascript(
-                "(function() { document.getElementById(\"" + key + "\").innerHTML = \"" + value + "\"; })();",
-                html -> {
-                    Timber.d("Worked?");
                 });
     }
 }

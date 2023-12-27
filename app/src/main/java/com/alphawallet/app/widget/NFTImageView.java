@@ -212,7 +212,6 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
     private void setWebView(String imageUrl, ImageType hint)
     {
         progressBar.setVisibility(VISIBLE);
-        webView.setOnTouchListener(this);
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
         webView.setWebChromeClient(new WebChromeClient());
@@ -245,6 +244,7 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
             else if (useType.getImageType() == ImageType.ANIM)
             {
                 String loaderAnim = loadFile(getContext(), R.raw.token_anim).replace("[URL]", imageUrl).replace("[MIME]", useType.getMimeType());
+                webView.setOnTouchListener(this);
                 webView.getSettings().setJavaScriptEnabled(true);
                 webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
                 webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
@@ -256,6 +256,7 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
             }
             else if (useType.getImageType() == ImageType.MODEL)
             {
+                webView.setOnTouchListener(this);
                 String loader = loadFile(getContext(), R.raw.token_model).replace("[URL]", imageUrl);
                 String base64 = android.util.Base64.encodeToString(loader.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
                 webView.loadData(base64, "text/html; charset=utf-8", "base64");
@@ -554,7 +555,11 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
             {
                 case "":
                     mimeStr = "";
-                    if (hint == ImageType.IMAGE || hint == ImageType.ANIM)
+                    if (url.contains("tokenscript.org"))
+                    {
+                        type = ImageType.WEB;
+                    }
+                    else if (hint == ImageType.IMAGE || hint == ImageType.ANIM)
                     {
                         type = hint;
                     }

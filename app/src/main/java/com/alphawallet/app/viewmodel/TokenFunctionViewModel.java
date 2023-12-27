@@ -21,8 +21,10 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
+import com.alphawallet.app.entity.TSAttrCallback;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionReturn;
+import com.alphawallet.app.entity.UpdateType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -132,6 +134,9 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
 
     @Nullable
     private Disposable scriptUpdate;
+
+    @Nullable
+    private Disposable attrRefresh;
 
     @Inject
     TokenFunctionViewModel(
@@ -575,6 +580,10 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         {
             scriptUpdate.dispose();
         }
+        if (attrRefresh != null && !attrRefresh.isDisposed())
+        {
+            attrRefresh.dispose();
+        }
 
         gasService.stopGasPriceCycle();
     }
@@ -852,6 +861,25 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         nftAsset.postValue(asset);
     }
 
+    public void completeTokenScriptSetup(Token token, BigInteger tokenId, String prevResult, TSAttrCallback tsCb)
+    {
+        final StringBuilder attrsTxt = new StringBuilder();
+        final List<TokenScriptResult.Attribute> attrs = new ArrayList<>();
+
+        if (hasTokenScript(token))
+        {
+            attrRefresh = assetDefinitionService.resolveAttrs(token, new ArrayList<>(Collections.singleton(tokenId)), null, UpdateType.USE_CACHE)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(attr -> { attrs.add(attr); attrsTxt.append(attr.text); }, this::onError, () -> checkUpdatedAttrs(prevResult, attrsTxt, attrs, tsCb));
+        }
+    }
+
+    private void checkUpdatedAttrs(String prevResult, final StringBuilder attrsText, List<TokenScriptResult.Attribute> attrs, TSAttrCallback tsCb)
+    {
+        tsCb.showTSAttributes(attrs, !prevResult.equals(attrsText.toString()));
+    }
+
     private void onAssetError(Throwable throwable)
     {
         Timber.d(throwable);
@@ -910,13 +938,14 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     public void updateLocalAttributes(Token token, BigInteger tokenId)
     {
         //Fetch Allowed attributes, then call updateAllowedAttributes
-        assetDefinitionService.fetchFunctionMap(token, Collections.singletonList(tokenId), token.getInterfaceSpec())
+        assetDefinitionService.fetchFunctionMap(token, Collections.singletonList(tokenId), token.getInterfaceSpec(), UpdateType.USE_CACHE)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(availableActions -> updateAllowedAttrs(token, availableActions), this::onError)
                 .isDisposed();
     }
 
+    /** @noinspection SimplifyOptionalCallChains*/
     private void updateAllowedAttrs(Token token, Map<BigInteger, List<String>> availableActions)
     {
         if (!availableActions.keySet().stream().findFirst().isPresent())
@@ -985,7 +1014,6 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     {
         return genericWalletInteract.findWallet(walletAddress);
     }
-
 
     public String addAttestationAttrs(NFTAsset asset, Token token, TSAction action)
     {

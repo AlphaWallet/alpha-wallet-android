@@ -28,6 +28,7 @@ import com.alphawallet.app.entity.EasAttestation;
 import com.alphawallet.app.entity.FragmentMessenger;
 import com.alphawallet.app.entity.QueryResponse;
 import com.alphawallet.app.entity.TokenLocator;
+import com.alphawallet.app.entity.UpdateType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Attestation;
@@ -592,7 +593,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (originToken == null || td == null) return null;
 
         //produce result
-        return tokenscriptUtility.fetchAttrResult(originToken, attr, tokenId, td, this, ViewType.VIEW).blockingGet();
+        return tokenscriptUtility.fetchAttrResult(originToken, attr, tokenId, td, this, ViewType.VIEW, UpdateType.UPDATE_IF_REQUIRED).blockingGet();
     }
 
     /**
@@ -1395,7 +1396,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     .equalTo("instanceKey", entryKey)
                     .findFirst();
 
-            if (entry != null && !TextUtils.isEmpty(entry.getFileHash())
+            if (entry != null && Utils.isIPFS(entry.getIpfsPath())
+                    && !TextUtils.isEmpty(entry.getFileHash())
                     && !TextUtils.isEmpty(entry.getFilePath())
                     && !TextUtils.isEmpty(entry.getIpfsPath())
                     && entry.getIpfsPath().equals(uri)
@@ -2304,7 +2306,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      * @param token
      * @return map of unique tokenIds to lists of allowed functions for that ID - note that we allow the function to be displayed if it has a denial message
      */
-    public Single<Map<BigInteger, List<String>>> fetchFunctionMap(Token token, @NotNull List<BigInteger> tokenIds, ContractType type)
+    public Single<Map<BigInteger, List<String>>> fetchFunctionMap(Token token, @NotNull List<BigInteger> tokenIds,
+                                                                  ContractType type, UpdateType update)
     {
         return Single.fromCallable(() -> {
             ActionModifier requiredActionModifier = type == ContractType.ATTESTATION ? ActionModifier.ATTESTATION : ActionModifier.NONE;
@@ -2316,7 +2319,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 //first gather all attrs required - do this so if there's multiple actions using the same attribute for a tokenId we aren't fetching the value repeatedly
                 List<String> requiredAttrNames = getRequiredAttributeNames(actions, td);
                 Map<BigInteger, Map<String, TokenScriptResult.Attribute>> attrResults   // Map of attribute results vs tokenId
-                        = getRequiredAttributeResults(requiredAttrNames, tokenIds, td, token); // Map of all required attribute values vs all the tokenIds
+                        = getRequiredAttributeResults(requiredAttrNames, tokenIds, td, token, update); // Map of all required attribute values vs all the tokenIds
 
                 for (BigInteger tokenId : tokenIds)
                 {
@@ -2387,7 +2390,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 {
                     Attribute attr = td.attributes.get(attrId);
                     if (attr == null) continue;
-                    TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, ViewType.VIEW).blockingGet();
+                    TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, tokenId, td, this, ViewType.VIEW, UpdateType.ALWAYS_UPDATE).blockingGet();
                     if (attrResult != null) attrs.put(attrId, attrResult);
                 }
 
@@ -2424,7 +2427,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return results;
     }
 
-    private Map<BigInteger, Map<String, TokenScriptResult.Attribute>> getRequiredAttributeResults(List<String> requiredAttrNames, List<BigInteger> tokenIds, TokenDefinition td, Token token)
+    private Map<BigInteger, Map<String, TokenScriptResult.Attribute>> getRequiredAttributeResults(List<String> requiredAttrNames, List<BigInteger> tokenIds,
+                                                                                                  TokenDefinition td, Token token, UpdateType update)
     {
         Map<BigInteger, Map<String, TokenScriptResult.Attribute>> resultSet = new HashMap<>();
         for (BigInteger tokenId : tokenIds)
@@ -2434,7 +2438,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 Attribute attr = td.attributes.get(attrName);
                 if (attr == null) continue;
                 BigInteger useTokenId = td.useZeroForTokenIdAgnostic(attrName, tokenId);
-                TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, useTokenId, td, this, ViewType.VIEW).blockingGet();
+                TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, useTokenId, td, this, ViewType.VIEW, update).blockingGet();
                 if (attrResult != null)
                 {
                     Map<String, TokenScriptResult.Attribute> tokenIdMap = resultSet.get(useTokenId);
@@ -2812,7 +2816,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         tokenscriptUtility.clearParseMaps();
     }
 
-    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, TokenDefinition td, BigInteger tokenId, List<Attribute> extraAttrs, ViewType itemView)
+    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, TokenDefinition td, BigInteger tokenId,
+                                                                List<Attribute> extraAttrs, ViewType itemView, UpdateType update)
     {
         TokenDefinition definition = td != null ? td : getAssetDefinition(token);
         ContractAddress cAddr = new ContractAddress(token.tokenInfo.chainId, token.tokenInfo.address);
@@ -2826,7 +2831,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         List<Attribute> attrList = new ArrayList<>(definition.attributes.values());
         if (extraAttrs != null) attrList.addAll(extraAttrs);
 
-        return resolveAttrs(token, tokenId, definition, attrList, itemView);
+        return resolveAttrs(token, tokenId, definition, attrList, itemView, update);
     }
 
     public List<TokenScriptResult.Attribute> getAttestationAttrs(Token token, TSAction action, String attnId)
@@ -2952,15 +2957,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     }
 
     private Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, BigInteger tokenId, TokenDefinition td,
-                                                                 List<Attribute> attrList, ViewType itemView)
+                                                                 List<Attribute> attrList, ViewType itemView, UpdateType update)
     {
         tokenscriptUtility.buildAttrMap(attrList);
         return Observable.fromIterable(attrList)
                 .flatMap(attr -> tokenscriptUtility.fetchAttrResult(token, attr, tokenId,
-                        td, this, itemView).toObservable());
+                        td, this, itemView, update).toObservable());
     }
 
-    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds, List<Attribute> extraAttrs)
+    public Observable<TokenScriptResult.Attribute> resolveAttrs(Token token, List<BigInteger> tokenIds, List<Attribute> extraAttrs, UpdateType update)
     {
         TokenDefinition definition = getAssetDefinition(token);
         if (definition == null)
@@ -2975,7 +2980,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //TODO: store transaction fetch time for multiple tokenIds
 
-        return resolveAttrs(token, definition, tokenIds.get(0), extraAttrs, ViewType.VIEW);
+        return resolveAttrs(token, definition, tokenIds.get(0), extraAttrs, ViewType.VIEW, UpdateType.UPDATE_IF_REQUIRED);
     }
 
     private void resolveTokenIds(Attribute attrType, List<BigInteger> tokenIds)

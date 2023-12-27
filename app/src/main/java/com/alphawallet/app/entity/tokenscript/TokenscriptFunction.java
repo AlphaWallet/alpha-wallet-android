@@ -5,6 +5,7 @@ import static org.web3j.protocol.core.methods.request.Transaction.createEthCallT
 
 import android.text.TextUtils;
 
+import com.alphawallet.app.entity.UpdateType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.util.BalanceUtils;
@@ -730,6 +731,17 @@ public abstract class TokenscriptFunction
             if (!TextUtils.isEmpty(res) && res.equalsIgnoreCase("TRUE")) val = BigInteger.ONE;
             else val = BigInteger.ZERO;
         }
+        else if (attr.syntax == TokenDefinition.Syntax.Integer)
+        {
+            if (transactionResult.result.startsWith("0x"))
+            {
+                val = new BigInteger(transactionResult.result, 16);
+            }
+            else
+            {
+                val = new BigInteger(transactionResult.result);
+            }
+        }
         else if (attr.syntax == TokenDefinition.Syntax.NumericString && attr.as != As.Address)
         {
             if (transactionResult.result == null)
@@ -863,7 +875,8 @@ public abstract class TokenscriptFunction
         }
         else
         {
-            return fetchAttrResult(token, attr, tokenId, definition, attrIf, ViewType.VIEW).blockingGet().text;
+            return fetchAttrResult(token, attr, tokenId, definition, attrIf,
+                    ViewType.VIEW, UpdateType.ALWAYS_UPDATE).blockingGet().text;
         }
 
         return null;
@@ -892,14 +905,16 @@ public abstract class TokenscriptFunction
      */
 
     public Single<TokenScriptResult.Attribute> fetchAttrResult(Token token, Attribute attr, BigInteger tokenId,
-                                                               TokenDefinition td, AttributeInterface attrIf, ViewType itemView)
+                                                               TokenDefinition td, AttributeInterface attrIf,
+                                                               ViewType itemView, UpdateType update)
     {
-        final BigInteger useTokenId = (attr == null) ? BigInteger.ZERO : tokenId;
         if (attr == null)
         {
             return Single.fromCallable(() -> new TokenScriptResult.Attribute("bd", "bd", BigInteger.ZERO, ""));
         }
-        else if (token.getAttributeResult(attr.name, useTokenId) != null)
+
+        final BigInteger useTokenId = attr.usesTokenId() ? tokenId : BigInteger.ZERO;
+        if (token.getAttributeResult(attr.name, useTokenId) != null)
         {
             return Single.fromCallable(() -> token.getAttributeResult(attr.name, useTokenId));
         }
@@ -929,7 +944,10 @@ public abstract class TokenscriptFunction
             ContractAddress useAddress = new ContractAddress(attr.function); //always use the function attribute's address
             long lastTxUpdate = attrIf.getLastTokenUpdate(useAddress.chainId, useAddress.address);
             TransactionResult cachedResult = attrIf.getFunctionResult(useAddress, attr, useTokenId); //Needs to allow for multiple tokenIds
-            if ((itemView == ViewType.ITEM_VIEW || (!attr.isVolatile() && ((attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(lastTxUpdate)))))) //can we use wallet's known data or cached value?
+            boolean shouldUseCache = checkUpdateRequired(attrIf, attr, cachedResult, update,
+                    itemView == ViewType.ITEM_VIEW, lastTxUpdate, useAddress);
+
+            if (shouldUseCache) //can we use wallet's known data or cached value?
             {
                 return resultFromDatabase(cachedResult, attr);
             }
@@ -943,6 +961,27 @@ public abstract class TokenscriptFunction
                         .map(result -> parseFunctionResult(result, attr));    // write returned data into attribute
             }
         }
+    }
+
+    private boolean checkUpdateRequired(AttributeInterface attrIf, Attribute attr,
+                                        TransactionResult cachedResult, UpdateType update,
+                                        boolean isItemView, long lastTxUpdate,
+                                        ContractAddress useAddress)
+    {
+        switch (update)
+        {
+            case USE_CACHE -> {
+                return isItemView || !(cachedResult.resultTime == 0); //only update if no result
+            }
+            case UPDATE_IF_REQUIRED -> {
+                return (isItemView || (!attr.isVolatile() && ((attrIf.resolveOptimisedAttr(useAddress, attr, cachedResult) || !cachedResult.needsUpdating(lastTxUpdate)))));
+            }
+            case ALWAYS_UPDATE -> {
+                return isItemView;
+            }
+        }
+
+        return true;
     }
 
     private Single<TokenScriptResult.Attribute> getEventResult(TransactionResult txResult, Attribute attr, BigInteger tokenId, AttributeInterface attrIf)
@@ -973,7 +1012,12 @@ public abstract class TokenscriptFunction
         return Single.fromCallable(() -> {
             try
             {
-                if (attr.userInput)
+                if (refTags.containsKey(attr.name))
+                {
+                    attr.userInput = false;
+                    return new TokenScriptResult.Attribute(attr.name, attr.label, BigInteger.ZERO, refTags.get(attr.name), false);
+                }
+                else if (attr.userInput)
                 {
                     return new TokenScriptResult.Attribute(attr.name, attr.label, BigInteger.ZERO, "", true);
                 }

@@ -6,6 +6,8 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.webkit.CookieManager;
+import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -201,12 +203,17 @@ public class AdvancedSettingsActivity extends BaseActivity
 
     private void onClearBrowserCacheClicked()
     {
-        WebView webView = new WebView(this);
-        webView.clearCache(true);
-        viewModel.blankFilterSettings();
-
         Single.fromCallable(() ->
             {
+                WebView webView = new WebView(this);
+                webView.clearCache(true);
+                webView.clearFormData();
+                webView.clearHistory();
+                webView.clearSslPreferences();
+                CookieManager cookieManager = CookieManager.getInstance();
+                cookieManager.removeAllCookies(null);
+                WebStorage.getInstance().deleteAllData();
+                viewModel.blankFilterSettings();
                 Glide.get(this).clearDiskCache();
                 return 1;
             }).subscribeOn(Schedulers.io())

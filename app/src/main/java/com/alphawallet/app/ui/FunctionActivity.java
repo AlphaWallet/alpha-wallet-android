@@ -32,6 +32,7 @@ import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionReturn;
+import com.alphawallet.app.entity.UpdateType;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -65,15 +66,14 @@ import com.alphawallet.token.entity.Signable;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptElement;
-import org.web3j.utils.Numeric;
 
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
+import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -220,7 +220,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         //Add attestation attributes
         attrs.append(viewModel.addAttestationAttrs(asset, token, action));
 
-        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs)
+        viewModel.getAssetDefinitionService().resolveAttrs(token, tokenIds, localAttrs, UpdateType.USE_CACHE)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onAttr, this::onError, () -> displayFunction(attrs.toString()))
@@ -393,7 +393,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             @Override
             public void unresolvedSymbolError(String value)
             {
-                Timber.d("ATTR/FA: Resolve: ERROR: " + value);
+                Timber.d("ATTR/FA: Resolve: ERROR: %s", value);
                 tokenScriptError(value, null);
             }
         };
@@ -1001,15 +1001,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
                     {
                         callback.unresolvedSymbolError(value);
                     }
-                });
-    }
-
-    private void repopulateInputField(String key, String value)
-    {
-        tokenView.evaluateJavascript(
-                "(function() { document.getElementById(\"" + key + "\").innerHTML = \"" + value + "\"; })();",
-                html -> {
-                    Timber.d("Worked?");
                 });
     }
 }

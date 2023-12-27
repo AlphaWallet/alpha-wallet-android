@@ -32,6 +32,6 @@ public class TransactionResult
     public boolean needsUpdating(long lastTxTime)
     {
         //if contract had new transactions then update, or if last tx was -1 (always check)
-        return (resultTime == 0 || ((System.currentTimeMillis() + 5*10*1000) < resultTime) || lastTxTime < 0 || lastTxTime > resultTime);
+        return resultTime == 0 || System.currentTimeMillis() > (resultTime + 30*1000) || lastTxTime < 0 || lastTxTime > resultTime;
     }
 }

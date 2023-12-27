@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -35,6 +34,7 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
+import com.alphawallet.app.entity.TSAttrCallback;
 import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -62,7 +62,6 @@ import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TicketRange;
 import com.alphawallet.token.entity.TokenScriptResult;
-import com.alphawallet.token.entity.TokenScriptResult.Attribute;
 import com.alphawallet.token.entity.ViewType;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.TokenDefinition;
@@ -75,11 +74,7 @@ import java.util.List;
 import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
 
 @AndroidEntryPoint
 public class NFTAssetDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
@@ -317,7 +312,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         else
         {
             viewModel.getAsset(token, tokenId);
-            viewModel.updateLocalAttributes(token, tokenId);
+            viewModel.updateLocalAttributes(token, tokenId); //when complete calls displayTokenView
         }
     }
 
@@ -334,7 +329,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel.sig().observe(this, this::onSignature);
         viewModel.newScriptFound().observe(this, this::newScriptFound);
         viewModel.walletUpdate().observe(this, this::setupFunctionBar);
-        viewModel.attrFetchComplete().observe(this, this::displayTokenView);
+        viewModel.attrFetchComplete().observe(this, this::displayTokenView); //local attr fetch
     }
 
     private void newScriptFound(TokenDefinition td)
@@ -412,18 +407,17 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
     }
 
-    private void completeTokenScriptSetup()
+    private void completeTokenScriptSetup(String prevResult)
     {
-        final List<Attribute> attrs = new ArrayList<>();
-
-        if (viewModel.hasTokenScript(token))
-        {
-            viewModel.getAssetDefinitionService().resolveAttrs(token, new ArrayList<>(Collections.singleton(tokenId)), null)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(attrs::add, this::onError, () -> showTSAttributes(attrs))
-                    .isDisposed();
-        }
+        viewModel.completeTokenScriptSetup(token, tokenId, prevResult, (attrs, needsUpdate) -> {
+            //should have resolved all the attrs
+            tsAttributeLayout.bindTSAttributes(attrs);
+            //require refresh of TS View
+            if (needsUpdate)
+            {
+                displayTokenView(viewModel.getAssetDefinitionService().getAssetDefinition(token));
+            }
+        });
     }
 
     private void reloadMetadata()
@@ -503,20 +497,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             clearRefreshAnimation();
 
             loadFromOpenSeaData(loadedAsset.getOpenSeaAsset());
-
-            completeTokenScriptSetup();
         }
-    }
-
-    private void showTSAttributes(List<Attribute> attrs)
-    {
-        //should have resolved all the attrs
-        tsAttributeLayout.bindTSAttributes(attrs);
-    }
-
-    private void onError(Throwable throwable)
-    {
-        Timber.w(throwable);
     }
 
     private void updateTokenImage(NFTAsset asset)
@@ -626,7 +607,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private void setupAttestation(TokenDefinition td)
     {
         NFTAsset attnAsset = new NFTAsset();
-        if (token.getInterfaceSpec() != ContractType.ATTESTATION)
+        if (token == null || token.getInterfaceSpec() != ContractType.ATTESTATION)
         {
             return;
         }
@@ -634,7 +615,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         {
             attnAsset.setupScriptElements(td);
             attnAsset.setupScriptAttributes(td, token);
-            if (!displayTokenView(td))
+            if (!displayTokenView(td)) //display token for Attribute
             {
                 tokenImage.setupTokenImage(attnAsset);
             }
@@ -796,7 +777,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (!TextUtils.isEmpty(issuer))
         {
             ((TokenInfoView)findViewById(R.id.key_address)).setCopyableValue(issuer);
-            ((TokenInfoView)findViewById(R.id.key_address)).setVisibility(View.VISIBLE);
+            findViewById(R.id.key_address).setVisibility(View.VISIBLE);
         }
     }
 
@@ -848,6 +829,13 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         return viewModel.getWallet().type;
     }
 
+    @Override
+    public void completeFunctionSetup()
+    {
+        //check if TS needs to be refreshed
+        completeTokenScriptSetup(tokenScriptView.getAttrResults());
+    }
+
     /***
      * TokenScript view handling
      */
@@ -859,6 +847,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             LinearLayout webWrapper = findViewById(R.id.layout_webwrapper);
             tokenScriptView = new Web3TokenView(this);
             tokenScriptView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            tokenScriptView.clearCache(true);
 
             if (tokenScriptView.renderTokenScriptView(token, new TicketRange(tokenId, token.getAddress()), viewModel.getAssetDefinitionService(), ViewType.VIEW, td))
             {

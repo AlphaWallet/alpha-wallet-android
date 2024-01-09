@@ -77,4 +77,15 @@ public class NFTAssetsViewModel extends BaseViewModel
         if (asset != null) intent.putExtra(C.EXTRA_NFTASSET, asset);
         return intent;
     }
+
+    public Intent showAssetDetailsEmbedded(Context context, Wallet wallet, long chainId, String tokenAddress, String tokenId, NFTAsset asset)
+    {
+        Intent intent = new Intent(context, NFTAssetDetailActivity.class);
+        intent.putExtra(C.Key.WALLET, wallet);
+        intent.putExtra(C.EXTRA_CHAIN_ID, chainId);
+        intent.putExtra(C.EXTRA_ADDRESS, tokenAddress);
+        intent.putExtra(C.EXTRA_TOKEN_ID, tokenId);
+        if (asset != null) intent.putExtra(C.EXTRA_NFTASSET, asset);
+        return intent;
+    }
 }

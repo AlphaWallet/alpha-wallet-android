@@ -42,6 +42,12 @@
                     android:gravity="center"
                     custom:webview_height="350" />
 
+            <Button
+                    android:id="@+id/test_embedded"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Test Embedded"/>
+
             <LinearLayout
                     android:id="@+id/layout_webwrapper"
                     android:layout_width="match_parent"
@@ -56,6 +62,10 @@
                     android:visibility="gone"
                     tools:visibility="visible">
 
+                <com.alphawallet.app.web3.Web3View
+                        android:id="@+id/web3view"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
             </LinearLayout>
 
             <com.alphawallet.app.widget.TokenInfoCategoryView

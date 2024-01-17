@@ -360,6 +360,11 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         use1559Transactions = !candidateTransaction.isLegacyTransaction(); // If doing a sign-only transaction (not send) we must respect ERC-1559 or legacy.
     }
 
+    public void setDappSigningMode()
+    {
+        this.mode = ActionSheetMode.SEND_TRANSACTION_DAPP;
+    }
+
     public void onDestroy()
     {
         if (gasWidgetInterface != null) gasWidgetInterface.onDestroy();

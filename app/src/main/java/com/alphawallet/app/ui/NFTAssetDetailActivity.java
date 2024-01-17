@@ -328,9 +328,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel.transactionError().observe(this, this::txError);
         viewModel.scriptUpdateInProgress().observe(this, this::startScriptDownload);
         viewModel.sig().observe(this, this::onSignature);
-        viewModel.newScriptFound().observe(this, this::newScriptFound);
+        //viewModel.newScriptFound().observe(this, this::newScriptFound);
         viewModel.walletUpdate().observe(this, this::setupFunctionBar);
-        viewModel.attrFetchComplete().observe(this, this::displayTokenView); //local attr fetch
+        //viewModel.attrFetchComplete().observe(this, this::displayTokenView); //local attr fetch
     }
 
     private void newScriptFound(TokenDefinition td)

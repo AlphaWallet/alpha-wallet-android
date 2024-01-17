@@ -25,6 +25,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
+import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -32,6 +33,7 @@ import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
+import com.alphawallet.app.entity.analytics.ActionSheetSource;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.TokenRepository;
@@ -70,15 +72,11 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.utils.Numeric;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
@@ -87,7 +85,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         OnSignTransactionListener, OnSignPersonalMessageListener, OnSignTypedMessageListener, OnSignMessageListener,
         OnEthCallListener, OnWalletAddEthereumChainObjectListener, OnWalletActionListener
 {
-    private TokenFunctionViewModel viewModel;
+    private DappBrowserViewModel viewModel;
     private Token token;
     private BigInteger tokenId;
     private NFTAsset asset;
@@ -176,7 +174,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         asset = getIntent().getParcelableExtra(C.EXTRA_NFTASSET);
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
         String walletAddress = getWalletFromIntent();
-        viewModel.loadWallet(walletAddress);
+        //viewModel.loadWallet(walletAddress);
         if (C.ACTION_TOKEN_SHORTCUT.equals(getIntent().getAction()))
         {
             handleShortCut(walletAddress);
@@ -187,7 +185,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
             setup();
         }
 
-        viewModel.startGasPriceUpdate(chainId);
+        //viewModel.startGasPriceUpdate(chainId);
     }
 
     private String getWalletFromIntent()
@@ -211,14 +209,14 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         }
         else
         {
-            return viewModel.getTokensService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+            return viewModel.getTokenService().getToken(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         }
     }
 
     private void handleShortCut(String walletAddress)
     {
         String tokenAddress = getIntent().getStringExtra(C.EXTRA_ADDRESS);
-        token = viewModel.getTokensService().getToken(walletAddress, chainId, tokenAddress);
+        token = viewModel.getTokenService().getToken(walletAddress, chainId, tokenAddress);
         if (token == null)
         {
             ShortcutUtils.showConfirmationDialog(this, singletonList(tokenAddress), getString(R.string.remove_shortcut_while_token_not_found));
@@ -232,8 +230,8 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
 
     private void setup()
     {
-        viewModel.checkForNewScript(token);
-        viewModel.checkTokenScriptValidity(token);
+        //viewModel.checkForNewScript(token);
+        //viewModel.checkTokenScriptValidity(token);
         setTitle(token.tokenInfo.name);
 
         if (asset != null && asset.isAttestation())
@@ -242,28 +240,32 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         }
         else
         {
-            viewModel.getAsset(token, tokenId);
-            viewModel.updateLocalAttributes(token, tokenId);
+            //viewModel.getAsset(token, tokenId);
+            //viewModel.updateLocalAttributes(token, tokenId);
         }
     }
 
     private void initViewModel()
     {
         viewModel = new ViewModelProvider(this)
-                .get(TokenFunctionViewModel.class);
-        viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
-        viewModel.gasEstimateError().observe(this, this::estimateError);
-        viewModel.transactionFinalised().observe(this, this::txWritten);
-        viewModel.transactionError().observe(this, this::txError);
-        viewModel.sig().observe(this, this::onSignature);
-
-        DappBrowserViewModel dappViewModel = new ViewModelProvider(this)
                 .get(DappBrowserViewModel.class);
+        //viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
+        //viewModel.gasEstimateError().observe(this, this::estimateError);
+        viewModel.transactionFinalised().observe(this, this::txWritten);
+        viewModel.transactionSigned().observe(this, this::txSigned);
+        viewModel.transactionError().observe(this, this::txError);
+        //
 
-        dappViewModel.defaultWallet().observe(this, this::onDefaultWallet);
-        activeNetwork = dappViewModel.getActiveNetwork();
+        TokenFunctionViewModel tsViewModel = new ViewModelProvider(this)
+                .get(TokenFunctionViewModel.class);
+        tsViewModel.sig().observe(this, this::onSignature);
 
-        dappViewModel.findWallet();
+        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
+
+        viewModel.setNetwork(chainId);
+        activeNetwork = viewModel.getActiveNetwork();
+
+        viewModel.findWallet();
 
         /*wallet = dappViewModel.defaultWallet().getValue();
 
@@ -285,32 +287,44 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         certificateToolbar.onSigData(descriptor, this);
     }
 
-    /**
-     * Final return path
-     * @param transactionReturn write success hash back to ActionSheet
-     */
-    private void txWritten(TransactionReturn transactionReturn)
+    private void txWritten(TransactionReturn txData)
     {
-        confirmationDialog.transactionWritten(transactionReturn.hash); //display hash and success in ActionSheet, start 1 second timer to dismiss.
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+        {
+            confirmationDialog.transactionWritten(txData.hash);
+        }
+
+        tokenScriptView.onSignTransactionSuccessful(txData);
+    }
+
+    private void txSigned(TransactionReturn txData)
+    {
+        confirmationDialog.transactionWritten(txData.getDisplayData());
+        tokenScriptView.onSignTransactionSuccessful(txData);
     }
 
     //Transaction failed to be sent
-    private void txError(TransactionReturn txReturn)
+    private void txError(TransactionReturn rtn)
     {
-        if (dialog != null && dialog.isShowing()) dialog.dismiss();
-        dialog = new AWalletAlertDialog(this);
-        dialog.setIcon(ERROR);
-        dialog.setTitle(R.string.error_transaction_failed);
-        dialog.setMessage(txReturn.throwable.getMessage());
-        dialog.setButtonText(R.string.button_ok);
-        dialog.setButtonListener(v -> {
-            dialog.dismiss();
-        });
-        dialog.show();
         confirmationDialog.dismiss();
+        tokenScriptView.onSignCancel(rtn.tx.leafPosition);
+
+        if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
+        resultDialog = new AWalletAlertDialog(this);
+        resultDialog.setIcon(ERROR);
+        resultDialog.setTitle(R.string.error_transaction_failed);
+        resultDialog.setMessage(rtn.throwable.getMessage());
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.show();
+
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+            confirmationDialog.dismiss();
     }
 
-    @Override
+    /*@Override
     public void showTransferToken(List<BigInteger> selection)
     {
         NFTAsset asset = token.getTokenAssets().get(tokenId);
@@ -330,7 +344,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
                 handleTransactionSuccess.launch(viewModel.getTransferIntent(this, token, singletonList(tokenId), new ArrayList<>(singletonList(asset))));
             }
         }
-    }
+    }*/
 
     private void calculateEstimateDialog()
     {
@@ -381,20 +395,33 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
     @Override
     public void getAuthorisation(SignAuthenticationCallback callback)
     {
-        viewModel.getAuthentication(this, callback);
+        viewModel.getAuthorisation(wallet, this, callback);
     }
 
     @Override
-    public void sendTransaction(Web3Transaction tx)
+    public void sendTransaction(Web3Transaction finalTx)
     {
-        viewModel.requestSignature(tx, viewModel.getWallet(), token.tokenInfo.chainId);
+        viewModel.requestSignature(finalTx, wallet, activeNetwork.chainId);
     }
 
     @Override
     public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
     {
-        viewModel.sendTransaction(viewModel.getWallet(), token.tokenInfo.chainId, tx, signature);
+        viewModel.sendTransaction(wallet, activeNetwork.chainId, tx, signature);
     }
+
+    @Override
+    public void signTransaction(Web3Transaction tx)
+    {
+        viewModel.requestSignatureOnly(tx, wallet, activeNetwork.chainId);
+    }
+
+    @Override
+    public void completeSignTransaction(Web3Transaction w3Tx, SignatureFromKey signature)
+    {
+        viewModel.signTransaction(activeNetwork.chainId, w3Tx, signature);
+    }
+
 
     @Override
     public void dismissed(String txHash, long callbackId, boolean actionCompleted)
@@ -410,7 +437,9 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
     @Override
     public void notifyConfirm(String mode)
     {
-        viewModel.actionSheetConfirm(mode);
+        AnalyticsProperties props = new AnalyticsProperties();
+        props.put(Analytics.PROPS_ACTION_SHEET_MODE, mode);
+        props.put(Analytics.PROPS_ACTION_SHEET_SOURCE, ActionSheetSource.BROWSER);
     }
 
     @Override
@@ -422,7 +451,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
     @Override
     public WalletType getWalletType()
     {
-        return viewModel.getWallet().type;
+        return wallet.type;
     }
 
     /***
@@ -451,7 +480,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
             tokenScriptView.setOnWalletAddEthereumChainObjectListener(this);
             tokenScriptView.setOnWalletActionListener(this);
 
-            //tokenScriptView.resetView();
+            tokenScriptView.resetView();
             tokenScriptView.loadUrl("http://192.168.1.15:3333/?viewType=alphawallet&chain=137&contract=0xD5cA946AC1c1F24Eb26dae9e1A53ba6a02bd97Fe&tokenId=3803829543");
 
             webWrapper.setVisibility(View.VISIBLE);
@@ -527,18 +556,13 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
     {
         // read chain value
         long chainId = chainObj.getChainId();
-        /*final NetworkInfo info = viewModel.getNetworkInfo(chainId);
-
-        if (forceChainChange != 0 || getContext() == null)
-        {
-            return; //No action if chain change is forced
-        }
+        final NetworkInfo info = viewModel.getNetworkInfo(chainId);
 
         // handle unknown network
         if (info == null)
         {
             // show add custom chain dialog
-            addCustomChainDialog = new AddEthereumChainPrompt(getContext(), chainObj, chainObject -> {
+            addCustomChainDialog = new AddEthereumChainPrompt(this, chainObj, chainObject -> {
                 if (viewModel.addCustomChain(chainObject))
                 {
                     loadNewNetwork(chainObj.getChainId());
@@ -554,7 +578,35 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         else
         {
             changeChainRequest(callbackId, info);
-        }*/
+        }
+    }
+
+    private void loadNewNetwork(long newNetworkId)
+    {
+        if (activeNetwork == null || activeNetwork.chainId != newNetworkId)
+        {
+            viewModel.setNetwork(newNetworkId);
+            viewModel.updateGasPrice(newNetworkId);
+        }
+        //refresh URL page
+        //reloadPage();
+    }
+
+    private void displayError(int title, int text)
+    {
+        if (resultDialog != null && resultDialog.isShowing()) resultDialog.dismiss();
+        resultDialog = new AWalletAlertDialog(this);
+        resultDialog.setIcon(ERROR);
+        resultDialog.setTitle(title);
+        if (text != 0) resultDialog.setMessage(text);
+        resultDialog.setButtonText(R.string.button_ok);
+        resultDialog.setButtonListener(v -> {
+            resultDialog.dismiss();
+        });
+        resultDialog.show();
+
+        if (confirmationDialog != null && confirmationDialog.isShowing())
+            confirmationDialog.dismiss();
     }
 
     private void changeChainRequest(long callbackId, NetworkInfo info)
@@ -604,10 +656,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         //request user to change chains
         long chainId = chainObj.getChainId();
 
-        DappBrowserViewModel dappViewModel = new ViewModelProvider(this)
-                .get(DappBrowserViewModel.class);
-
-        final NetworkInfo info = dappViewModel.getNetworkInfo(chainId);
+        final NetworkInfo info = viewModel.getNetworkInfo(chainId);
 
         if (info == null)
         {
@@ -708,15 +757,13 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
                 Token token = viewModel.getTokenService().getTokenOrBase(activeNetwork.chainId, transaction.recipient.toString());
                 confirmationDialog = new ActionSheetDialog(this, transaction, token,
                         "", transaction.recipient.toString(), viewModel.getTokenService(), this);
+                ((ActionSheetDialog) confirmationDialog).setDappSigningMode();
                 confirmationDialog.setURL(url);
                 confirmationDialog.setCanceledOnTouchOutside(false);
                 confirmationDialog.show();
                 confirmationDialog.fullExpand();
 
-                DappBrowserViewModel dappViewModel = new ViewModelProvider(this)
-                        .get(DappBrowserViewModel.class);
-
-                dappViewModel.calculateGasEstimate(wallet, transaction, activeNetwork.chainId)
+                viewModel.calculateGasEstimate(wallet, transaction, activeNetwork.chainId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(estimate -> confirmationDialog.setGasEstimate(estimate),

@@ -115,6 +115,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private boolean triggeredReload;
     private long chainId;
     private Web3TokenView tokenScriptView;
+    private boolean useNativeTokenScript = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -313,7 +314,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         else
         {
             viewModel.getAsset(token, tokenId);
-            viewModel.updateLocalAttributes(token, tokenId); //when complete calls displayTokenView
+            if (this.useNativeTokenScript)
+                viewModel.updateLocalAttributes(token, tokenId);  //when complete calls displayTokenView
         }
     }
 
@@ -328,9 +330,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         viewModel.transactionError().observe(this, this::txError);
         viewModel.scriptUpdateInProgress().observe(this, this::startScriptDownload);
         viewModel.sig().observe(this, this::onSignature);
-        //viewModel.newScriptFound().observe(this, this::newScriptFound);
+        viewModel.newScriptFound().observe(this, this::newScriptFound);
         viewModel.walletUpdate().observe(this, this::setupFunctionBar);
-        //viewModel.attrFetchComplete().observe(this, this::displayTokenView); //local attr fetch
+        viewModel.attrFetchComplete().observe(this, this::displayTokenView); //local attr fetch
     }
 
     private void newScriptFound(TokenDefinition td)
@@ -354,7 +356,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             }
             else
             {
-                displayTokenView(td);
+                if (this.useNativeTokenScript)
+                    displayTokenView(td);
             }
         }
         else
@@ -390,8 +393,13 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (token != null && wallet != null && (BuildConfig.DEBUG || wallet.type != WalletType.WATCH))
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-            functionBar.setupFunctionsForJsViewer(this, R.string.title_tokenscript, this.token, Collections.singletonList(tokenId));
-            //functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
+
+            if (this.useNativeTokenScript){
+                functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
+            } else {
+                functionBar.setupFunctionsForJsViewer(this, R.string.title_tokenscript, this.token, Collections.singletonList(tokenId));
+            }
+
             functionBar.revealButtons();
             functionBar.setWalletType(wallet.type);
         }

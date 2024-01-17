@@ -174,7 +174,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         asset = getIntent().getParcelableExtra(C.EXTRA_NFTASSET);
         sequenceId = getIntent().getStringExtra(C.EXTRA_STATE);
         String walletAddress = getWalletFromIntent();
-        //viewModel.loadWallet(walletAddress);
+
         if (C.ACTION_TOKEN_SHORTCUT.equals(getIntent().getAction()))
         {
             handleShortCut(walletAddress);
@@ -184,8 +184,6 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
             token = resolveAssetToken();
             setup();
         }
-
-        //viewModel.startGasPriceUpdate(chainId);
     }
 
     private String getWalletFromIntent()
@@ -230,46 +228,29 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
 
     private void setup()
     {
-        //viewModel.checkForNewScript(token);
-        //viewModel.checkTokenScriptValidity(token);
+        TokenFunctionViewModel tsViewModel = new ViewModelProvider(this)
+                .get(TokenFunctionViewModel.class);
+        tsViewModel.checkTokenScriptValidity(token);
         setTitle(token.tokenInfo.name);
-
-        if (asset != null && asset.isAttestation())
-        {
-            //setupAttestation(viewModel.getAssetDefinitionService().getAssetDefinition(token));
-        }
-        else
-        {
-            //viewModel.getAsset(token, tokenId);
-            //viewModel.updateLocalAttributes(token, tokenId);
-        }
     }
 
     private void initViewModel()
     {
         viewModel = new ViewModelProvider(this)
                 .get(DappBrowserViewModel.class);
-        //viewModel.gasEstimateComplete().observe(this, this::checkConfirm);
-        //viewModel.gasEstimateError().observe(this, this::estimateError);
         viewModel.transactionFinalised().observe(this, this::txWritten);
         viewModel.transactionSigned().observe(this, this::txSigned);
         viewModel.transactionError().observe(this, this::txError);
-        //
+        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
 
         TokenFunctionViewModel tsViewModel = new ViewModelProvider(this)
                 .get(TokenFunctionViewModel.class);
         tsViewModel.sig().observe(this, this::onSignature);
 
-        viewModel.defaultWallet().observe(this, this::onDefaultWallet);
-
         viewModel.setNetwork(chainId);
         activeNetwork = viewModel.getActiveNetwork();
 
         viewModel.findWallet();
-
-        /*wallet = dappViewModel.defaultWallet().getValue();
-
-        openTokenscriptWebview(wallet);*/
     }
 
     private void onDefaultWallet(Wallet wallet)
@@ -323,28 +304,6 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         if (confirmationDialog != null && confirmationDialog.isShowing())
             confirmationDialog.dismiss();
     }
-
-    /*@Override
-    public void showTransferToken(List<BigInteger> selection)
-    {
-        NFTAsset asset = token.getTokenAssets().get(tokenId);
-        if (asset != null)
-        {
-            if (asset.isAssetMultiple())
-            {
-                viewModel.showTransferSelectCount(this, token, tokenId)
-                        .subscribe((Consumer<Intent>) handleTransactionSuccess::launch).isDisposed();
-            }
-            else
-            {
-                if (asset.getSelectedBalance().compareTo(BigDecimal.ZERO) == 0)
-                {
-                    asset.setSelectedBalance(BigDecimal.ONE);
-                }
-                handleTransactionSuccess.launch(viewModel.getTransferIntent(this, token, singletonList(tokenId), new ArrayList<>(singletonList(asset))));
-            }
-        }
-    }*/
 
     private void calculateEstimateDialog()
     {
@@ -457,17 +416,16 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
     /***
      * TokenScript view handling
      */
-    private boolean openTokenscriptWebview(Wallet wallet)
+    private void openTokenscriptWebview(Wallet wallet)
     {
-        boolean couldDisplay = false;
         try
         {
-            LinearLayout webWrapper = findViewById(R.id.layout_webwrapper);
-
             tokenScriptView = findViewById(R.id.web3view);
-            //tokenScriptView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
             tokenScriptView.setWebChromeClient(new WebChromeClient());
+
+            tokenScriptView.getSettings().setSupportMultipleWindows(true);
+
             tokenScriptView.setWebViewClient(new WebViewClient());
             tokenScriptView.setChainId(activeNetwork.chainId);
             tokenScriptView.setWalletAddress(new Address(wallet.address));
@@ -481,29 +439,12 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
             tokenScriptView.setOnWalletActionListener(this);
 
             tokenScriptView.resetView();
-            tokenScriptView.loadUrl("http://192.168.1.15:3333/?viewType=alphawallet&chain=137&contract=0xD5cA946AC1c1F24Eb26dae9e1A53ba6a02bd97Fe&tokenId=3803829543");
-
-            webWrapper.setVisibility(View.VISIBLE);
-
-            //webWrapper.addView(tokenScriptView);
-            couldDisplay = true;
-            /*tokenScriptView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
-            if (tokenScriptView.renderTokenScriptView(token, new TicketRange(tokenId, token.getAddress()), viewModel.getAssetDefinitionService(), ViewType.VIEW, td))
-            {
-                webWrapper.setVisibility(View.VISIBLE);
-                tokenScriptView.setChainId(token.tokenInfo.chainId);
-                tokenScriptView.setWalletAddress(new Address(token.getWallet()));
-                webWrapper.addView(tokenScriptView);
-                couldDisplay = true;
-            }*/
+            tokenScriptView.loadUrl("http://192.168.1.15:3333/?viewType=alphawallet&chain=" + chainId + "&contract=" + token.tokenInfo.address + "&tokenId=" + tokenId);
         }
         catch (Exception e)
         {
-            //fillEmpty();
+            Timber.e(e);
         }
-
-        return couldDisplay;
     }
 
 

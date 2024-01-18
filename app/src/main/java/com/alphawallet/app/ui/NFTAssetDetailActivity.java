@@ -114,6 +114,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private boolean triggeredReload;
     private long chainId;
     private Web3TokenView tokenScriptView;
+    private static final boolean FORCE_EMBEDDED_VIEWER = true;
     private boolean useNativeTokenScript = false;
 
     @Override
@@ -306,6 +307,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         setTitle(token.tokenInfo.name);
         updateDefaultTokenData();
 
+        if (!NFTAssetDetailActivity.FORCE_EMBEDDED_VIEWER) {
+            TokenDefinition td = viewModel.getAssetDefinitionService().getAssetDefinition(this.token);
+            this.useNativeTokenScript = td.nameSpace != null;
+        }
+
         if (asset != null && asset.isAttestation())
         {
             setupAttestation(viewModel.getAssetDefinitionService().getAssetDefinition(token));
@@ -345,6 +351,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             viewModel.checkTokenScriptValidity(token);
 
             setTitle(token.getTokenName(viewModel.getAssetDefinitionService(), 1));
+
+            if (!NFTAssetDetailActivity.FORCE_EMBEDDED_VIEWER)
+                this.useNativeTokenScript = td.nameSpace != null;
 
             //now re-load the verbs if already called. If wallet is null this won't complete
             setupFunctionBar(viewModel.getWallet());

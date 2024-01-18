@@ -56,10 +56,6 @@
                     android:visibility="gone"
                     tools:visibility="visible">
 
-                <com.alphawallet.app.web3.Web3View
-                        android:id="@+id/web3view"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
             </LinearLayout>
 
             <com.alphawallet.app.widget.TokenInfoCategoryView

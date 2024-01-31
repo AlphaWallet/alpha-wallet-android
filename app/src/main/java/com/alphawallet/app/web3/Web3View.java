@@ -225,9 +225,13 @@ public class Web3View extends WebView {
         return webViewClient.getJsInjectorClient().getChainId();
     }
 
-    public void setChainId(long chainId)
+    public void setChainId(long chainId, boolean isTokenscript)
     {
-        webViewClient.getJsInjectorClient().setChainId(chainId);
+        if (isTokenscript){
+            webViewClient.getJsInjectorClient().setTSChainId(chainId);
+        } else {
+            webViewClient.getJsInjectorClient().setChainId(chainId);
+        }
     }
 
     public void setWebLoadCallback(URLLoadInterface iFace)

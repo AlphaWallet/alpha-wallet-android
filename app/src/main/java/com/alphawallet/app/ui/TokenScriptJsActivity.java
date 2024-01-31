@@ -104,6 +104,9 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
     private AWalletAlertDialog errorDialog;
     private AddEthereumChainPrompt addCustomChainDialog;
 
+    private static String VIEWER_URL = //"https://viewer.tokenscript.org";
+            "http://192.168.1.15:3333";
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
@@ -247,8 +250,10 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
                 .get(TokenFunctionViewModel.class);
         tsViewModel.sig().observe(this, this::onSignature);
 
+        getIntentData();
+
         viewModel.setNetwork(chainId);
-        activeNetwork = viewModel.getActiveNetwork();
+        activeNetwork = viewModel.getNetworkInfo(chainId);
 
         viewModel.findWallet();
     }
@@ -427,7 +432,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
             tokenScriptView.getSettings().setSupportMultipleWindows(true);
 
             tokenScriptView.setWebViewClient(new WebViewClient());
-            tokenScriptView.setChainId(activeNetwork.chainId);
+            tokenScriptView.setChainId(activeNetwork.chainId, false);
             tokenScriptView.setWalletAddress(new Address(wallet.address));
 
             tokenScriptView.setOnSignMessageListener(this);
@@ -439,7 +444,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
             tokenScriptView.setOnWalletActionListener(this);
 
             tokenScriptView.resetView();
-            tokenScriptView.loadUrl("http://192.168.1.15:3333/?viewType=alphawallet&chain=" + chainId + "&contract=" + token.tokenInfo.address + "&tokenId=" + tokenId);
+            tokenScriptView.loadUrl(VIEWER_URL + "/?viewType=alphawallet&chain=" + chainId + "&contract=" + token.tokenInfo.address + "&tokenId=" + tokenId);
         }
         catch (Exception e)
         {
@@ -559,21 +564,10 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
             return;
         }
 
-        //if we're switching between mainnet and testnet we need to pop open the 'switch to testnet' dialog (class TestNetDialog)
-        // - after the user switches to testnet, go straight to switching the network (loadNewNetwork)
-        // - if user is switching form testnet to mainnet, simply add the title below
-
-        // at this stage, we know if it's testnet or not
-        /*if (!info.hasRealValue() && (activeNetwork != null && activeNetwork.hasRealValue()))
-        {
-            TestNetDialog testnetDialog = new TestNetDialog(this, info.chainId, this);
-            testnetDialog.show();
-        }
-        else
-        {*/
-        //go straight to chain change dialog
-        showChainChangeDialog(callbackId, info);
-        //}
+        activeNetwork = info;
+        tokenScriptView.setChainId(info.chainId, true);
+        viewModel.setNetwork(info.chainId);
+        tokenScriptView.onWalletActionSuccessful(callbackId, null);
     }
 
     @Override
@@ -615,23 +609,6 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         {
             changeChainRequest(callbackId, info);
         }
-    }
-
-    /**
-     * This will pop the ActionSheetDialog to request a chain change, with appropriate warning
-     * if switching between mainnets and testnets
-     *
-     * @param callbackId
-     * @param newNetwork
-     */
-    private void showChainChangeDialog(long callbackId, NetworkInfo newNetwork)
-    {
-        Token baseToken = viewModel.getTokenService().getTokenOrBase(newNetwork.chainId, wallet.address);
-        confirmationDialog = new ActionSheetDialog(this, this, R.string.switch_chain_request, R.string.switch_and_reload,
-                callbackId, baseToken, activeNetwork, newNetwork);
-        confirmationDialog.setCanceledOnTouchOutside(true);
-        confirmationDialog.show();
-        confirmationDialog.fullExpand();
     }
 
     private void handleSignMessage(Signable message)

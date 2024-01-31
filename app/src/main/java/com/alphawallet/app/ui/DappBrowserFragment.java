@@ -820,7 +820,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     private void setupWeb3(Wallet wallet)
     {
         if (wallet == null) { return; }
-        web3.setChainId(activeNetwork.chainId);
+        web3.setChainId(activeNetwork.chainId, false);
         web3.setWalletAddress(new Address(wallet.address));
 
         web3.setWebChromeClient(new WebChromeClient()

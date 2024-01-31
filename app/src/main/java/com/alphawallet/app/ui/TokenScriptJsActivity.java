@@ -432,7 +432,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
             tokenScriptView.getSettings().setSupportMultipleWindows(true);
 
             tokenScriptView.setWebViewClient(new WebViewClient());
-            tokenScriptView.setChainId(activeNetwork.chainId, false);
+            tokenScriptView.setChainId(activeNetwork.chainId, true);
             tokenScriptView.setWalletAddress(new Address(wallet.address));
 
             tokenScriptView.setOnSignMessageListener(this);

@@ -6,19 +6,23 @@ import static org.web3j.protocol.core.methods.request.Transaction.createFunction
 import static java.util.Collections.singletonList;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Pair;
-import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.webkit.WebChromeClient;
+import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.LinearLayout;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.view.menu.ActionMenuItemView;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -103,6 +107,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
     private AWalletAlertDialog resultDialog;
     private AWalletAlertDialog errorDialog;
     private AddEthereumChainPrompt addCustomChainDialog;
+    private ActionMenuItemView refreshMenu;
 
     private static String VIEWER_URL = //"https://viewer.tokenscript.org";
             "http://192.168.1.15:3333";
@@ -162,6 +167,23 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
     {
         super.onDestroy();
         viewModel.onDestroy();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(@NonNull Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.menu_refresh, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == R.id.action_reload_metadata)
+        {
+            tokenScriptView.reload();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void initViews()
@@ -428,11 +450,27 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
             tokenScriptView = findViewById(R.id.web3view);
 
             tokenScriptView.setWebChromeClient(new WebChromeClient());
+            tokenScriptView.setWebViewClient(new WebViewClient(){
+                @Override
+                public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                    refreshMenu = findViewById(R.id.action_reload_metadata);
+                    refreshMenu.startAnimation(rotation);
+                    super.onPageStarted(view, url, favicon);
+                }
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    if (refreshMenu != null)
+                    {
+                        refreshMenu.clearAnimation();
+                    }
+                    super.onPageFinished(view, url);
+                }
+            });
 
             tokenScriptView.getSettings().setSupportMultipleWindows(true);
 
             tokenScriptView.setWebViewClient(new WebViewClient());
-            tokenScriptView.setChainId(activeNetwork.chainId, true);
+            tokenScriptView.setChainId(activeNetwork.chainId, false);
             tokenScriptView.setWalletAddress(new Address(wallet.address));
 
             tokenScriptView.setOnSignMessageListener(this);
@@ -565,7 +603,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         }
 
         activeNetwork = info;
-        tokenScriptView.setChainId(info.chainId, true);
+        tokenScriptView.setChainId(info.chainId, false);
         viewModel.setNetwork(info.chainId);
         tokenScriptView.onWalletActionSuccessful(callbackId, null);
     }

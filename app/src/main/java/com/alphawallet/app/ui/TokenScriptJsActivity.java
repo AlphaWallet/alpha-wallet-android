@@ -109,8 +109,8 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
     private AddEthereumChainPrompt addCustomChainDialog;
     private ActionMenuItemView refreshMenu;
 
-    private static String VIEWER_URL = //"https://viewer.tokenscript.org";
-            "http://192.168.1.15:3333";
+    private static String VIEWER_URL = "https://viewer.tokenscript.org";
+            //"http://192.168.1.15:3333";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)

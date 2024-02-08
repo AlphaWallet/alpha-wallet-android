@@ -582,40 +582,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
-    public static String getMagiclinkFromClipboard(Context ctx)
-    {
-        String magicLink = null;
-        try
-        {
-            //try clipboard data
-            ClipboardManager clipboard = (ClipboardManager) ctx.getSystemService(CLIPBOARD_SERVICE);
-            CharSequence text = clipboard.getPrimaryClip().getItemAt(0).getText();
-
-            //see if text is a magic link
-            if (text != null && text.length() > 60 && text.length() < 300)
-            {
-                //could be magicLink
-                CryptoFunctions cryptoFunctions = new CryptoFunctions();
-                ParseMagicLink parser = new ParseMagicLink(cryptoFunctions, EthereumNetworkRepository.extraChains());
-                MagicLinkData order = parser.parseUniversalLink(text.toString());
-                if (Utils.isAddressValid(order.contractAddress) && order.indices.length > 0)
-                {
-                    magicLink = text.toString();
-                    //now clear the clipboard - we only ever do this if it's definitely a magicLink in the clipboard
-                    ClipData clipData = ClipData.newPlainText("", "");
-                    clipboard.setPrimaryClip(clipData);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            //not a magicLink
-            magicLink = null;
-        }
-
-        return magicLink;
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode,resultCode,intent);

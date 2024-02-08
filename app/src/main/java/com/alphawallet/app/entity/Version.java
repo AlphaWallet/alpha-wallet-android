@@ -6,11 +6,14 @@ public class Version implements Comparable<Version>
 
     public Version(String version)
     {
-        if (version == null)
-            throw new IllegalArgumentException("Version cannot be null");
-        if (!version.matches("[0-9]+(\\.[0-9]+)*"))
-            throw new IllegalArgumentException("Invalid version format");
-        this.version = version;
+        if (version != null && version.matches("[0-9]+(\\.[0-9]+)*"))
+        {
+            this.version = version;
+        }
+        else
+        {
+            this.version = "";
+        }
     }
 
     public final String get()
@@ -21,8 +24,10 @@ public class Version implements Comparable<Version>
     @Override
     public int compareTo(Version that)
     {
-        if (that == null)
+        if (that == null || this.version.length() == 0)
+        {
             return 1;
+        }
         String[] thisParts = this.get().split("\\.");
         String[] thatParts = that.get().split("\\.");
         int length = Math.max(thisParts.length, thatParts.length);

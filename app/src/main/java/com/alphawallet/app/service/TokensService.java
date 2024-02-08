@@ -232,9 +232,17 @@ public class TokensService
         startUpdateCycle();
     }
 
+    public void startUpdateCycleIfRequired()
+    {
+        if (eventTimer == null || eventTimer.isDisposed())
+        {
+            startUpdateCycle();
+        }
+    }
+
     public void startUpdateCycle()
     {
-        if ((lastStartCycleTime + 1000) > System.currentTimeMillis())
+        if ((lastStartCycleTime + 2000) > System.currentTimeMillis())
         {
             return; // Block this refresh - we need to ensure the cycle restarts but within 1 second no need to restart
         }

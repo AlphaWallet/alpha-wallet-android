@@ -93,7 +93,6 @@ public class PriceAlertsService extends Service
     {
         tokensService.setCurrentAddress(wallet.address);
         assetDefinitionService.startEventListener();
-        tokensService.startUpdateCycle();
         defaultWallet = wallet;
     }
 

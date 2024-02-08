@@ -50,6 +50,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListener, TokensAdapterCallback {
@@ -188,10 +189,17 @@ public class NFTAssetsFragment extends BaseFragment implements OnAssetClickListe
 
     public void showListView()
     {
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.removeItemDecoration(gridItemDecoration);
-        recyclerView.setPadding(0, 0, 0, 0);
-        initAndAttachAdapter(false);
+        try
+        {
+            recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+            recyclerView.removeItemDecoration(gridItemDecoration);
+            recyclerView.setPadding(0, 0, 0, 0);
+            initAndAttachAdapter(false);
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
     }
 
     private void initAndAttachAdapter(boolean isGridView)

@@ -51,7 +51,7 @@ import org.hamcrest.core.AllOf;
 public class Steps
 {
     //public static final String GANACHE_URL = "http://10.0.2.2:8545/";
-    public static final String GANACHE_URL = "http://192.168.50.224:8555/";
+    public static final String GANACHE_URL = "http://192.168.50.184:8555/";
 
     public static void createNewWallet()
     {

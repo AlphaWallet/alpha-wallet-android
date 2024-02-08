@@ -211,7 +211,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         List<String> handledHashes = checkRealmScriptsForChanges();
-        loadNewFiles(handledHashes);
+        //loadNewFiles(handledHashes);
 
         //executes after observable completes due to blockingForEach
         loadInternalAssets();
@@ -1282,6 +1282,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     //Call contract and check for script
     private Single<File> fetchTokenScriptFromContract(Token token, MutableLiveData<Boolean> updateFlag)
     {
+        if (token == null) { return Single.fromCallable(() -> new File("")); }
+
         //Allow for arrays of URI, check each in turn for multiple and return the first valid entry
         return token.getScriptURI()
                 .map(uriList -> {
@@ -1531,11 +1533,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void finishLoading()
     {
         assetLoadingLock.release();
-        if (Utils.isAddressValid(tokensService.getCurrentAddress()))
+        //remove event listener update for now
+        /*if (Utils.isAddressValid(tokensService.getCurrentAddress()))
         {
             updateEventBlockTimes();
             startEventListener();
-        }
+        }*/
     }
 
     private void removeFile(String filename)
@@ -2055,7 +2058,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         {
             realm.executeTransaction(r -> {
                 //if signature present, then just update
-                boolean isNew = false;
                 RealmCertificateData realmData = r.where(RealmCertificateData.class)
                         .equalTo("instanceKey", hash)
                         .findFirst();
@@ -2063,13 +2065,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 if (realmData == null)
                 {
                     realmData = r.createObject(RealmCertificateData.class, hash);
-                    isNew = true;
                 }
                 realmData.setFromSig(sig);
-                if (isNew)
-                {
-                    r.insertOrUpdate(realmData);
-                }
+                r.insertOrUpdate(realmData);
             });
         }
     }
@@ -2085,14 +2083,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             if (realmCert != null)
             {
-                sig = new XMLDsigDescriptor();
-                sig.issuer = realmCert.getIssuer();
-                sig.certificateName = realmCert.getCertificateName();
-                sig.keyName = realmCert.getKeyName();
-                sig.keyType = realmCert.getKeyType();
-                sig.result = realmCert.getResult();
-                sig.subject = realmCert.getSubject();
-                sig.type = realmCert.getType();
+                sig = realmCert.getDsigObject();
             }
         }
         catch (Exception e)
@@ -2522,6 +2513,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public Single<XMLDsigDescriptor> getSignatureData(Token token)
     {
+        if (token == null) return Single.fromCallable(XMLDsigDescriptor::new);
         TokenScriptFile tsf = getTokenScriptFile(token);
         return getSignatureData(tsf, token.tokenInfo.chainId, token.tokenInfo.address);
     }
@@ -2543,7 +2535,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 String hash = tsf.calcMD5();
                 XMLDsigDescriptor sig = getCertificateFromRealm(hash);
-                if (sig == null || (sig.result != null && sig.result.equalsIgnoreCase("fail")))
+                if (sig == null || (sig.result != null && sig.result.equalsIgnoreCase("fail")) || sig.type == SigReturnType.NO_TOKENSCRIPT)
                 {
                     sig = alphaWalletService.checkTokenScriptSignature(tsf.getInputStream(), chainId, contractAddress);
                     tsf.determineSignatureType(sig);
@@ -3135,6 +3127,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     //Import script from scriptURI
     public Single<TokenDefinition> checkServerForScript(Token token, MutableLiveData<Boolean> updateFlag)
     {
+        if (token == null) return Single.fromCallable(TokenDefinition::new);
+
         TokenScriptFile tf = getTokenScriptFile(token);
 
         if ((tf != null && tf.exists()) && !isInSecureZone(tf))

@@ -1348,6 +1348,11 @@ public class TokensRealmSource implements TokenLocalSource
     @Override
     public void updateERC20Tickers(long chainId, final Map<String, TokenTicker> erc20Tickers)
     {
+        if (erc20Tickers.isEmpty())
+        {
+            return;
+        }
+
         List<ContractAddress> tickerUpdates = new ArrayList<>();
         try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
         {

@@ -779,13 +779,6 @@ public class HomeViewModel extends BaseViewModel
         currencyRepository.setDefaultCurrency(preferenceRepository.getDefaultCurrency());
     }
 
-    public void sendMsgPumpToWC(Context context)
-    {
-        //NB: WalletConnect v1 has been deprecated
-        //Timber.d("Start WC service");
-        //WCUtils.startServiceLocal(context, null, WalletConnectActions.MSG_PUMP);
-    }
-
     // Restart walletconnect sessions if required
     private void initWalletConnectSessions(Activity activity, Wallet wallet)
     {

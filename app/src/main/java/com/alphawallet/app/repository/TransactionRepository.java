@@ -86,7 +86,7 @@ public class TransactionRepository implements TransactionRepositoryType
         else
         {
             return formatRawTransaction(w3Tx.getTransactionDestination().toString(), chainId, w3Tx.value, w3Tx.gasLimit, w3Tx.maxPriorityFeePerGas,
-                    w3Tx.maxFeePerGas, nonce, !TextUtils.isEmpty(w3Tx.payload) ? Numeric.hexStringToByteArray(w3Tx.payload) : new byte[0]);
+                    w3Tx.maxFeePerGas, nonce, !TextUtils.isEmpty(w3Tx.payload) ? Numeric.hexStringToByteArray(w3Tx.payload) : new byte[0], w3Tx.isConstructor());
         }
     }
 
@@ -287,19 +287,36 @@ public class TransactionRepository implements TransactionRepositoryType
                                                 BigInteger maxPriorityFeePerGas,
                                                 BigInteger maxFeePerGas,
                                                 long nonce,
-                                                byte[] data)
+                                                byte[] data,
+                                                boolean isConstructor)
     {
         String dataStr = data != null ? Numeric.toHexString(data) : "";
 
-        return RawTransaction.createTransaction(
-                chainId,
-                BigInteger.valueOf(nonce),
-                gasLimit,
-                toAddress,
-                amount,
-                dataStr,
-                maxPriorityFeePerGas,
-                maxFeePerGas
-        );
+        if (isConstructor)
+        {
+            return RawTransaction.createTransaction(
+                    chainId,
+                    BigInteger.valueOf(nonce),
+                    gasLimit,
+                    "",
+                    amount,
+                    dataStr,
+                    maxPriorityFeePerGas,
+                    maxFeePerGas
+            );
+        }
+        else
+        {
+            return RawTransaction.createTransaction(
+                    chainId,
+                    BigInteger.valueOf(nonce),
+                    gasLimit,
+                    toAddress,
+                    amount,
+                    dataStr,
+                    maxPriorityFeePerGas,
+                    maxFeePerGas
+            );
+        }
     }
 }

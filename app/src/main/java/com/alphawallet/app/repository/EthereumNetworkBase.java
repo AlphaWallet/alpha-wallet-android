@@ -61,18 +61,17 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.PALM_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ROOTSTOCK_MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ROOTSTOCK_MAINNET_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ROOTSTOCK_TESTNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.ROOTSTOCK_TESTNET_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.XDAI_RPC_URL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ROOTSTOCK_MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ROOTSTOCK_TESTNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ROOTSTOCK_MAINNET_RPC_URL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.ROOTSTOCK_TESTNET_RPC_URL;
 
 import android.text.TextUtils;
 import android.util.LongSparseArray;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractLocator;
@@ -256,13 +255,13 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     FANTOM_TEST_RPC_URL,
                     "https://explorer.testnet.fantom.network/tx/", FANTOM_TEST_ID,
                     "https://fantom-testnet.public.blastapi.io", "https://api.covalenthq.com/v1/" + COVALENT)); //NB: Fantom testnet not yet supported by Covalent
-            put(POLYGON_ID, new NetworkInfo(C.POLYGON_NETWORK, C.POLYGON_SYMBOL, POLYGON_RPC_URL,
+            put(POLYGON_ID, new NetworkInfo(C.POLYGON_NETWORK, C.POLYGON_SYMBOL, FREE_POLYGON_RPC_URL,
                     "https://polygonscan.com/tx/", POLYGON_ID,
-                    POLYGON_FALLBACK_RPC_URL, "https://api.polygonscan.com/api?"));
+                    POLYGON_RPC_URL, "https://api.polygonscan.com/api?"));
             put(POLYGON_TEST_ID, new NetworkInfo(C.POLYGON_TEST_NETWORK, C.POLYGON_SYMBOL,
-                    MUMBAI_TEST_RPC_URL,
+                    FREE_MUMBAI_RPC_URL,
                     "https://mumbai.polygonscan.com/tx/", POLYGON_TEST_ID,
-                    MUMBAI_FALLBACK_RPC_URL, " https://api-testnet.polygonscan.com/api?"));
+                    MUMBAI_TEST_RPC_URL, " https://api-testnet.polygonscan.com/api?"));
             put(OPTIMISTIC_MAIN_ID, new NetworkInfo(C.OPTIMISTIC_NETWORK, C.ETH_SYMBOL,
                     OPTIMISTIC_MAIN_URL,
                     "https://optimistic.etherscan.io/tx/", OPTIMISTIC_MAIN_ID, OPTIMISTIC_MAIN_FALLBACK_URL,
@@ -872,7 +871,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             try
             {
                 EthGetTransactionCount ethGetTransactionCount = web3j
-                        .ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)
+                        .ethGetTransactionCount(walletAddress, DefaultBlockParameterName.LATEST)
                         .send();
                 return ethGetTransactionCount.getTransactionCount();
             }

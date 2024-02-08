@@ -23,21 +23,35 @@ public class RealmCertificateData extends RealmObject
 
     public void setFromSig(XMLDsigDescriptor sig)
     {
-        result = sig.result;
-        subject = sig.subject;
-        keyName = sig.keyName;
-        keyType = sig.keyType;
-        issuer = sig.issuer;
-        certificateName = sig.certificateName;
+        this.result = sig.result;
+        this.subject = sig.subject;
+        this.keyName = sig.keyName;
+        this.keyType = sig.keyType;
+        this.issuer = sig.issuer;
+        this.certificateName = sig.certificateName;
         if (sig.type == null)
         {
             if (sig.result != null && sig.result.equals("pass")) type = SigReturnType.SIGNATURE_PASS.ordinal();
-            else type = SigReturnType.SIGNATURE_INVALID.ordinal();
+            else this.type = SigReturnType.SIGNATURE_INVALID.ordinal();
         }
         else
         {
-            type = sig.type.ordinal();
+            this.type = sig.type.ordinal();
         }
+    }
+
+    public XMLDsigDescriptor getDsigObject()
+    {
+        XMLDsigDescriptor sig = new XMLDsigDescriptor();
+        sig.issuer = this.issuer;
+        sig.certificateName = this.certificateName;
+        sig.keyName = this.keyName;
+        sig.keyType = this.keyType;
+        sig.result = this.result;
+        sig.subject = this.subject;
+        sig.type = SigReturnType.values()[this.type];
+
+        return sig;
     }
 
     public String getResult()
@@ -50,19 +64,9 @@ public class RealmCertificateData extends RealmObject
         this.result = result;
     }
 
-    public String getKeyName()
-    {
-        return keyName;
-    }
-
-    public void setKeyName(String keyName)
-    {
-        this.keyName = keyName;
-    }
-
     public String getSubject()
     {
-        return subject;
+        return this.subject;
     }
 
     public void setSubject(String subject)
@@ -78,7 +82,9 @@ public class RealmCertificateData extends RealmObject
     public void setType(SigReturnType type)
     {
         if (type == null && this.result.equals("pass"))
-        this.type = type.ordinal();
+        {
+            this.type = type.ordinal();
+        }
     }
 
     public String getIssuer()
@@ -89,25 +95,5 @@ public class RealmCertificateData extends RealmObject
     public void setIssuer(String issuer)
     {
         this.issuer = issuer;
-    }
-
-    public String getCertificateName()
-    {
-        return certificateName;
-    }
-
-    public void setCertificateName(String certificateName)
-    {
-        this.certificateName = certificateName;
-    }
-
-    public String getKeyType()
-    {
-        return keyType;
-    }
-
-    public void setKeyType(String keyType)
-    {
-        this.keyType = keyType;
     }
 }

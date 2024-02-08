@@ -47,9 +47,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.analytics.Analytics;
-import com.alphawallet.app.api.v1.entity.request.ApiV1Request;
 import com.alphawallet.app.entity.ContractLocator;
-import com.alphawallet.app.entity.CryptoFunctions;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.DeepLinkRequest;
 import com.alphawallet.app.entity.ErrorEnvelope;
@@ -64,10 +62,8 @@ import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.attestation.AttestationImportInterface;
 import com.alphawallet.app.entity.attestation.SmartPassReturn;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.DeepLinkService;
-import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
@@ -83,16 +79,14 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.AWalletConfirmationDialog;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.hardware.SignatureFromKey;
-import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.Signable;
-import org.web3j.utils.Numeric;
-import com.alphawallet.token.tools.ParseMagicLink;
 import com.github.florent37.tutoshowcase.TutoShowcase;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
-import com.walletconnect.android.CoreClient;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
+
+import org.web3j.utils.Numeric;
 
 import java.util.List;
 
@@ -169,11 +163,11 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
                 break;
             case ON_START:
                 Timber.tag("LIFE").d("AlphaWallet into foreground");
-                if (viewModel != null)
-                {
-                    viewModel.checkTransactionEngine();
-                    viewModel.sendMsgPumpToWC(this);
-                }
+                handler.postDelayed(() -> {
+                    if (viewModel != null)
+                    {
+                        viewModel.checkTransactionEngine();
+                    }}, 5000);
                 isForeground = true;
                 break;
             case ON_RESUME:
@@ -584,16 +578,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             homeReceiver.register();
         }
         initViews();
-
-        handler.post(() ->
-        {
-            //check clipboard
-            String magicLink = ImportTokenActivity.getMagiclinkFromClipboard(this);
-            if (magicLink != null)
-            {
-                viewModel.showImportLink(this, magicLink);
-            }
-        });
     }
 
     @Override

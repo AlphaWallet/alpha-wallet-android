@@ -219,7 +219,6 @@ public class WalletViewModel extends BaseViewModel
         tokensService.setCurrentAddress(wallet.address);
         assetDefinitionService.startEventListener();
         defaultWallet.postValue(wallet);
-        tokensService.startUpdateCycle();
         fetchTokens(wallet);
     }
 

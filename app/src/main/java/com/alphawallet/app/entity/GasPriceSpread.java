@@ -19,6 +19,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import timber.log.Timber;
+
 /**
  * Created by JB on 20/01/2022.
  */
@@ -165,6 +167,66 @@ public class GasPriceSpread implements Parcelable
         hasLockedGas = false;
     }
 
+    public GasPriceSpread(Context ctx, String apiReturn) //ChainId is unused but we need to disambiguate from etherscan API return
+    {
+        this.timeStamp = System.currentTimeMillis();
+        BigDecimal rBaseFee = BigDecimal.ZERO;
+        hasLockedGas = false;
+
+        try
+        {
+            JSONObject result = new JSONObject(apiReturn);
+            if (result.has("estimatedBaseFee"))
+            {
+                rBaseFee = new BigDecimal(result.getString("estimatedBaseFee"));
+            }
+
+            EIP1559FeeOracleResult low = readFeeResult(result, "low", rBaseFee);
+            EIP1559FeeOracleResult medium = readFeeResult(result, "medium", rBaseFee);
+            EIP1559FeeOracleResult high = readFeeResult(result, "high", rBaseFee);
+
+            if (low == null || medium == null || high == null)
+            {
+                return;
+            }
+
+            BigInteger rapidPriorityFee = (new BigDecimal(high.priorityFee)).multiply(BigDecimal.valueOf(1.2)).toBigInteger();
+            EIP1559FeeOracleResult rapid = new EIP1559FeeOracleResult(high.maxFeePerGas, rapidPriorityFee, gweiToWei(rBaseFee));
+
+            fees.put(TXSpeed.SLOW, new GasSpeed(ctx.getString(R.string.speed_slow), SLOW_SECONDS, low));
+            fees.put(TXSpeed.STANDARD, new GasSpeed(ctx.getString(R.string.speed_average), STANDARD_SECONDS, medium));
+            fees.put(TXSpeed.FAST, new GasSpeed(ctx.getString(R.string.speed_fast), FAST_SECONDS, high));
+            fees.put(TXSpeed.RAPID, new GasSpeed(ctx.getString(R.string.speed_rapid), RAPID_SECONDS, rapid));
+        }
+        catch (JSONException e)
+        {
+            //
+        }
+    }
+
+    private EIP1559FeeOracleResult readFeeResult(JSONObject result, String speed, BigDecimal rBaseFee)
+    {
+        EIP1559FeeOracleResult oracleResult = null;
+
+        try
+        {
+            if (result.has(speed))
+            {
+                JSONObject thisSpeed = result.getJSONObject(speed);
+                BigDecimal maxFeePerGas = new BigDecimal(thisSpeed.getString("suggestedMaxFeePerGas"));
+                BigDecimal priorityFee = new BigDecimal(thisSpeed.getString("suggestedMaxPriorityFeePerGas"));
+                oracleResult = new EIP1559FeeOracleResult(gweiToWei(maxFeePerGas), gweiToWei(priorityFee), gweiToWei(rBaseFee));
+            }
+        }
+        catch (Exception e)
+        {
+            Timber.e("Infura GasOracle read failing; please adjust your Infura API settings.");
+        }
+
+        return oracleResult;
+    }
+
+    // For etherscan return
     public GasPriceSpread(String apiReturn)
     {
         this.timeStamp = System.currentTimeMillis();

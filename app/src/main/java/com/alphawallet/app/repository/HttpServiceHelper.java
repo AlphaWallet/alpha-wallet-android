@@ -38,4 +38,9 @@ public class HttpServiceHelper
             service.addHeader("Authorization", "Basic " + infuraKey);
         }
     }
+
+    public static void addInfuraGasCredentials(Request.Builder service, String infuraSecret)
+    {
+        service.addHeader("Authorization", "Basic " + infuraSecret);
+    }
 }

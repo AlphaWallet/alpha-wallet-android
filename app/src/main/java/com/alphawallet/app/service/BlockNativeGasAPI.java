@@ -55,8 +55,12 @@ public class BlockNativeGasAPI
         return requestB.build();
     }
 
-    public Single<Map<Integer, EIP1559FeeOracleResult>> fetchGasEstimates(long chainId)
+    public Single<Map<Integer, EIP1559FeeOracleResult>> get1559GasEstimates(Map<Integer, EIP1559FeeOracleResult> result, long chainId)
     {
+        if (result.size() > 0)
+        {
+            return Single.fromCallable(() -> result);
+        }
         String oracleAPI = EthereumNetworkBase.getBlockNativeOracle(chainId);
         return Single.fromCallable(() -> buildOracleResult(executeRequest(oracleAPI))); // any kind of error results in blank mapping,
                                                                                         // if blank, fall back to calculation method

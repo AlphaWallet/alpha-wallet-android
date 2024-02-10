@@ -490,6 +490,18 @@ public class AWRealmMigration implements RealmMigration
 
             oldVersion = 53;
         }
+
+        if (oldVersion == 53)
+        {
+            RealmObjectSchema realmData = schema.get("Realm1559Gas");
+            if (realmData != null) schema.remove("Realm1559Gas");
+            schema.create("Realm1559Gas")
+                    .addField("chainId", long.class, FieldAttribute.PRIMARY_KEY)
+                    .addField("timeStamp", long.class)
+                    .addField("resultData", String.class);
+
+            oldVersion = 54;
+        }
     }
 
     @Override

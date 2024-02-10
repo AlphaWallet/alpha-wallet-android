@@ -1,6 +1,9 @@
 package com.alphawallet.app.entity;
 
+import android.content.Intent;
+
 import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
 
 import com.alphawallet.app.web3.entity.Web3Transaction;
 
@@ -57,5 +60,15 @@ public interface ActionSheetInterface
 
     default void setCurrentGasIndex(ActivityResult result)
     {
+    }
+
+    default ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return null;
+    }
+
+    default void gasEstimateReady()
+    {
+
     }
 }

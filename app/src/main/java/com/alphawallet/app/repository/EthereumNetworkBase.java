@@ -119,6 +119,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     private static final KeyProvider keyProvider = KeyProviderFactory.get();
     public static final boolean usesProductionKey = !keyProvider.getInfuraKey().equals(DEFAULT_INFURA_KEY);
+    private static final String INFURA_GAS_API = "https://gas.api.infura.io/networks/CHAIN_ID/suggestedGasFees";
 
     public static final String FREE_MAINNET_RPC_URL = "https://rpc.ankr.com/eth";
     public static final String FREE_POLYGON_RPC_URL = "https://polygon-rpc.com";
@@ -493,7 +494,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //Add it to this list here if so. Note that so far, all gas oracles follow the same format:
     //  <etherscanAPI from the above list> + GAS_API
     //If the gas oracle you're adding doesn't follow this spec then you'll have to change the getGasOracle method
-    private static final List<Long> hasGasOracleAPI = Arrays.asList(MAINNET_ID, HECO_ID, BINANCE_MAIN_ID, POLYGON_ID);
+    private static final List<Long> hasGasOracleAPI = Arrays.asList(MAINNET_ID, POLYGON_ID, ARBITRUM_MAIN_ID, AVALANCHE_ID, BINANCE_MAIN_ID, CRONOS_MAIN_ID, GOERLI_ID,
+            SEPOLIA_TESTNET_ID, FANTOM_ID, LINEA_ID, OPTIMISTIC_MAIN_ID, POLYGON_TEST_ID);
+    private static final List<Long> hasEtherscanGasOracleAPI = Arrays.asList(MAINNET_ID, HECO_ID, BINANCE_MAIN_ID, POLYGON_ID);
     private static final List<Long> hasBlockNativeGasOracleAPI = Arrays.asList(MAINNET_ID, POLYGON_ID);
     //These chains don't allow custom gas
     private static final List<Long> hasLockedGas = Arrays.asList(KLAYTN_ID, KLAYTN_BAOBAB_ID);
@@ -508,11 +511,24 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     };
 
+    public static String getEtherscanGasOracle(long chainId)
+    {
+        if (hasEtherscanGasOracleAPI.contains(chainId) && networkMap.indexOfKey(chainId) >= 0)
+        {
+            return networkMap.get(chainId).etherscanAPI + GAS_API;
+        }
+        else
+        {
+            return "";
+        }
+    }
+
     public static String getGasOracle(long chainId)
     {
         if (hasGasOracleAPI.contains(chainId) && networkMap.indexOfKey(chainId) >= 0)
         {
-            return networkMap.get(chainId).etherscanAPI + GAS_API;
+            //construct API route:
+            return INFURA_GAS_API.replace("CHAIN_ID", Long.toString(chainId));
         }
         else
         {
@@ -603,7 +619,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static int getBatchProcessingLimit(long chainId)
     {
         if (batchProcessingLimitMap.size() == 0) setBatchProcessingLimits(); //If batch limits not set, init them and proceed
-        return batchProcessingLimitMap.get(chainId, 0); //default to zero / no batching
+        {
+            return batchProcessingLimitMap.get(chainId, 0); //default to zero / no batching
+        }
     }
 
     @Override
@@ -861,8 +879,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return networkMap.get(chainId);
     }
 
-    // fetches the last transaction nonce; if it's identical to the last used one then increment by one
-    // to ensure we don't get transaction replacement
     @Override
     public Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress)
     {
@@ -871,7 +887,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             try
             {
                 EthGetTransactionCount ethGetTransactionCount = web3j
-                        .ethGetTransactionCount(walletAddress, DefaultBlockParameterName.LATEST)
+                        .ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)
                         .send();
                 return ethGetTransactionCount.getTransactionCount();
             }

@@ -10,6 +10,7 @@ import com.alphawallet.app.entity.EventMeta;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionMeta;
 import com.alphawallet.app.entity.Wallet;
+import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
 import com.alphawallet.app.repository.entity.RealmToken;
@@ -295,6 +296,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     r.where(RealmAuxData.class).findAll().deleteAllFromRealm();
                     r.where(RealmNFTAsset.class).findAll().deleteAllFromRealm();
                     r.where(RealmTransfer.class).findAll().deleteAllFromRealm();
+                    r.where(Realm1559Gas.class).findAll().deleteAllFromRealm();
                 });
                 instance.refresh();
             }

@@ -30,7 +30,6 @@ import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.web3.entity.Web3Transaction;
-import org.web3j.utils.Numeric;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +40,7 @@ import org.web3j.protocol.core.methods.response.EthEstimateGas;
 import org.web3j.protocol.core.methods.response.EthGasPrice;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.ContractGasProvider;
+import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -82,6 +82,7 @@ public class GasService implements ContractGasProvider
     private final String ETHERSCAN_API_KEY;
     private final String POLYGONSCAN_API_KEY;
     private boolean keyFail;
+
     @Nullable
     private Disposable gasFetchDisposable;
 
@@ -186,7 +187,7 @@ public class GasService implements ContractGasProvider
 
     private Single<Boolean> updateCurrentGasPrices()
     {
-        String gasOracleAPI = EthereumNetworkRepository.getGasOracle(currentChainId);
+        String gasOracleAPI = EthereumNetworkRepository.getEtherscanGasOracle(currentChainId);
         if (!TextUtils.isEmpty(gasOracleAPI))
         {
             if (!keyFail && gasOracleAPI.contains("etherscan")) gasOracleAPI += ETHERSCAN_API_KEY;
@@ -303,13 +304,14 @@ public class GasService implements ContractGasProvider
                 Realm1559Gas rgs = r.where(Realm1559Gas.class)
                         .equalTo("chainId", chainId)
                         .findFirst();
+
                 if (rgs == null)
                 {
                     rgs = r.createObject(Realm1559Gas.class, chainId);
                 }
 
                 rgs.setResultData(result, System.currentTimeMillis());
-                r.insertOrUpdate(rgs);
+                //r.insertOrUpdate(rgs);
             });
         }
         catch (Exception e)
@@ -325,11 +327,11 @@ public class GasService implements ContractGasProvider
     {
         updateChainId(chainId);
         return useNodeEstimate(true)
-                    .flatMap(com -> calculateGasEstimateInternal(transactionBytes, chainId, toAddress, amount, wallet, defaultLimit));
+                .flatMap(com -> calculateGasEstimateInternal(transactionBytes, chainId, toAddress, amount, wallet, defaultLimit));
     }
 
     public Single<GasEstimate> calculateGasEstimateInternal(byte[] transactionBytes, long chainId, String toAddress,
-                                                     BigInteger amount, Wallet wallet, final BigInteger defaultLimit)
+                                                            BigInteger amount, Wallet wallet, final BigInteger defaultLimit)
     {
         String txData = "";
         if (transactionBytes != null && transactionBytes.length > 0)
@@ -387,7 +389,7 @@ public class GasService implements ContractGasProvider
     {
         if (!estimate.hasError() || chainId != 1) return Single.fromCallable(() -> estimate);
         else return networkRepository.getLastTransactionNonce(web3j, WHALE_ACCOUNT)
-            .flatMap(nonce -> ethEstimateGas(chainId, WHALE_ACCOUNT, nonce, toAddress, amount, finalTxData));
+                .flatMap(nonce -> ethEstimateGas(chainId, WHALE_ACCOUNT, nonce, toAddress, amount, finalTxData));
     }
 
     private BigInteger getLowGasPrice()
@@ -420,8 +422,9 @@ public class GasService implements ContractGasProvider
 
     private Single<Map<Integer, EIP1559FeeOracleResult>> getEIP1559FeeStructure()
     {
-        return BlockNativeGasAPI.get(httpClient).fetchGasEstimates(currentChainId)
-                    .flatMap(this::useCalculationIfRequired); //if interface doesn't have blocknative API then use calculation method
+        return InfuraGasAPI.get1559GasEstimates(currentChainId, httpClient)
+                .flatMap(result -> BlockNativeGasAPI.get(httpClient).get1559GasEstimates(result, currentChainId))
+                .flatMap(this::useCalculationIfRequired); //if interface doesn't have blocknative API then use calculation method
     }
 
     private Single<Map<Integer, EIP1559FeeOracleResult>> useCalculationIfRequired(Map<Integer, EIP1559FeeOracleResult> resultMap)

@@ -28,4 +28,10 @@ public interface GasWidgetInterface
     void setupResendSettings(ActionSheetMode mode, BigInteger gasPrice);
     void setCurrentGasIndex(int gasSelectionIndex, BigInteger maxFeePerGas, BigInteger maxPriorityFee, BigDecimal customGasLimit, long expectedTxTime, long customNonce);
     long getExpectedTransactionTime();
+    default boolean gasPriceReady(long gasEstimateTime)
+    {
+        return gasEstimateTime > (System.currentTimeMillis() - 30 * 1000);
+    }
+
+    boolean gasPriceReady();
 }

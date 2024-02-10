@@ -153,35 +153,7 @@ public class Web3TokenView extends WebView
             @Override
             public boolean onConsoleMessage(ConsoleMessage msg)
             {
-                if (!showingError && msg.messageLevel() == ConsoleMessage.MessageLevel.ERROR)
-                {
-                    if (msg.message().contains(REFRESH_ERROR)) return true; //don't stop for refresh error
-                    String errorLine = "";
-                    try
-                    {
-                        LineNumberReader lineNumberReader = new LineNumberReader(new StringReader(unencodedPage));
-                        lineNumberReader.setLineNumber(0);
-
-                        String lineStr;
-                        while ((lineStr = lineNumberReader.readLine()) != null)
-                        {
-                            if (lineNumberReader.getLineNumber() == msg.lineNumber())
-                            {
-                                errorLine = Utils.escapeHTML(lineStr); //ensure string is displayed exactly how it is read
-                                break;
-                            }
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        errorLine = "";
-                    }
-
-                    String errorMessage = RENDERING_ERROR.replace("${ERR1}", msg.message());
-                    if (!TextUtils.isEmpty(errorLine)) errorMessage += RENDERING_ERROR_SUPPLIMENTAL.replace("$ERR1", String.valueOf(msg.lineNumber())).replace("$ERR2", errorLine); //.replace("$ERR2", errorMessage)
-                    showError(errorMessage);
-                    unencodedPage = null;
-                }
+                Timber.w("Web3Token Message: %s", msg.message());
                 return true;
             }
 

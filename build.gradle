@@ -12,7 +12,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:7.4.2'
         //NB - there is an issue with newer versions of gradle. The APK balloons out, so far haven't diagnosed why.
         //If you want to try upgrading gradle plugin past 3.5.4 you will need to also diagnose the APK ballooning issue.
-        classpath "io.realm:realm-gradle-plugin:10.16.1"
+        classpath "io.realm:realm-gradle-plugin:10.18.0"
         // WARNING WARNING WARNING
         // you are about to add here a dependency to be used in the Android app
         // don't do that. add that dependency to app/build.gradle

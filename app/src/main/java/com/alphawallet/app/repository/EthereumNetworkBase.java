@@ -1097,7 +1097,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
         else
         {
-            return info.backupNodeUrl != null ? info.backupNodeUrl : info.rpcServerUrl;
+            return info.rpcServerUrl; // Not Infura, use directly
         }
     }
 

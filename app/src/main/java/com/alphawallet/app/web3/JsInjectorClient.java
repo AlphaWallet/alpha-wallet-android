@@ -65,7 +65,7 @@ public class JsInjectorClient {
     public void setTSChainId(long chainId)
     {
         this.chainId = chainId;
-        this.rpcUrl = EthereumNetworkRepository.getTSNodeURL(chainId);
+        this.rpcUrl = EthereumNetworkRepository.getDefaultNodeURL(chainId);
     }
 
     public String initJs(Context context)

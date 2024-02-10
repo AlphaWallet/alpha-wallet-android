@@ -304,13 +304,14 @@ public class GasService implements ContractGasProvider
                 Realm1559Gas rgs = r.where(Realm1559Gas.class)
                         .equalTo("chainId", chainId)
                         .findFirst();
+
                 if (rgs == null)
                 {
                     rgs = r.createObject(Realm1559Gas.class, chainId);
                 }
 
                 rgs.setResultData(result, System.currentTimeMillis());
-                r.insertOrUpdate(rgs);
+                //r.insertOrUpdate(rgs);
             });
         }
         catch (Exception e)

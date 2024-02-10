@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
@@ -89,7 +90,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private boolean use1559Transactions = false;
     private Transaction transaction;
     private final WalletType walletType;
-    private Disposable disposable;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
                              String destName, String destAddress, TokensService ts,
@@ -329,14 +329,14 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
         if (use1559Transactions)
         {
-            gasWidget.setupWidget(tokensService, token, candidateTransaction, actionSheetCallback.gasSelectLauncher());
+            gasWidget.setupWidget(tokensService, token, candidateTransaction, this);
             return gasWidget;
         }
         else
         {
             gasWidget.setVisibility(View.GONE);
             gasWidgetLegacy.setVisibility(View.VISIBLE);
-            gasWidgetLegacy.setupWidget(tokensService, token, candidateTransaction, this, actionSheetCallback.gasSelectLauncher());
+            gasWidgetLegacy.setupWidget(tokensService, token, candidateTransaction, this, this);
             return gasWidgetLegacy;
         }
     }
@@ -434,6 +434,13 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public void handleClick(String action, int id)
     {
+        //first ensure gas estimate is up to date
+        if (gasEstimateOutOfDate())
+        {
+            functionBar.setPrimaryButtonWaiting();
+            return;
+        }
+
         if (walletType == WalletType.HARDWARE)
         {
             //TODO: Hardware - Maybe flick a toast to tell user to apply card
@@ -475,6 +482,23 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                 }
                 break;
         }
+    }
+
+    @Override
+    public void gasEstimateReady()
+    {
+        functionBar.setPrimaryButtonEnabled(true);
+    }
+
+    @Override
+    public ActivityResultLauncher<Intent> gasSelectLauncher()
+    {
+        return actionSheetCallback.gasSelectLauncher();
+    }
+
+    private boolean gasEstimateOutOfDate()
+    {
+        return !gasWidget.gasPriceReady();
     }
 
     private BigDecimal getTransactionAmount()

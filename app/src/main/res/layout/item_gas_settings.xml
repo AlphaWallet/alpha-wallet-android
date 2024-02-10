@@ -110,9 +110,18 @@
         android:paddingEnd="@dimen/mini_4">
 
         <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="@integer/widget_label" />
+                android:id="@+id/view_spacer"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="@integer/widget_label" />
+
+        <ProgressBar
+                android:id="@+id/gas_fetch_wait"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:progressDrawable="@drawable/progress_bar_spinner"
+                android:visibility="gone"
+                android:layout_weight="@integer/widget_control"/>
 
         <TextView
             android:id="@+id/text_time_estimate"

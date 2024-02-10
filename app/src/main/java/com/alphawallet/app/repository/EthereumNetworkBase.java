@@ -879,8 +879,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return networkMap.get(chainId);
     }
 
-    // fetches the last transaction nonce; if it's identical to the last used one then increment by one
-    // to ensure we don't get transaction replacement
     @Override
     public Single<BigInteger> getLastTransactionNonce(Web3j web3j, String walletAddress)
     {
@@ -889,7 +887,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             try
             {
                 EthGetTransactionCount ethGetTransactionCount = web3j
-                        .ethGetTransactionCount(walletAddress, DefaultBlockParameterName.LATEST)
+                        .ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)
                         .send();
                 return ethGetTransactionCount.getTransactionCount();
             }

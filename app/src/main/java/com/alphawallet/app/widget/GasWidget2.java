@@ -11,11 +11,10 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResultLauncher;
-
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.analytics.ActionSheetMode;
@@ -66,6 +65,8 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     private TXSpeed currentGasSpeedIndex = TXSpeed.STANDARD;
     private long customNonce = -1;
     private BigInteger resendGasPrice = BigInteger.ZERO;
+    private long gasEstimateTime = 0;
+    private ActionSheetInterface actionSheetInterface;
 
     //Need to track user selected gas limit & calculated gas limit
     //At initial setup, we have the limit from the tx or default: presetGasLimit
@@ -85,7 +86,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     }
 
     // Called once from ActionSheet constructor
-    public void setupWidget(TokensService svs, Token t, Web3Transaction tx, ActivityResultLauncher<Intent> gasSelectLauncher)
+    public void setupWidget(TokensService svs, Token t, Web3Transaction tx, ActionSheetInterface actionSheetIf)
     {
         tokensService = svs;
         token = t;
@@ -93,6 +94,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
         adjustedValue = tx.value;
         initialGasPrice = tx.gasPrice;
         customNonce = tx.nonce;
+        actionSheetInterface = actionSheetIf;
 
         if (tx.gasLimit.equals(BigInteger.ZERO)) //dapp didn't specify a limit, use default limits until node returns an estimate (see setGasEstimate())
         {
@@ -124,7 +126,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
                 intent.putExtra(C.EXTRA_NONCE, customNonce);
                 intent.putExtra(C.EXTRA_1559_TX, true);
                 intent.putExtra(C.EXTRA_MIN_GAS_PRICE, resendGasPrice.longValue());
-                gasSelectLauncher.launch(intent);
+                actionSheetInterface.gasSelectLauncher().launch(intent);
             });
         }
     }
@@ -132,15 +134,20 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     //set custom fee if specified by tx feed
     private void setupGasSpeeds(Web3Transaction w3tx)
     {
-        Realm1559Gas getGas = getGasQuery2().findFirst();
-        if (getGas != null)
+        try (Realm realm = tokensService.getTickerRealmInstance())
         {
-            initGasSpeeds(getGas);
-        }
-        else
-        {
-            // Couldn't get current gas. Add a blank custom gas speed node
-            gasSpread = new GasPriceSpread(getContext(), w3tx.maxFeePerGas, w3tx.maxPriorityFeePerGas);
+            Realm1559Gas gasReturn = realm.where(Realm1559Gas.class)
+                .equalTo("chainId", token.tokenInfo.chainId).findFirst();
+
+            if (gasReturn != null)
+            {
+                initGasSpeeds(gasReturn);
+            }
+            else
+            {
+                // Couldn't get current gas. Add a blank custom gas speed node
+                gasSpread = new GasPriceSpread(getContext(), w3tx.maxFeePerGas, w3tx.maxPriorityFeePerGas);
+            }
         }
 
         if (w3tx.maxFeePerGas.compareTo(BigInteger.ZERO) > 0 && w3tx.maxPriorityFeePerGas.compareTo(BigInteger.ZERO) > 0)
@@ -273,6 +280,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
             GasSpeed custom = getCustomGasSpeed();
             gasSpread = new GasPriceSpread(getContext(), gs.getResult());
             gasSpread.setCustom(custom);
+            gasEstimateTime = gs.getTimeStamp();
 
             //if we have mainnet then show timings, otherwise no timing, if the token has fiat value, show fiat value of gas, so we need the ticker
             handler.post(this);
@@ -340,6 +348,22 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
         }
         checkSufficientGas();
         manageWarnings();
+
+        if (gasPriceReady(gasEstimateTime))
+        {
+            actionSheetInterface.gasEstimateReady();
+            setGasReadyStatus(true);
+        }
+        else
+        {
+            setGasReadyStatus(false);
+        }
+    }
+
+    private void setGasReadyStatus(boolean ready)
+    {
+        findViewById(R.id.view_spacer).setVisibility(ready ? View.VISIBLE : View.GONE);
+        findViewById(R.id.gas_fetch_wait).setVisibility(ready ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -359,7 +383,7 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     @Override
     public BigInteger getGasPrice(BigInteger defaultPrice)
     {
-        if (gasSpread != null)
+        if (gasSpread != null && gasSpread.getSelectedGasFee(currentGasSpeedIndex) != null)
         {
             GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);
             return gs.gasPrice.maxFeePerGas;
@@ -388,6 +412,12 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     public boolean isSendingAll(Web3Transaction tx)
     {
         return false;
+    }
+
+    @Override
+    public boolean gasPriceReady()
+    {
+        return gasPriceReady(gasEstimateTime);
     }
 
     @Override

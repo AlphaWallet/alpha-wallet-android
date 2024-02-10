@@ -24,7 +24,12 @@ public class Realm1559Gas extends RealmObject
     public Map<Integer, EIP1559FeeOracleResult> getResult()
     {
         Type entry = new TypeToken<Map<Integer, EIP1559FeeOracleResult>>() {}.getType();
-        return new Gson().fromJson(resultData, entry);
+        return new Gson().fromJson(getResultData(), entry);
+    }
+
+    public String getResultData()
+    {
+        return resultData;
     }
 
     public void setResultData(Map<Integer, EIP1559FeeOracleResult> result, long ts)

@@ -82,6 +82,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
@@ -120,13 +121,13 @@ import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
-import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -1234,6 +1235,12 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
     public WalletType getWalletType()
     {
         return wallet.type;
+    }
+
+    @Override
+    public GasService getGasService()
+    {
+        return viewModel.getGasService();
     }
 
     @Override

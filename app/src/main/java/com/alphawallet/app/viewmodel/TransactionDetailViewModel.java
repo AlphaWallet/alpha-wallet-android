@@ -375,4 +375,9 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
             currentBlockUpdateDisposable.dispose();
         }
     }
+
+    public GasService getGasService()
+    {
+        return gasService;
+    }
 }

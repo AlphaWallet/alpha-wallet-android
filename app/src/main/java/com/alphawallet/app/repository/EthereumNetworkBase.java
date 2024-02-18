@@ -577,6 +577,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final int INFURA_BATCH_LIMIT = 512;
     public static final String INFURA_DOMAIN = "infura.io";
 
+    public static void setBatchProcessingError(long chainId)
+    {
+        batchProcessingLimitMap.put(chainId, 0);
+    }
+
     //TODO: Refactor when we bump the version of java to allow switch on Long (Finally!!)
     //Also TODO: add a test to check these batch limits of each chain we support
     private static int batchProcessingLimit(long chainId)

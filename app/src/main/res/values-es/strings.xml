@@ -995,4 +995,5 @@
     <string name="override">Anular</string>
     <string name="developer_override">Anulación del Desarrollador</string>
     <string name="override_warning_text">Es posible que esté a punto de firmar una transacción sin saberlo, lo que podría vaciar sus fondos. Es posible que desee firmar el código de bytes como desarrollador y puede anular esta advertencia si configura el modo de desarrollador en la configuración avanzada.</string>
+    <string name="constructor">Constructor</string>
 </resources>

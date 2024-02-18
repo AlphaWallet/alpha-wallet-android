@@ -64,6 +64,7 @@ import com.alphawallet.app.entity.attestation.SmartPassReturn;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.router.ImportTokenRouter;
 import com.alphawallet.app.service.DeepLinkService;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.PriceAlertsService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.PagerCallback;
@@ -665,6 +666,12 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
             homeReceiver.unregister();
             homeReceiver = null;
         }
+    }
+
+    @Override
+    public GasService getGasService()
+    {
+        return viewModel.getGasService();
     }
 
     private void showPage(WalletPage page)

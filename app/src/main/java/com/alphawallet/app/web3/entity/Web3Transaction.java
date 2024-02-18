@@ -20,6 +20,7 @@ import org.web3j.protocol.core.methods.request.Transaction;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Locale;
 
 
 public class Web3Transaction implements Parcelable
@@ -317,7 +318,7 @@ public class Web3Transaction implements Parcelable
 
     public boolean isConstructor()
     {
-        return (recipient.equals(Address.EMPTY) && payload != null);
+        return ((TextUtils.isEmpty(recipient.toString()) || recipient.equals(Address.EMPTY)) && payload != null) && (payload.startsWith("0x6080") || payload.toLowerCase(Locale.ROOT).startsWith("0x5b6080"));
     }
 
     public boolean isBaseTransfer()

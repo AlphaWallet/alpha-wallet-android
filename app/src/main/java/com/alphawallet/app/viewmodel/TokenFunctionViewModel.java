@@ -1042,4 +1042,9 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
             TokenScriptResult.addPair(attrs, attribute);
         }
     }
+
+    public GasService getGasService()
+    {
+        return gasService;
+    }
 }

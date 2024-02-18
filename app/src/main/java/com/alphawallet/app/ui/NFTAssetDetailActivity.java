@@ -830,6 +830,12 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     }
 
     @Override
+    public GasService getGasService()
+    {
+        return viewModel.getGasService();
+    }
+
+    @Override
     public void completeFunctionSetup()
     {
         //check if TS needs to be refreshed

@@ -75,7 +75,6 @@ public class ERC721Token extends Token
 {
     private final Map<BigInteger, NFTAsset> tokenBalanceAssets;
     private static final Map<String, Boolean> balanceChecks = new ConcurrentHashMap<>();
-    private boolean batchProcessingError;
 
     public ERC721Token(TokenInfo tokenInfo, Map<BigInteger, NFTAsset> balanceList, BigDecimal balance, long blancaTime, String networkName, ContractType type)
     {
@@ -90,7 +89,6 @@ public class ERC721Token extends Token
         }
         setInterfaceSpec(type);
         group = TokenGroup.NFT;
-        batchProcessingError = false;
     }
 
     @Override
@@ -419,7 +417,7 @@ public class ERC721Token extends Token
         //find tokenIds held
         long currentBalance = balance != null ? balance.longValue() : 0;
 
-        if (EthereumNetworkBase.getBatchProcessingLimit(tokenInfo.chainId) > 0 && !batchProcessingError && currentBalance > 1) //no need to do batch query for 1
+        if (EthereumNetworkBase.getBatchProcessingLimit(tokenInfo.chainId) > 0 && currentBalance > 1) //no need to do batch query for 1
         {
             updateEnumerableBatchBalance(web3j, currentBalance, tokenIdsHeld, realm);
         }
@@ -457,11 +455,6 @@ public class ERC721Token extends Token
             //do final call
             handleEnumerableRequests(requests, tokenIdsHeld);
         }
-
-        if (batchProcessingError)
-        {
-            updateEnumerableBalance(web3j, realm);
-        }
     }
 
     private void handleEnumerableRequests(BatchRequest requests, HashSet<BigInteger> tokenIdsHeld) throws IOException
@@ -469,7 +462,7 @@ public class ERC721Token extends Token
         BatchResponse responses = requests.send();
         if (responses.getResponses().size() != requests.getRequests().size())
         {
-            batchProcessingError = true;
+            EthereumNetworkBase.setBatchProcessingError(tokenInfo.chainId);
             return;
         }
 
@@ -622,7 +615,7 @@ public class ERC721Token extends Token
     private HashSet<BigInteger> checkBalances(Web3j web3j, HashSet<BigInteger> eventIds) throws IOException
     {
         HashSet<BigInteger> heldTokens = new HashSet<>();
-        if (EthereumNetworkBase.getBatchProcessingLimit(tokenInfo.chainId) > 0 && !batchProcessingError && eventIds.size() > 1) return checkBatchBalances(web3j, eventIds);
+        if (EthereumNetworkBase.getBatchProcessingLimit(tokenInfo.chainId) > 0 && eventIds.size() > 1) return checkBatchBalances(web3j, eventIds);
 
         for (BigInteger tokenId : eventIds)
         {
@@ -659,14 +652,7 @@ public class ERC721Token extends Token
             handleRequests(requests, balanceIds, heldTokens);
         }
 
-        if (batchProcessingError)
-        {
-            return checkBalances(web3j, eventIds);
-        }
-        else
-        {
-            return heldTokens;
-        }
+        return heldTokens;
     }
 
     private void handleRequests(BatchRequest requests, List<BigInteger> balanceIds, HashSet<BigInteger> heldTokens) throws IOException
@@ -675,7 +661,7 @@ public class ERC721Token extends Token
         BatchResponse responses = requests.send();
         if (responses.getResponses().size() != requests.getRequests().size())
         {
-            batchProcessingError = true;
+            EthereumNetworkBase.setBatchProcessingError(tokenInfo.chainId);
             return;
         }
 

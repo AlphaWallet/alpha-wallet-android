@@ -6,9 +6,10 @@ import androidx.activity.result.ActivityResultLauncher;
 
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.Token;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.web3.entity.Web3Transaction;
+import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.Signable;
 
 import java.math.BigInteger;
@@ -70,4 +71,6 @@ public interface ActionSheetCallback
     {
         return BigInteger.ZERO;
     }
+
+    GasService getGasService();
 }

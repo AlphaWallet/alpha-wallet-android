@@ -81,7 +81,7 @@ public class TransactionRepository implements TransactionRepositoryType
         if (w3Tx.isLegacyTransaction())
         {
             return formatRawTransaction(w3Tx.getTransactionDestination().toString(), w3Tx.value, w3Tx.gasPrice, w3Tx.gasLimit, nonce,
-                    !TextUtils.isEmpty(w3Tx.payload) ? Numeric.hexStringToByteArray(w3Tx.payload) : new byte[0]);
+                    !TextUtils.isEmpty(w3Tx.payload) ? Numeric.hexStringToByteArray(w3Tx.payload) : new byte[0], w3Tx.isConstructor());
         }
         else
         {
@@ -252,11 +252,11 @@ public class TransactionRepository implements TransactionRepositoryType
     /**
      * Format a legacy transaction
      */
-    private RawTransaction formatRawTransaction(String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data)
+    private RawTransaction formatRawTransaction(String toAddress, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit, long nonce, byte[] data, boolean isConstructor)
     {
         String dataStr = data != null ? Numeric.toHexString(data) : "";
 
-        if (TextUtils.isEmpty(toAddress)) //This transaction is a constructor
+        if (isConstructor)
         {
             return RawTransaction.createContractTransaction(
                     BigInteger.valueOf(nonce),

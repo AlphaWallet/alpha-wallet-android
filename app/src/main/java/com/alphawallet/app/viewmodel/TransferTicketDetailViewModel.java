@@ -38,8 +38,9 @@ import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.hardware.SignatureReturnType;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.entity.SignableBytes;
-import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
+
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -355,5 +356,10 @@ public class TransferTicketDetailViewModel extends BaseViewModel implements Tran
         disposable = genericWalletInteract
                 .findWallet(address)
                 .subscribe(this::onDefaultWallet, this::onError);
+    }
+
+    public GasService getGasService()
+    {
+        return gasService;
     }
 }

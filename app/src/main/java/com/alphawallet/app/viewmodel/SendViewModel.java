@@ -189,4 +189,9 @@ public class SendViewModel extends BaseViewModel implements TransactionSendHandl
     {
         transactionError.postValue(txError);
     }
+
+    public GasService getGasService()
+    {
+        return gasService;
+    }
 }

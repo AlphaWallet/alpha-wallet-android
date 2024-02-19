@@ -197,7 +197,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         try
         {
-            attrs = viewModel.getAssetDefinitionService().getTokenAttrs(token, tokenId, 1);
+            attrs = viewModel.getAssetDefinitionService().getTokenAttrs(token, tokenId, BigInteger.ONE);
             //add extra tokenIds if required
             addMultipleTokenIds(attrs);
         }

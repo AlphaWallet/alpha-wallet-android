@@ -38,7 +38,6 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.utils.Numeric;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -1735,15 +1734,9 @@ public class TokenDefinition
         return tokenViews.getView(viewTag);
     }
 
-    public TSTokenView getTSTokenView(String type)
+    public TSTokenView getTSTokenView(String name)
     {
-        TSTokenView view = tokenViews.views.get(type);
-        if (view == null && tokenViews.views.size() > 0)
-        {
-            view = tokenViews.views.values().iterator().next();
-        }
-
-        return view;
+        return tokenViews.getTSView(name);
     }
 
     public String getTokenViewStyle(String viewTag)

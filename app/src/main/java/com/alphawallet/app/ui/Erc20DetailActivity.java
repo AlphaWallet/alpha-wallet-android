@@ -5,6 +5,7 @@ import static com.alphawallet.app.C.Key.WALLET;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_MODE;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
 
 import android.content.Context;
 import android.content.Intent;
@@ -49,6 +50,7 @@ import com.alphawallet.app.widget.ActivityHistoryList;
 import com.alphawallet.app.widget.CertifiedToolbarView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.token.entity.XMLDsigDescriptor;
+import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -56,6 +58,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -79,6 +82,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private ActivityHistoryList activityHistoryList = null;
     private Realm realm = null;
     private RealmResults<RealmToken> realmTokenUpdates;
+    private CertifiedToolbarView certHeader;
+    private final TokenInfoFragment tokenInfoFragment = new TokenInfoFragment();
 
     private ViewPager2 viewPager;
 
@@ -100,7 +105,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     }
 
     private final DetailPage[] detailPages = new DetailPage[] {
-            new DetailPage(R.string.tab_info, new TokenInfoFragment()),
+            new DetailPage(R.string.tab_info, tokenInfoFragment),
             new DetailPage(R.string.tab_activity, new TokenActivityFragment()),
             new DetailPage(R.string.tab_alert, new TokenAlertsFragment())
     };
@@ -126,6 +131,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
             getIntentData();
         }
 
+        certHeader = findViewById(R.id.certified_toolbar);
+        certHeader.startDownload();
         viewModel.checkForNewScript(token);
 
         setTitle(token.tokenInfo.name + " (" + token.tokenInfo.symbol + ")");
@@ -190,8 +197,8 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
+            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(BigInteger.ZERO));
             functionBar.setupBuyFunction(this, viewModel.getOnRampRepository());
-            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
             functionBar.revealButtons();
             functionBar.setWalletType(wallet.type);
         }
@@ -203,10 +210,9 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         {
             viewModel = new ViewModelProvider(this)
                     .get(Erc20DetailViewModel.class);
-            viewModel.newScriptFound().observe(this, this::onNewScript);
+            viewModel.newScriptFound().observe(this, this::newScriptFound);
             viewModel.sig().observe(this, this::onSignature);
             viewModel.scriptUpdateInProgress().observe(this, this::startScriptDownload);
-//            findViewById(R.id.certificate_spinner).setVisibility(View.VISIBLE); //Samoa TODO: restore certificate toolbar
         }
     }
 
@@ -225,16 +231,27 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         }
     }
 
-    private void onNewScript(Boolean hasNewScript)
+    private void newScriptFound(TokenDefinition td)
     {
+        //determinate signature
+        certHeader.stopDownload();
+        certHeader.setVisibility(View.VISIBLE);
+
         final TokenGroup group = viewModel.getTokensService().getTokenGroup(token);
         //found a new tokenscript for this token, create a new meta with balance set to trigger view update; view will update the token name
         tokenViewAdapter.updateToken(new TokenCardMeta(token.tokenInfo.chainId, token.getAddress(), "force_update",
                 token.updateBlancaTime, token.lastTxCheck, token.getInterfaceSpec(), group));
-        viewModel.checkTokenScriptValidity(token); //check script signature
-        CertifiedToolbarView certificateToolbar = findViewById(R.id.certified_toolbar);
-        certificateToolbar.stopDownload();
+
         setupButtons();
+
+        if (td.nameSpace.equals(UNCHANGED_SCRIPT))
+        {
+            td = viewModel.getAssetDefinitionService().getAssetDefinition(token);
+        }
+
+        //new script, need to check validity
+        viewModel.checkTokenScriptValidity(token); //check script signature
+        tokenInfoFragment.initTokenScript(td);
     }
 
     private void onSignature(XMLDsigDescriptor descriptor)
@@ -274,7 +291,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         tokenView.setAdapter(tokenViewAdapter);
         setTokenListener();
         setupButtons();
-        viewModel.checkTokenScriptValidity(token);
     }
 
     private void getIntentData()
@@ -288,7 +304,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         token = viewModel.getTokensService().getTokenOrBase(chainId, getIntent().getStringExtra(C.EXTRA_ADDRESS));
         token.group = viewModel.getTokensService().getTokenGroup(token);
         tokenMeta = new TokenCardMeta(token, token.getName());
-        viewModel.checkForNewScript(token);
     }
 
     @Override

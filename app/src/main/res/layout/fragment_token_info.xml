@@ -1,60 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<androidx.core.widget.NestedScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="?actionBarSize"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:id="@+id/layout_token_header"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical" />
+            android:layout_marginBottom="?actionBarSize"
+            android:orientation="vertical">
+
+        <LinearLayout
+                android:id="@+id/layout_token_header"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" />
 
         <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
             <ImageView
-                android:id="@+id/placeholder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_components_charts_graph_stable"
-                android:visibility="invisible" />
+                    android:id="@+id/placeholder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_components_charts_graph_stable"
+                    android:visibility="invisible" />
 
             <com.alphawallet.app.ui.widget.entity.HistoryChart
-                android:id="@+id/history_chart"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                    android:id="@+id/history_chart"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
         </FrameLayout>
 
         <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tab_layout"
-            style="@style/Aw.Component.ChartTabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" />
+                android:id="@+id/tab_layout"
+                style="@style/Aw.Component.ChartTabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" />
 
         <View
-            style="@style/Aw.Component.Separator"
-            android:layout_marginStart="@dimen/tiny_8"
-            android:layout_marginTop="@dimen/tiny_8"
-            android:layout_marginEnd="@dimen/tiny_8" />
+                style="@style/Aw.Component.Separator"
+                android:layout_marginStart="@dimen/tiny_8"
+                android:layout_marginTop="@dimen/tiny_8"
+                android:layout_marginEnd="@dimen/tiny_8" />
 
         <LinearLayout
-            android:id="@+id/layout_token_info"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" />
+                android:id="@+id/layout_token_info"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" />
 
         <LinearLayout
                 android:id="@+id/layout_contract_addr"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical" />
+
+        <LinearLayout
+                android:id="@+id/layout_webwrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginStart="@dimen/tiny_8"
+                android:layout_marginTop="@dimen/standard_16"
+                android:layout_marginEnd="@dimen/tiny_8"
+                android:gravity="top"
+                android:minHeight="100dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+        </LinearLayout>
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

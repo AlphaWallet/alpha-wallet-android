@@ -41,4 +41,9 @@ public class TSTokenViewHolder
 
         return v;
     }
+
+    public TSTokenView getTSView(String name)
+    {
+        return getViewOrDefault(name);
+    }
 }

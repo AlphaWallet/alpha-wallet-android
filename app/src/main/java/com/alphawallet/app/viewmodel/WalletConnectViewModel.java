@@ -30,7 +30,6 @@ import com.alphawallet.app.interact.FetchWalletsInteract;
 import com.alphawallet.app.interact.FindDefaultNetworkInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.interact.WalletConnectInteract;
-import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.SignRecord;
 import com.alphawallet.app.repository.entity.RealmWCSession;
@@ -53,6 +52,7 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.EthereumTypedMessage;
 import com.alphawallet.token.entity.Signable;
+
 import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
@@ -168,6 +168,11 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
         prepareDisposable = genericWalletInteract
                 .find()
                 .subscribe(this::onDefaultWallet, this::onError);
+    }
+
+    public GasService getGasService()
+    {
+        return gasService;
     }
 
     public void startGasCycle(long chainId)

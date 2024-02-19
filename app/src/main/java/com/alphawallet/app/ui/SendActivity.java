@@ -58,8 +58,9 @@ import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import com.alphawallet.token.tools.Convert;
-import org.web3j.utils.Numeric;
 import com.alphawallet.token.tools.ParseMagicLink;
+
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -671,6 +672,12 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     public WalletType getWalletType()
     {
         return wallet.type;
+    }
+
+    @Override
+    public GasService getGasService()
+    {
+        return viewModel.getGasService();
     }
 
     private void txWritten(TransactionReturn txData)

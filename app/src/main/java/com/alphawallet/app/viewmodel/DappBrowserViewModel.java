@@ -497,4 +497,9 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
 
         tokensService.setupFilter(true);
     }
+
+    public GasService getGasService()
+    {
+        return gasService;
+    }
 }

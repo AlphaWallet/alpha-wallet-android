@@ -23,6 +23,7 @@ import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.SwapRepositoryType;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.SwapService;
 import com.alphawallet.app.service.TokensService;
@@ -67,6 +68,7 @@ public class SwapViewModel extends BaseViewModel implements TransactionSendHandl
     private final SwapService swapService;
     private final CreateTransactionInteract createTransactionInteract;
     private final KeyService keyService;
+    private final GasService gasService;
 
     private final MutableLiveData<List<Chain>> chains = new MutableLiveData<>();
     private final MutableLiveData<Chain> chain = new MutableLiveData<>();
@@ -91,7 +93,8 @@ public class SwapViewModel extends BaseViewModel implements TransactionSendHandl
             SwapService swapService,
             CreateTransactionInteract createTransactionInteract,
             KeyService keyService,
-            AnalyticsServiceType analyticsService)
+            AnalyticsServiceType analyticsService,
+            GasService gasService)
     {
         this.assetDefinitionService = assetDefinitionService;
         this.preferenceRepository = preferenceRepository;
@@ -100,6 +103,7 @@ public class SwapViewModel extends BaseViewModel implements TransactionSendHandl
         this.swapService = swapService;
         this.createTransactionInteract = createTransactionInteract;
         this.keyService = keyService;
+        this.gasService = gasService;
         setAnalyticsService(analyticsService);
     }
 
@@ -494,5 +498,10 @@ public class SwapViewModel extends BaseViewModel implements TransactionSendHandl
     public void transactionError(TransactionReturn error)
     {
         transactionError.postValue(error);
+    }
+
+    public GasService getGasService()
+    {
+        return gasService;
     }
 }

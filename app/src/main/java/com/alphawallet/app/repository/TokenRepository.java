@@ -2,6 +2,7 @@ package com.alphawallet.app.repository;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 import static java.util.Arrays.asList;
 
@@ -95,7 +96,9 @@ public class TokenRepository implements TokenRepositoryType {
     public static final BigInteger INTERFACE_BALANCES_721_TICKET = new BigInteger ("c84aae17", 16);
     public static final BigInteger INTERFACE_SUPERRARE = new BigInteger ("5b5e139f", 16);
     public static final BigInteger INTERFACE_ERC1155 = new BigInteger("d9b67a26", 16);
+    public static final BigInteger INTERFACE_ERC20 = new BigInteger("36372b07", 16);
     public static final BigInteger INTERFACE_ERC721_ENUMERABLE = new BigInteger("780e9d63", 16);
+    public static final BigInteger INTERFACE_ERC404 = new BigInteger("b374afc4", 16);
 
     private static final int NODE_COMMS_ERROR = -1;
     private static final int CONTRACT_BALANCE_NULL = -2;
@@ -1219,6 +1222,10 @@ public class TokenRepository implements TokenRepositoryType {
                     returnType = ContractType.ERC721_ENUMERABLE;
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_OFFICIAL_ERC721), Boolean.TRUE))
                     returnType = ContractType.ERC721;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_ERC20), Boolean.TRUE))
+                    returnType = ContractType.ERC20;
+                else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_ERC404), Boolean.TRUE))
+                    returnType = ContractType.ERC20;
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_SUPERRARE), Boolean.TRUE))
                     returnType = ContractType.ERC721;
                 else if (getContractData(network, tokenInfo.address, supportsInterface(INTERFACE_ERC1155), Boolean.TRUE))

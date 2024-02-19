@@ -482,6 +482,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         return tokenId;
     }
 
+    @Override
+    public GasService getGasService()
+    {
+        return viewModel.getGasService();
+    }
+
     private void calculateEstimateDialog()
     {
         if (alertDialog != null && alertDialog.isShowing()) alertDialog.dismiss();

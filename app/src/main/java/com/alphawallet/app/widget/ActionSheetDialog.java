@@ -19,6 +19,7 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ActionSheetInterface;
 import com.alphawallet.app.entity.ActionSheetStatus;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.EIP1559FeeOracleResult;
 import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
@@ -52,7 +53,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.Nullable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 
 /**
@@ -90,6 +94,10 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private boolean use1559Transactions = false;
     private Transaction transaction;
     private final WalletType walletType;
+    @Nullable
+    private Disposable backupGasFetchDisposable;
+
+    private EIP1559FeeOracleResult gasToUse = null;
 
     public ActionSheetDialog(@NonNull Activity activity, Web3Transaction tx, Token t,
                              String destName, String destAddress, TokensService ts,
@@ -147,6 +155,9 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         networkDisplay.setNetwork(token.tokenInfo.chainId);
 
         gasWidgetInterface = setupGasWidget();
+
+        //ensure gas service is started
+        actionSheetCallback.getGasService().startGasPriceCycle(token.tokenInfo.chainId);
 
         if (!tx.gasLimit.equals(BigInteger.ZERO))
         {
@@ -435,11 +446,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     public void handleClick(String action, int id)
     {
         //first ensure gas estimate is up to date
-        if (gasEstimateOutOfDate())
-        {
-            functionBar.setPrimaryButtonWaiting();
-            return;
-        }
 
         if (walletType == WalletType.HARDWARE)
         {
@@ -454,14 +460,16 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
             case SEND_TRANSACTION_DAPP:
             case SPEEDUP_TRANSACTION:
             case CANCEL_TRANSACTION:
-                //check gas and warn user
-                if (!gasWidgetInterface.checkSufficientGas())
+                gasToUse = getGasSettingsToUse();
+                if (gasToUse == null)
                 {
-                    askUserForInsufficientGasConfirm();
+                    functionBar.setPrimaryButtonWaiting();
+                    //call gas collect then push tx again
+                    callGasUpdateAndRePushTx();
                 }
                 else
                 {
-                    handleTransactionOperation();
+                    checkGasAndSend();
                 }
                 break;
             case SIGN_TRANSACTION:
@@ -484,6 +492,36 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         }
     }
 
+    private void checkGasAndSend()
+    {
+        functionBar.setPrimaryButtonEnabled(true);
+        //check gas and warn user
+        if (!gasWidgetInterface.checkSufficientGas())
+        {
+            askUserForInsufficientGasConfirm();
+        }
+        else
+        {
+            handleTransactionOperation();
+        }
+    }
+
+    private void callGasUpdateAndRePushTx()
+    {
+        //fetch gas and then re-click
+        backupGasFetchDisposable = actionSheetCallback.getGasService().fetchGasPrice(token.tokenInfo.chainId, use1559Transactions)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(gasPriceStandard -> {
+                gasToUse = gasPriceStandard;
+                if (use1559Transactions && gasToUse.maxFeePerGas.equals(BigInteger.ZERO) && gasToUse.priorityFee.equals(BigInteger.ZERO))
+                {
+                    use1559Transactions = false;
+                }
+                checkGasAndSend();
+            });
+    }
+
     @Override
     public void gasEstimateReady()
     {
@@ -496,9 +534,23 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         return actionSheetCallback.gasSelectLauncher();
     }
 
-    private boolean gasEstimateOutOfDate()
+    private EIP1559FeeOracleResult getGasSettingsToUse()
     {
-        return !gasWidget.gasPriceReady();
+        if (gasWidgetInterface != null && gasWidgetInterface.gasPriceReady())
+        {
+            if (use1559Transactions)
+            {
+                return new EIP1559FeeOracleResult(gasWidgetInterface.getGasMax(),
+                        gasWidgetInterface.getPriorityFee(), gasWidgetInterface.getGasPrice());
+            }
+            else
+            {
+                return new EIP1559FeeOracleResult(BigInteger.ZERO,
+                        BigInteger.ZERO, gasWidgetInterface.getGasPrice(candidateTransaction.gasPrice));
+            }
+        }
+
+        return null;
     }
 
     private BigDecimal getTransactionAmount()
@@ -629,6 +681,10 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         setOnDismissListener(v -> {
             actionSheetCallback.dismissed(txHash, callbackId, actionCompleted);
             if (gasWidgetInterface != null) gasWidgetInterface.onDestroy();
+            if (backupGasFetchDisposable != null && !backupGasFetchDisposable.isDisposed())
+            {
+                backupGasFetchDisposable.dispose();
+            }
         });
     }
 
@@ -664,14 +720,12 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         //form Web3Transaction
         if (!use1559Transactions)
         {
-            BigInteger currentGasPrice = gasWidgetInterface.getGasPrice(candidateTransaction.gasPrice); // also recalculates the transaction value
-
             establishedTransaction = new Web3Transaction(
                     candidateTransaction.recipient,
                     candidateTransaction.contract,
                     candidateTransaction.sender,
                     gasWidgetInterface.getValue(),
-                    currentGasPrice,
+                    gasToUse.baseFee,
                     gasWidgetInterface.getGasLimit(),
                     gasWidgetInterface.getNonce(),
                     candidateTransaction.payload,
@@ -685,8 +739,8 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
                     candidateTransaction.contract,
                     candidateTransaction.sender,
                     gasWidgetInterface.getValue(),
-                    gasWidgetInterface.getGasMax(),
-                    gasWidgetInterface.getPriorityFee(),
+                    gasToUse.maxFeePerGas,
+                    gasToUse.priorityFee,
                     gasWidgetInterface.getGasLimit(),
                     gasWidgetInterface.getNonce(),
                     candidateTransaction.payload,

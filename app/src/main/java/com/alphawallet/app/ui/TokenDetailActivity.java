@@ -357,4 +357,10 @@ public class TokenDetailActivity extends BaseActivity implements StandardFunctio
     {
         return viewModel.getWallet().type;
     }
+
+    @Override
+    public GasService getGasService()
+    {
+        return viewModel.getGasService();
+    }
 }

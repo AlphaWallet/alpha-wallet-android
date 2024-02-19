@@ -19,6 +19,7 @@ import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.GasPriceSpread;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SuggestEIP1559Kt;
+import com.alphawallet.app.entity.TXSpeed;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -27,6 +28,7 @@ import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.HttpServiceHelper;
 import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.entity.Realm1559Gas;
 import com.alphawallet.app.repository.entity.RealmGasSpread;
 import com.alphawallet.app.web3.entity.Web3Transaction;
@@ -147,7 +149,7 @@ public class GasService implements ContractGasProvider
                 .isDisposed();
 
         //also update EIP1559 if required and we haven't previously determined there's no EIP1559 support
-        getEIP1559FeeStructure()
+        getEIP1559FeeStructure(currentChainId)
                 .map(result -> updateEIP1559Realm(result, currentChainId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -217,9 +219,14 @@ public class GasService implements ContractGasProvider
         }
         else
         {
-            return Single.fromCallable(() -> web3j.ethGasPrice().send())
+            return getNodeEstimate(currentChainId)
                     .map(price -> updateGasPrice(price, currentChainId, updated));
         }
+    }
+
+    private Single<EthGasPrice> getNodeEstimate(long chainId)
+    {
+        return Single.fromCallable(() -> TokenRepository.getWeb3jService(chainId).ethGasPrice().send());
     }
 
     private Boolean updateGasPrice(EthGasPrice ethGasPrice, long chainId, boolean databaseUpdated)
@@ -292,6 +299,37 @@ public class GasService implements ContractGasProvider
                 rgs.setGasSpread(oracleResult, System.currentTimeMillis());
                 r.insertOrUpdate(rgs);
             });
+        }
+    }
+
+    //If for whatever reason gasprice hasn't been fetched or is out of date, use a manual fetch to ensure process goes through.
+    public Single<EIP1559FeeOracleResult> fetchGasPrice(long chainId, boolean use1559Gas)
+    {
+        //fetch relevant average setting
+        if (use1559Gas)
+        {
+            return getEIP1559FeeStructure(chainId)
+                    .map(result -> {
+                        //select average
+                        EIP1559FeeOracleResult standard = (result != null && result.containsKey(TXSpeed.STANDARD)) ? result.get(TXSpeed.STANDARD) : null;
+                        if (standard != null)
+                        {
+                            return standard;
+                        }
+                        else
+                        {
+                            //return legacy calc
+                            EthGasPrice gasPrice = getNodeEstimate(chainId).blockingGet();
+                            return new EIP1559FeeOracleResult(BigInteger.ZERO, BigInteger.ZERO, gasPrice.getGasPrice());
+                        }
+                    });
+        }
+        else
+        {
+            //get legacy gas
+            return getNodeEstimate(chainId)
+                    .map(result -> new EIP1559FeeOracleResult(result.getGasPrice(), BigInteger.ZERO, BigInteger.ZERO));
+
         }
     }
 
@@ -420,10 +458,10 @@ public class GasService implements ContractGasProvider
         return Single.fromCallable(() -> web3j.ethEstimateGas(transaction).send());
     }
 
-    private Single<Map<Integer, EIP1559FeeOracleResult>> getEIP1559FeeStructure()
+    private Single<Map<Integer, EIP1559FeeOracleResult>> getEIP1559FeeStructure(long chainId)
     {
-        return InfuraGasAPI.get1559GasEstimates(currentChainId, httpClient)
-                .flatMap(result -> BlockNativeGasAPI.get(httpClient).get1559GasEstimates(result, currentChainId))
+        return InfuraGasAPI.get1559GasEstimates(chainId, httpClient)
+                .flatMap(result -> BlockNativeGasAPI.get(httpClient).get1559GasEstimates(result, chainId))
                 .flatMap(this::useCalculationIfRequired); //if interface doesn't have blocknative API then use calculation method
     }
 

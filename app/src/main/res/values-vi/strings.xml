@@ -1009,4 +1009,5 @@
     <string name="override">Ghi đè</string>
     <string name="developer_override">Ghi đè Nhà phát triển</string>
     <string name="override_warning_text">Bạn có thể sắp vô tình ký một giao dịch, điều này có thể khiến tiền của bạn bị rỗng. Bạn có thể muốn ký mã byte với tư cách là nhà phát triển và bạn có thể ghi đè cảnh báo này nếu bạn đặt chế độ nhà phát triển trong cài đặt Nâng cao.</string>
+    <string name="constructor">Constructor</string>
 </resources>

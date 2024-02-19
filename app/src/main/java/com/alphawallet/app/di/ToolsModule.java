@@ -5,6 +5,7 @@ import android.content.Context;
 import com.alphawallet.app.C;
 import com.alphawallet.app.interact.WalletConnectInteract;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.google.gson.Gson;
@@ -54,8 +55,8 @@ public class ToolsModule
 
     @Singleton
     @Provides
-    AWWalletConnectClient provideAWWalletConnectClient(@ApplicationContext Context context, WalletConnectInteract walletConnectInteract, PreferenceRepositoryType preferenceRepositoryType)
+    AWWalletConnectClient provideAWWalletConnectClient(@ApplicationContext Context context, WalletConnectInteract walletConnectInteract, PreferenceRepositoryType preferenceRepositoryType, GasService gasService)
     {
-        return new AWWalletConnectClient(context, walletConnectInteract, preferenceRepositoryType);
+        return new AWWalletConnectClient(context, walletConnectInteract, preferenceRepositoryType, gasService);
     }
 }

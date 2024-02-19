@@ -494,4 +494,10 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     {
         return viewModel.getWallet().type;
     }
+
+    @Override
+    public GasService getGasService()
+    {
+        return viewModel.getGasService();
+    }
 }

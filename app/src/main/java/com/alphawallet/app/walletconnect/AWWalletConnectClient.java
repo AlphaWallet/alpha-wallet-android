@@ -31,6 +31,7 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.WalletConnectV2Service;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -76,16 +77,18 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     private final MutableLiveData<List<WalletConnectSessionItem>> sessionItemMutableLiveData = new MutableLiveData<>(Collections.emptyList());
     private final KeyProvider keyProvider = KeyProviderFactory.get();
     private final LongSparseArray<WalletConnectV2SessionRequestHandler> requestHandlers = new LongSparseArray<>();
+    private final GasService gasService;
     private ActionSheetCallback actionSheetCallback;
     private boolean hasConnection;
     private Application application;
     private PreferenceRepositoryType preferenceRepository;
 
-    public AWWalletConnectClient(Context context, WalletConnectInteract walletConnectInteract, PreferenceRepositoryType preferenceRepository)
+    public AWWalletConnectClient(Context context, WalletConnectInteract walletConnectInteract, PreferenceRepositoryType preferenceRepository, GasService gasService)
     {
         this.context = context;
         this.walletConnectInteract = walletConnectInteract;
         this.preferenceRepository = preferenceRepository;
+        this.gasService = gasService;
         hasConnection = false;
     }
 
@@ -511,6 +514,12 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
             @Override
             public void completeSendTransaction(Web3Transaction tx, SignatureFromKey signature)
             {
+            }
+
+            @Override
+            public GasService getGasService()
+            {
+                return gasService;
             }
 
             @Override

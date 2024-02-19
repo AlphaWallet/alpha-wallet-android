@@ -49,7 +49,6 @@ import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.WalletType;
-import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.app.entity.tokens.ERC721Token;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -73,9 +72,10 @@ import com.alphawallet.app.widget.InputAddress;
 import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
-import org.web3j.utils.Numeric;
+import com.alphawallet.hardware.SignatureFromKey;
 
 import org.jetbrains.annotations.NotNull;
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -946,6 +946,12 @@ public class TransferTicketDetailActivity extends BaseActivity
     public WalletType getWalletType()
     {
         return viewModel.getWallet().type;
+    }
+
+    @Override
+    public GasService getGasService()
+    {
+        return viewModel.getGasService();
     }
 
     private void txWritten(TransactionReturn transactionReturn)

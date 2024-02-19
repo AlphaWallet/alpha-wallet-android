@@ -996,4 +996,5 @@
     <string name="override">覆盖</string>
     <string name="developer_override">开发者覆盖</string>
     <string name="override_warning_text">您可能会在不知情的情况下签署一项交易，这可能会清空您的资金。 您可能希望以开发人员的身份对字节码进行签名，如果您在高级设置中设置开发人员模式，则可以覆盖此警告。</string>
+    <string name="constructor">Constructor</string>
 </resources>

@@ -57,9 +57,9 @@ import com.alphawallet.app.widget.ProgressView;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.app.widget.SystemView;
 import com.alphawallet.hardware.SignatureFromKey;
-import org.web3j.utils.Numeric;
 
 import org.jetbrains.annotations.NotNull;
+import org.web3j.utils.Numeric;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -467,6 +467,12 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
     public WalletType getWalletType()
     {
         return viewModel.getWallet().type;
+    }
+
+    @Override
+    public GasService getGasService()
+    {
+        return viewModel.getGasService();
     }
 
     private void txWritten(TransactionReturn txReturn)

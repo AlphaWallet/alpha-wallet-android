@@ -71,11 +71,20 @@ public class TransactionDetailWidget extends LinearLayout
             textFunctionName.setText(displayText);
         }
 
-        SignatureLookupService svc = new SignatureLookupService();
-        disposable = svc.getFunctionName(w3tx.payload)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(this::onResult, error -> { });
+        if (w3tx.isConstructor())
+        {
+            String constructor = getContext().getString(R.string.constructor);
+            textTransactionSummary.setText(constructor);
+            textFunctionName.setText(constructor);
+        }
+        else
+        {
+            SignatureLookupService svc = new SignatureLookupService();
+            disposable = svc.getFunctionName(w3tx.payload)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(this::onResult, error -> { });
+        }
 
         layoutHolder.setOnClickListener(v -> {
             if (layoutDetails.getVisibility() == View.GONE)

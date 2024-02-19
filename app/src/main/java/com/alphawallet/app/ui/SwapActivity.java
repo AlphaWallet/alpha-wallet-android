@@ -33,6 +33,7 @@ import com.alphawallet.app.entity.lifi.Chain;
 import com.alphawallet.app.entity.lifi.Connection;
 import com.alphawallet.app.entity.lifi.Quote;
 import com.alphawallet.app.entity.lifi.Token;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.ProgressInfo;
 import com.alphawallet.app.util.BalanceUtils;
@@ -49,8 +50,9 @@ import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.app.widget.TokenSelector;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.hardware.SignatureFromKey;
-import org.web3j.utils.Numeric;
 import com.google.android.material.button.MaterialButton;
+
+import org.web3j.utils.Numeric;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -790,5 +792,11 @@ public class SwapActivity extends BaseActivity implements StandardFunctionInterf
     public WalletType getWalletType()
     {
         return wallet.type;
+    }
+
+    @Override
+    public GasService getGasService()
+    {
+        return viewModel.getGasService();
     }
 }

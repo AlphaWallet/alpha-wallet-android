@@ -56,6 +56,7 @@ import com.alphawallet.app.router.MyAddressRouter;
 import com.alphawallet.app.service.AlphaWalletNotificationService;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
+import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.service.TransactionsService;
@@ -132,6 +133,7 @@ public class HomeViewModel extends BaseViewModel
     private final OkHttpClient httpClient;
     private final RealmManager realmManager;
     private final TokensService tokensService;
+    private final GasService gasService;
     private final AlphaWalletNotificationService alphaWalletNotificationService;
     private final MutableLiveData<String> walletName = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -160,7 +162,8 @@ public class HomeViewModel extends BaseViewModel
             OkHttpClient httpClient,
             RealmManager realmManager,
             TokensService tokensService,
-            AlphaWalletNotificationService alphaWalletNotificationService)
+            AlphaWalletNotificationService alphaWalletNotificationService,
+            GasService gasService)
     {
         this.preferenceRepository = preferenceRepository;
         this.importTokenRouter = importTokenRouter;
@@ -179,6 +182,7 @@ public class HomeViewModel extends BaseViewModel
         setAnalyticsService(analyticsService);
         this.preferenceRepository.incrementLaunchCount();
         this.tokensService = tokensService;
+        this.gasService = gasService;
     }
 
     @Override
@@ -215,6 +219,8 @@ public class HomeViewModel extends BaseViewModel
     {
         return defaultWallet;
     }
+
+    public GasService getGasService() { return gasService; }
 
     public void prepare(Activity activity)
     {

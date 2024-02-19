@@ -579,4 +579,10 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
     {
         return wallet.type;
     }
+
+    @Override
+    public GasService getGasService()
+    {
+        return viewModel.getGasService();
+    }
 }

@@ -25,7 +25,7 @@ public class HomeViewModelTest
     public void setUp() throws Exception
     {
         SharedPreferenceRepository sharedPreferenceRepository = new SharedPreferenceRepository(RuntimeEnvironment.getApplication());
-        homeViewModel = new HomeViewModel(sharedPreferenceRepository, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        homeViewModel = new HomeViewModel(sharedPreferenceRepository, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Test

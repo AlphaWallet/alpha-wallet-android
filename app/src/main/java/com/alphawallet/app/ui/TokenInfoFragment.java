@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
@@ -25,11 +24,16 @@ import com.alphawallet.app.service.TickerService;
 import com.alphawallet.app.ui.widget.entity.HistoryChart;
 import com.alphawallet.app.util.TabUtils;
 import com.alphawallet.app.viewmodel.TokenInfoViewModel;
+import com.alphawallet.app.web3.Web3TokenView;
+import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.widget.TokenInfoCategoryView;
 import com.alphawallet.app.widget.TokenInfoHeaderView;
 import com.alphawallet.app.widget.TokenInfoView;
 import com.alphawallet.ethereum.EthereumNetworkBase;
+import com.alphawallet.token.entity.TicketRange;
+import com.alphawallet.token.entity.ViewType;
 import com.alphawallet.token.tools.Convert;
+import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.tabs.TabLayout;
 
 import org.json.JSONArray;
@@ -42,8 +46,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Single;
@@ -85,6 +87,8 @@ public class TokenInfoFragment extends BaseFragment {
     private TokenInfoView stats1YearLow;
     private TokenInfoView stats1YearHigh;
     private TokenInfoView contractAddress;
+    private LinearLayout webWrapper;
+    private Web3TokenView tokenScriptView;
 
     @Nullable
     @Override
@@ -109,6 +113,7 @@ public class TokenInfoFragment extends BaseFragment {
             historyChart = view.findViewById(R.id.history_chart);
             tokenInfoHeaderLayout = view.findViewById(R.id.layout_token_header);
             tokenInfoLayout = view.findViewById(R.id.layout_token_info);
+            webWrapper = view.findViewById(R.id.layout_webwrapper);
 
             //TODO: Work out how to source these
             //portfolioBalance = new TokenInfoView(getContext(), "Balance");
@@ -385,5 +390,50 @@ public class TokenInfoFragment extends BaseFragment {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         return calendar.getTime();
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        if (tokenScriptView != null && tokenScriptView.getVisibility() == View.VISIBLE)
+        {
+            webWrapper.removeView(tokenScriptView);
+            tokenScriptView.destroy();
+            tokenScriptView = null;
+        }
+        super.onDestroy();
+    }
+
+    /***
+     * TokenScript view handling
+     */
+    public void initTokenScript(final TokenDefinition td)
+    {
+        try
+        {
+            //restart if required
+            if (tokenScriptView != null)
+            {
+                webWrapper.removeView(tokenScriptView);
+                tokenScriptView.destroy();
+                tokenScriptView = null;
+            }
+
+            tokenScriptView = new Web3TokenView(requireContext());
+            tokenScriptView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            tokenScriptView.clearCache(true);
+
+            if (tokenScriptView.renderTokenScriptInfoView(token, new TicketRange(token.balance.toBigInteger()), viewModel.getAssetDefinitionService(), ViewType.VIEW, td))
+            {
+                webWrapper.setVisibility(View.VISIBLE);
+                tokenScriptView.setChainId(token.tokenInfo.chainId);
+                tokenScriptView.setWalletAddress(new Address(token.getWallet()));
+                webWrapper.addView(tokenScriptView);
+            }
+        }
+        catch (Exception e)
+        {
+            //fillEmpty();
+        }
     }
 }

@@ -34,7 +34,6 @@ import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.GasEstimate;
 import com.alphawallet.app.entity.SignAuthenticationCallback;
 import com.alphawallet.app.entity.StandardFunctionInterface;
-import com.alphawallet.app.entity.TSAttrCallback;
 import com.alphawallet.app.entity.TransactionReturn;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
@@ -75,6 +74,7 @@ import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.functions.Consumer;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class NFTAssetDetailActivity extends BaseActivity implements StandardFunctionInterface, ActionSheetCallback
@@ -851,11 +851,19 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         try
         {
             LinearLayout webWrapper = findViewById(R.id.layout_webwrapper);
+            //restart if required
+            if (tokenScriptView != null)
+            {
+                webWrapper.removeView(tokenScriptView);
+                tokenScriptView.destroy();
+                tokenScriptView = null;
+            }
+
             tokenScriptView = new Web3TokenView(this);
             tokenScriptView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             tokenScriptView.clearCache(true);
 
-            if (tokenScriptView.renderTokenScriptView(token, new TicketRange(tokenId, token.getAddress()), viewModel.getAssetDefinitionService(), ViewType.VIEW, td))
+            if (tokenScriptView.renderTokenScriptInfoView(token, new TicketRange(tokenId, token.getAddress()), viewModel.getAssetDefinitionService(), ViewType.VIEW, td))
             {
                 webWrapper.setVisibility(View.VISIBLE);
                 tokenScriptView.setChainId(token.tokenInfo.chainId);
@@ -866,6 +874,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
         catch (Exception e)
         {
+            Timber.e(e);
             //fillEmpty();
         }
 

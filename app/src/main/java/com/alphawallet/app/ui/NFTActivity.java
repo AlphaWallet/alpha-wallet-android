@@ -51,7 +51,6 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
     private NFTViewModel viewModel;
     private Wallet wallet;
     private Token token;
-    private FunctionButtonBar functionBar;
     private boolean isGridView;
     private MenuItem sendMultipleTokensMenuItem;
     private MenuItem switchToGridViewMenuItem;
@@ -241,11 +240,9 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
                 switch (tab.getPosition())
                 {
                     case 0:
-                        // showFunctionBar(true);
                         showMenu();
                         break;
                     default:
-                        // showFunctionBar(false);
                         hideMenu();
                         break;
                 }
@@ -263,16 +260,6 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
 
             }
         });
-    }
-
-    private void showFunctionBar(boolean show)
-    {
-        if (functionBar == null && !show) return;
-        if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
-        {
-            if (functionBar == null) setupFunctionBar();
-            functionBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
     }
 
     @Override
@@ -344,18 +331,6 @@ public class NFTActivity extends BaseActivity implements StandardFunctionInterfa
     {
         super.onDestroy();
         viewModel.onDestroy();
-    }
-
-    private void setupFunctionBar()
-    {
-        if (BuildConfig.DEBUG || wallet.type != WalletType.WATCH)
-        {
-            functionBar = findViewById(R.id.layoutButtons);
-            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, null);
-            functionBar.revealButtons();
-            functionBar.setWalletType(wallet.type);
-            functionBar.setVisibility(View.GONE);
-        }
     }
 
     private void hideMenu()

@@ -58,7 +58,6 @@ import com.alphawallet.token.entity.ParseResult;
 import com.alphawallet.token.entity.SigReturnType;
 import com.alphawallet.token.entity.TSAction;
 import com.alphawallet.token.entity.TSSelection;
-import com.alphawallet.token.entity.TSTokenView;
 import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TokenscriptContext;
 import com.alphawallet.token.entity.TokenscriptElement;
@@ -210,7 +209,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             Timber.e(e);
         }
 
-        List<String> handledHashes = checkRealmScriptsForChanges();
+        //List<String> handledHashes = checkRealmScriptsForChanges();
         //loadNewFiles(handledHashes);
 
         //executes after observable completes due to blockingForEach
@@ -1203,6 +1202,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private Single<TokenDefinition> handleNewTSFile(File newFile)
     {
+        //if unchanged return existing definition
         if (!newFile.exists())
         {
             return signalUnchangedScript(newFile.getName());
@@ -2176,12 +2176,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return hasDefinition;
     }
 
-    //when user reloads the tokens we should also check XML for any files
-    public void clearCheckTimes()
-    {
-        assetChecked.clear();
-    }
-
     public boolean hasTokenView(Token token, String type)
     {
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
@@ -2192,43 +2186,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             return (tsData != null && tsData.getViewList().size() > 0);
         }
-    }
-
-    public TSTokenView getTSTokenView(Token token, String type)
-    {
-        TokenDefinition td = getAssetDefinition(token);
-        if (td != null)
-        {
-            return td.getTSTokenView(type);
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    public String getTokenView(Token token, String type)
-    {
-        String viewHTML = "";
-        TokenDefinition td = getAssetDefinition(token);
-        if (td != null)
-        {
-            viewHTML = td.getTokenView(type);
-        }
-
-        return viewHTML;
-    }
-
-    public String getTokenViewStyle(Token token, String type)
-    {
-        String styleData = "";
-        TokenDefinition td = getAssetDefinition(token);
-        if (td != null)
-        {
-            styleData = td.getTokenViewStyle(type);
-        }
-
-        return styleData;
     }
 
     public List<Attribute> getTokenViewLocalAttributes(Token token)
@@ -2311,6 +2268,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 List<String> requiredAttrNames = getRequiredAttributeNames(actions, td);
                 Map<BigInteger, Map<String, TokenScriptResult.Attribute>> attrResults   // Map of attribute results vs tokenId
                         = getRequiredAttributeResults(requiredAttrNames, tokenIds, td, token, update); // Map of all required attribute values vs all the tokenIds
+
+                //What about for ERC20?
+                //ERC20!
 
                 for (BigInteger tokenId : tokenIds)
                 {
@@ -2741,7 +2701,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public StringBuilder getTokenAttrs(Token token, BigInteger tokenId, int count)
+    public StringBuilder getTokenAttrs(Token token, BigInteger tokenId, BigInteger count)
     {
         StringBuilder attrs = new StringBuilder();
 
@@ -2754,7 +2714,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenScriptResult.addPair(attrs, "name", token.tokenInfo.name);
         TokenScriptResult.addPair(attrs, "label", label);
         TokenScriptResult.addPair(attrs, "symbol", token.getSymbol());
-        TokenScriptResult.addPair(attrs, "_count", BigInteger.valueOf(count));
+        TokenScriptResult.addPair(attrs, "_count", count.toString());
         TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);
         TokenScriptResult.addPair(attrs, "chainId", BigInteger.valueOf(token.tokenInfo.chainId));
         TokenScriptResult.addPair(attrs, "tokenId", tokenId);

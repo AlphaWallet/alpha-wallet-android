@@ -319,19 +319,6 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         return assetDefinitionService.generateTransactionPayload(token, tokenId, def);
     }
 
-    public TokenScriptResult getTokenScriptResult(Token token, BigInteger tokenId)
-    {
-        return assetDefinitionService.getTokenScriptResult(token, tokenId);
-    }
-
-    public BigInteger calculateMinGasPrice(BigInteger oldGasPrice)
-    {
-        //get 0.1GWEI in wei
-        BigInteger zeroPointOneWei = BalanceUtils.gweiToWei(BigDecimal.valueOf(0.1));
-        return new BigDecimal(oldGasPrice).multiply(BigDecimal.valueOf(1.1)).setScale(18, RoundingMode.UP).toBigInteger()
-                .add(zeroPointOneWei);
-    }
-
     public Token getToken(long chainId, String contractAddress)
     {
         return tokensService.getToken(chainId, contractAddress);

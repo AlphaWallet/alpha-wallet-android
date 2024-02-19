@@ -2,6 +2,7 @@ package com.alphawallet.token.entity;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -18,7 +19,17 @@ public class TicketRange
     public boolean exposeRadio;
     public String contractAddress; // Should this be address or actual token?
 
-    public List<BigInteger> tokenIds;
+    public final List<BigInteger> tokenIds;
+    public final BigInteger balance; //in wei for ERC20
+    public final boolean isERC20;
+
+    public TicketRange(BigInteger balance)
+    {
+        this.balance = balance;
+        this.isERC20 = true;
+        this.tokenIds = new ArrayList<>(Collections.singleton(BigInteger.ZERO));
+        this.contractAddress = null;
+    }
 
     public TicketRange(BigInteger tokenId, String contractAddress)
     {
@@ -27,6 +38,8 @@ public class TicketRange
         tokenIds.add(tokenId);
         this.isChecked = false;
         this.exposeRadio = false;
+        this.balance = BigInteger.ONE;
+        this.isERC20 = false;
     }
 
     public TicketRange(List<BigInteger> tokenIds, String contractAddress, boolean isChecked)
@@ -35,14 +48,8 @@ public class TicketRange
         this.tokenIds = tokenIds;
         this.isChecked = isChecked;
         this.exposeRadio = false;
-    }
-
-    public void selectSubRange(int count)
-    {
-        if (count < tokenIds.size())
-        {
-            tokenIds = tokenIds.subList(0, count);
-        }
+        this.balance = BigInteger.valueOf(tokenIds.size());
+        this.isERC20 = false;
     }
 
     public boolean equals(TicketRange compare)

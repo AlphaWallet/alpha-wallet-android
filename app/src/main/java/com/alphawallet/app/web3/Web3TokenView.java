@@ -1,7 +1,5 @@
 package com.alphawallet.app.web3;
 
-import static com.alphawallet.app.service.AssetDefinitionService.ASSET_DETAIL_VIEW_NAME;
-import static com.alphawallet.app.service.AssetDefinitionService.ASSET_SUMMARY_VIEW_NAME;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
 
 import android.annotation.SuppressLint;
@@ -29,14 +27,12 @@ import androidx.webkit.WebViewFeature;
 
 import com.alphawallet.app.BuildConfig;
 import com.alphawallet.app.R;
-import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.UpdateType;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokenscript.TokenScriptRenderCallback;
 import com.alphawallet.app.entity.tokenscript.WebCompletionCallback;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3.entity.Address;
 import com.alphawallet.app.web3.entity.FunctionCallback;
 import com.alphawallet.app.web3.entity.PageReadyCallback;
@@ -51,8 +47,6 @@ import com.alphawallet.token.tools.TokenDefinition;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.LineNumberReader;
-import java.io.StringReader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -405,7 +399,7 @@ public class Web3TokenView extends WebView
         if (td != null && td.holdingToken != null)
         {
             //use webview
-            renderTokenScriptView(token, range, assetService, iconified, td);
+            renderTokenScriptInfoView(token, range, assetService, iconified, td);
         }
         else
         {
@@ -429,24 +423,25 @@ public class Web3TokenView extends WebView
         loadData(displayData, "text/html", "utf-8");
     }
 
-    public boolean renderTokenScriptView(Token token, TicketRange range, AssetDefinitionService assetService, ViewType itemView,
+    public boolean renderTokenScriptInfoView(Token token, TicketRange range, AssetDefinitionService assetService, ViewType itemView,
                                          final TokenDefinition td)
     {
         BigInteger tokenId = range.tokenIds.get(0);
-        if (!td.hasTokenView())
+        TSTokenView tokenView = td.getTSTokenView("Info");
+        if (tokenView == null)
         {
             return false;
         }
 
         attrResults = "";
 
-        final StringBuilder attrs = assetService.getTokenAttrs(token, tokenId, range.tokenIds.size());
+        final StringBuilder attrs = assetService.getTokenAttrs(token, tokenId, range.balance);
 
         buildViewAttrs = assetService.resolveAttrs(token, null, tokenId, assetService.getTokenViewLocalAttributes(token), itemView, UpdateType.USE_CACHE)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(attr -> onAttr(attr, attrs), throwable -> onError(token, throwable, range),
-                           () -> displayTokenView(token, assetService, attrs, itemView, range, td));
+                           () -> displayTokenView(token, assetService, attrs, itemView, range, td, tokenView));
 
         return true;
     }
@@ -459,27 +454,14 @@ public class Web3TokenView extends WebView
      * @param iconified
      * @param range
      */
-    private void displayTokenView(Token token, AssetDefinitionService assetService, StringBuilder attrs, ViewType iconified, TicketRange range, final TokenDefinition td)
+    private void displayTokenView(Token token, AssetDefinitionService assetService, StringBuilder attrs, ViewType iconified, TicketRange range, final TokenDefinition td, final TSTokenView tokenView)
     {
         setVisibility(View.VISIBLE);
-        String viewName;
-        switch (iconified)
-        {
-            case VIEW:
-            default:
-                viewName = ASSET_DETAIL_VIEW_NAME;
-                break;
-            case ITEM_VIEW:
-                viewName = ASSET_SUMMARY_VIEW_NAME;
-                break;
-        }
-
-        TSTokenView tokenView = td.getTSTokenView(viewName);
 
         String view = tokenView.getTokenView();
         if (TextUtils.isEmpty(view))
         {
-            view = buildViewError(token, range, viewName);
+            view = buildViewError(token, range, tokenView.getLabel());
         }
         String style = tokenView.getStyle();
         unencodedPage = injectWeb3TokenInit(view, attrs.toString(), range.tokenIds.get(0));

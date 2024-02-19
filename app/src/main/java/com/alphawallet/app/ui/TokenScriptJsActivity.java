@@ -440,6 +440,12 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         return wallet.type;
     }
 
+    @Override
+    public GasService getGasService()
+    {
+        return viewModel.getGasService();
+    }
+
     /***
      * TokenScript view handling
      */

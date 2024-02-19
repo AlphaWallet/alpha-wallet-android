@@ -32,6 +32,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String HIDE_ZERO_BALANCE_TOKENS = "hide_zero_balance_tokens";
     public static final String FULL_SCREEN_STATE = "full_screen";
     public static final String EXPERIMENTAL_1559_TX = "ex_1559_tx";
+    public static final String USE_TOKENSCRIPT_VIEWER = "use_ts_viewer";
     public static final String DEVELOPER_OVERRIDE = "developer_override";
     public static final String TESTNET_ENABLED = "testnet_enabled";
     public static final String PRICE_ALERTS = "price_alerts";
@@ -469,8 +470,21 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public void setPostNotificationsPermissionRequested(String address, boolean hasRequested) {
+    public void setPostNotificationsPermissionRequested(String address, boolean hasRequested)
+    {
         pref.edit().putBoolean(getAddressKey(POST_NOTIFICATIONS_PERMISSION_REQUESTED, address), hasRequested).apply();
+    }
+
+    @Override
+    public boolean getUseTSViewer()
+    {
+        return pref.getBoolean(USE_TOKENSCRIPT_VIEWER, true);
+    }
+
+    @Override
+    public void setUseTSViewer(boolean state)
+    {
+        pref.edit().putBoolean(USE_TOKENSCRIPT_VIEWER, state).apply();
     }
 
     @NonNull

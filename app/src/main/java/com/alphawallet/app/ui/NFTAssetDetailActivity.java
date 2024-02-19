@@ -114,8 +114,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private boolean triggeredReload;
     private long chainId;
     private Web3TokenView tokenScriptView;
-    private static final boolean FORCE_EMBEDDED_VIEWER = true;
-    private boolean useNativeTokenScript = false;
+    private boolean usingNativeTokenScript = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -291,7 +290,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         token = viewModel.getTokensService().getToken(walletAddress, chainId, tokenAddress);
         if (token == null)
         {
-            ShortcutUtils.showConfirmationDialog(this, singletonList(tokenAddress), getString(R.string.remove_shortcut_while_token_not_found));
+            ShortcutUtils.showConfirmationDialog(this, singletonList(tokenAddress), getString(R.string.remove_shortcut_while_token_not_found), null);
         }
         else
         {
@@ -307,9 +306,10 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         setTitle(token.tokenInfo.name);
         updateDefaultTokenData();
 
-        if (!NFTAssetDetailActivity.FORCE_EMBEDDED_VIEWER) {
+        if (!viewModel.getUseTSViewer())
+        {
             TokenDefinition td = viewModel.getAssetDefinitionService().getAssetDefinition(this.token);
-            this.useNativeTokenScript = td.nameSpace != null;
+            this.usingNativeTokenScript = td.nameSpace != null;
         }
 
         if (asset != null && asset.isAttestation())
@@ -319,8 +319,10 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         else
         {
             viewModel.getAsset(token, tokenId);
-            if (this.useNativeTokenScript)
+            if (this.usingNativeTokenScript)
+            {
                 viewModel.updateLocalAttributes(token, tokenId);  //when complete calls displayTokenView
+            }
         }
     }
 
@@ -352,8 +354,10 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
             setTitle(token.getTokenName(viewModel.getAssetDefinitionService(), 1));
 
-            if (!NFTAssetDetailActivity.FORCE_EMBEDDED_VIEWER)
-                this.useNativeTokenScript = td.nameSpace != null;
+            if (!viewModel.getUseTSViewer())
+            {
+                this.usingNativeTokenScript = td.nameSpace != null;
+            }
 
             //now re-load the verbs if already called. If wallet is null this won't complete
             setupFunctionBar(viewModel.getWallet());
@@ -362,10 +366,9 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             {
                 setupAttestation(td);
             }
-            else
+            else if (this.usingNativeTokenScript)
             {
-                if (this.useNativeTokenScript)
-                    displayTokenView(td);
+                displayTokenView(td);
             }
         }
         else
@@ -402,9 +405,12 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
 
-            if (this.useNativeTokenScript){
+            if (this.usingNativeTokenScript)
+            {
                 functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
-            } else {
+            }
+            else
+            {
                 functionBar.setupFunctionsForJsViewer(this, R.string.title_tokenscript, this.token, Collections.singletonList(tokenId));
             }
 

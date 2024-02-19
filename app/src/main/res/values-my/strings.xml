@@ -1031,4 +1031,5 @@
     <string name="developer_override">Developer Override</string>
     <string name="override_warning_text">သင့်ငွေများကို အချည်းနှီးဖြစ်စေနိုင်သည့် ငွေပေးငွေယူတစ်ခုအား သင်မသိလိုက်ဘဲ လက်မှတ်ထိုးပါတော့မည်။ သင်သည် ဆော့ဖ်ဝဲအင်ဂျင်နီယာတစ်ဦးအနေဖြင့် bytecode ကို လက်မှတ်ထိုးလိုနိုင်ပြီး၊ Advanced ဆက်တင်များတွင် developer မုဒ်ကို သင်သတ်မှတ်ပါက ဤသတိပေးချက်ကို အစားထိုးနိုင်ပါသည်။</string>
     <string name="constructor">Constructor</string>
+    <string name="use_tokenscript_viewer">TokenScript ကြည့်ရှုသူ</string>
 </resources>

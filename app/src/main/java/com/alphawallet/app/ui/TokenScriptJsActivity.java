@@ -242,7 +242,7 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         token = viewModel.getTokenService().getToken(walletAddress, chainId, tokenAddress);
         if (token == null)
         {
-            ShortcutUtils.showConfirmationDialog(this, singletonList(tokenAddress), getString(R.string.remove_shortcut_while_token_not_found));
+            ShortcutUtils.showConfirmationDialog(this, singletonList(tokenAddress), getString(R.string.remove_shortcut_while_token_not_found), null);
         }
         else
         {

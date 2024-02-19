@@ -34,6 +34,7 @@ import com.alphawallet.app.interact.CreateTransactionInteract;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
+import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.AnalyticsServiceType;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.GasService;
@@ -104,11 +105,11 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     private final CreateTransactionInteract createTransactionInteract;
     private final GasService gasService;
     private final TokensService tokensService;
-    private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final KeyService keyService;
     private final GenericWalletInteract genericWalletInteract;
     private final OpenSeaService openseaService;
     private final FetchTransactionsInteract fetchTransactionsInteract;
+    private final PreferenceRepositoryType preferences;
     private final MutableLiveData<Token> insufficientFunds = new MutableLiveData<>();
     private final MutableLiveData<String> invalidAddress = new MutableLiveData<>();
     private final MutableLiveData<XMLDsigDescriptor> sig = new MutableLiveData<>();
@@ -144,23 +145,23 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
             CreateTransactionInteract createTransactionInteract,
             GasService gasService,
             TokensService tokensService,
-            EthereumNetworkRepositoryType ethereumNetworkRepository,
             KeyService keyService,
             GenericWalletInteract genericWalletInteract,
             OpenSeaService openseaService,
             FetchTransactionsInteract fetchTransactionsInteract,
-            AnalyticsServiceType analyticsService)
+            AnalyticsServiceType analyticsService,
+            PreferenceRepositoryType prefs)
     {
         this.assetDefinitionService = assetDefinitionService;
         this.createTransactionInteract = createTransactionInteract;
         this.gasService = gasService;
         this.tokensService = tokensService;
-        this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.keyService = keyService;
         this.genericWalletInteract = genericWalletInteract;
         this.openseaService = openseaService;
         this.fetchTransactionsInteract = fetchTransactionsInteract;
         setAnalyticsService(analyticsService);
+        this.preferences = prefs;
     }
 
     public AssetDefinitionService getAssetDefinitionService()
@@ -1033,5 +1034,10 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     public GasService getGasService()
     {
         return gasService;
+    }
+
+    public boolean getUseTSViewer()
+    {
+        return preferences.getUseTSViewer();
     }
 }

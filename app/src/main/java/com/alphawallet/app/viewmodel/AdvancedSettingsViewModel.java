@@ -84,4 +84,14 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     {
         transactionsService.stopActivity();
     }
+
+    public void toggleUseViewer(boolean state)
+    {
+        preferenceRepository.setUseTSViewer(state);
+    }
+
+    public boolean getTokenScriptViewerState()
+    {
+        return preferenceRepository.getUseTSViewer();
+    }
 }

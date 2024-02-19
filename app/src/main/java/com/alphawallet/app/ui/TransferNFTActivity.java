@@ -146,16 +146,19 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
         functionBar.revealButtons();
 
         setupScreen();
-
-        confirmRemoveShortcuts(assetSelection, token);
     }
 
-    private void confirmRemoveShortcuts(ArrayList<Pair<BigInteger, NFTAsset>> tokenIdList, Token token)
+    private boolean confirmRemoveShortcuts(ArrayList<Pair<BigInteger, NFTAsset>> tokenIdList, Token token)
     {
         List<String> shortcutIds = ShortcutUtils.getShortcutIds(getApplicationContext(), token, tokenIdList);
         if (!shortcutIds.isEmpty())
         {
-            ShortcutUtils.showConfirmationDialog(this, shortcutIds, getString(R.string.remove_shortcut_reminder));
+            ShortcutUtils.showConfirmationDialog(this, shortcutIds, getString(R.string.remove_shortcut_reminder), this);
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 
@@ -334,8 +337,11 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
     @Override
     public void showTransferToken(List<BigInteger> selection)
     {
-        KeyboardUtils.hideKeyboard(getCurrentFocus());
-        addressInput.getAddress();
+        if (!confirmRemoveShortcuts(assetSelection, token))
+        {
+            KeyboardUtils.hideKeyboard(getCurrentFocus());
+            addressInput.getAddress();
+        }
     }
 
     private void calculateTransactionCost()
@@ -381,7 +387,6 @@ public class TransferNFTActivity extends BaseActivity implements TokensAdapterCa
      */
     private void checkConfirm(GasEstimate estimate, final byte[] transactionBytes, final String txSendAddress, final String resolvedAddress)
     {
-
         Web3Transaction w3tx = new Web3Transaction(
                 new Address(txSendAddress),
                 new Address(token.getAddress()),

@@ -1001,4 +1001,5 @@
     <string name="developer_override">Penggantian Pengembang</string>
     <string name="override_warning_text">Anda mungkin tanpa sadar menandatangani transaksi, yang dapat mengosongkan dana Anda. Anda mungkin ingin menandatangani bytecode sebagai pengembang, dan Anda dapat mengabaikan peringatan ini jika Anda menyetel mode pengembang di Setelan lanjutan.</string>
     <string name="constructor">Constructor</string>
+    <string name="use_tokenscript_viewer">Penampil TokenScript</string>
 </resources>

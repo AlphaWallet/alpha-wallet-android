@@ -9,6 +9,7 @@ import static com.alphawallet.app.assertions.Should.shouldSee;
 import static com.alphawallet.app.steps.Steps.closeSecurityWarning;
 import static com.alphawallet.app.steps.Steps.createNewWallet;
 import static com.alphawallet.app.steps.Steps.gotoSettingsPage;
+import static com.alphawallet.app.steps.Steps.scrollToImproved;
 import static com.alphawallet.app.steps.Steps.selectMenu;
 import static com.alphawallet.app.util.Helper.click;
 
@@ -38,7 +39,10 @@ public class AnalyticsSettingsTest extends BaseE2ETest
         gotoSettingsPage();
         selectMenu("Advanced");
         Helper.wait(1);
-        onView(withId(R.id.layout)).perform(swipeUp());
+        onView(withId(R.id.scroll_layer)).perform(swipeUp());
+        onView(withId(R.id.scroll_layer)).perform(swipeUp());
+        onView(withSubstring("Crash")).perform(scrollToImproved());
+
         click(withSubstring("Crash"));
         shouldSee("Share Anonymous Data");
     }

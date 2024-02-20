@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!--<include layout="@layout/layout_url_bar_compact" />-->
+
+    <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/toolbar_block"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|snap"
+            app:titleEnabled="false">
+
+        <com.alphawallet.app.widget.CertifiedToolbarView
+                android:id="@+id/certified_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    <com.alphawallet.app.web3.Web3View
+            android:id="@+id/web3view"
+            android:layout_below="@id/toolbar_block"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+</RelativeLayout>

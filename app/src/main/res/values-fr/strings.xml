@@ -1010,4 +1010,5 @@
     <string name="developer_override">Remplacement du Développeur</string>
     <string name="override_warning_text">Vous êtes peut-être sur le point de signer sans le savoir une transaction, ce qui pourrait vider vos fonds. Vous souhaiterez peut-être signer le bytecode en tant que développeur et vous pouvez ignorer cet avertissement si vous définissez le mode développeur dans les paramètres avancés.</string>
     <string name="constructor">Constructor</string>
+    <string name="use_tokenscript_viewer">Visionneuse TokenScript</string>
 </resources>

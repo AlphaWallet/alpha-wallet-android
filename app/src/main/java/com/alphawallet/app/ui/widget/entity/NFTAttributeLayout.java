@@ -1,6 +1,7 @@
 package com.alphawallet.app.ui.widget.entity;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -64,7 +65,7 @@ public class NFTAttributeLayout extends LinearLayout {
 
     private void setAttributeLabel(String tokenName, int size)
     {
-        if (size > 0 && tokenName.equalsIgnoreCase("cryptokitties"))
+        if (size > 0 && !TextUtils.isEmpty(tokenName) && tokenName.equalsIgnoreCase("cryptokitties"))
         {
             labelAttributes.setTitle(getContext().getString(R.string.label_cattributes));
             labelAttributes.setVisibility(View.VISIBLE);

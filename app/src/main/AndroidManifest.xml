@@ -327,6 +327,11 @@
                 android:label="ERC1155 Asset Details" />
 
         <activity
+                android:name=".ui.TokenScriptJsActivity"
+                android:hardwareAccelerated="true"
+                android:label="TokenScript JS Viewer" />
+
+        <activity
                 android:name=".ui.Erc1155AssetListActivity"
                 android:hardwareAccelerated="true"
                 android:label="ERC1155 Asset Details" />

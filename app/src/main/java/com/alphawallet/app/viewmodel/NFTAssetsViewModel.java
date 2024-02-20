@@ -6,7 +6,6 @@ import android.content.Intent;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.interact.FetchTransactionsInteract;
 import com.alphawallet.app.service.AssetDefinitionService;
@@ -16,7 +15,6 @@ import com.alphawallet.app.ui.Erc1155AssetListActivity;
 import com.alphawallet.app.ui.NFTAssetDetailActivity;
 
 import java.math.BigInteger;
-import java.util.List;
 
 import javax.inject.Inject;
 

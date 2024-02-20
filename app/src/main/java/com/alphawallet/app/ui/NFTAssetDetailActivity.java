@@ -114,6 +114,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private boolean triggeredReload;
     private long chainId;
     private Web3TokenView tokenScriptView;
+    private boolean usingNativeTokenScript = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -289,7 +290,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         token = viewModel.getTokensService().getToken(walletAddress, chainId, tokenAddress);
         if (token == null)
         {
-            ShortcutUtils.showConfirmationDialog(this, singletonList(tokenAddress), getString(R.string.remove_shortcut_while_token_not_found));
+            ShortcutUtils.showConfirmationDialog(this, singletonList(tokenAddress), getString(R.string.remove_shortcut_while_token_not_found), null);
         }
         else
         {
@@ -305,6 +306,12 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         setTitle(token.tokenInfo.name);
         updateDefaultTokenData();
 
+        if (!viewModel.getUseTSViewer())
+        {
+            TokenDefinition td = viewModel.getAssetDefinitionService().getAssetDefinition(this.token);
+            this.usingNativeTokenScript = td.nameSpace != null;
+        }
+
         if (asset != null && asset.isAttestation())
         {
             setupAttestation(viewModel.getAssetDefinitionService().getAssetDefinition(token));
@@ -312,7 +319,10 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         else
         {
             viewModel.getAsset(token, tokenId);
-            viewModel.updateLocalAttributes(token, tokenId); //when complete calls displayTokenView
+            if (this.usingNativeTokenScript)
+            {
+                viewModel.updateLocalAttributes(token, tokenId);  //when complete calls displayTokenView
+            }
         }
     }
 
@@ -344,6 +354,11 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
 
             setTitle(token.getTokenName(viewModel.getAssetDefinitionService(), 1));
 
+            if (!viewModel.getUseTSViewer())
+            {
+                this.usingNativeTokenScript = td.nameSpace != null;
+            }
+
             //now re-load the verbs if already called. If wallet is null this won't complete
             setupFunctionBar(viewModel.getWallet());
 
@@ -351,7 +366,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             {
                 setupAttestation(td);
             }
-            else
+            else if (this.usingNativeTokenScript)
             {
                 displayTokenView(td);
             }
@@ -389,7 +404,16 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (token != null && wallet != null && (BuildConfig.DEBUG || wallet.type != WalletType.WATCH))
         {
             FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-            functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
+
+            if (this.usingNativeTokenScript)
+            {
+                functionBar.setupFunctions(this, viewModel.getAssetDefinitionService(), token, null, Collections.singletonList(tokenId));
+            }
+            else
+            {
+                functionBar.setupFunctionsForJsViewer(this, R.string.title_tokenscript, this.token, Collections.singletonList(tokenId));
+            }
+
             functionBar.revealButtons();
             functionBar.setWalletType(wallet.type);
         }
@@ -879,5 +903,19 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         }
 
         return couldDisplay;
+    }
+
+    public void handleClick(String action, int actionId) {
+
+        if (actionId != R.string.title_tokenscript)
+            return;
+
+        Intent intent = new Intent(NFTAssetDetailActivity.this, TokenScriptJsActivity.class);
+        intent.putExtra(C.Key.WALLET, (Wallet) getIntent().getParcelableExtra(C.Key.WALLET));
+        intent.putExtra(C.EXTRA_CHAIN_ID, getIntent().getLongExtra(C.EXTRA_CHAIN_ID, chainId));
+        intent.putExtra(C.EXTRA_ADDRESS, getIntent().getStringExtra(C.EXTRA_ADDRESS));
+        intent.putExtra(C.EXTRA_TOKEN_ID, getIntent().getStringExtra(C.EXTRA_TOKEN_ID));
+        if (asset != null) intent.putExtra(C.EXTRA_NFTASSET, (NFTAsset) getIntent().getParcelableExtra(C.EXTRA_NFTASSET));
+        startActivity(intent);
     }
 }

@@ -10,6 +10,7 @@ import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.graphics.drawable.IconCompat;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
@@ -59,7 +60,7 @@ public class ShortcutUtils
         return ids;
     }
 
-    public static void showConfirmationDialog(Activity activity, List<String> shortcutIds, String message)
+    public static void showConfirmationDialog(Activity activity, List<String> shortcutIds, String message, StandardFunctionInterface callback)
     {
         AWalletAlertDialog confirmationDialog = new AWalletAlertDialog(activity);
         confirmationDialog.setCancelable(false);
@@ -68,7 +69,7 @@ public class ShortcutUtils
         confirmationDialog.setButton(R.string.yes_continue, v -> {
             ShortcutManagerCompat.removeDynamicShortcuts(activity, shortcutIds);
             confirmationDialog.dismiss();
-            activity.finish();
+            callback.showTransferToken(new ArrayList<>());
         });
         confirmationDialog.setSecondaryButtonText(R.string.dialog_cancel_back);
         confirmationDialog.setSecondaryButtonListener(v -> {

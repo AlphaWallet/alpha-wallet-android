@@ -131,9 +131,8 @@ public class TokenRepository implements TokenRepositoryType {
 
     private void buildWeb3jClient(NetworkInfo networkInfo)
     {
-        AWHttpService publicNodeService = new AWHttpService(networkInfo.rpcServerUrl, networkInfo.backupNodeUrl, okClient, false);
-        HttpServiceHelper.addRequiredCredentials(networkInfo.chainId, publicNodeService, KeyProviderFactory.get().getKlaytnKey(),
-                KeyProviderFactory.get().getInfuraSecret(), EthereumNetworkBase.usesProductionKey);
+        AWHttpService publicNodeService = new AWHttpService(networkInfo.rpcServerUrl, networkInfo.backupNodeUrl, networkInfo.chainId, okClient, KeyProviderFactory.get().getInfuraKey(),
+                KeyProviderFactory.get().getInfuraSecret(), KeyProviderFactory.get().getKlaytnKey(), false);
         web3jNodeServers.put(networkInfo.chainId, Web3j.build(publicNodeService));
     }
 
@@ -1317,9 +1316,8 @@ public class TokenRepository implements TokenRepositoryType {
             secondaryNode = EthereumNetworkRepository.getNodeURLByNetworkId(chainId);
         }
 
-        AWHttpService publicNodeService = new AWHttpService(nodeUrl, secondaryNode, okClient, false);
-        HttpServiceHelper.addRequiredCredentials(chainId, publicNodeService, KeyProviderFactory.get().getKlaytnKey(),
-                KeyProviderFactory.get().getInfuraSecret(), EthereumNetworkBase.usesProductionKey);
+        AWHttpService publicNodeService = new AWHttpService(nodeUrl, secondaryNode, chainId, okClient, KeyProviderFactory.get().getInfuraKey(),
+                KeyProviderFactory.get().getInfuraSecret(), KeyProviderFactory.get().getKlaytnKey(), false);
         return Web3j.build(publicNodeService);
     }
 
@@ -1332,9 +1330,8 @@ public class TokenRepository implements TokenRepositoryType {
                 .retryOnConnectionFailure(true)
                 .build();
 
-        AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId(chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), okClient, false);
-        HttpServiceHelper.addRequiredCredentials(chainId, publicNodeService, KeyProviderFactory.get().getKlaytnKey(),
-                KeyProviderFactory.get().getInfuraSecret(), EthereumNetworkBase.usesProductionKey);
+        AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId(chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), chainId, okClient, KeyProviderFactory.get().getInfuraKey(),
+                KeyProviderFactory.get().getInfuraSecret(), KeyProviderFactory.get().getKlaytnKey(), false);
         return Web3j.build(publicNodeService);
     }
 

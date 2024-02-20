@@ -9,7 +9,11 @@ package com.alphawallet.app.service;
  *
  */
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BAOBAB_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static okhttp3.ConnectionSpec.CLEARTEXT;
+
+import android.text.TextUtils;
 
 import com.google.gson.JsonParseException;
 
@@ -38,7 +42,6 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 import okio.BufferedSource;
-import timber.log.Timber;
 
 /** HTTP implementation of our services API. */
 public class AWHttpService extends HttpService
@@ -101,15 +104,23 @@ public class AWHttpService extends HttpService
     private final String secondaryUrl;
 
     private final boolean includeRawResponse;
+    private final String infuraSecret;
+    private final String infuraKey;
+    private final String klaytnKey;
+    private final long chainId;
 
     private final HashMap<String, String> headers = new HashMap<>();
 
-    public AWHttpService(String url, String secondaryUrl, OkHttpClient httpClient, boolean includeRawResponses) {
+    public AWHttpService(String url, String secondaryUrl, long chainId, OkHttpClient httpClient, String infuraKey, String infuraSecret, String klaytnKey, boolean includeRawResponses) {
         super(includeRawResponses);
         this.url = url;
         this.httpClient = httpClient;
         this.includeRawResponse = includeRawResponses;
         this.secondaryUrl = secondaryUrl;
+        this.infuraKey = infuraKey;
+        this.infuraSecret = infuraSecret;
+        this.klaytnKey = klaytnKey;
+        this.chainId = chainId;
     }
 
     @Override
@@ -125,6 +136,8 @@ public class AWHttpService extends HttpService
             requestBody = RequestBody.create("", MEDIA_TYPE_TEXT);
         }
 
+        addRequiredSecrets(url);
+
         okhttp3.Request httpRequest =
                 new okhttp3.Request.Builder()
                         .url(url)
@@ -138,7 +151,18 @@ public class AWHttpService extends HttpService
             //try primary node
             response = httpClient.newCall(httpRequest).execute();
         }
-        catch (SocketTimeoutException e) //seamlessly attempt a call to secondary node if primary timed out
+        catch (SocketTimeoutException e)
+        {
+            if (secondaryUrl != null) //only if we have a secondary node
+            {
+                return trySecondaryNode(request);
+            }
+        }
+        catch (java.io.InterruptedIOException e) //interrupted exception should be thrown back
+        {
+            throw e;
+        }
+        catch (Exception e) //seamlessly attempt a call to secondary node if primary node has some error
         {
             if (secondaryUrl != null) //only if we have a secondary node
             {
@@ -146,12 +170,12 @@ public class AWHttpService extends HttpService
             }
             else
             {
-                throw new SocketTimeoutException();
+                throw e; //throw the error back up the stack
             }
         }
         //TODO: Also check java.io.InterruptedIOException
 
-        if (response.code() / 100 == 4) //rate limited
+        if (response.code() / 100 != 2)
         {
             response.close();
             return trySecondaryNode(request);
@@ -162,16 +186,17 @@ public class AWHttpService extends HttpService
 
     private InputStream trySecondaryNode(String request) throws IOException
     {
-        Timber.d("trySecondaryNode: ");
         RequestBody requestBody = RequestBody.create(request, JSON_MEDIA_TYPE);
 
+        addRequiredSecrets(secondaryUrl);
+
         okhttp3.Request httpRequest =
-                new okhttp3.Request.Builder().url(secondaryUrl).post(requestBody).build();
+                new okhttp3.Request.Builder()
+                        .url(secondaryUrl)
+                        .headers(buildHeaders())
+                        .post(requestBody).build();
 
-        okhttp3.Response response;
-
-        response = httpClient.newCall(httpRequest).execute();
-
+        okhttp3.Response response = httpClient.newCall(httpRequest).execute();
         return processNodeResponse(response, request, true);
     }
 
@@ -241,6 +266,19 @@ public class AWHttpService extends HttpService
 
         } else {
             return inputStream;
+        }
+    }
+
+    private void addRequiredSecrets(String url)
+    {
+        if (!TextUtils.isEmpty(infuraKey) && url.endsWith(infuraKey) && !TextUtils.isEmpty(infuraSecret)) //primary InfuraKey has secret
+        {
+            addHeader("Authorization", "Basic " + infuraSecret);
+        }
+        else if (!TextUtils.isEmpty(klaytnKey) && (chainId == KLAYTN_BAOBAB_ID || chainId == KLAYTN_ID))
+        {
+            addHeader("x-chain-id", Long.toString(chainId));
+            addHeader("Authorization", "Basic " + klaytnKey);
         }
     }
 

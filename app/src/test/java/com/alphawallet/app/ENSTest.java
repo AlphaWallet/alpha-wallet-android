@@ -41,7 +41,7 @@ public class ENSTest
             .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
             .build();
-        return new AWHttpService("https://mainnet.infura.io/v3/" + TextUtils.rot(Inf), "https://rpc.ankr.com/eth", okClient, false);
+        return new AWHttpService("https://mainnet.infura.io/v3/" + TextUtils.rot(Inf), "https://rpc.ankr.com/eth", 1, okClient, null, null, null, false);
     }
 
     public static Web3j getWeb3j(AWHttpService service)

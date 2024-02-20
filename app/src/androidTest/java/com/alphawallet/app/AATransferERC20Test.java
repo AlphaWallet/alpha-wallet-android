@@ -68,7 +68,7 @@ public class AATransferERC20Test extends BaseE2ETest
         contractOwnerCredentials = Credentials.create(contractOwnerPk);
 
         super.setUp();
-        web3j = EthUtils.buildWeb3j(GANACHE_URL);
+        web3j = EthUtils.buildWeb3j(GANACHE_URL, 2L);
         deployTestTokenOnGanache();
     }
 

@@ -68,7 +68,7 @@ public class AAATokenScriptCertificateTest extends BaseE2ETest
             fail("Please config seed phrase and wallet address for this API level first.");
         }
 
-        web3j = EthUtils.buildWeb3j(GANACHE_URL);
+        web3j = EthUtils.buildWeb3j(GANACHE_URL, 2L);
 
         String privateKey = array[0];
 

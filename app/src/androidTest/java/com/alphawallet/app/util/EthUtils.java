@@ -32,7 +32,7 @@ import okhttp3.OkHttpClient;
  */
 public abstract class EthUtils
 {
-    public static Web3j buildWeb3j(String url)
+    public static Web3j buildWeb3j(String url, long chainId)
     {
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
@@ -41,7 +41,7 @@ public abstract class EthUtils
                 .retryOnConnectionFailure(true)
                 .build();
 
-        AWHttpService svs = new AWHttpService(url, url, client, false);
+        AWHttpService svs = new AWHttpService(url, url, chainId, client,null, null, null, false);
         return Web3j.build(svs);
     }
 

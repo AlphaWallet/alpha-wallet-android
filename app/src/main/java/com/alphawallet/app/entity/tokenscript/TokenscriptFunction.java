@@ -149,6 +149,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -958,7 +959,8 @@ public abstract class TokenscriptFunction
                         .map(transactionResult -> addParseResultIfValid(token, useTokenId, attr, transactionResult))// only cache live transaction result
                         .map(result -> restoreFromDBIfRequired(result, cachedResult))  // If network unavailable restore value from cache
                         .map(txResult -> attrIf.storeAuxData(walletAddress, txResult))                                     // store new data
-                        .map(result -> parseFunctionResult(result, attr));    // write returned data into attribute
+                        .map(result -> parseFunctionResult(result, attr))
+                        .subscribeOn(Schedulers.io());    // write returned data into attribute
             }
         }
     }

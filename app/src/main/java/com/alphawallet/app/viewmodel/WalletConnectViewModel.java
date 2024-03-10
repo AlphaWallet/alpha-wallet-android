@@ -45,7 +45,6 @@ import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
 import com.alphawallet.app.walletconnect.entity.GetClientCallback;
 import com.alphawallet.app.walletconnect.entity.WCPeerMeta;
-import com.alphawallet.app.walletconnect.entity.WCUtils;
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.hardware.SignatureFromKey;
@@ -131,35 +130,6 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
         disposable = genericWalletInteract
                 .find()
                 .subscribe(w -> this.wallet = w, this::onError);
-    }
-
-    public void startService(Context context)
-    {
-        ServiceConnection connection = new ServiceConnection()
-        {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service)
-            {
-                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
-                Timber.tag(TAG).d("Service connected");
-                for (String sessionId : clientBuffer.keySet())
-                {
-                    Timber.tag(TAG).d("put from buffer: %s", sessionId);
-                    WCClient c = clientBuffer.get(sessionId);
-                    walletConnectService.putClient(sessionId, c);
-                }
-                clientBuffer.clear();
-                serviceReady.postValue(true);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name)
-            {
-                Timber.tag(TAG).d("Service disconnected");
-            }
-        };
-
-        WCUtils.startServiceLocal(context, connection, WalletConnectActions.CONNECT);
     }
 
     public void prepare()
@@ -503,112 +473,6 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
         return sessions;
     }
 
-    public void removePendingRequest(Activity activity, long id)
-    {
-        ServiceConnection connection = new ServiceConnection()
-        {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service)
-            {
-                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
-                walletConnectService.removePendingRequest(id);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name)
-            {
-                //walletConnectService = null;
-                Timber.tag(TAG).d("Service disconnected");
-            }
-        };
-
-        WCUtils.startServiceLocal(activity, connection, WalletConnectActions.CONNECT);
-    }
-
-    public void getClient(Activity activity, String sessionId, GetClientCallback clientCb)
-    {
-        ServiceConnection connection = new ServiceConnection()
-        {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service)
-            {
-                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
-                clientCb.getClient(walletConnectService.getClient(sessionId));
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name)
-            {
-                Timber.tag(TAG).d("Service disconnected");
-            }
-        };
-
-        WCUtils.startServiceLocal(activity, connection, WalletConnectActions.CONNECT);
-    }
-
-    public void putClient(Activity activity, String sessionId, WCClient client)
-    {
-        ServiceConnection connection = new ServiceConnection()
-        {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service)
-            {
-                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
-                walletConnectService.putClient(sessionId, client);
-                awWalletConnectClient.updateNotification();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name)
-            {
-                Timber.tag(TAG).d("Service disconnected");
-            }
-        };
-
-        WCUtils.startServiceLocal(activity, connection, WalletConnectActions.CONNECT);
-    }
-
-    public void disconnectSession(Activity activity, String sessionId)
-    {
-        ServiceConnection connection = new ServiceConnection()
-        {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service)
-            {
-                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
-                walletConnectService.terminateClient(sessionId);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name)
-            {
-                Timber.tag(TAG).d("Service disconnected");
-            }
-        };
-
-        WCUtils.startServiceLocal(activity, connection, WalletConnectActions.CONNECT);
-    }
-
-    public void rejectRequest(Context ctx, String sessionId, long id, String message)
-    {
-        Intent bIntent = new Intent(ctx, WalletConnectService.class);
-        bIntent.setAction(String.valueOf(WalletConnectActions.REJECT.ordinal()));
-        bIntent.putExtra("sessionId", sessionId);
-        bIntent.putExtra("id", id);
-        bIntent.putExtra("message", message);
-        ctx.startService(bIntent);
-    }
-
-    public void approveRequest(Context ctx, String sessionId, long id, String message)
-    {
-        Intent bIntent = new Intent(ctx, WalletConnectService.class);
-        bIntent.setAction(String.valueOf(WalletConnectActions.APPROVE.ordinal()));
-        bIntent.putExtra("sessionId", sessionId);
-        bIntent.putExtra("id", id);
-        bIntent.putExtra("message", message);
-        ctx.startService(bIntent);
-    }
-
     public String getNetworkSymbol(long chainId)
     {
         NetworkInfo info = findDefaultNetworkInteract.getNetworkInfo(chainId);
@@ -617,51 +481,6 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
             info = findDefaultNetworkInteract.getNetworkInfo(MAINNET_ID);
         }
         return info.symbol;
-    }
-
-    public void prepareIfRequired()
-    {
-        if (prepareDisposable == null)
-        {
-            prepare();
-        }
-    }
-
-    public void approveSwitchEthChain(Context context, long requestId, String sessionId, long chainId, boolean approve, boolean chainAvailable)
-    {
-        Intent i = new Intent(context, WalletConnectService.class);
-        i.setAction(String.valueOf(WalletConnectActions.SWITCH_CHAIN.ordinal()));
-        i.putExtra(C.EXTRA_WC_REQUEST_ID, requestId);
-        i.putExtra(C.EXTRA_SESSION_ID, sessionId);
-        i.putExtra(C.EXTRA_CHAIN_ID, chainId);
-        i.putExtra(C.EXTRA_APPROVED, approve);
-        i.putExtra(C.EXTRA_CHAIN_AVAILABLE, chainAvailable);
-        context.startService(i);
-    }
-
-    public void approveAddEthereumChain(Context context,
-                                        long requestId,
-                                        String sessionId,
-                                        WalletAddEthereumChainObject chainObject,
-                                        boolean approved)
-    {
-        Intent i = new Intent(context, WalletConnectService.class);
-        i.setAction(String.valueOf(WalletConnectActions.ADD_CHAIN.ordinal()));
-        i.putExtra(C.EXTRA_WC_REQUEST_ID, requestId);
-        i.putExtra(C.EXTRA_SESSION_ID, sessionId);
-        i.putExtra(C.EXTRA_CHAIN_OBJ, chainObject);
-        i.putExtra(C.EXTRA_APPROVED, approved);
-
-        if (approved)
-        {
-            // add only if not present
-            if (!isChainAdded(chainObject.getChainId()))
-            {
-                ethereumNetworkRepository.saveCustomRPCNetwork(chainObject.chainName, extractRpc(chainObject), chainObject.getChainId(),
-                        chainObject.nativeCurrency.symbol, "", "", false, -1L);
-            }
-        }
-        context.startService(i);
     }
 
     private String extractRpc(WalletAddEthereumChainObject chainObject)
@@ -710,13 +529,6 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
         }
     }
 
-    public void removeSessionsWithoutSignRecords(Context context)
-    {
-        getInactiveSessionIds(context, sessions -> {
-            deleteSessionsFromRealm(filterSessionsWithoutSignRecords(sessions), this::updateSessions);
-        });
-    }
-
     @NonNull
     private ArrayList<String> filterSessionsWithoutSignRecords(List<String> sessions)
     {
@@ -734,49 +546,6 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     public void updateSessions()
     {
         sessions.postValue(walletConnectInteract.getSessions());
-    }
-
-    public void removeInactiveSessions(Context context)
-    {
-        getInactiveSessionIds(context, list -> {
-            deleteSessionsFromRealm(list, this::updateSessions);
-        });
-    }
-
-    // connects to service to check session state and gives inactive sessions
-    private void getInactiveSessionIds(Context context, GenericCallback<List<String>> callback)
-    {
-        List<WalletConnectSessionItem> sessionItems = walletConnectInteract.getSessions();
-        ArrayList<String> inactiveSessions = new ArrayList<>();
-        ServiceConnection connection = new ServiceConnection()
-        {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service)
-            {
-                WalletConnectService walletConnectService = ((WalletConnectService.LocalBinder) service).getService();
-                // loop & populate sessions which are inactive
-                for (WalletConnectSessionItem item : sessionItems)
-                {
-                    WCClient wcClient = walletConnectService.getClient(item.sessionId);
-                    // if client is not connected ie: session inactive
-                    if (wcClient == null || !wcClient.isConnected())
-                    {
-                        inactiveSessions.add(item.sessionId);
-                    }
-                }
-                callback.call(inactiveSessions);        // return inactive sessions to caller
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name)
-            {
-                //walletConnectService = null;
-                Timber.tag(TAG).d("Service disconnected");
-            }
-        };
-        Intent i = new Intent(context, WalletConnectService.class);     // not specifying action as no need. we just need to bind to service
-        context.startService(i);
-        context.bindService(i, connection, Service.BIND_ABOVE_CLIENT);
     }
 
     // deletes the RealmWCSession objects with the given sessionIds present in the list

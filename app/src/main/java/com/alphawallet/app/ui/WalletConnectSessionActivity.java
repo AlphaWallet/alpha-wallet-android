@@ -192,12 +192,12 @@ public class WalletConnectSessionActivity extends BaseActivity
         popupMenu.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_delete_empty)
             {
-                viewModel.removeSessionsWithoutSignRecords(this);
+                //viewModel.removeSessionsWithoutSignRecords(this);
                 return true;
             }
             else if (item.getItemId() == R.id.action_delete_all)
             {
-                viewModel.removeInactiveSessions(this);
+                //viewModel.removeInactiveSessions(this);
                 return true;
             }
             return false;
@@ -207,16 +207,7 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     private void setupClient(final WalletConnectSessionItem session, final CustomAdapter.CustomViewHolder holder)
     {
-        if (session.wcVersion == 1)
-        {
-            viewModel.getClient(this, session.sessionId, client -> handler.post(() -> {
-                setStatusIconActive(holder, (client != null && client.isConnected()));
-            }));
-        }
-        else
-        {
-            setStatusIconActive(holder, (session.expiryTime > System.currentTimeMillis()));
-        }
+        setStatusIconActive(holder, (session.expiryTime > System.currentTimeMillis()));
     }
 
     private void setStatusIconActive(final CustomAdapter.CustomViewHolder holder, boolean active)
@@ -244,7 +235,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             @Override
             public void onSessionDisconnected()
             {
-                runOnUiThread(() -> awWalletConnectClient.updateNotification());
+                //runOnUiThread(() -> awWalletConnectClient.updateNotification());
             }
         }));
         cDialog.setSecondaryButtonText(R.string.action_cancel);

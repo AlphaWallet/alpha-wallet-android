@@ -790,11 +790,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void launchWalletConnectSessionCancel()
     {
-        String sessionId = walletConnectSession != null ? viewModel.getSessionId(walletConnectSession) : "";
+        /*String sessionId = walletConnectSession != null ? viewModel.getSessionId(walletConnectSession) : "";
         Intent bIntent = new Intent(getContext(), WalletConnectService.class);
         bIntent.setAction(String.valueOf(WalletConnectActions.CLOSE.ordinal()));
         bIntent.putExtra("session", sessionId);
-        requireActivity().startService(bIntent);
+        requireActivity().startService(bIntent);*/
         reloadPage();
     }
 

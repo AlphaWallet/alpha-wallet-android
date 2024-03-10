@@ -430,10 +430,10 @@ public class WalletsActivity extends BaseActivity implements
 
         viewModel.stopUpdates();
 
-        Intent bIntent = new Intent(this, WalletConnectService.class);
+        /*Intent bIntent = new Intent(this, WalletConnectService.class);
         bIntent.setAction(String.valueOf(WalletConnectActions.DISCONNECT.ordinal()));
         bIntent.putExtra("wallet", selectedWallet);
-        startService(bIntent);
+        startService(bIntent);*/
 
         selectedWallet = wallet;
     }

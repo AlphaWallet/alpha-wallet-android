@@ -386,7 +386,7 @@ public class WalletFragment extends BaseFragment implements
             adapter.clear();
             viewModel.prepare();
             viewModel.notifyRefresh();
-            awWalletConnectClient.updateNotification();
+            //awWalletConnectClient.updateNotification();
         });
     }
 
@@ -595,7 +595,7 @@ public class WalletFragment extends BaseFragment implements
 
         if (currentTabPos.equals(TokenFilter.ALL))
         {
-            awWalletConnectClient.updateNotification();
+            //awWalletConnectClient.updateNotification();
         }
         else
         {

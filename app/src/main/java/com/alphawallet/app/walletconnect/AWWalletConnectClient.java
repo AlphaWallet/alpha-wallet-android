@@ -92,10 +92,10 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         hasConnection = false;
     }
 
-    public void onSessionDelete(@NonNull Model.SessionDelete deletedSession)
+    /*public void onSessionDelete(@NonNull Model.SessionDelete deletedSession)
     {
         updateNotification();
-    }
+    }*/
 
     public void onSessionProposal(@NonNull Model.SessionProposal sessionProposal)
     {
@@ -216,7 +216,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         Params.SessionApprove approve = new Params.SessionApprove(proposerPublicKey, buildNamespaces(sessionProposal, selectedAccounts), sessionProposal.getRelayProtocol());
         Web3Wallet.INSTANCE.approveSession(approve, sessionApprove -> {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                updateNotification();
+                //updateNotification();
                 callback.onSessionProposalApproved();
             }, 500);
             return null;
@@ -288,14 +288,6 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         return sessionItemMutableLiveData;
     }
 
-    public void updateNotification()
-    {
-        walletConnectInteract.fetchSessions(context, items -> {
-            sessionItemMutableLiveData.postValue(items);
-            updateService(context, items);
-        });
-    }
-
     private void updateService(Context context, List<WalletConnectSessionItem> walletConnectSessionItems)
     {
         try
@@ -338,7 +330,6 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     {
         Web3Wallet.INSTANCE.disconnectSession(new Params.SessionDisconnect(sessionId), sd -> null, this::onDisconnectError);
         callback.onSessionDisconnected();
-        updateNotification();
     }
 
     private Unit onDisconnectError(Model.Error error)
@@ -664,6 +655,12 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
             handler.handle(method, actionSheetCallback);
             requestHandlers.append(sessionRequest.getRequest().getId(), handler);
         }
+    }
+
+    @Override
+    public void onSessionDelete(@NonNull Model.SessionDelete sessionDelete)
+    {
+
     }
 
     public interface WalletConnectV2Callback

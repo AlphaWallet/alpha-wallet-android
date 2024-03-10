@@ -33,6 +33,7 @@ import org.json.JSONObject;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -200,7 +201,7 @@ public class OpenSeaService
         for (int i = 0; i < assets.length(); i++)
         {
             JSONObject assetJSON = assets.getJSONObject(i);
-            String tokenStandard = assetJSON.getString("token_standard").toLowerCase();
+            String tokenStandard = assetJSON.getString("token_standard").toLowerCase(Locale.ROOT);
 
             if (!TextUtils.isEmpty(tokenStandard))
             {

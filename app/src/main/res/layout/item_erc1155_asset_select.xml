@@ -128,13 +128,16 @@
             tools:visibility="visible" />
 
         <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/checkbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:clickable="false"
-            android:visibility="gone"
-            tools:visibility="visible" />
+                android:id="@+id/checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                app:useMaterialThemeColors="false"
+                app:buttonTint="@color/selector_button_tint"
+                tools:checked="true"
+                android:clickable="false"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
     </FrameLayout>
 

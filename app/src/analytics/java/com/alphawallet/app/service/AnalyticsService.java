@@ -11,14 +11,13 @@ import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.mixpanel.android.mpmetrics.MixpanelAPI;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
-import java.util.Objects;
 
 import timber.log.Timber;
 
@@ -31,7 +30,7 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T>
     public AnalyticsService(Context context, PreferenceRepositoryType preferenceRepository)
     {
         this.preferenceRepository = preferenceRepository;
-        mixpanelAPI = MixpanelAPI.getInstance(context, KeyProviderFactory.get().getAnalyticsKey());
+        mixpanelAPI = MixpanelAPI.getInstance(context, KeyProviderFactory.get().getAnalyticsKey(), false);
         firebaseAnalytics = FirebaseAnalytics.getInstance(context);
     }
 
@@ -115,14 +114,14 @@ public class AnalyticsService<T> implements AnalyticsServiceType<T>
             mixpanelAPI.getPeople().identify(uuid);
             mixpanelAPI.getPeople().set(Analytics.UserProperties.APPLICATION_ID.getValue(), BuildConfig.APPLICATION_ID);
 
-            FirebaseInstanceId.getInstance().getInstanceId()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful())
-                    {
-                        String token = Objects.requireNonNull(task.getResult()).getToken();
-                        mixpanelAPI.getPeople().setPushRegistrationId(token);
-                    }
-                });
+            FirebaseMessaging.getInstance().getToken()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful())
+                        {
+                            String token = task.getResult();
+                            mixpanelAPI.getPeople().setPushRegistrationId(token);
+                        }
+                    });
         }
     }
 

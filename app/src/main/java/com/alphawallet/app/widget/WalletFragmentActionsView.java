@@ -35,31 +35,30 @@ public class WalletFragmentActionsView extends FrameLayout implements View.OnCli
     }
 
     @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-
-            case R.id.copy_wallet_address_action: {
-                if (onCopyWalletAddressClickListener != null) {
-                    onCopyWalletAddressClickListener.onClick(view);
-                }
-                break;
+    public void onClick(View view)
+    {
+        if (view.getId() == R.id.copy_wallet_address_action)
+        {
+            if (onCopyWalletAddressClickListener != null) {
+                onCopyWalletAddressClickListener.onClick(view);
             }
-            case R.id.show_my_wallet_address_action: {
-                if (onShowMyWalletAddressClickListener != null) {
-                    onShowMyWalletAddressClickListener.onClick(view);
-                }
-                break;
+        }
+        else if (view.getId() == R.id.show_my_wallet_address_action)
+        {
+            if (onShowMyWalletAddressClickListener != null) {
+                onShowMyWalletAddressClickListener.onClick(view);
             }
-            case R.id.add_hide_tokens_action: {
-                if (onAddHideTokensClickListener != null) {
-                    onAddHideTokensClickListener.onClick(view);
-                }
-                break;
+        }
+        else if (view.getId() == R.id.add_hide_tokens_action)
+        {
+            if (onAddHideTokensClickListener != null) {
+                onAddHideTokensClickListener.onClick(view);
             }
-            case R.id.rename_this_wallet_action: {
-                if (onRenameThisWalletListener != null) {
-                    onRenameThisWalletListener.onClick(view);
-                }
+        }
+        else if (view.getId() == R.id.rename_this_wallet_action)
+        {
+            if (onRenameThisWalletListener != null) {
+                onRenameThisWalletListener.onClick(view);
             }
         }
     }

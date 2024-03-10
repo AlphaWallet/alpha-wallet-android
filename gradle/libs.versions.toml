@@ -1,0 +1,116 @@
+[versions]
+agp = "8.3.0"
+android_lint_reporter = "2.1.0"
+androidBom = "1.23.0"
+bcprovJdk15onVersion = "1.70"
+bcprovJdk18onVersion = "1.77"
+biometric = "1.1.0"
+compiler = "4.16.0"
+core = "3.5.3"
+coreSplashscreen = "1.0.1"
+coreVersion = "1.10.3"
+detektGradlePlugin = "1.23.5"
+firebaseAnalytics = "21.5.1"
+firebaseCrashlytics = "18.6.2"
+firebaseCrashlyticsGradle = "2.9.9"
+firebaseMessaging = "23.4.1"
+flexboxLayout = "2.0.1"
+glide = "4.16.0"
+googleServices = "4.4.1"
+gradle = "8.3.0"
+gridlayout = "1.0.0"
+gson = "2.10.1"
+guava = "30.1.1-android"
+hiltAndroidGradlePlugin = "2.48"
+jacocoAndroid = "0.1.5"
+jsonSimple = "4.0.1"
+junit = "4.13.2"
+junitVersion = "1.1.5"
+espressoCore = "3.5.1"
+appcompat = "1.6.1"
+keyboardvisibilityevent = "3.0.0-RC3"
+kotlinGradlePlugin = "1.8.0"
+kotson = "2.5.0"
+mailchimpSdkAndroid = "1.0.0"
+material = "1.11.0"
+constraintlayout = "2.1.4"
+lifecycleLivedataKtx = "2.7.0"
+lifecycleViewmodelKtx = "2.7.0"
+mixpanelAndroid = "5.8.4"
+navigationFragment = "2.7.7"
+navigationUi = "2.7.7"
+okhttp = "4.12.0"
+preferenceKtx = "1.2.1"
+realmGradlePlugin = "10.18.0"
+recyclerview = "1.3.2"
+rxjava = "2.2.21"
+rxandroid = "2.1.1"
+slf4jApi = "2.0.9"
+springBootGradlePlugin = "2.2.2.RELEASE"
+timber = "5.0.1"
+vectordrawable = "1.1.0"
+walletCore = "3.2.18"
+webkit = "1.10.0"
+workRuntimeKtx = "2.9.0"
+zxingAndroidEmbedded = "4.3.0"
+
+[libraries]
+android-bom = { module = "com.walletconnect:android-bom", version.ref = "androidBom" }
+android_lint_reporter = { module = "gradle.plugin.com.worker8.android_lint_reporter:android_lint_reporter", version.ref = "android_lint_reporter" }
+biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
+bouncycastle-bcprov-jdk15on = { module = "org.bouncycastle:bcprov-jdk15on", version.ref = "bcprovJdk15onVersion" }
+bouncycastle-bcprov-jdk18on = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bcprovJdk18onVersion" }
+compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
+core = { module = "com.google.zxing:core", version.ref = "core" }
+core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detektGradlePlugin" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebaseAnalytics" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics", version.ref = "firebaseCrashlytics" }
+firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebaseCrashlyticsGradle" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessaging" }
+flexbox-layout = { module = "com.github.google:flexbox-layout", version.ref = "flexboxLayout" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+gridlayout = { module = "androidx.gridlayout:gridlayout", version.ref = "gridlayout" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidGradlePlugin" }
+hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroidGradlePlugin" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroidGradlePlugin" }
+jacoco-android = { module = "com.dicedmelon.gradle:jacoco-android", version.ref = "jacocoAndroid" }
+json-simple = { module = "com.github.cliftonlabs:json-simple", version.ref = "jsonSimple" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+keyboardvisibilityevent = { module = "net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent", version.ref = "keyboardvisibilityevent" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
+kotson = { module = "com.github.salomonbrys.kotson:kotson", version.ref = "kotson" }
+mailchimp-sdk-android = { module = "com.github.mailchimp:mailchimp-sdk-android", version.ref = "mailchimpSdkAndroid" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
+lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+mixpanel-android = { module = "com.mixpanel.android:mixpanel-android", version.ref = "mixpanelAndroid" }
+navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
+navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+play-core = { module = "com.google.android.play:core", version.ref = "coreVersion" }
+preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
+realm-gradle-plugin = { module = "io.realm:realm-gradle-plugin", version.ref = "realmGradlePlugin" }
+recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+rxjava = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava" }
+rxandroid = { module = "io.reactivex.rxjava2:rxandroid", version.ref = "rxandroid" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4jApi" }
+spring-boot-gradle-plugin = { module = "org.springframework.boot:spring-boot-gradle-plugin", version.ref = "springBootGradlePlugin" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+vectordrawable = { module = "androidx.vectordrawable:vectordrawable", version.ref = "vectordrawable" }
+wallet-core = { module = "com.trustwallet:wallet-core", version.ref = "walletCore" }
+webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
+work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+

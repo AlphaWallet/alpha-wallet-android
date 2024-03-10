@@ -137,18 +137,17 @@ public class RedeemAssetSelectActivity extends BaseActivity implements TokensAda
     public boolean onOptionsItemSelected(MenuItem item) {
         final int action_next = R.id.action_next;
         final int action_redeem = R.id.action_redeem;
-        switch (item.getItemId()) {
-            case action_next: {
-                onNext();
-            }
-            break;
-            case action_redeem: {
-                onRedeem();
-            }
-            break;
-            case android.R.id.home: {
-                finish();
-            }
+        if (item.getItemId() == R.id.action_next)
+        {
+            onNext();
+        }
+        else if (item.getItemId() == R.id.action_redeem)
+        {
+            onRedeem();
+        }
+        else if (item.getItemId() == android.R.id.home)
+        {
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }

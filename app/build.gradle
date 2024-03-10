@@ -1,54 +1,26 @@
-//noinspection GradleDependency
-// WARNING WARNING WARNING
-// don't add any additional things here without first search "China" in this file
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "gradle.plugin.com.worker8.android_lint_reporter:android_lint_reporter:2.1.0"
-        classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.22.0"
-        classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
-    }
+plugins {
+    alias(libs.plugins.androidApplication)
+    id("com.worker8.android_lint_reporter") version "2.1.0"
+    id("io.gitlab.arturbosch.detekt") version "1.23.5"
+    id 'jacoco'
 }
 
-// WARNING WARNING WARNING
-// DON'T add any plugins that is Google Play Service or uses Google Play Service
-// Search China in this file for the reason
 apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 apply plugin: 'kotlin-android'
 apply plugin: 'dagger.hilt.android.plugin'
 apply plugin: 'com.worker8.android_lint_reporter'
 apply plugin: 'io.gitlab.arturbosch.detekt'
-apply plugin: 'com.dicedmelon.gradle.jacoco-android'
+apply plugin: 'jacoco'
 
 jacoco {
-    toolVersion = "0.8.9"
+    toolVersion = "0.8.8"
 }
 
 tasks.withType(Test).configureEach {
     jacoco.includeNoLocationClasses = true
     jacoco.excludes = ['jdk.internal.*']
-}
-
-jacocoAndroidUnitTestReport {
-    csv.enabled false
-    html.enabled true
-    xml.enabled true
-}
-
-jacocoAndroidUnitTestReport {
-    excludes += [
-            '**/*Realm*.*',
-            '**/Generated*.*',
-            '**/*_*.*'
-    ]
 }
 
 detekt {
@@ -67,20 +39,25 @@ android_lint_reporter {
 }
 
 android {
+    namespace 'com.alphawallet.app'
+    compileSdk 34
+
     sourceSets {
         main {
 
         }
     }
+
     defaultConfig {
+        applicationId "io.stormbird.wallet"
+        minSdk 24
+        targetSdk 34
         versionCode 256
         versionName "3.77"
 
-        applicationId "io.stormbird.wallet"
-        minSdkVersion 24
-        targetSdkVersion 33
-        compileSdk 33
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        android.buildFeatures.buildConfig true
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
         def XInfuraAPI = "XInfuraAPI"
         //Put your Infura key here, NB with over 30 - 40 users this API key will rate limit, it's only here for bootstrapping a free build
@@ -122,6 +99,7 @@ android {
             }
         }
     }
+
     flavorDimensions.add("targetting")
 
     productFlavors {
@@ -151,6 +129,7 @@ android {
             }
         }
     }
+
     buildTypes {
         debug {
             minifyEnabled false
@@ -181,9 +160,6 @@ android {
         targetCompatibility JavaVersion.VERSION_17
         sourceCompatibility JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = '17'
-    }
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
@@ -201,7 +177,9 @@ android {
         includeInApk false
         includeInBundle false
     }
-    namespace 'com.alphawallet.app'
+    buildFeatures {
+        viewBinding true
+    }
     lint {
         abortOnError false
         baseline file('./check/lint-baseline.xml')
@@ -222,18 +200,23 @@ tasks.register("printVersionCode") {
     }
 }
 
+tasks.register("jacocoAndroidUnitTestReport") {
+    reports {
+        csv.enabled false
+        html.enabled true
+        xml.enabled true
+    }
+    def fileFilter = ['**/R.class', '**/R$*.class', '**/*$ViewInjector*.*', '**/BuildConfig.*', '**/Manifest*.*', '**/*Realm*.*', '**/Generated*.*', '**/*_*.*']
+    def debugTree = fileTree(dir: "**/", excludes: fileFilter)
+    def mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories.setFrom(files([mainSrc]))
+    classDirectories.setFrom(files([debugTree]))
+}
+
 dependencies {
-    implementation project(":lib")
+    implementation project(':lib')
 
-    // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
-    // WARNING!  Don't add dependency on Google Play Services without consulting
-    // WARNING!  The China marketing team
-    // WARNING!  Many Chinese Android phones execute (meaning terminate) any app that
-    // WARNING!  users google gms summarily, like immune systems cleansing infections
-    // WARNING! WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!  WARNING!
-
-    // Ethereum client
-    //implementation "org.web3j:core:4.9.8"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation fileTree(include: ['*.aar'], dir: 'libs')
     //NB: Downgrade jackson due to bug in 2.15 releases that makes it incompatible with Gradle 8
@@ -242,62 +225,64 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
-    implementation 'org.slf4j:slf4j-api:2.0.9'
-    implementation "androidx.core:core-splashscreen:1.0.1"
+    implementation libs.slf4j.api
+    implementation libs.core.splashscreen
 
     // Http client
-    implementation "com.squareup.okhttp3:okhttp:4.11.0"
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation libs.okhttp
+    implementation libs.gson
 
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
-    implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
-    implementation 'androidx.recyclerview:recyclerview:1.3.2'
-    implementation 'androidx.biometric:biometric:1.1.0'
-    implementation 'androidx.gridlayout:gridlayout:1.0.0'
+    implementation libs.appcompat
+    implementation libs.material //'com.google.android.material:material:1.9.0'
+    implementation libs.vectordrawable
+    implementation libs.recyclerview
+    implementation libs.biometric
+    implementation libs.gridlayout
 
     // Bar code scanning
-    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
-    implementation 'com.google.zxing:core:3.5.2'
+    implementation libs.zxing.android.embedded
+    implementation libs.core
 
     // Sugar
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation libs.constraintlayout
 
     //coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.5'
 
     // ReactiveX
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
-    implementation "io.reactivex.rxjava2:rxandroid:2.1.1"
+    implementation libs.rxjava
+    implementation libs.rxandroid
 
     // Keyboard visibility
-    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3'
+    implementation libs.keyboardvisibilityevent
 
     // Dagger 2
 
     // dagger-hilt
-    implementation "com.google.dagger:hilt-android:2.48"
-    annotationProcessor "com.google.dagger:hilt-compiler:2.48"
+    implementation libs.hilt.android
+    annotationProcessor libs.hilt.compiler
 
     // WebKit - for WebView Dark Mode (NB Can't be upgraded from 1.7.0 until migration to Gradle 8)
-    implementation 'androidx.webkit:webkit:1.7.0'
+    implementation libs.webkit
 
     //Use Leak Canary for debug builds only
     //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 
     // Image Loader
-    implementation 'com.github.bumptech.glide:glide:4.13.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
-    implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-android'
-    implementation 'com.trustwallet:wallet-core:3.2.18'
+    implementation libs.glide
+    annotationProcessor libs.compiler
+    implementation libs.guava
+    implementation libs.wallet.core
+    //noinspection UseTomlInstead
     implementation 'com.github.florent37:TutoShowcase:d8b91be8a2'
-    implementation 'com.github.google:flexbox-layout:2.0.1'
-    implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
-    implementation 'com.github.mailchimp:mailchimp-sdk-android:1.0.0'
-    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation libs.flexbox.layout
+    implementation libs.kotson
+    implementation libs.mailchimp.sdk.android
+    implementation libs.preference.ktx
 
     //Timber
-    implementation 'com.jakewharton.timber:timber:5.0.1'
+    implementation libs.timber
 
+    //noinspection UseTomlInstead
     implementation platform('com.walletconnect:android-bom:1.13.1')
     implementation("com.walletconnect:android-core", {
         exclude group: 'org.web3j', module: '*'
@@ -306,20 +291,20 @@ dependencies {
         exclude group: 'org.web3j', module: '*'
     })
 
-    runtimeOnly 'androidx.work:work-runtime-ktx:2.8.1'
+    runtimeOnly libs.work.runtime.ktx
 
     //Analytics
-    analyticsImplementation 'com.google.android.play:core:1.10.3'
+    analyticsImplementation libs.play.core
 
-    analyticsImplementation 'com.google.android.play:core:1.10.3'
-    analyticsImplementation 'com.google.firebase:firebase-analytics:21.5.0'
-    analyticsImplementation 'com.mixpanel.android:mixpanel-android:5.8.4'
-    analyticsImplementation 'com.google.firebase:firebase-crashlytics:18.5.1'
+    analyticsImplementation libs.play.core
+    analyticsImplementation libs.firebase.analytics
+    analyticsImplementation libs.mixpanel.android
+    analyticsImplementation libs.firebase.crashlytics
 
     // Notifications: NB there appears to be an incompatibility in the newer builds of firebase-messaging.
     // Update when resolved.
     //noinspection GradleDependency
-    implementation 'com.google.firebase:firebase-messaging:21.1.0'
+    implementation libs.firebase.messaging
 
 
     //
@@ -330,7 +315,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.3.0'
-    androidTestImplementation 'androidx.browser:browser:1.5.0'
+    androidTestImplementation 'androidx.browser:browser:1.8.0'
 
     // Unit tests
     testImplementation 'junit:junit:4.13.2'
@@ -338,7 +323,7 @@ dependencies {
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
-    testImplementation group: 'org.json', name: 'json', version: '20220320'
+    testImplementation group: 'org.json', name: 'json', version: '20240303'
 
     // Component tests: Updating these appears to break the tests.
     testImplementation 'org.robolectric:robolectric:4.8.2'
@@ -358,8 +343,5 @@ dependencies {
     androidTestImplementation('tools.fastlane:screengrab:2.1.1', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
 }
-
-// WARNING WARNING WARNING
-// don't add any additional things here without first search "China" in this file
-

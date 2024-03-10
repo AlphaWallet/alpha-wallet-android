@@ -36,51 +36,40 @@ public class QRCodeActionsView extends FrameLayout implements View.OnClickListen
         findViewById(R.id.close_action).setOnClickListener(this);
     }
 
-    //TODO: Refactor with if/else
     @Override
-    public void onClick(View view) {
-
-        final int send_to_this_address_action = R.id.send_to_this_address_action;
-        final int add_custom_token_action = R.id.add_custom_token_action;
-        final int watch_account_action = R.id.watch_account_action;
-        final int open_in_etherscan_action = R.id.open_in_etherscan_action;
-        final int close_action = R.id.close_action;
-
-        switch (view.getId()) {
-            case send_to_this_address_action: {
-                if (onSendToAddressClickListener != null) {
-                    onSendToAddressClickListener.onClick(view);
-                }
-                break;
+    public void onClick(View view)
+    {
+        if (view.getId() == R.id.send_to_this_address_action)
+        {
+            if (onSendToAddressClickListener != null) {
+                onSendToAddressClickListener.onClick(view);
             }
-            case add_custom_token_action: {
-                if (onAddCustonTokenClickListener != null) {
-                    onAddCustonTokenClickListener.onClick(view);
-                }
-                break;
+        }
+        else if (view.getId() == R.id.add_custom_token_action)
+        {
+            if (onAddCustonTokenClickListener != null) {
+                onAddCustonTokenClickListener.onClick(view);
             }
-            case watch_account_action: {
-                if (onWatchWalletClickListener != null) {
-                    onWatchWalletClickListener.onClick(view);
-                }
-                break;
-
+        }
+        else if (view.getId() == R.id.watch_account_action)
+        {
+            if (onWatchWalletClickListener != null) {
+                onWatchWalletClickListener.onClick(view);
             }
-            case open_in_etherscan_action: {
-                if (onOpenInEtherscanClickListener != null) {
-                    onOpenInEtherscanClickListener.onClick(view);
-                }
-                break;
+        }
+        else if (view.getId() == R.id.open_in_etherscan_action)
+        {
+            if (onOpenInEtherscanClickListener != null) {
+                onOpenInEtherscanClickListener.onClick(view);
             }
-            case close_action: {
-                if (onCloseActionListener != null) {
-                    onCloseActionListener.onClick(view);
-                }
-                break;
+        }
+        else if (view.getId() == R.id.close_action)
+        {
+            if (onCloseActionListener != null) {
+                onCloseActionListener.onClick(view);
             }
         }
     }
-
 
     public void setOnSendToAddressClickListener(OnClickListener onSendToAddressClickListener) {
         this.onSendToAddressClickListener = onSendToAddressClickListener;

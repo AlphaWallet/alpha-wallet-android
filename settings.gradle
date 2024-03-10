@@ -1,1 +1,45 @@
-include ':app', ':lib', ':util', ':dmz', ':hardware_stub'
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+        maven {
+            url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
+            credentials {
+                username = getGitHubUsername() as String ?: System.getenv("GITHUB_USER")
+                password = getPAT() as String ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        maven { url 'https://repo.spring.io/milestone' }
+    }
+}
+
+private static String getGitHubUsername() {
+    "JamesSmartCell"
+}
+
+private static String getPAT() {
+    def encodedToken = "WjJod1gyaFZWVFF4ZGtoVk1qTkdiVVJqTlRWUGVtSlFZVlI0UkRocldYQkRZak5FTlU5aFNnPT0="
+    def firstEncode = new String(encodedToken.decodeBase64())
+    new String(firstEncode.decodeBase64())
+}
+
+rootProject.name = "AlphaWallet"
+include ':app', ':lib', ':hardware_stub' //, ':dmz' //TODO: Fix DMZ for Gradle 8

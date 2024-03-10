@@ -1,173 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/token_layout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clickable="true"
-    android:focusable="true">
-
-    <com.google.android.material.checkbox.MaterialCheckBox
-        android:id="@+id/select_token"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:visibility="gone"
-        tools:visibility="visible" />
-
-    <RelativeLayout
-        android:id="@+id/wrapped_layout"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/token_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@id/select_token"
-        android:orientation="vertical"
-        android:padding="@dimen/standard_16">
+        android:clickable="true"
+        android:focusable="true">
 
-        <LinearLayout
-            android:id="@+id/layout_balance"
+    <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/select_token"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            app:useMaterialThemeColors="false"
+            app:buttonTint="@color/selector_button_tint"
+            tools:checked="true"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+    <RelativeLayout
+            android:id="@+id/wrapped_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@id/select_token"
+            android:orientation="vertical"
+            android:padding="@dimen/standard_16">
 
-            <com.alphawallet.app.widget.TokenIcon
-                android:id="@+id/token_icon"
-                android:layout_width="@dimen/token_icon"
-                android:layout_height="@dimen/token_icon"
-                android:layout_gravity="center"
-                android:layout_marginEnd="@dimen/small_12" />
-
-            <LinearLayout
+        <LinearLayout
+                android:id="@+id/layout_balance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
-                <LinearLayout
+            <com.alphawallet.app.widget.TokenIcon
+                    android:id="@+id/token_icon"
+                    android:layout_width="@dimen/token_icon"
+                    android:layout_height="@dimen/token_icon"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="@dimen/small_12" />
+
+            <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/eth_data"
-                        style="@style/Aw.Typography.Title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/standard_16"
-                        android:layout_weight="1"
-                        android:ellipsize="end"
-                        android:singleLine="true"
-                        tools:text="Ethereum" />
-
-                    <TextView
-                        android:id="@+id/balance_currency"
-                        style="@style/Aw.Typography.Title.SemiBold"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:text="@string/unknown_balance_without_symbol"
-                        android:visibility="gone"
-                        tools:text="$208.26"
-                        tools:visibility="visible" />
-
-                </LinearLayout>
+                    android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/layout_info"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:id="@+id/layout_extended_info"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/issuerPlaceholder"
-                            style="@style/Aw.Typography.Sub"
-                            android:layout_width="wrap_content"
+                    <TextView
+                            android:id="@+id/eth_data"
+                            style="@style/Aw.Typography.Title"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/mini_4"
-                            android:text="@string/issuer"
-                            android:visibility="gone"
-                            tools:visibility="visible" />
+                            android:layout_marginEnd="@dimen/standard_16"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:singleLine="true"
+                            tools:text="Ethereum" />
 
-                        <TextView
-                            android:id="@+id/issuer"
-                            style="@style/Aw.Typography.Sub"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/mini_4"
-                            android:visibility="gone" />
-
-                        <TextView
-                            android:id="@+id/balance_coin"
-                            style="@style/Aw.Typography.Sub"
+                    <TextView
+                            android:id="@+id/balance_currency"
+                            style="@style/Aw.Typography.Title.SemiBold"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:text="@string/unknown_balance_without_symbol"
                             android:visibility="gone"
-                            tools:text="0.01234 ETH"
+                            tools:text="$208.26"
                             tools:visibility="visible" />
 
-                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                        android:id="@+id/layout_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:baselineAligned="false"
+                        android:orientation="horizontal">
 
                     <LinearLayout
-                        android:id="@+id/layout_appreciation"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="end|center_vertical"
-                        android:orientation="horizontal"
-                        android:visibility="gone"
-                        tools:visibility="visible">
-
-                        <TextView
-                            android:id="@+id/text_appreciation"
-                            style="@style/Aw.Typography.Sub"
-                            android:layout_width="wrap_content"
+                            android:id="@+id/layout_extended_info"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
-                            android:layout_marginEnd="@dimen/tiny_8"
-                            android:text="@string/unknown_balance_without_symbol"
-                            tools:text="$3.47" />
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
-                        <LinearLayout
-                            android:id="@+id/root_24_hrs"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="2dp"
-                            tools:ignore="UseCompoundDrawables">
-
-                            <ImageView
-                                android:id="@+id/image_24_hrs"
+                        <TextView
+                                android:id="@+id/issuerPlaceholder"
+                                style="@style/Aw.Typography.Sub"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center_vertical"
-                                android:padding="@dimen/mini_4"
-                                android:src="@drawable/ic_price_up" />
+                                android:layout_marginEnd="@dimen/mini_4"
+                                android:text="@string/issuer"
+                                android:visibility="gone"
+                                tools:visibility="visible" />
 
-                            <TextView
-                                android:id="@+id/text_24_hrs"
+                        <TextView
+                                android:id="@+id/issuer"
+                                style="@style/Aw.Typography.Sub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="@dimen/mini_4"
+                                android:visibility="gone" />
+
+                        <TextView
+                                android:id="@+id/balance_coin"
                                 style="@style/Aw.Typography.Sub"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_horizontal"
-                                android:layout_marginEnd="2dp"
                                 android:text="@string/unknown_balance_without_symbol"
-                                tools:text="1.659%" />
+                                android:visibility="gone"
+                                tools:text="0.01234 ETH"
+                                tools:visibility="visible" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:id="@+id/layout_appreciation"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="end|center_vertical"
+                            android:orientation="horizontal"
+                            android:visibility="gone"
+                            tools:visibility="visible">
+
+                        <TextView
+                                android:id="@+id/text_appreciation"
+                                style="@style/Aw.Typography.Sub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginEnd="@dimen/tiny_8"
+                                android:text="@string/unknown_balance_without_symbol"
+                                tools:text="$3.47" />
+
+                        <LinearLayout
+                                android:id="@+id/root_24_hrs"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:padding="2dp"
+                                tools:ignore="UseCompoundDrawables">
+
+                            <ImageView
+                                    android:id="@+id/image_24_hrs"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:padding="@dimen/mini_4"
+                                    android:src="@drawable/ic_price_up" />
+
+                            <TextView
+                                    android:id="@+id/text_24_hrs"
+                                    style="@style/Aw.Typography.Sub"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal"
+                                    android:layout_marginEnd="2dp"
+                                    android:text="@string/unknown_balance_without_symbol"
+                                    tools:text="1.659%" />
                         </LinearLayout>
 
                         <ProgressBar
-                            android:id="@+id/ticker_progress"
-                            android:layout_width="@dimen/token_icon_small"
-                            android:layout_height="@dimen/token_icon_small" />
+                                android:id="@+id/ticker_progress"
+                                android:layout_width="@dimen/token_icon_small"
+                                android:layout_height="@dimen/token_icon_small" />
 
                     </LinearLayout>
 

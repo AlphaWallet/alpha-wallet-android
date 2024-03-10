@@ -1,33 +1,45 @@
-buildscript {
-    repositories {
-        google()
-        jcenter()
-        mavenCentral()
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://plugins.gradle.org/m2/' }
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    namespace 'com.alphawallet'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 34
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
     }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:6.1.0'
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java-library'
-
 dependencies {
-    //implementation 'org.web3j:core:4.9.8'
+
     implementation files('../app/libs/abi-4.9.8.jar')
     implementation files('../app/libs/core-4.9.8.jar')
     implementation files('../app/libs/crypto-4.9.8.jar')
     implementation files('../app/libs/utils-4.9.8.jar')
 
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation libs.junit
 
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    implementation libs.bouncycastle.bcprov.jdk15on
     // https://mvnrepository.com/artifact/com.github.cliftonlabs/json-simple
-    implementation group: 'com.github.cliftonlabs', name: 'json-simple', version: '4.0.1'
+    implementation libs.json.simple
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+    implementation libs.gson
 }
 
 sourceCompatibility = "17"

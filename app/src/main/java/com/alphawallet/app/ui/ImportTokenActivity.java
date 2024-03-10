@@ -527,33 +527,32 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
     }
 
     @Override
-    public void onClick(View v) {
-        final int import_ticket = R.id.import_ticket;
-        final int cancel_button = R.id.cancel_button;
-        switch (v.getId()) {
-            case import_ticket:
-                if (ticketRange != null) {
-                    if (viewModel.getSalesOrder().price > 0.0)
-                    {
-                        confirmPurchaseDialog();
-                    }
-                    else
-                    {
-                        onProgress(true);
-                        completeImport();
-                    }
+    public void onClick(View v)
+    {
+        if (v.getId() == R.id.import_ticket)
+        {
+            if (ticketRange != null)
+            {
+                if (viewModel.getSalesOrder().price > 0.0)
+                {
+                    confirmPurchaseDialog();
                 }
-                else if (viewModel.getSalesOrder().contractType == currencyLink)
+                else
                 {
                     onProgress(true);
-                    completeCurrencyImport();
+                    completeImport();
                 }
-                break;
-            case cancel_button:
-                //go to main screen
-                new HomeRouter().open(this, true);
-                finish();
-                break;
+            }
+            else if (viewModel.getSalesOrder().contractType == currencyLink)
+            {
+                onProgress(true);
+                completeCurrencyImport();
+            }
+        }
+        else if (v.getId() == R.id.cancel_button)
+        {
+            new HomeRouter().open(this, true);
+            finish();
         }
     }
 

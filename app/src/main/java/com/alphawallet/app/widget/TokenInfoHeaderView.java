@@ -37,7 +37,7 @@ public class TokenInfoHeaderView extends LinearLayout {
     public TokenInfoHeaderView(Context context, Token token, TokensService svs)
     {
         this(context);
-        icon.bindData(token, svs);
+        icon.bindData(token);
         if (!token.isEthereum()) icon.setChainIcon(token.tokenInfo.chainId);
         setAmount(token.getFixedFormattedBalance());
         setSymbol(token.tokenInfo.symbol);

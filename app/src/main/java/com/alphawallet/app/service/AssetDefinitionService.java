@@ -3148,56 +3148,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    public String getTokenImageUrl(long networkId, String address)
-    {
-        String url = "";
-        String instanceKey = address.toLowerCase() + "-" + networkId;
-        try (Realm realm = realmManager.getRealmInstance(IMAGES_DB))
-        {
-            RealmAuxData instance = realm.where(RealmAuxData.class)
-                    .equalTo("instanceKey", instanceKey)
-                    .findFirst();
-
-            if (instance != null)
-            {
-                url = instance.getResult();
-            }
-        }
-        catch (Exception ex)
-        {
-            Timber.e(ex);
-        }
-
-        return url;
-    }
-
-    public Pair<String, Boolean> getFallbackUrlForToken(Token token)
-    {
-        boolean storedOverride = false;
-        String correctedAddr = Keys.toChecksumAddress(token.getAddress());
-
-        String tURL = getTokenImageUrl(token.tokenInfo.chainId, token.getAddress());
-        if (TextUtils.isEmpty(tURL))
-        {
-            tURL = Utils.getTWTokenImageUrl(token.tokenInfo.chainId, correctedAddr);
-        }
-        else
-        {
-            storedOverride = true;
-        }
-
-        return new Pair<>(tURL, storedOverride);
-    }
-
-    public void storeImageUrl(long chainId, String imageUrl)
-    {
-        String tokenAddress = Utils.getTokenAddrFromAWUrl(imageUrl);
-        if (!TextUtils.isEmpty(tokenAddress))
-        {
-            tokensService.addTokenImageUrl(chainId, tokenAddress, imageUrl);
-        }
-    }
-
     public Single<Integer> fetchViewHeight(long chainId, String address)
     {
         return Single.fromCallable(() -> {

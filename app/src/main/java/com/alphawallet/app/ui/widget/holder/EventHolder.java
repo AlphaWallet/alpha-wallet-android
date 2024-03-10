@@ -93,7 +93,7 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
 
         if (token == null) token = tokensService.getToken(data.chainId, walletAddress);
         String sym = token.getShortSymbol();
-        tokenIcon.bindData(token, assetDefinition);
+        tokenIcon.bindData(token);
         String itemView = null;
 
         TokenDefinition td = assetDefinition.getAssetDefinition(token);

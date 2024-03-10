@@ -1,8 +1,9 @@
 plugins {
-    id 'com.android.library'
+    //id 'com.android.library' //apply plugin: 'com.github.johnrengelman.shadow'
+    id 'java-library'
 }
 
-android {
+/*android {
     namespace 'com.alphawallet'
     compileSdk 34
 
@@ -24,7 +25,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-}
+}*/
 
 dependencies {
 

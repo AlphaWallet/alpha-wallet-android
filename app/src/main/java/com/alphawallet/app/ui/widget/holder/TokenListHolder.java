@@ -69,7 +69,7 @@ public class TokenListHolder extends BinderViewHolder<TokenCardMeta> implements 
         switchEnabled.setOnCheckedChangeListener(null);
         switchEnabled.setChecked(data.isEnabled);
         switchEnabled.setOnCheckedChangeListener(this);
-        tokenIcon.bindData(token, assetDefinition);
+        tokenIcon.bindData(token);
 
         if (data.isEnabled)
         {

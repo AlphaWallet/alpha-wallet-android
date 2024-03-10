@@ -5,6 +5,7 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static java.util.Collections.singletonList;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
@@ -90,6 +91,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private NFTAttributeLayout nftAttributeLayout;
     private NFTAttributeLayout tsAttributeLayout;
     private TextView tokenDescription;
+    @SuppressLint("RestrictedApi")
     private ActionMenuItemView refreshMenu;
     private ProgressBar progressBar;
     private TokenInfoCategoryView descriptionLabel;
@@ -114,7 +116,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
     private boolean triggeredReload;
     private long chainId;
     private Web3TokenView tokenScriptView;
-    private boolean usingNativeTokenScript = false;
+    private boolean usingNativeTokenScript = true;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
@@ -309,7 +311,7 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         if (!viewModel.getUseTSViewer())
         {
             TokenDefinition td = viewModel.getAssetDefinitionService().getAssetDefinition(this.token);
-            this.usingNativeTokenScript = td.nameSpace != null;
+            this.usingNativeTokenScript = (td != null && td.nameSpace != null);
         }
 
         if (asset != null && asset.isAttestation())

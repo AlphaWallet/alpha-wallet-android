@@ -815,6 +815,22 @@ public class ERC1155Token extends Token
     }
 
     @Override
+    public String getFirstImageUrl()
+    {
+        if (assets != null && !assets.isEmpty() && assets.values().stream().findFirst().isPresent())
+        {
+            //get first asset
+            NFTAsset firstAsset = assets.values().stream().findFirst().get();
+            if (firstAsset.hasImageAsset())
+            {
+                return firstAsset.getThumbnail();
+            }
+        }
+
+        return "";
+    }
+
+    @Override
     public boolean isBatchTransferAvailable()
     {
         return true;

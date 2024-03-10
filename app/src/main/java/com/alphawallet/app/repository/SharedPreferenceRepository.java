@@ -478,7 +478,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public boolean getUseTSViewer()
     {
-        return pref.getBoolean(USE_TOKENSCRIPT_VIEWER, true);
+        return pref.getBoolean(USE_TOKENSCRIPT_VIEWER, false);
     }
 
     @Override

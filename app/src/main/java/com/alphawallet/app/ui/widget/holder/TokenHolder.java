@@ -155,7 +155,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
                 balanceCoin.setText(getString(R.string.valueSymbol, coinBalance, symbol));
             }
 
-            tokenIcon.bindData(token, assetDefinition);
+            tokenIcon.bindData(token);
             if (!token.isEthereum())
             {
                 tokenIcon.setChainIcon(token.tokenInfo.chainId); //Add in when we upgrade the design

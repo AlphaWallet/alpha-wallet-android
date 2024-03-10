@@ -52,11 +52,13 @@ public class NFTAsset implements Parcelable
     };
     private static final String LOADING_TOKEN = "*Loading*";
     private static final String ID = "id";
+    private static final String OPENSEA_ID = "identifier";
     private static final String ATTN_ID = "attn_id";
     private static final String NAME = "name";
     private static final String IMAGE = "image";
     private static final String IMAGE_URL = "image_url";
     private static final String IMAGE_PREVIEW = "image_preview_url";
+    private static final String COLLECTION = "collection";
     private static final String DESCRIPTION = "description";
     private static final String IMAGE_ORIGINAL_URL = "image_original_url";
     private static final String IMAGE_ANIMATION = "animation_url";
@@ -66,7 +68,7 @@ public class NFTAsset implements Parcelable
     private static final String[] IMAGE_THUMBNAIL_DESIGNATORS = {IMAGE_PREVIEW, IMAGE, IMAGE_URL, IMAGE_ORIGINAL_URL, IMAGE_ANIMATION};
     private static final String BACKGROUND_COLOUR = "background_color";
     private static final String EXTERNAL_LINK = "external_link";
-    private static final List<String> DESIRED_PARAMS = Arrays.asList(NAME, BACKGROUND_COLOUR, IMAGE_URL, IMAGE, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW, DESCRIPTION, EXTERNAL_LINK, IMAGE_ANIMATION);
+    private static final List<String> DESIRED_PARAMS = Arrays.asList(NAME, BACKGROUND_COLOUR, IMAGE_URL, IMAGE, IMAGE_ORIGINAL_URL, IMAGE_PREVIEW, DESCRIPTION, EXTERNAL_LINK, IMAGE_ANIMATION, COLLECTION);
     private static final List<String> ATTRIBUTE_DESCRIPTOR = Arrays.asList("attributes", "traits");
     private final Map<String, String> assetMap = new HashMap<>();
     private final Map<String, String> attributeMap = new HashMap<>();
@@ -265,6 +267,11 @@ public class NFTAsset implements Parcelable
         try
         {
             JSONObject jsonData = new JSONObject(metaData);
+            if (jsonData.has("nft"))
+            {
+                //need to unwrap this return value
+                jsonData = jsonData.getJSONObject("nft");
+            }
             Iterator<String> keys = jsonData.keys();
             String id = null;
 
@@ -272,7 +279,7 @@ public class NFTAsset implements Parcelable
             {
                 String key = keys.next();
                 String value = jsonData.getString(key);
-                if (key.equals(ID))
+                if (key.equals(ID) || key.equals(OPENSEA_ID))
                 {
                     id = value;
                 }

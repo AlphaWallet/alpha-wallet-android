@@ -46,6 +46,14 @@ public class Attestation implements Signable {
 
     public int getVersion() {
         return version.getValue().intValueExact();
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        {
+            return version.getValue().intValueExact();
+        }
+        else
+        {
+            return version.getValue().intValue();
+        }*/
     }
 
     public void setVersion(int version) {
@@ -54,6 +62,14 @@ public class Attestation implements Signable {
 
     public int getSerialNumber() {
         return serialNumber.getValue().intValueExact();
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        {
+            return serialNumber.getValue().intValueExact();
+        }
+        else
+        {
+            return serialNumber.getValue().intValue();
+        }*/
     }
 
     public void setSerialNumber(long serialNumber) {
@@ -140,6 +156,14 @@ public class Attestation implements Signable {
         Iterator<ASN1Encodable> it = smartcontracts.iterator();
         while(it.hasNext()) {
             res.add(((ASN1Integer) it.next()).getValue().longValueExact());
+            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            {
+                res.add(((ASN1Integer) it.next()).getValue().longValueExact());
+            }
+            else
+            {
+                res.add(((ASN1Integer) it.next()).getValue().longValue());
+            }*/
         }
         return res;
     }
@@ -182,6 +206,19 @@ public class Attestation implements Signable {
         if (version.getValue().intValueExact() != 0 && version.getValue().intValueExact() != 1 && version.getValue().intValueExact() != 2) {
             return false;
         }
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        {
+            if (version.getValue().intValueExact() != 0 && version.getValue().intValueExact() != 1 && version.getValue().intValueExact() != 2) {
+                return false;
+            }
+        }
+        else
+        {
+            if (version.getValue().intValue() != 0 && version.getValue().intValue() != 1 && version.getValue().intValue() != 2) {
+                return false;
+            }
+        }*/
+
         if (issuer == null || issuer.getRDNs().length == 0) {
             return false;
         }

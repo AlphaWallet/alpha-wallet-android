@@ -44,12 +44,11 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
     private final TextView supplemental;
     private final TokensService tokensService;
     private final FetchTransactionsInteract transactionsInteract;
-    private final AssetDefinitionService assetService;
 
     private Transaction transaction;
     private String defaultAddress;
 
-    public TransactionHolder(ViewGroup parent, TokensService service, FetchTransactionsInteract interact, AssetDefinitionService svs)
+    public TransactionHolder(ViewGroup parent, TokensService service, FetchTransactionsInteract interact)
     {
         super(R.layout.item_transaction, parent);
         date = findViewById(R.id.text_tx_time);
@@ -60,7 +59,6 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         supplemental = findViewById(R.id.supplimental);
         tokensService = service;
         transactionsInteract = interact;
-        assetService = svs;
         itemView.setOnClickListener(this);
     }
 
@@ -97,7 +95,7 @@ public class TransactionHolder extends BinderViewHolder<TransactionMeta> impleme
         setTokenDetailName(token);
 
         //set colours and up/down arrow
-        tokenIcon.bindData(token, assetService);
+        tokenIcon.bindData(token);
         tokenIcon.setStatusIcon(token.getTxStatus(transaction));
         tokenIcon.setChainIcon(token.tokenInfo.chainId);
 

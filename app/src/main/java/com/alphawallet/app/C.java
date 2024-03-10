@@ -313,23 +313,8 @@ public abstract class C {
 
     // OpenSea APIs
     public static final String OPENSEA_COLLECTION_API_MAINNET = "https://api.opensea.io/collection/";
-
-    public static final String OPENSEA_ASSETS_API_MAINNET = "https://api.opensea.io/api/v1/assets";
-    public static final String OPENSEA_ASSETS_API_TESTNET = "https://testnets-api.opensea.io/api/v1/assets";
-    public static final String OPENSEA_ASSETS_API_MATIC = "https://api.opensea.io/api/v2/assets/matic";
-    public static final String OPENSEA_ASSETS_API_ARBITRUM = "https://api.opensea.io/api/v2/assets/arbitrum";
-    public static final String OPENSEA_ASSETS_API_AVALANCHE = "https://api.opensea.io/api/v2/assets/avalanche";
-    public static final String OPENSEA_ASSETS_API_KLAYTN = "https://api.opensea.io/api/v2/assets/klaytn";
-    public static final String OPENSEA_ASSETS_API_OPTIMISM = "https://api.opensea.io/api/v2/assets/optimism";
-
-    public static final String OPENSEA_SINGLE_ASSET_API_MAINNET = "https://api.opensea.io/api/v1/asset/";
-    public static final String OPENSEA_SINGLE_ASSET_API_TESTNET = "https://testnets-api.opensea.io/api/v1/asset/";
-    public static final String OPENSEA_SINGLE_ASSET_API_MATIC = "https://api.opensea.io/api/v2/metadata/matic/";
-    public static final String OPENSEA_SINGLE_ASSET_API_ARBITRUM = "https://api.opensea.io/api/v2/metadata/arbitrum/";
-    public static final String OPENSEA_SINGLE_ASSET_API_AVALANCHE = "https://api.opensea.io/api/v2/metadata/avalanche/";
-    public static final String OPENSEA_SINGLE_ASSET_API_KLAYTN = "https://api.opensea.io/api/v2/metadata/klaytn/";
-    public static final String OPENSEA_SINGLE_ASSET_API_OPTIMISM = "https://api.opensea.io/api/v2/metadata/optimism/";
-
+    public static final String OPENSEA_ASSETS_API_V2 = "https://api.opensea.io/api/v2/chain/{CHAIN}/account/{ADDRESS}/nfts";
+    public static final String OPENSEA_NFT_API_V2 = "https://api.opensea.io/api/v2/chain/{CHAIN}/contract/{ADDRESS}/nfts/{TOKEN_ID}";
 
     //Timing
     public static long CONNECT_TIMEOUT = 10; //Seconds

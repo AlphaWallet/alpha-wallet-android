@@ -1,5 +1,15 @@
 package com.alphawallet.app.service;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
+
 import android.net.Uri;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -24,6 +34,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
@@ -40,11 +51,23 @@ import timber.log.Timber;
 public class OpenSeaService
 {
     private final OkHttpClient httpClient;
-    private static final int PAGE_SIZE = 50;
+    private static final int PAGE_SIZE = 200;
     private final Map<String, String> imageUrls = new HashMap<>();
     private static final TokenFactory tf = new TokenFactory();
     private final LongSparseArray<Long> networkCheckTimes = new LongSparseArray<>();
-    private final LongSparseArray<Integer> pageOffsets = new LongSparseArray<>();
+    private final Map<Long, String> pageOffsets = new ConcurrentHashMap<>();
+
+    private final Map<Long, String> API_CHAIN_MAP = Map.of(
+            MAINNET_ID, "ethereum",
+            KLAYTN_ID, "klaytn",
+            POLYGON_TEST_ID, "mumbai",
+            POLYGON_ID, "matic",
+            OPTIMISTIC_MAIN_ID, "optimism",
+            ARBITRUM_MAIN_ID, "arbitrum",
+            SEPOLIA_TESTNET_ID, "sepolia",
+            AVALANCHE_ID, "avalanche",
+            BINANCE_MAIN_ID, "bsc"
+    );
 
     public OpenSeaService()
     {
@@ -115,46 +138,42 @@ public class OpenSeaService
             if (!canCheckChain(networkId)) return new Token[0];
             networkCheckTimes.put(networkId, currentTime);
 
-            int pageOffset = pageOffsets.get(networkId, 0);
+            String pageCursor = pageOffsets.getOrDefault(networkId, "");
 
             Timber.d("Fetch from opensea : %s", networkName);
 
             do
             {
-                String jsonData = fetchAssets(networkId, address, pageOffset);
+                String jsonData = fetchAssets(networkId, address, pageCursor);
                 if (!JsonUtils.hasAssets(jsonData))
                 {
                     return foundTokens.values().toArray(new Token[0]); //on error return results found so far
                 }
 
                 JSONObject result = new JSONObject(jsonData);
-                JSONArray assets;
-                if (result.has("assets"))
-                {
-                    assets = result.getJSONArray("assets");
-                }
-                else
-                {
-                    assets = result.getJSONArray("results");
-                }
+                JSONArray assets = result.getJSONArray("nfts");
 
                 receivedTokens = assets.length();
-                pageOffset += assets.length();
 
                 //process this page of results
                 processOpenseaTokens(foundTokens, assets, address, networkId, networkName, tokensService);
                 currentPage++;
+                pageCursor = result.getString("next");
+                if (TextUtils.isEmpty(pageCursor))
+                {
+                    break;
+                }
             }
-            while (receivedTokens == PAGE_SIZE && currentPage <= 3); //fetch 4 pages for each loop
+            while (currentPage <= 3); //fetch 4 pages for each loop
+
+            pageOffsets.put(networkId, pageCursor);
 
             if (receivedTokens < PAGE_SIZE)
             {
-                Timber.d("Reset OpenSeaAPI reads at: %s", pageOffset);
-                pageOffsets.put(networkId, 0);
+                Timber.d("Reset OpenSeaAPI reads at: %s", pageCursor);
             }
             else
             {
-                pageOffsets.put(networkId, pageOffset);
                 networkCheckTimes.put(networkId, currentTime - 55 * DateUtils.SECOND_IN_MILLIS); //do another read within 5 seconds
             }
 
@@ -181,19 +200,18 @@ public class OpenSeaService
         for (int i = 0; i < assets.length(); i++)
         {
             JSONObject assetJSON = assets.getJSONObject(i);
-            AssetContract assetContract =
-                    new Gson().fromJson(assetJSON.getString("asset_contract"), AssetContract.class);
+            String tokenStandard = assetJSON.getString("token_standard").toLowerCase();
 
-            if (assetContract != null && !TextUtils.isEmpty(assetContract.getSchemaName()))
+            if (!TextUtils.isEmpty(tokenStandard))
             {
-                switch (assetContract.getSchemaName())
+                switch (tokenStandard)
                 {
-                    case "ERC721":
-                        handleERC721(assetContract, assetList, assetJSON, networkId, foundTokens, tokensService,
+                    case "erc721":
+                        handleERC721(assetList, assetJSON, networkId, foundTokens, tokensService,
                                 networkName, address);
                         break;
-                    case "ERC1155":
-                        handleERC1155(assetContract, assetList, assetJSON, networkId, foundTokens, tokensService,
+                    case "erc1155":
+                        handleERC1155(assetList, assetJSON, networkId, foundTokens, tokensService,
                                 networkName, address);
                         break;
                 }
@@ -201,8 +219,7 @@ public class OpenSeaService
         }
     }
 
-    private void handleERC721(AssetContract assetContract,
-                              Map<String, Map<BigInteger, NFTAsset>> assetList,
+    private void handleERC721(Map<String, Map<BigInteger, NFTAsset>> assetList,
                               JSONObject assetJSON,
                               long networkId,
                               Map<String, Token> foundTokens,
@@ -212,52 +229,50 @@ public class OpenSeaService
     {
         NFTAsset asset = new NFTAsset(assetJSON.toString());
 
-        BigInteger tokenId = assetJSON.has("token_id") ?
-                new BigInteger(assetJSON.getString("token_id"))
+        BigInteger tokenId = assetJSON.has("identifier") ?
+                new BigInteger(assetJSON.getString("identifier"))
                 : null;
         if (tokenId == null) return;
 
-        addAssetImageToHashMap(assetContract.getAddress(), assetContract.getImageUrl());
+        String contractAddress = assetJSON.getString("contract");
+        String collectionName = assetJSON.getString("collection");
 
-        Token token = foundTokens.get(assetContract.getAddress());
+        Token token = foundTokens.get(contractAddress);
         if (token == null)
         {
             TokenInfo tInfo;
             ContractType type;
             long lastCheckTime = 0;
-            Token checkToken = svs.getToken(networkId, assetContract.getAddress());
+            Token checkToken = svs.getToken(networkId, contractAddress);
             if (checkToken != null && (checkToken.isERC721() || checkToken.isERC721Ticket()))
             {
-                assetList.put(assetContract.getAddress(), checkToken.getTokenAssets());
+                assetList.put(contractAddress, checkToken.getTokenAssets());
                 tInfo = checkToken.tokenInfo;
                 type = checkToken.getInterfaceSpec();
                 lastCheckTime = checkToken.lastTxTime;
 
-                JSONObject collectionJSON = assetJSON.getJSONObject("collection");
-                String collectionName = collectionJSON.getString("name");
-                if (!TextUtils.isEmpty(collectionName) && (TextUtils.isEmpty(checkToken.tokenInfo.name) || !collectionName.equals(checkToken.tokenInfo.name)))
+                if (!TextUtils.isEmpty(collectionName) && (TextUtils.isEmpty(checkToken.tokenInfo.name)))
                 {
                     //Update to collection name if the token name is blank, or if the collection name is not blank and current token name is different
-                    tInfo = new TokenInfo(assetContract.getAddress(), collectionName, assetContract.getSymbol(), 0, tInfo.isEnabled, networkId);
+                    tInfo = new TokenInfo(contractAddress, collectionName, "", 0, tInfo.isEnabled, networkId);
                 }
             }
             else //if we haven't seen the contract before, or it was previously logged as something other than a ERC721 variant then specify undetermined flag
             {
-                tInfo = new TokenInfo(assetContract.getAddress(), assetContract.getName(), assetContract.getSymbol(), 0, true, networkId);
-                type = ContractType.ERC721_UNDETERMINED;
+                tInfo = new TokenInfo(contractAddress, asset.getName(), "", 0, true, networkId);
+                type = ContractType.ERC721;
             }
 
             token = tf.createToken(tInfo, type, networkName);
             token.setTokenWallet(address);
             token.lastTxTime = lastCheckTime;
-            foundTokens.put(assetContract.getAddress(), token);
+            foundTokens.put(contractAddress, token);
         }
         asset.updateAsset(tokenId, assetList.get(token.getAddress()));
         token.addAssetToTokenBalanceAssets(tokenId, asset);
     }
 
-    private void handleERC1155(AssetContract assetContract,
-                               Map<String, Map<BigInteger, NFTAsset>> assetList,
+    private void handleERC1155(Map<String, Map<BigInteger, NFTAsset>> assetList,
                                JSONObject assetJSON,
                                long networkId,
                                Map<String, Token> foundTokens,
@@ -267,39 +282,39 @@ public class OpenSeaService
     {
         NFTAsset asset = new NFTAsset(assetJSON.toString());
 
-        BigInteger tokenId = assetJSON.has("token_id") ?
-                new BigInteger(assetJSON.getString("token_id"))
+        BigInteger tokenId = assetJSON.has("identifier") ?
+                new BigInteger(assetJSON.getString("identifier"))
                 : null;
 
         if (tokenId == null) return;
 
-        addAssetImageToHashMap(assetContract.getAddress(), assetContract.getImageUrl());
+        String contractAddress = assetJSON.getString("contract");
+        String collectionName = assetJSON.getString("collection");
 
-        Token token = foundTokens.get(assetContract.getAddress());
+        Token token = foundTokens.get(contractAddress);
         if (token == null)
         {
             TokenInfo tInfo;
             ContractType type;
             long lastCheckTime = 0;
-            Token checkToken = svs.getToken(networkId, assetContract.getAddress());
+            Token checkToken = svs.getToken(networkId, contractAddress);
             if (checkToken != null && checkToken.getInterfaceSpec() == ContractType.ERC1155)
             {
-                assetList.put(assetContract.getAddress(), checkToken.getTokenAssets());
+                assetList.put(contractAddress, checkToken.getTokenAssets());
                 tInfo = checkToken.tokenInfo;
                 type = checkToken.getInterfaceSpec();
                 lastCheckTime = checkToken.lastTxTime;
             }
             else
             {
-                tInfo = new TokenInfo(assetContract.getAddress(), assetContract.getName(), assetContract.getSymbol(), 0, true, networkId);
+                tInfo = new TokenInfo(contractAddress, collectionName, "", 0, true, networkId);
                 type = ContractType.ERC1155;
             }
 
             token = tf.createToken(tInfo, type, networkName);
             token.setTokenWallet(address);
             token.lastTxTime = lastCheckTime;
-            token.setAssetContract(assetContract);
-            foundTokens.put(assetContract.getAddress(), token);
+            foundTokens.put(contractAddress, token);
         }
         asset.updateAsset(tokenId, assetList.get(token.getAddress()));
         token.addAssetToTokenBalanceAssets(tokenId, asset);
@@ -352,92 +367,37 @@ public class OpenSeaService
                 fetchCollection(token.tokenInfo.chainId, slug));
     }
 
-    public String fetchAssets(long networkId, String address, int offset)
+    public String fetchAssets(long networkId, String address, String pageCursor)
     {
-        String api = "";
-        String ownerOption = "owner";
-
-        //TODO: Put these into a mapping
-        if (networkId == EthereumNetworkBase.MAINNET_ID)
+        String mappingName = API_CHAIN_MAP.get(networkId);
+        if (TextUtils.isEmpty(mappingName))
         {
-            api = C.OPENSEA_ASSETS_API_MAINNET;
-        }
-        else if (networkId == EthereumNetworkBase.GOERLI_ID)
-        {
-            api = C.OPENSEA_ASSETS_API_TESTNET;
-        }
-        else if (networkId == EthereumNetworkBase.POLYGON_ID)
-        {
-            api = C.OPENSEA_ASSETS_API_MATIC;
-            ownerOption = "owner_address";
-        }
-        else if (networkId == EthereumNetworkBase.ARBITRUM_MAIN_ID)
-        {
-            api = C.OPENSEA_ASSETS_API_ARBITRUM;
-            ownerOption = "owner_address";
-        }
-        else if (networkId == EthereumNetworkBase.AVALANCHE_ID)
-        {
-            api = C.OPENSEA_ASSETS_API_AVALANCHE;
-            ownerOption = "owner_address";
-        }
-        else if (networkId == EthereumNetworkBase.KLAYTN_ID)
-        {
-            api = C.OPENSEA_ASSETS_API_KLAYTN;
-            ownerOption = "owner_address";
-        }
-        else if (networkId == EthereumNetworkBase.OPTIMISTIC_MAIN_ID)
-        {
-            api = C.OPENSEA_ASSETS_API_OPTIMISM;
-            ownerOption = "owner_address";
+            return JsonUtils.EMPTY_RESULT;
         }
 
-        if (!TextUtils.isEmpty(api))
-        {
-            Uri.Builder builder = new Uri.Builder();
-            builder.encodedPath(api)
-                .appendQueryParameter(ownerOption, address)
-                .appendQueryParameter("limit", String.valueOf(PAGE_SIZE))
-                .appendQueryParameter("offset", String.valueOf(offset));
+        String api = C.OPENSEA_ASSETS_API_V2.replace("{CHAIN}", mappingName).replace("{ADDRESS}", address);
 
-            return executeRequest(networkId, builder.build().toString());
+        Uri.Builder builder = new Uri.Builder();
+        builder.encodedPath(api)
+                .appendQueryParameter("limit", String.valueOf(PAGE_SIZE));
+
+        if (!TextUtils.isEmpty(pageCursor))
+        {
+            builder.appendQueryParameter("next", pageCursor);
         }
 
-        return JsonUtils.EMPTY_RESULT;
+        return executeRequest(networkId, builder.build().toString());
     }
 
     public String fetchAsset(long networkId, String contractAddress, String tokenId)
     {
-        String api = "";
-        if (networkId == EthereumNetworkBase.MAINNET_ID)
+        String mappingName = API_CHAIN_MAP.get(networkId);
+        if (TextUtils.isEmpty(mappingName))
         {
-            api = C.OPENSEA_SINGLE_ASSET_API_MAINNET + contractAddress + "/" + tokenId;
-        }
-        else if (networkId == EthereumNetworkBase.GOERLI_ID)
-        {
-            api = C.OPENSEA_SINGLE_ASSET_API_TESTNET + contractAddress + "/" + tokenId;
-        }
-        else if (networkId == EthereumNetworkBase.POLYGON_ID)
-        {
-            api = C.OPENSEA_SINGLE_ASSET_API_MATIC + contractAddress + "/" + tokenId;
-        }
-        else if (networkId == EthereumNetworkBase.ARBITRUM_MAIN_ID)
-        {
-            api = C.OPENSEA_SINGLE_ASSET_API_ARBITRUM + contractAddress + "/" + tokenId;
-        }
-        else if (networkId == EthereumNetworkBase.AVALANCHE_ID)
-        {
-            api = C.OPENSEA_SINGLE_ASSET_API_AVALANCHE + contractAddress + "/" + tokenId;
-        }
-        else if (networkId == EthereumNetworkBase.KLAYTN_ID)
-        {
-            api = C.OPENSEA_SINGLE_ASSET_API_KLAYTN + contractAddress + "/" + tokenId;
-        }
-        else if (networkId == EthereumNetworkBase.OPTIMISTIC_MAIN_ID)
-        {
-            api = C.OPENSEA_SINGLE_ASSET_API_OPTIMISM + contractAddress + "/" + tokenId;
+            return JsonUtils.EMPTY_RESULT;
         }
 
+        String api = C.OPENSEA_NFT_API_V2.replace("{CHAIN}", mappingName).replace("{ADDRESS}", contractAddress).replace("{TOKEN_ID}", tokenId);
         return executeRequest(networkId, api);
     }
 

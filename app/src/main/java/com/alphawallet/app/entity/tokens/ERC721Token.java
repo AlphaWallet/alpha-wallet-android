@@ -427,7 +427,7 @@ public class ERC721Token extends Token
             {
                 // find tokenId from index
                 String tokenId = callSmartContractFunction(tokenInfo.chainId, tokenOfOwnerByIndex(BigInteger.valueOf(tokenIndex)), getAddress(), getWallet());
-                if (tokenId == null) continue;
+                if (TextUtils.isEmpty(tokenId)) continue;
                 tokenIdsHeld.add(new BigInteger(tokenId));
             }
         }
@@ -620,7 +620,7 @@ public class ERC721Token extends Token
         for (BigInteger tokenId : eventIds)
         {
             String owner = callSmartContractFunction(tokenInfo.chainId, ownerOf(tokenId), getAddress(), getWallet());
-            if (owner == null || owner.equalsIgnoreCase(getWallet()))
+            if (TextUtils.isEmpty(owner) || owner.equalsIgnoreCase(getWallet()))
             {
                 heldTokens.add(tokenId);
             }
@@ -726,6 +726,22 @@ public class ERC721Token extends Token
         filter.addSingleTopic(null);
         filter.addSingleTopic(null);
         return filter;
+    }
+
+    @Override
+    public String getFirstImageUrl()
+    {
+        if (tokenBalanceAssets != null && !tokenBalanceAssets.isEmpty() && tokenBalanceAssets.values().stream().findFirst().isPresent())
+        {
+            //get first asset
+            NFTAsset firstAsset = tokenBalanceAssets.values().stream().findFirst().get();
+            if (firstAsset.hasImageAsset())
+            {
+                return firstAsset.getThumbnail();
+            }
+        }
+
+        return "";
     }
 
     public String getTransferID(Transaction tx)

@@ -62,7 +62,6 @@ public class InputAmount extends LinearLayout
     private Realm realm;
     private Realm tickerRealm;
     private TokensService tokensService;
-    private AssetDefinitionService assetService;
     private BigInteger gasPriceEstimate = BigInteger.ZERO;
     private BigDecimal exactAmount = BigDecimal.ZERO;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -105,14 +104,13 @@ public class InputAmount extends LinearLayout
      * @param assetDefinitionService
      * @param svs
      */
-    public void setupToken(@NotNull Token token, @Nullable AssetDefinitionService assetDefinitionService,
+    public void setupToken(@NotNull Token token,
                            @NotNull TokensService svs, @NotNull AmountReadyCallback amountCallback)
     {
         this.token = token;
         this.tokensService = svs;
-        this.assetService = assetDefinitionService;
         this.amountReadyCallback = amountCallback;
-        icon.bindData(token, assetService);
+        icon.bindData(token);
         header.getChainName().setChainID(token.tokenInfo.chainId);
         updateAvailableBalance();
 
@@ -315,7 +313,7 @@ public class InputAmount extends LinearLayout
 
     private void showCrypto()
     {
-        icon.bindData(token, assetService);
+        icon.bindData(token);
         symbolText.setText(token.getSymbol());
         availableSymbol.setText(token.getSymbol());
         availableAmount.setText(token.getStringBalanceForUI(5));

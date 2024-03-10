@@ -151,7 +151,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         transaction = new Transaction(tx, token.tokenInfo.chainId, ts.getCurrentAddress());
         transaction.transactionInput = Transaction.decoder.decodeInput(candidateTransaction, token.tokenInfo.chainId, token.getWallet());
 
-        balanceDisplay.setupBalance(token, tokensService, transaction);
+        balanceDisplay.setupBalance(token, transaction);
         networkDisplay.setNetwork(token.tokenInfo.chainId);
 
         gasWidgetInterface = setupGasWidget();

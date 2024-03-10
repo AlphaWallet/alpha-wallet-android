@@ -1083,6 +1083,11 @@ public class Token
         return contractInteract.getScriptFileURI();
     }
 
+    public Single<String> getContractURI()
+    {
+        return contractInteract.getContractURIResult();
+    }
+
     /**
      * Event filters for send and receive of the token, overriden by the token type
      */
@@ -1152,5 +1157,10 @@ public class Token
     public String getAttestationCollectionId(TokenDefinition td)
     {
         return getTSKey();
+    }
+
+    public String getFirstImageUrl()
+    {
+        return "";
     }
 }

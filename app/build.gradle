@@ -31,7 +31,7 @@ detekt {
 }
 
 android_lint_reporter {
-    //lintFilePath = "./build/reports/lint-results-analyticsDebug.xml"
+    lintFilePath = "./build/reports/lint-results-analyticsDebug.xml"
     detektFilePath = "./build/reports/detekt/detekt.xml"
     githubOwner = "AlphaWallet"
     githubRepositoryName = "alpha-wallet-android"
@@ -220,7 +220,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation fileTree(include: ['*.aar'], dir: 'libs')
     //NB: Downgrade jackson due to bug in 2.15 releases that makes it incompatible with Gradle 8
-    //noinspection GradleDependency
+    //noinspection UseTomlInstead,GradleDependency
     implementation platform('com.fasterxml.jackson:jackson-bom:2.13.5') //Don't upgrade from 2.13.5 due to Android API24 compatibility
     implementation 'com.fasterxml.jackson.core:jackson-core'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
@@ -323,7 +323,7 @@ dependencies {
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
-    testImplementation group: 'org.json', name: 'json', version: '20240303'
+    testImplementation group: 'org.json', name: 'json', version: '20220320'
 
     // Component tests: Updating these appears to break the tests.
     testImplementation 'org.robolectric:robolectric:4.8.2'

@@ -26,7 +26,6 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.analytics.QrScanResultType;
 import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.ui.BaseActivity;
-import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.viewmodel.QrScannerViewModel;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
@@ -189,18 +188,8 @@ public class QRScannerActivity extends BaseActivity
 
     private void startWalletConnect(String qrCode)
     {
-        Intent intent;
-        if (WalletConnectHelper.isWalletConnectV1(qrCode))
-        {
-            intent = new Intent(this, WalletConnectActivity.class);
-            intent.putExtra("qrCode", qrCode);
-            intent.putExtra(C.EXTRA_CHAIN_ID, chainIdOverride);
-        }
-        else
-        {
-            intent = new Intent(this, WalletConnectV2Activity.class);
-            intent.putExtra("url", qrCode);
-        }
+        Intent intent = new Intent(this, WalletConnectV2Activity.class);
+        intent.putExtra("url", qrCode);
         startActivity(intent);
         setResult(WALLET_CONNECT);
         finish();
@@ -209,6 +198,7 @@ public class QRScannerActivity extends BaseActivity
     @Override
     public void onBackPressed()
     {
+        super.onBackPressed();
         viewModel.track(Analytics.Action.SCAN_QR_CODE_CANCELLED);
         Intent intent = new Intent();
         setResult(Activity.RESULT_CANCELED, intent);

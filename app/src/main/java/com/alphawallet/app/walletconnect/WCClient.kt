@@ -1,22 +1,37 @@
 package com.alphawallet.app.walletconnect
 
 import com.alphawallet.app.C
-import com.alphawallet.app.walletconnect.entity.*
+import com.alphawallet.app.walletconnect.entity.InvalidJsonRpcParamsException
+import com.alphawallet.app.walletconnect.entity.JsonRpcError
+import com.alphawallet.app.walletconnect.entity.JsonRpcErrorResponse
+import com.alphawallet.app.walletconnect.entity.JsonRpcRequest
+import com.alphawallet.app.walletconnect.entity.MessageType
+import com.alphawallet.app.walletconnect.entity.WCEncryptionPayload
+import com.alphawallet.app.walletconnect.entity.WCEthereumSignMessage
+import com.alphawallet.app.walletconnect.entity.WCEthereumTransaction
+import com.alphawallet.app.walletconnect.entity.WCMethod
+import com.alphawallet.app.walletconnect.entity.WCPeerMeta
+import com.alphawallet.app.walletconnect.entity.WCSessionUpdate
+import com.alphawallet.app.walletconnect.entity.WCSocketMessage
+import com.alphawallet.app.walletconnect.entity.ethTransactionSerializer
 import com.alphawallet.app.walletconnect.util.WCCipher
 import com.alphawallet.app.walletconnect.util.toByteArray
 import com.alphawallet.app.web3.entity.WalletAddEthereumChainObject
-import com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.registerTypeAdapter
 import com.github.salomonbrys.kotson.typeToken
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonSyntaxException
-import okhttp3.*
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
 import okio.ByteString
-import org.web3j.utils.Numeric
 import timber.log.Timber
-import java.util.*
+import java.util.Date
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 open class WCClient : WebSocketListener() {
@@ -52,8 +67,6 @@ open class WCClient : WebSocketListener() {
         else return null
     }
 
-    private var handshakeId: Long = -1
-
     var accounts: List<String>? = null
         private set
 
@@ -66,10 +79,6 @@ open class WCClient : WebSocketListener() {
         .pingInterval(C.PING_INTERVAL, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
         .build();
-
-    fun chainIdVal(): Long {
-        return chainId?.toLong() ?: 0
-    }
 
     var onFailure: (Throwable) -> Unit = { _ -> Unit }
     var onDisconnect: (code: Int, reason: String) -> Unit = { _, _ -> Unit }
@@ -94,9 +103,9 @@ open class WCClient : WebSocketListener() {
         listeners.forEach { it.onOpen(webSocket, response) }
 
         val session =
-            this.session ?: throw IllegalStateException("session can't be null on connection open")
+            this.session!!
         val peerId =
-            this.peerId ?: throw IllegalStateException("peerId can't be null on connection open")
+            this.peerId!!
         // The Session.topic channel is used to listen session request messages only.
         subscribe(session.topic)
         // The peerId channel is used to listen to all messages sent to this httpClient.
@@ -172,39 +181,6 @@ open class WCClient : WebSocketListener() {
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun setupSession(accounts: List<String>, _chainId: Long) {
-        this.chainId = _chainId.toString();
-        this.accounts = accounts;
-    }
-
-    fun approveSession(accounts: List<String>, _chainId: Long): Boolean {
-        if (handshakeId <= 0) {
-            onFailure(Throwable("handshakeId must be greater than 0 on session approve"))
-        }
-        var useChainId: Long = _chainId
-        if (this.chainId?.toIntOrNull() != 1) useChainId = _chainId
-        chainId = useChainId.toString()
-        this.accounts = accounts;
-
-        val result = WCApproveSessionResponse(
-            chainId = useChainId,
-            accounts = accounts,
-            peerId = peerId,
-            peerMeta = peerMeta
-        )
-        val response = JsonRpcResponse(
-            id = handshakeId,
-            result = result
-        )
-
-        return encryptAndSend(gson.toJson(response))
-    }
-
-    fun sendPing(): Boolean {
-        Timber.d("==> ping")
-        return socket?.send("ping") ?: false
-    }
-
     fun updateSession(
         accounts: List<String>? = null,
         chainId: Long? = null,
@@ -224,114 +200,15 @@ open class WCClient : WebSocketListener() {
         return encryptAndSend(gson.toJson(request))
     }
 
-    fun rejectSession(message: String = "Session rejected"): Boolean {
-        check(handshakeId > 0) { "handshakeId must be greater than 0" }
-        val response = JsonRpcErrorResponse(
-            id = handshakeId,
-            error = JsonRpcError.serverError(
-                message = message
-            )
-        )
-        return encryptAndSend(gson.toJson(response))
-    }
-
     fun killSession(): Boolean {
         updateSession(approved = false)
         return disconnect()
     }
 
-    fun <T> approveRequest(id: Long, result: T): Boolean {
-        val response = JsonRpcResponse(
-            id = id,
-            result = result
-        )
-        return encryptAndSend(gson.toJson(response))
-    }
-
-    fun rejectRequest(id: Long, message: String = "Rejected by the user"): Boolean {
-        val response = JsonRpcErrorResponse(
-            id = id,
-            error = JsonRpcError.serverError(
-                message = message
-            )
-        )
-        return encryptAndSend(gson.toJson(response))
-    }
-
-    fun switchChain(
-        requestId: Long,
-        chainId: Long,
-        success: Boolean,
-        chainAvailable: Boolean = true
-    ): Boolean {
-        Timber.tag(TAG).d(
-            "switchChain: id: %s, chainId: %s, success: %s, chainAvailable: %s",
-            requestId,
-            chainId,
-            success,
-            chainAvailable
-        );
-        var response:String;
-        if (!chainAvailable) {
-            val errorResponse = JsonRpcErrorResponse(
-                id = requestId,
-                error = JsonRpcError.unrecognisedChain(
-                    message = "Unrecognized chain ID"
-                )
-            )
-            return encryptAndSend(gson.toJson(errorResponse))
-        }
-        if (success) {
-            this.chainId = chainId.toString();
-            updateSession()     // will use updated chainId
-            response = gson.toJson(JsonRpcResponse<Any>(
-                id = requestId,     // json rpc request id
-                result = null
-            ))
-        } else {
-            response = gson.toJson(JsonRpcErrorResponse(
-                id = requestId,
-                error = JsonRpcError.serverError(
-                    message = "Rejected by user"
-                ))
-            )
-        }
-        return encryptAndSend(response)
-    }
-
-    fun addChain(
-        requestId: Long,
-        chainObj: WalletAddEthereumChainObject,
-        success: Boolean
-    ): Boolean {
-        Timber.tag(TAG).d(
-            "addChain: id: %s, chainId: %s, success: %s",
-            requestId,
-            chainObj.getChainId(),
-            success
-        );
-        return if (success) {
-            this.chainId = chainObj.getChainId().toString()
-            updateSession()  // updated session with new chain Id
-            encryptAndSend(
-                gson.toJson(
-                    JsonRpcResponse<Any>(id = requestId, result = null)
-                )
-            )
-        } else {
-            val errorResponse = JsonRpcErrorResponse(
-                id = requestId,
-                error = JsonRpcError.serverError("Rejected by user")
-            )
-            encryptAndSend(gson.toJson(errorResponse))
-        }
-    }
-
     private fun decryptMessage(text: String): String {
         val message = gson.fromJson<WCSocketMessage>(text)
         val encrypted = gson.fromJson<WCEncryptionPayload>(message.payload)
-        val session = this.session
-            ?: throw IllegalStateException("Session is null")
+        val session = this.session!!
         return String(WCCipher.decrypt(encrypted, session.key.toByteArray()), Charsets.UTF_8)
     }
 
@@ -365,91 +242,6 @@ open class WCClient : WebSocketListener() {
 
     private fun handleRequest(request: JsonRpcRequest<JsonArray>) {
         Timber.tag(TAG).d("handleRequest: %s", request.toString())
-        when (request.method) {
-            WCMethod.SESSION_REQUEST -> {
-                val param = gson.fromJson<List<WCSessionRequest>>(request.params)
-                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                handshakeId = request.id
-                remotePeerId = param.peerId
-                chainId = when (param.chainId.isNullOrEmpty()) {
-                    true -> MAINNET_ID.toString()
-                    false -> param.chainId
-                }
-                onSessionRequest(request.id, param.peerMeta)
-            }
-            WCMethod.SESSION_UPDATE -> {
-                val param = gson.fromJson<List<WCSessionUpdate>>(request.params)
-                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                if (!param.approved) {
-                    killSession()
-                }
-            }
-            WCMethod.ETH_SIGN -> {
-                signRequest(request, WCEthereumSignMessage.WCSignType.MESSAGE)
-            }
-            WCMethod.ETH_PERSONAL_SIGN -> {
-                signRequest(request, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE)
-            }
-            WCMethod.ETH_SIGN_TYPE_DATA,
-            WCMethod.ETH_SIGN_TYPE_DATA_V3,
-            WCMethod.ETH_SIGN_TYPE_DATA_V4 -> {
-                signRequest(request, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE)
-            }
-            WCMethod.ETH_SIGN_TRANSACTION -> {
-                val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
-                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                onEthSignTransaction(request.id, param)
-            }
-            WCMethod.ETH_SEND_TRANSACTION -> {
-                val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
-                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                onEthSendTransaction(request.id, param)
-            }
-            WCMethod.GET_ACCOUNTS -> {
-                onGetAccounts(request.id)
-            }
-            WCMethod.SWITCH_ETHEREUM_CHAIN -> {
-                handleSwitchChain(request)
-            }
-            WCMethod.ADD_ETHEREUM_CHAIN -> {
-                handleAddChain(request)
-            }
-            else -> {}
-        }
-    }
-
-    private fun handleAddChain(request: JsonRpcRequest<JsonArray>)
-    {
-        Timber.d("WCMethod: addEthereumChain")
-        val param: WCAddEthChain = gson.fromJson<List<WCAddEthChain>>(request.params)
-                .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-        Timber.tag(TAG).d("addChainRequest: $param")
-        onAddEthereumChain(request.id, param.toWalletAddEthereumObject())
-    }
-
-    private fun handleSwitchChain(request: JsonRpcRequest<JsonArray>)
-    {
-        Timber.d("WCMethod: switchEthereumChain")
-        val param = gson.fromJson<List<WCSwitchEthChain>>(request.params)
-                .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-        val newChainId: Long = Numeric.toBigInt(param.chainId).toLong();
-        if (newChainId != chainIdVal()) {
-            onSwitchEthereumChain(request.id, newChainId)
-        } else {
-            // auto accept if same chain
-            switchChain(request.id, chainIdVal(), true);
-        }
-    }
-
-    private fun signRequest(request: JsonRpcRequest<JsonArray>, signType: WCEthereumSignMessage.WCSignType)
-    {
-        val params = gson.fromJson<List<String>>(request.params)
-        if (params.size < 2)
-            throw InvalidJsonRpcParamsException(request.id)
-        onEthSign(
-                request.id,
-                WCEthereumSignMessage(params, signType)
-        )
     }
 
     private fun subscribe(topic: String): Boolean {
@@ -466,8 +258,7 @@ open class WCClient : WebSocketListener() {
 
     private fun encryptAndSend(result: String): Boolean {
         Timber.d("==> message $result")
-        val session = this.session
-            ?: throw IllegalStateException("Session is null")
+        val session = this.session!!
         val payload = gson.toJson(
             WCCipher.encrypt(
                 result.toByteArray(Charsets.UTF_8),
@@ -490,22 +281,5 @@ open class WCClient : WebSocketListener() {
 
     fun disconnect(): Boolean {
         return socket?.close(1000, null) ?: false
-    }
-
-    fun addSocketListener(listener: WebSocketListener) {
-        listeners.add(listener)
-    }
-
-    fun removeSocketListener(listener: WebSocketListener) {
-        listeners.remove(listener)
-    }
-
-    fun resetState() {
-        handshakeId = -1
-        isConnected = false
-        session = null
-        peerId = null
-        remotePeerId = null
-        peerMeta = null
     }
 }

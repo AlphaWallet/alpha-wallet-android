@@ -56,17 +56,23 @@ private fun calculateResult(priorityFee: BigInteger, feeHistory: FeeHistory): Si
             baseFee[baseFee.size - 1] = (baseFee[baseFee.size - 1].toBigDecimal() * BigDecimal(9 / 8.0)).toBigInteger()
         }
 
-        ((feeHistory.gasUsedRatio.size - 1) downTo 0).forEach { i ->
+        for (i in (feeHistory.gasUsedRatio.size - 1) downTo 0) {
             if (feeHistory.gasUsedRatio[i] > 0.9) {
                 baseFee[i] = baseFee[i + 1]
             }
         }
 
+        /*((feeHistory.gasUsedRatio.size - 1) downTo 0).forEach { i ->
+            if (feeHistory.gasUsedRatio[i] > 0.9) {
+                baseFee[i] = baseFee[i + 1]
+            }
+        }*/
+
         val order = (0..feeHistory.gasUsedRatio.size).map { it }.sortedBy { baseFee[it] }
 
         var maxBaseFee = ZERO
         val result = mutableMapOf<Int, EIP1559FeeOracleResult>()
-        (maxTimeFactor downTo 0).forEach { timeFactor ->
+        for (timeFactor in maxTimeFactor downTo 0) {
             var bf: BigInteger
             if (timeFactor < 1e-6) {
                 bf = baseFee.last()
@@ -145,8 +151,8 @@ internal fun suggestPriorityFee(firstBlock: Long, feeHistory: FeeHistory, gasSer
                     rewardPercentile.toString()).blockingGet();
 
                 val rewardSize = feeHistoryFetch?.reward?.size ?: 0
-                (0 until rewardSize).forEach {
-                    rewards.add(BigInteger(Numeric.cleanHexPrefix(feeHistoryFetch.reward[it][0].removePrefix("0x")),
+                for (index in 0 until rewardSize) {
+                    rewards.add(BigInteger(Numeric.cleanHexPrefix(feeHistoryFetch.reward[index][0].removePrefix("0x")),
                         16))
                 }
                 if (rewardSize < blockCount) break

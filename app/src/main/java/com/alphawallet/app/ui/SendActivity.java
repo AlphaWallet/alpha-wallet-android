@@ -289,16 +289,6 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         }
     }
 
-    private void startWalletConnect(String qrCode)
-    {
-        Intent intent = new Intent(this, WalletConnectActivity.class);
-        intent.putExtra("qrCode", qrCode);
-        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
-        startActivity(intent);
-        setResult(RESULT_OK);
-        finish();
-    }
-
     private void showCameraDenied()
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();

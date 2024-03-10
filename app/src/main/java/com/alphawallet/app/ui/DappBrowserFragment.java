@@ -83,7 +83,6 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;

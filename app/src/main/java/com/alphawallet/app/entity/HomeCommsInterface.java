@@ -6,5 +6,4 @@ public interface HomeCommsInterface
     void backupSuccess(String keyAddress);
     void resetTokens();
     void resetTransactions();
-    void openWalletConnect(String sessionId);
 }

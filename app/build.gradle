@@ -24,7 +24,7 @@ tasks.withType(Test).configureEach {
 }
 
 detekt {
-    toolVersion = "1.20.0-RC1"
+    toolVersion = "1.23.5"
     buildUponDefaultConfig = true // preconfigure defaults
     allRules = false // activate all available (even unstable) rules.
     baseline = file("$projectDir/check/detekt-baseline.xml")

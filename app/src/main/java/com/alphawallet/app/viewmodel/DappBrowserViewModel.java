@@ -43,7 +43,6 @@ import com.alphawallet.app.ui.ImportTokenActivity;
 import com.alphawallet.app.ui.MyAddressActivity;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.SendActivity;
-import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.util.DappBrowserUtils;
 import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
@@ -366,16 +365,7 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
 
     public void handleWalletConnect(Context context, String url, NetworkInfo activeNetwork)
     {
-        Intent intent;
-        if (WalletConnectHelper.isWalletConnectV1(url))
-        {
-            intent = getIntentOfWalletConnectV1(context, url, activeNetwork);
-        }
-        else
-        {
-            intent = getIntentOfWalletConnectV2(context, url);
-        }
-
+        Intent intent = getIntentOfWalletConnectV2(context, url);
         context.startActivity(intent);
     }
 
@@ -384,17 +374,6 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
     {
         Intent intent = new Intent(context, WalletConnectV2Activity.class);
         intent.putExtra("url", url);
-        return intent;
-    }
-
-    @NonNull
-    private Intent getIntentOfWalletConnectV1(Context context, String url, NetworkInfo activeNetwork)
-    {
-        String importPassData = WalletConnectActivity.WC_LOCAL_PREFIX + url;
-        Intent intent = new Intent(context, WalletConnectActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.putExtra(C.EXTRA_CHAIN_ID, activeNetwork.chainId);
-        intent.putExtra("qrCode", importPassData);
         return intent;
     }
 

@@ -570,7 +570,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     {
         super.onResume();
         setWCConnect();
-        viewModel.prepare(this);
+        viewModel.prepare();
         viewModel.getWalletName(this);
         viewModel.setErrorCallback(this);
         if (homeReceiver == null)
@@ -911,15 +911,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
     public void resetTransactions()
     {
         getFragment(ACTIVITY).resetTransactions();
-    }
-
-    @Override
-    public void openWalletConnect(String sessionId)
-    {
-        Intent intent = new Intent(getApplication(), WalletConnectActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        intent.putExtra("session", sessionId);
-        startActivity(intent);
     }
 
     private void hideDialog()

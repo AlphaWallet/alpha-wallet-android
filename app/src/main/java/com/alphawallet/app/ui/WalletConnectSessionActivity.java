@@ -352,17 +352,9 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     public static Intent newIntent(Context context, WalletConnectSessionItem session)
     {
-        Intent intent;
-        if (session instanceof WalletConnectV2SessionItem)
-        {
-            intent = new Intent(context, WalletConnectV2Activity.class);
-            intent.putExtra("session", (WalletConnectV2SessionItem) session);
-        }
-        else
-        {
-            intent = new Intent(context, WalletConnectActivity.class);
-            intent.putExtra("session", session.sessionId);
-        }
+        Intent intent = new Intent(context, WalletConnectV2Activity.class);
+        intent.putExtra("session", (WalletConnectV2SessionItem) session);
+
         intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
         return intent;
     }

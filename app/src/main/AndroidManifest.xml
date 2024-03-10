@@ -124,10 +124,6 @@
                 android:theme="@style/AppTheme.NoActionBar.Splash" />
 
         <service
-                android:name=".service.WalletConnectService"
-                android:enabled="true" />
-
-        <service
                 android:name=".service.WalletConnectV2Service"
                 android:enabled="true"
                 android:exported="false"

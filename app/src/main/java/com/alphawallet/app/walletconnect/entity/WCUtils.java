@@ -10,8 +10,6 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletConnectActions;
-import com.alphawallet.app.repository.entity.RealmWCSession;
-import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.walletconnect.WCClient;
 import com.alphawallet.app.walletconnect.WCSession;
 

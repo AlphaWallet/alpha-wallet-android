@@ -160,9 +160,6 @@ android {
         targetCompatibility JavaVersion.VERSION_17
         sourceCompatibility JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = '17'
-    }
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
@@ -212,7 +209,7 @@ tasks.register("jacocoAndroidUnitTestReport") {
     def fileFilter = ['**/R.class', '**/R$*.class', '**/*$ViewInjector*.*', '**/BuildConfig.*', '**/Manifest*.*', '**/*Realm*.*', '**/Generated*.*', '**/*_*.*']
     def debugTree = fileTree(dir: "**/", excludes: fileFilter)
     def mainSrc = "${project.projectDir}/src/main/java"
-
+    
     sourceDirectories.setFrom(files([mainSrc]))
     classDirectories.setFrom(files([debugTree]))
 }
@@ -326,7 +323,7 @@ dependencies {
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule-agent', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
-    testImplementation group: 'org.json', name: 'json', version: '20220320'
+    testImplementation group: 'org.json', name: 'json', version: '20240303'
 
     // Component tests: Updating these appears to break the tests.
     testImplementation 'org.robolectric:robolectric:4.8.2'

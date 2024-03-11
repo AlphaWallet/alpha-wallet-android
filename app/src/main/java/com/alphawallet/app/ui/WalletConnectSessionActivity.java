@@ -269,7 +269,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             View itemView = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_wc_session, parent, false);
 
-            return new CustomAdapter.CustomViewHolder(itemView);
+            return new CustomViewHolder(itemView);
         }
 
         @Override
@@ -317,7 +317,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             notifyDataSetChanged();
         }
 
-        class CustomViewHolder extends RecyclerView.ViewHolder
+        static class CustomViewHolder extends RecyclerView.ViewHolder
         {
             final ImageView icon;
             final ImageView statusIcon;

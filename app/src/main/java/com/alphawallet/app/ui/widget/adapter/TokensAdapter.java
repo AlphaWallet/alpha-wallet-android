@@ -13,11 +13,9 @@ import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.CustomViewSettings;
 import com.alphawallet.app.entity.TokenFilter;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
-import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
-import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
@@ -169,7 +167,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
                 break;
 
             case SearchTokensHolder.VIEW_TYPE:
-                holder = new SearchTokensHolder(R.layout.layout_manage_token_search, parent, tokensAdapterCallback::onSearchClicked);
+                holder = new SearchTokensHolder(R.layout.layout_manage_token_search, parent, tokensAdapterCallback);
                 break;
 
             case WarningHolder.VIEW_TYPE:
@@ -301,11 +299,11 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
             }
             else
             {
-                SortedItem headerItem = new HeaderItem(token.group);
+                SortedItem<?> headerItem = new HeaderItem(token.group);
                 items.add(tsi);
                 items.add(headerItem);
 
-                SortedItem chainItem = new ChainItem(token.getChain(), token.group);
+                SortedItem<?> chainItem = new ChainItem(token.getChain(), token.group);
                 if (doesNotExist(chainItem))
                 {
                     items.add(chainItem);
@@ -318,12 +316,12 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         }
     }
 
-    private boolean doesNotExist(SortedItem token)
+    private boolean doesNotExist(SortedItem<?> token)
     {
         return findItem(token) == -1;
     }
 
-    private int findItem(SortedItem tsi)
+    private int findItem(SortedItem<?> tsi)
     {
         for (int i = 0; i < items.size(); i++)
         {
@@ -339,9 +337,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     {
         for (int i = 0; i < items.size(); i++)
         {
-            if (items.get(i) instanceof TokenSortedItem)
+            if (items.get(i) instanceof TokenSortedItem tsi)
             {
-                TokenSortedItem tsi = (TokenSortedItem) items.get(i);
                 if (tsi.value.equals(token))
                 {
                     if (tsi.value.getNameWeight() != token.getNameWeight())
@@ -523,9 +520,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
-            if (si instanceof TokenSortedItem)
+            if (si instanceof TokenSortedItem tsi)
             {
-                TokenSortedItem tsi = (TokenSortedItem) si;
                 if (canDisplayToken(tsi.value))
                 {
                     filterTokens.add(tsi.value);
@@ -567,9 +563,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
             for (int i = 0; i < items.size(); i++)
             {
                 Object si = items.get(i);
-                if (si instanceof TokenSortedItem)
+                if (si instanceof TokenSortedItem tsi)
                 {
-                    TokenSortedItem tsi = (TokenSortedItem) si;
                     TokenCardMeta token = tsi.value;
                     if (scrollToken.equals(token))
                     {
@@ -653,5 +648,27 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     public void addToken(SortedItem<TokenCardMeta> token)
     {
         items.add(token);
+    }
+
+    public void checkWalletConnect()
+    {
+        //activate WC logo in search bar if we have active WC sessions
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof ManageTokensSearchItem manageTokensSearchItem && manageTokensSearchItem.view instanceof SearchTokensHolder sth)
+            {
+                if (tokensAdapterCallback.hasWCSession())
+                {
+                    sth.enableWalletConnect();
+                }
+                else
+                {
+                    sth.hideWalletConnect();
+                }
+
+                break;
+            }
+        }
     }
 }

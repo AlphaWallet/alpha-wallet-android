@@ -1,52 +1,69 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <ImageView
+            android:id="@+id/icon_wc_active"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginEnd="@dimen/tiny_8"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:src="@drawable/ic_wallet_connect"
+            android:contentDescription="@string/title_wallet_connect"
+            android:visibility="gone"/>
 
     <LinearLayout
-        android:id="@+id/layout_search_tokens"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/massive_44"
-        android:layout_marginStart="@dimen/tiny_8"
-        android:layout_marginTop="@dimen/tiny_8"
-        android:layout_marginEnd="@dimen/tiny_8"
-        android:layout_marginBottom="@dimen/tiny_8"
-        android:background="@drawable/background_round_search"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+            android:id="@+id/layout_search_tokens"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/massive_44"
+            android:layout_marginStart="@dimen/tiny_8"
+            android:layout_marginTop="@dimen/tiny_8"
+            android:layout_marginEnd="@dimen/tiny_8"
+            android:layout_marginBottom="@dimen/tiny_8"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/icon_wc_active"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="@drawable/background_round_search"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="@dimen/base_24"
-            android:layout_height="@dimen/base_24"
-            android:layout_marginStart="@dimen/small_12"
-            android:src="@drawable/ic_search_small"
-            app:tint="?android:textColorSecondary" />
+                android:layout_width="@dimen/base_24"
+                android:layout_height="@dimen/base_24"
+                android:layout_marginStart="@dimen/small_12"
+                android:src="@drawable/ic_search_small"
+                app:tint="?android:textColorSecondary" />
 
         <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/edit_search"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/tiny_8"
-            android:layout_marginEnd="@dimen/standard_16"
-            android:background="@null"
-            android:clickable="false"
-            android:focusable="false"
-            android:fontFamily="@font/font_regular"
-            android:hint="@string/search_for_tokens"
-            android:imeOptions="actionSearch"
-            android:maxLength="20"
-            android:maxLines="1" />
+                android:id="@+id/edit_search"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/tiny_8"
+                android:layout_marginEnd="@dimen/standard_16"
+                android:background="@null"
+                android:clickable="false"
+                android:focusable="false"
+                android:fontFamily="@font/font_regular"
+                android:hint="@string/search_for_tokens"
+                android:imeOptions="actionSearch"
+                android:maxLength="20"
+                android:maxLines="1" />
 
     </LinearLayout>
 
     <View
-        android:id="@+id/click_layer"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/optimal_30"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="@dimen/tiny_8"
-        android:layout_marginEnd="@dimen/tiny_8"
-        android:background="@color/transparent" />
+            android:id="@+id/click_layer"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/optimal_30"
+            app:layout_constraintStart_toStartOf="@+id/layout_search_tokens"
+            app:layout_constraintEnd_toEndOf="@+id/layout_search_tokens"
+            app:layout_constraintTop_toTopOf="@+id/layout_search_tokens"
+            app:layout_constraintBottom_toBottomOf="@+id/layout_search_tokens"
+            android:background="@color/transparent" />
 
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

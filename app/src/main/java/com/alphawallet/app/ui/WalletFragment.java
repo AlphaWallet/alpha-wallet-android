@@ -386,7 +386,6 @@ public class WalletFragment extends BaseFragment implements
             adapter.clear();
             viewModel.prepare();
             viewModel.notifyRefresh();
-            //awWalletConnectClient.updateNotification();
         });
     }
 
@@ -407,6 +406,7 @@ public class WalletFragment extends BaseFragment implements
             viewModel.startUpdateListener();
             viewModel.getTokensService().startUpdateCycleIfRequired();
         }
+        checkWalletConnect();
     }
 
     @Override
@@ -566,6 +566,7 @@ public class WalletFragment extends BaseFragment implements
         if (viewModel == null)
         {
             requireActivity().recreate();
+            return;
         }
         else
         {
@@ -581,6 +582,16 @@ public class WalletFragment extends BaseFragment implements
             viewModel.startUpdateListener();
             viewModel.getTokensService().startUpdateCycleIfRequired();
         }
+
+        checkWalletConnect();
+    }
+
+    private void checkWalletConnect()
+    {
+        if (adapter != null)
+        {
+            adapter.checkWalletConnect();
+        }
     }
 
     private void onTokens(TokenCardMeta[] tokens)
@@ -595,7 +606,7 @@ public class WalletFragment extends BaseFragment implements
 
         if (currentTabPos.equals(TokenFilter.ALL))
         {
-            //awWalletConnectClient.updateNotification();
+            checkWalletConnect();
         }
         else
         {
@@ -805,6 +816,19 @@ public class WalletFragment extends BaseFragment implements
         Intent intent = new Intent(getActivity(), SearchActivity.class);
         networkSettingsHandler.launch(intent);
         //startActivity(intent);
+    }
+
+    @Override
+    public void onWCClicked()
+    {
+        Intent intent = awWalletConnectClient.getSessionIntent(getContext());
+        startActivity(intent);
+    }
+
+    @Override
+    public boolean hasWCSession()
+    {
+        return awWalletConnectClient != null && awWalletConnectClient.hasWalletConnectSessions();
     }
 
     @Override

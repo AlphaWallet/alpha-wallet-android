@@ -29,7 +29,7 @@ private const val extraPriorityFeeRatio = 0.25      // extra priority fee offere
 private const val fallbackPriorityFee = 2000000000L // priority fee offered when there are no recent transactions
 private const val MIN_PRIORITY_FEE = 100000000L       // Minimum priority fee in Wei, 0.1 Gwei
 
-fun SuggestEIP1559(gasService: GasService, feeHistory: FeeHistory): Single<MutableMap<Int, EIP1559FeeOracleResult>> {
+fun suggestEIP1559(gasService: GasService, feeHistory: FeeHistory): Single<MutableMap<Int, EIP1559FeeOracleResult>> {
     return suggestPriorityFee(parseLong(feeHistory.oldestBlock.removePrefix("0x"), 16), feeHistory, gasService)
             .flatMap { priorityFee -> calculateResult(priorityFee, feeHistory) }
 }
@@ -74,10 +74,10 @@ private fun calculateResult(priorityFee: BigInteger, feeHistory: FeeHistory): Si
         val result = mutableMapOf<Int, EIP1559FeeOracleResult>()
         for (timeFactor in maxTimeFactor downTo 0) {
             var bf: BigInteger
-            if (timeFactor < 1e-6) {
-                bf = baseFee.last()
+            bf = if (timeFactor < 1e-6) {
+                baseFee.last()
             } else {
-                bf = predictMinBaseFee(baseFee, order, timeFactor.toDouble(), consistentBaseFee)
+                predictMinBaseFee(baseFee, order, timeFactor.toDouble(), consistentBaseFee)
             }
             var t = BigDecimal(usePriorityFee)
             if (bf > maxBaseFee) {

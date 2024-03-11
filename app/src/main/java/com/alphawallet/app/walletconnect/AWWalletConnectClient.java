@@ -33,6 +33,7 @@ import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.GasService;
 import com.alphawallet.app.service.WalletConnectV2Service;
+import com.alphawallet.app.ui.WalletConnectSessionActivity;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.walletconnect.util.WCMethodChecker;
@@ -43,7 +44,6 @@ import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
-import org.web3j.utils.Numeric;
 import com.walletconnect.android.Core;
 import com.walletconnect.android.CoreClient;
 import com.walletconnect.android.cacao.signature.SignatureType;
@@ -52,6 +52,8 @@ import com.walletconnect.android.relay.NetworkClientTimeout;
 import com.walletconnect.web3.wallet.client.Wallet;
 import com.walletconnect.web3.wallet.client.Wallet.Model.Session;
 import com.walletconnect.web3.wallet.client.Web3Wallet;
+
+import org.web3j.utils.Numeric;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,6 +111,11 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         intent.putExtra("session", sessionItem);
         intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+    }
+
+    public boolean hasWalletConnectSessions()
+    {
+        return !walletConnectInteract.getSessions().isEmpty();
     }
 
     private boolean validChainId(List<String> chains)
@@ -661,6 +668,22 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     public void onSessionDelete(@NonNull Model.SessionDelete sessionDelete)
     {
 
+    }
+
+    public Intent getSessionIntent(Context appContext)
+    {
+        Intent intent;
+        List<WalletConnectSessionItem> sessions = walletConnectInteract.getSessions();
+        if (sessions.size() == 1)
+        {
+            intent = WalletConnectSessionActivity.newIntent(appContext, sessions.get(0));
+        }
+        else
+        {
+            intent = new Intent(appContext, WalletConnectSessionActivity.class);
+        }
+
+        return intent;
     }
 
     public interface WalletConnectV2Callback

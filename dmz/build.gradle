@@ -1,10 +1,7 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.2.RELEASE")
-    }
+// TODO: DMZ not buildable until Gradle v8 is ready. Use previous snapshot for DMZ until fixed
+
+plugins {
+    id 'org.springframework.boot' version '2.2.2.RELEASE'
 }
 
 apply plugin: 'java'
@@ -17,9 +14,11 @@ bootJar {
     launchScript()
 }
 
-repositories {
-    mavenCentral()
-}
+/*
+dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.2.RELEASE")
+    }
+ */
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8

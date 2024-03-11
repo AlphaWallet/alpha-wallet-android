@@ -1,3 +1,6 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+
 buildscript {
     repositories {
         // don't add anything here until you read to the bottom of this bracket
@@ -9,72 +12,24 @@ buildscript {
         // don't do that. add that repository to app/build.gradle
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
-        //NB - there is an issue with newer versions of gradle. The APK balloons out, so far haven't diagnosed why.
-        //If you want to try upgrading gradle plugin past 3.5.4 you will need to also diagnose the APK ballooning issue.
-        classpath "io.realm:realm-gradle-plugin:10.18.0"
+        classpath libs.gradle
+        classpath libs.realm.gradle.plugin
         // WARNING WARNING WARNING
         // you are about to add here a dependency to be used in the Android app
         // don't do that. add that dependency to app/build.gradle
-        classpath 'com.google.gms:google-services:4.4.0'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
-        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.48'
+        classpath libs.google.services
+        classpath libs.kotlin.gradle.plugin
+        classpath libs.firebase.crashlytics.gradle
+        classpath libs.hilt.android.gradle.plugin
     }
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url = uri("https://jitpack.io") }
-        maven { url = uri("https://maven.pkg.github.com/trustwallet/wallet-core")
-                credentials {
-                    username = getGitHubUsername() as String?: System.getenv("GITHUB_USER")
-                    password = getPAT() as String?: System.getenv("GITHUB_TOKEN")
-                }
-        }
-        // WARNING WARNING WARNING
-        // you are about to add here a repository which provides some library for the Android app
-        // don't do that. add that repository to app/build.gradle
-    }
-
-    configurations.configureEach {
-        resolutionStrategy {
-            force 'com.google.firebase:firebase-analytics:16.5.0'
-        }
-    }
-
-    tasks.withType(Test).configureEach {
-        maxParallelForks = 2
-        forkEvery = 80
-        maxHeapSize = "2048m"
-        minHeapSize = "1024m"
-    }
+plugins {
+    alias(libs.plugins.androidApplication) apply false
 }
 
-tasks.register("clean") {
-    delete rootProject.buildDir
-}
-
-gradle.projectsEvaluated({
-    def username = getGitHubUsername()
-    def password = getPAT()
-    if (!username || !password) {
-        throw new GradleException('Please provide GitHub username and Personal Access Token. Find more here https://github.com/alphaWallet/alpha-wallet-android#getting-started')
+configurations.configureEach {
+    resolutionStrategy {
+        force 'com.google.firebase:firebase-analytics:16.5.0'
     }
-})
-
-private String getGitHubUsername() {
-    project.findProperty("gpr.user")
 }
-
-private String getPAT() {
-    def encodedToken = project.findProperty("gpr.key")
-    def firstEncode = new String(encodedToken.decodeBase64())
-    new String(firstEncode.decodeBase64())
-}
-
-//task clean(type: Delete) {
-//    delete rootProject.buildDir
-//}

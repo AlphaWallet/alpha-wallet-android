@@ -39,56 +39,40 @@ public class AddWalletView extends FrameLayout implements View.OnClickListener {
     @Override
     public void onClick(View view)
     {
-
-        final int close_action = R.id.close_action;
-        final int new_account_action = R.id.new_account_action;
-        final int import_account_action = R.id.import_account_action;
-        final int watch_account_action = R.id.watch_account_action;
-        final int hardware_card = R.id.hardware_card;
-
-        switch (view.getId())
+        if (view.getId() == R.id.close_action)
         {
-            case close_action:
+            if (onCloseActionListener != null)
             {
-                if (onCloseActionListener != null)
-                {
-                    onCloseActionListener.onClose(view);
-                }
-                break;
+                onCloseActionListener.onClose(view);
             }
-            case new_account_action:
+        }
+        else if (view.getId() == R.id.new_account_action)
+        {
+            if (onNewWalletClickListener != null)
             {
-                if (onNewWalletClickListener != null)
-                {
-                    onNewWalletClickListener.onNewWallet(view);
-                }
-                break;
+                onNewWalletClickListener.onNewWallet(view);
             }
-            case import_account_action:
+        }
+        else if (view.getId() == R.id.import_account_action)
+        {
+            if (onImportWalletClickListener != null)
             {
-                if (onImportWalletClickListener != null)
-                {
-                    onImportWalletClickListener.onImportWallet(view);
-                }
-                break;
+                onImportWalletClickListener.onImportWallet(view);
             }
-            case watch_account_action:
+        }
+        else if (view.getId() == R.id.watch_account_action)
+        {
+            if (onWatchWalletClickListener != null)
             {
-                if (onWatchWalletClickListener != null)
-                {
-                    onWatchWalletClickListener.onWatchWallet(view);
-                }
-                break;
+                onWatchWalletClickListener.onWatchWallet(view);
             }
-            case hardware_card:
+        }
+        else if (view.getId() == R.id.hardware_card)
+        {
+            if (onHardwareCardClickListener != null)
             {
-                if (onHardwareCardClickListener != null)
-                {
-                    onHardwareCardClickListener.detectCard(view);
-                }
+                onHardwareCardClickListener.detectCard(view);
             }
-            default:
-                break;
         }
     }
 

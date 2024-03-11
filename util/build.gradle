@@ -24,7 +24,7 @@ dependencies {
     implementation files('../app/libs/crypto-4.9.8.jar')
     implementation files('../app/libs/utils-4.9.8.jar')
 
-    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
     testImplementation 'junit:junit:4.12'
     implementation project(path: ':lib')

@@ -70,7 +70,14 @@ public class TraitsAdapter extends RecyclerView.Adapter<TraitsAdapter.ViewHolder
     @Override
     public int getItemCount()
     {
-        return traitList.size();
+        if (traitList != null)
+        {
+            return traitList.size();
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

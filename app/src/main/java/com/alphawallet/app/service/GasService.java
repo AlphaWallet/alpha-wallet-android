@@ -480,7 +480,7 @@ public class GasService implements ContractGasProvider
     private Single<Map<Integer, EIP1559FeeOracleResult>> getEIP1559FeeStructureCalculation()
     {
         return getChainFeeHistory(100, "latest", "")
-                .flatMap(feeHistory -> SuggestEIP1559Kt.SuggestEIP1559(this, feeHistory));
+                .flatMap(feeHistory -> SuggestEIP1559Kt.suggestEIP1559(this, feeHistory));
     }
 
     private void handleError(Throwable err)

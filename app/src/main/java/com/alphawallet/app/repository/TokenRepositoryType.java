@@ -4,6 +4,7 @@ import android.util.Pair;
 
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.ImageEntry;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -66,7 +67,7 @@ public interface TokenRepositoryType
 
     Single<Boolean> fetchIsRedeemed(Token token, BigInteger tokenId);
 
-    void addImageUrl(long chainId, String address, String imageUrl);
+    void addImageUrl(List<ImageEntry> entries);
 
     void updateLocalAddress(String walletAddress);
 

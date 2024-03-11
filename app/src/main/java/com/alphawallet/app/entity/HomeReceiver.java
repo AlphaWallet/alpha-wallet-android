@@ -36,9 +36,6 @@ public class HomeReceiver extends BroadcastReceiver
                     String keyAddress = bundle != null ? bundle.getString("Key", "") : "";
                     homeCommsInterface.backupSuccess(keyAddress);
                     break;
-                case C.WALLET_CONNECT_REQUEST:
-                    String sessionId = bundle != null ? bundle.getString("sessionid", "") : "";
-                    homeCommsInterface.openWalletConnect(sessionId);
                 default:
                     break;
             }

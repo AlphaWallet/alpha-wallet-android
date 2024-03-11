@@ -83,7 +83,6 @@ import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.entity.RealmToken;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.OnDappHomeNavClickListener;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -791,11 +790,11 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private void launchWalletConnectSessionCancel()
     {
-        String sessionId = walletConnectSession != null ? viewModel.getSessionId(walletConnectSession) : "";
+        /*String sessionId = walletConnectSession != null ? viewModel.getSessionId(walletConnectSession) : "";
         Intent bIntent = new Intent(getContext(), WalletConnectService.class);
         bIntent.setAction(String.valueOf(WalletConnectActions.CLOSE.ordinal()));
         bIntent.putExtra("session", sessionId);
-        requireActivity().startService(bIntent);
+        requireActivity().startService(bIntent);*/
         reloadPage();
     }
 

@@ -27,5 +27,5 @@ jobs:
           PR_NUMBER: ${{ github.event.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./gradlew report -PgithubPullRequestId=$PR_NUMBER -PgithubToken=$GITHUB_TOKEN
+          ./gradlew report --no-configuration-cache -PgithubPullRequestId=$PR_NUMBER -PgithubToken=$GITHUB_TOKEN
 

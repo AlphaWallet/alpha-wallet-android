@@ -35,7 +35,6 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.KeyService;
-import com.alphawallet.app.service.WalletConnectService;
 import com.alphawallet.app.ui.widget.adapter.WalletsSummaryAdapter;
 import com.alphawallet.app.viewmodel.WalletsViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
@@ -431,10 +430,10 @@ public class WalletsActivity extends BaseActivity implements
 
         viewModel.stopUpdates();
 
-        Intent bIntent = new Intent(this, WalletConnectService.class);
+        /*Intent bIntent = new Intent(this, WalletConnectService.class);
         bIntent.setAction(String.valueOf(WalletConnectActions.DISCONNECT.ordinal()));
         bIntent.putExtra("wallet", selectedWallet);
-        startService(bIntent);
+        startService(bIntent);*/
 
         selectedWallet = wallet;
     }

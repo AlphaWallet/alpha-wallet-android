@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.ImageEntry;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.TransferFromEventResponse;
 import com.alphawallet.app.entity.Wallet;
@@ -1295,9 +1296,9 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
-    public void addImageUrl(long networkId, String address, String imageUrl)
+    public void addImageUrl(List<ImageEntry> entries)
     {
-        localSource.storeTokenUrl(networkId, address, imageUrl);
+        localSource.storeTokenUrl(entries);
     }
 
     public static Web3j getWeb3jServiceForEvents(long chainId)
@@ -1358,7 +1359,7 @@ public class TokenRepository implements TokenRepositoryType {
             //
         }
 
-        return null;
+        return "";
     }
 
     public static List<String> callSmartContractFuncAdaptiveArray(long chainId,

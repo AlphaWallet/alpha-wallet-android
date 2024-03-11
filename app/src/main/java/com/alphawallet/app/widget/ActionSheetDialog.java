@@ -37,7 +37,6 @@ import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.HomeActivity;
 import com.alphawallet.app.ui.TransactionSuccessActivity;
-import com.alphawallet.app.ui.WalletConnectActivity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
 import com.alphawallet.app.ui.widget.entity.GasWidgetInterface;
 import com.alphawallet.app.util.Utils;
@@ -128,10 +127,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         {
             mode = ActionSheetMode.SEND_TRANSACTION_DAPP;
         }
-        else if (activity instanceof WalletConnectActivity)
-        {
-            mode = ActionSheetMode.SEND_TRANSACTION_WC;
-        }
         else
         {
             mode = ActionSheetMode.SEND_TRANSACTION;
@@ -151,7 +146,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         transaction = new Transaction(tx, token.tokenInfo.chainId, ts.getCurrentAddress());
         transaction.transactionInput = Transaction.decoder.decodeInput(candidateTransaction, token.tokenInfo.chainId, token.getWallet());
 
-        balanceDisplay.setupBalance(token, tokensService, transaction);
+        balanceDisplay.setupBalance(token, transaction);
         networkDisplay.setNetwork(token.tokenInfo.chainId);
 
         gasWidgetInterface = setupGasWidget();
@@ -844,13 +839,6 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
         actionSheetCallback.getAuthorisation(signCallback);
     }
-
-    //Takes gas estimate from calling activity (eg WalletConnectActivity) and updates dialog
-//    public void setGasEstimate(BigInteger estimate)
-//    {
-//        gasWidgetInterface.setGasEstimate(estimate);
-//        functionBar.setPrimaryButtonEnabled(true);
-//    }
 
     @Override
     public void setGasEstimate(GasEstimate estimate)

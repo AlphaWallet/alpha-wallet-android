@@ -9,6 +9,7 @@ import android.util.Pair;
 
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.ImageEntry;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
@@ -717,31 +718,29 @@ public class TokensRealmSource implements TokenLocalSource
     }
 
     @Override
-    public void storeTokenUrl(long networkId, String address, String imageUrl)
+    public void storeTokenUrl(List<ImageEntry> entries)
     {
         try (Realm realm = realmManager.getRealmInstance(IMAGES_DB))
         {
-            final String instanceKey = address.toLowerCase() + "-" + networkId;
-            final RealmAuxData instance = realm.where(RealmAuxData.class).equalTo("instanceKey", instanceKey).findFirst();
+            realm.executeTransaction(r -> {
+                for (ImageEntry thisEntry : entries)
+                {
+                    final String instanceKey = thisEntry.address.toLowerCase() + "-" + thisEntry.chainId;
+                    RealmAuxData instance = r.where(RealmAuxData.class).equalTo("instanceKey", instanceKey).findFirst();
 
-            if (instance == null || !instance.getResult().equals(imageUrl))
-            {
-                realm.executeTransactionAsync(r -> {
-                    RealmAuxData aux;
-                    if (instance == null)
+                    if (instance == null || !instance.getResult().equals(thisEntry.imageUrl))
                     {
-                        aux = r.createObject(RealmAuxData.class, instanceKey);
-                    }
-                    else
-                    {
-                        aux = instance;
-                    }
+                        if (instance == null)
+                        {
+                            instance = r.createObject(RealmAuxData.class, instanceKey);
+                        }
 
-                    aux.setResult(imageUrl);
-                    aux.setResultTime(System.currentTimeMillis());
-                    r.insertOrUpdate(aux);
-                });
-            }
+                        instance.setResult(thisEntry.imageUrl);
+                        instance.setResultTime(System.currentTimeMillis());
+                        r.insertOrUpdate(instance);
+                    }
+                }
+            });
         }
     }
 

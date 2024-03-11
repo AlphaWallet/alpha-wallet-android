@@ -37,12 +37,12 @@ public class BalanceDisplayWidget extends LinearLayout
         tokenIcon = findViewById(R.id.token_icon);
     }
 
-    public void setupBalance(Token token, TokensService tokenService, Transaction tx)
+    public void setupBalance(Token token, Transaction tx)
     {
         if (token.isNonFungible())
         {
             tokenIcon.setVisibility(View.VISIBLE);
-            tokenIcon.bindData(token, tokenService);
+            tokenIcon.bindData(token);
         }
         else
         {

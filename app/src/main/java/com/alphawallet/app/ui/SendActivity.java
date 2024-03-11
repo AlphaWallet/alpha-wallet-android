@@ -194,12 +194,6 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     }
 
     @Override
-    public void onBackPressed()
-    {
-        onBack();
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         {
@@ -295,16 +289,6 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         }
     }
 
-    private void startWalletConnect(String qrCode)
-    {
-        Intent intent = new Intent(this, WalletConnectActivity.class);
-        intent.putExtra("qrCode", qrCode);
-        intent.putExtra(C.EXTRA_CHAIN_ID, token.tokenInfo.chainId);
-        startActivity(intent);
-        setResult(RESULT_OK);
-        finish();
-    }
-
     private void showCameraDenied()
     {
         if (dialog != null && dialog.isShowing()) dialog.dismiss();
@@ -380,7 +364,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                 sendText.setText(R.string.transfer_request);
                 token = viewModel.getToken(result.chainId, wallet.address);
                 addressInput.setAddress(result.getAddress());
-                amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+                amountInput.setupToken(token, viewModel.getTokenService(), this);
                 amountInput.setAmount(ethAmount);
                 setupTokenContent();
                 break;
@@ -398,7 +382,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
                     //ERC20 send request
                     token = resultToken;
                     setupTokenContent();
-                    amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+                    amountInput.setupToken(token, viewModel.getTokenService(), this);
                     //convert token amount into scaled value
                     String convertedAmount = Convert.getConvertedValue(result.tokenAmount, token.tokenInfo.decimals);
                     amountInput.setAmount(convertedAmount);
@@ -432,7 +416,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
         dialog.setButtonListener(v -> {
             //we should change the chain.
             token = viewModel.getToken(chainId, token.getAddress());
-            amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+            amountInput.setupToken(token, viewModel.getTokenService(), this);
             dialog.dismiss();
             validateEIP681Request(currentResult, false);
         });
@@ -488,7 +472,7 @@ public class SendActivity extends BaseActivity implements AmountReadyCallback, S
     private void setupTokenContent()
     {
         amountInput = findViewById(R.id.input_amount);
-        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+        amountInput.setupToken(token, viewModel.getTokenService(), this);
         addressInput = findViewById(R.id.input_address);
         addressInput.setAddressCallback(this);
         addressInput.setChainOverrideForWalletConnect(token.tokenInfo.chainId);

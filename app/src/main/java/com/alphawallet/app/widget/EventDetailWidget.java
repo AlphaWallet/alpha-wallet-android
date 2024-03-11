@@ -47,7 +47,7 @@ public class EventDetailWidget extends LinearLayout
     public void setupView(RealmAuxData data, Token token, AssetDefinitionService svs, String eventAmount)
     {
         holdingView.setVisibility(View.VISIBLE);
-        icon.bindData(token, svs);
+        icon.bindData(token);
         title.setText(data.getTitle(getContext()));
         symbol.setText(token.getSymbol());
         int resourceId;
@@ -76,7 +76,7 @@ public class EventDetailWidget extends LinearLayout
     public void setupTransactionView(Transaction tx, Token token, AssetDefinitionService svs, String supplimentalInfo)
     {
         holdingView.setVisibility(View.VISIBLE);
-        icon.bindData(token, svs);
+        icon.bindData(token);
         symbol.setText(token.getSymbol());
         title.setVisibility(View.GONE);
         if (supplimentalInfo.charAt(0) == '-')

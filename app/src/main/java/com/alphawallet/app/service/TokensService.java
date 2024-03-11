@@ -3,6 +3,7 @@ package com.alphawallet.app.service;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
+import android.media.Image;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Pair;
@@ -15,6 +16,7 @@ import com.alphawallet.app.entity.AnalyticsProperties;
 import com.alphawallet.app.entity.ContractLocator;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.CustomViewSettings;
+import com.alphawallet.app.entity.ImageEntry;
 import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
@@ -78,6 +80,7 @@ public class TokensService
     private ContractLocator focusToken;
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
     private final ConcurrentLinkedQueue<Long> baseTokenCheck;
+    private final ConcurrentLinkedQueue<ImageEntry> imagesForWrite;
     private long openSeaCheckId;
     private boolean appHasFocus;
     private static boolean walletStartup = false;
@@ -102,6 +105,8 @@ public class TokensService
     private Disposable tokenStoreDisposable;
     @Nullable
     private Disposable openSeaQueryDisposable;
+    @Nullable
+    private Disposable imageWriter;
 
     private static boolean done = false;
 
@@ -120,6 +125,7 @@ public class TokensService
         focusToken = null;
         this.unknownTokens = new ConcurrentLinkedDeque<>();
         this.baseTokenCheck = new ConcurrentLinkedQueue<>();
+        this.imagesForWrite = new ConcurrentLinkedQueue<>();
         setCurrentAddress(ethereumNetworkRepository.getCurrentWalletAddress()); //set current wallet address at service startup
         appHasFocus = true;
         transferCheckChain = 0;
@@ -403,7 +409,6 @@ public class TokensService
         if (queryUnknownTokensDisposable != null && !queryUnknownTokensDisposable.isDisposed()) { queryUnknownTokensDisposable.dispose(); }
         if (openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed()) { openSeaQueryDisposable.dispose(); }
 
-        IconItem.resetCheck();
         pendingChainMap.clear();
         tokenStoreList.clear();
         baseTokenCheck.clear();
@@ -502,6 +507,35 @@ public class TokensService
         }
     }
 
+    private void startImageWrite()
+    {
+        if (imageWriter == null || imageWriter.isDisposed())
+        {
+            imageWriter = Observable.interval(500, 500, TimeUnit.MILLISECONDS)
+                    .doOnNext(l -> writeImages()).subscribe();
+        }
+    }
+
+    private void writeImages()
+    {
+        if (imagesForWrite.isEmpty())
+        {
+            imageWriter.dispose();
+            imageWriter = null;
+        }
+        else
+        {
+            Single.fromCallable(() -> {
+                        List<ImageEntry> entries = new ArrayList<>(imagesForWrite);
+                        imagesForWrite.clear();
+                        tokenRepository.addImageUrl(entries);
+                        return "";
+                    })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(Schedulers.io()).subscribe().isDisposed();
+        }
+    }
+
     private void startupPass()
     {
         if (!walletStartup) return;
@@ -540,9 +574,12 @@ public class TokensService
         return info.symbol;
     }
 
+    //Add to write queue
     public void addTokenImageUrl(long networkId, String address, String imageUrl)
     {
-        tokenRepository.addImageUrl(networkId, address, imageUrl);
+        ImageEntry entry = new ImageEntry(networkId, address, imageUrl);
+        imagesForWrite.add(entry);
+        startImageWrite();
     }
 
     public Single<TokenInfo> update(String address, long chainId, ContractType type)

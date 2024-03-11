@@ -244,7 +244,7 @@ public class TransactionDetailActivity extends BaseActivity implements StandardF
         Token targetToken = viewModel.getToken(transaction.chainId, TextUtils.isEmpty(tokenAddress) ? transaction.to : tokenAddress);
         if (targetToken.isEthereum()) return;
         tokenDetailsLayout.setVisibility(View.VISIBLE);
-        icon.bindData(targetToken, viewModel.getTokenService());
+        icon.bindData(targetToken);
         address.setText(Keys.toChecksumAddress(targetToken.getAddress()));
         tokenName.setText(targetToken.getFullName());
     }

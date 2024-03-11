@@ -27,7 +27,6 @@
     <application
             android:name=".App"
             android:allowBackup="false"
-            android:extractNativeLibs="true"
             android:hardwareAccelerated="false"
             android:largeHeap="true"
             android:icon="@mipmap/ic_launcher"
@@ -122,10 +121,6 @@
         <activity
                 android:name=".ui.SplashActivity"
                 android:theme="@style/AppTheme.NoActionBar.Splash" />
-
-        <service
-                android:name=".service.WalletConnectService"
-                android:enabled="true" />
 
         <service
                 android:name=".service.WalletConnectV2Service"

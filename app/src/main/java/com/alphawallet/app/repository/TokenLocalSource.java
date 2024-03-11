@@ -3,6 +3,7 @@ package com.alphawallet.app.repository;
 import android.util.Pair;
 
 import com.alphawallet.app.entity.ContractType;
+import com.alphawallet.app.entity.ImageEntry;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
@@ -38,7 +39,7 @@ public interface TokenLocalSource
 
     void deleteRealmTokens(Wallet wallet, List<TokenCardMeta> tcmList);
 
-    void storeTokenUrl(long chainId, String address, String imageUrl);
+    void storeTokenUrl(List<ImageEntry> entries);
 
     Token initNFTAssets(Wallet wallet, Token tokens);
 

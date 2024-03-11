@@ -212,7 +212,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
     private void setupPOSMode(NetworkInfo info)
     {
         if (token == null) token = viewModel.getTokenService().getToken(info.chainId, wallet.address);
-        amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+        amountInput.setupToken(token, viewModel.getTokenService(), this);
         amountInput.setAmount("");
         updateCryptoAmount(BigDecimal.ZERO);
     }
@@ -340,7 +340,7 @@ public class MyAddressActivity extends BaseActivity implements AmountReadyCallba
             }
             else
             {
-                amountInput.setupToken(token, viewModel.getAssetDefinitionService(), viewModel.getTokenService(), this);
+                amountInput.setupToken(token, viewModel.getTokenService(), this);
             }
         }
     }

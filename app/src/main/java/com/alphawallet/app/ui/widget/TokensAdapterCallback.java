@@ -14,5 +14,7 @@ public interface TokensAdapterCallback
     default void reloadTokens() { };
     default void onBuyToken() { }
     default void onSearchClicked() { };
-    default void onSwitchClicked() {};
+    default void onSwitchClicked() { };
+    default void onWCClicked() { };
+    default boolean hasWCSession() { return false; };
 }

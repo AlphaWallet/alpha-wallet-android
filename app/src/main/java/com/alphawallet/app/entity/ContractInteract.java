@@ -44,6 +44,13 @@ public class ContractInteract
         return Single.fromCallable(() -> callSmartContractFuncAdaptiveArray(token.tokenInfo.chainId, getScriptURI(), token.getAddress(), token.getWallet())).observeOn(Schedulers.io());
     }
 
+    public Single<String> getContractURIResult()
+    {
+        return Single.fromCallable(() -> callSmartContractFunction(token.tokenInfo.chainId, getContractURI(), token.getAddress(), token.getWallet()))
+                .map(this::loadMetaData)
+                .observeOn(Schedulers.io());
+    }
+
     private String loadMetaData(String tokenURI)
     {
         if (TextUtils.isEmpty(tokenURI))
@@ -65,7 +72,7 @@ public class ContractInteract
     {
         //1. get TokenURI (check for non-standard URI - check "tokenURI" and "uri")
         String responseValue = callSmartContractFunction(token.tokenInfo.chainId, getTokenURI(tokenId), token.getAddress(), token.getWallet());
-        if (responseValue == null)
+        if (TextUtils.isEmpty(responseValue))
         {
             responseValue = callSmartContractFunction(token.tokenInfo.chainId, getTokenURI2(tokenId), token.getAddress(), token.getWallet());
         }
@@ -98,6 +105,12 @@ public class ContractInteract
 
     private static Function getScriptURI() {
         return new Function("scriptURI",
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Utf8String>() {}));
+    }
+
+    private static Function getContractURI() {
+        return new Function("contractURI",
                 Collections.emptyList(),
                 Collections.singletonList(new TypeReference<Utf8String>() {}));
     }

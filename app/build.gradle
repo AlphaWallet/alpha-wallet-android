@@ -24,7 +24,7 @@ tasks.withType(Test).configureEach {
 }
 
 detekt {
-    toolVersion = "1.20.0-RC1"
+    toolVersion = "1.23.5"
     buildUponDefaultConfig = true // preconfigure defaults
     allRules = false // activate all available (even unstable) rules.
     baseline = file("$projectDir/check/detekt-baseline.xml")
@@ -209,7 +209,7 @@ tasks.register("jacocoAndroidUnitTestReport") {
     def fileFilter = ['**/R.class', '**/R$*.class', '**/*$ViewInjector*.*', '**/BuildConfig.*', '**/Manifest*.*', '**/*Realm*.*', '**/Generated*.*', '**/*_*.*']
     def debugTree = fileTree(dir: "**/", excludes: fileFilter)
     def mainSrc = "${project.projectDir}/src/main/java"
-
+    
     sourceDirectories.setFrom(files([mainSrc]))
     classDirectories.setFrom(files([debugTree]))
 }
@@ -219,9 +219,9 @@ dependencies {
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation fileTree(include: ['*.aar'], dir: 'libs')
-    //NB: Downgrade jackson due to bug in 2.15 releases that makes it incompatible with Gradle 8
-    //noinspection GradleDependency
-    implementation platform('com.fasterxml.jackson:jackson-bom:2.13.5') //Don't upgrade from 2.13.5 due to Android API24 compatibility
+
+    //noinspection BomWithoutPlatform,GradleDependency
+    implementation platform('com.fasterxml.jackson:jackson-bom:2.13.5') //Do not upgrade! 2.13.5 is latest library with Android API24 compatibility
     implementation 'com.fasterxml.jackson.core:jackson-core'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
@@ -282,8 +282,8 @@ dependencies {
     //Timber
     implementation libs.timber
 
-    //noinspection UseTomlInstead
-    implementation platform('com.walletconnect:android-bom:1.13.1')
+    //noinspection UseTomlInstead,GradleDependency
+    implementation platform('com.walletconnect:android-bom:1.13.1') //TODO: Upgrade
     implementation("com.walletconnect:android-core", {
         exclude group: 'org.web3j', module: '*'
     })

@@ -98,7 +98,7 @@ public class TransferHolder extends BinderViewHolder<TokenTransferData> implemen
             disposable.dispose();
         }
 
-        tokenIcon.bindData(token, assetDefinition);
+        tokenIcon.bindData(token);
 
         //We haven't yet fetched the underlying transaction. Fetch and display
         if (tx == null)

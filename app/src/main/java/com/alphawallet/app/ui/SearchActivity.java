@@ -22,9 +22,7 @@ import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.SearchToolbarCallback;
-import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletViewModel;
-import com.alphawallet.app.widget.AWalletAlertDialog;
 import com.alphawallet.app.widget.SearchToolbar;
 
 import org.web3j.crypto.WalletUtils;

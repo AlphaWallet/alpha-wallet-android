@@ -4,11 +4,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.alphawallet.app.R;
+import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 
 public class SearchTokensHolder extends BinderViewHolder<ManageTokensData> {
@@ -20,7 +22,9 @@ public class SearchTokensHolder extends BinderViewHolder<ManageTokensData> {
 
     final EditText editSearch;
     final SearchHandler searchHandler;
+    final SearchHandler onWCClicked;
     final View searchTokenClick;
+    final ImageView walletConnect;
     String wallet;
 
     @Override
@@ -38,11 +42,32 @@ public class SearchTokensHolder extends BinderViewHolder<ManageTokensData> {
         });
     }
 
-    public SearchTokensHolder(int res_id, ViewGroup parent, SearchHandler handler) {
+    public SearchTokensHolder(int res_id, ViewGroup parent, TokensAdapterCallback tCallback) {
         super(res_id, parent);
         this.editSearch = findViewById(R.id.edit_search);
-        this.searchHandler = handler;
+        this.searchHandler = tCallback::onSearchClicked;
         this.searchTokenClick = findViewById(R.id.click_layer);
+        this.walletConnect = findViewById(R.id.icon_wc_active);
         this.wallet = null;
+        this.onWCClicked = tCallback::onWCClicked;
+
+        if (tCallback.hasWCSession())
+        {
+            enableWalletConnect();
+        }
+    }
+
+    public void enableWalletConnect()
+    {
+        walletConnect.setVisibility(View.VISIBLE);
+        walletConnect.setOnClickListener(v -> {
+            if (onWCClicked != null) onWCClicked.onFocus();
+        });
+    }
+
+    public void hideWalletConnect()
+    {
+        walletConnect.setVisibility(View.GONE);
+        walletConnect.setOnClickListener(null);
     }
 }

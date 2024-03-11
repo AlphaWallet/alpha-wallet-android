@@ -7,6 +7,7 @@ import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.UnableToResolveENS;
+import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.web3j.ens.EnsResolutionException;
@@ -179,11 +180,11 @@ public class AWEnsResolver
                 String tokenId = matcher.group(8);
 
                 String asset = new OpenSeaService().fetchAsset(chainId, tokenAddress, tokenId);
-                JSONObject assetObj = new JSONObject(asset);
-                String url = assetObj.getString(OPENSEA_IMAGE_PREVIEW);
+                NFTAsset nftAsset = new NFTAsset(asset);
+                String url = nftAsset.getThumbnail();
                 if (!TextUtils.isEmpty(url) && url.endsWith(".svg"))
                 {
-                    String original = assetObj.getString(OPENSEA_IMAGE_ORIGINAL);
+                    String original = nftAsset.getImage();
                     if (!TextUtils.isEmpty(original)) url = original;
                 }
                 return url;

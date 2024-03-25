@@ -159,7 +159,7 @@ public class OpenSeaService
                 //process this page of results
                 processOpenseaTokens(foundTokens, assets, address, networkId, networkName, tokensService);
                 currentPage++;
-                pageCursor = result.getString("next");
+                pageCursor = result.has("next") ? result.getString("next") : "";
                 if (TextUtils.isEmpty(pageCursor))
                 {
                     break;

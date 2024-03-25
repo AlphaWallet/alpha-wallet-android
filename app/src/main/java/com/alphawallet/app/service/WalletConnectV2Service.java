@@ -5,7 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
@@ -21,6 +20,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class WalletConnectV2Service extends Service
 {
+    private static final String TAG = WalletConnectV2Service.class.getName();
+
+    final String CHANNEL_ID = "WalletConnectV2Service";
     @Override
     public IBinder onBind(Intent intent)
     {
@@ -32,32 +34,38 @@ public class WalletConnectV2Service extends Service
     public void onCreate()
     {
         super.onCreate();
-        String CHANNEL_ID = "my_channel_01";
-        NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                "WalletConnect V2",
-                NotificationManager.IMPORTANCE_DEFAULT);
-
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.createNotificationChannel(channel);
-
-        Intent intent = new Intent(getApplicationContext(), WalletConnectNotificationActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE);
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_logo)
-                .setOnlyAlertOnce(true)
-                .setContentTitle(getString(R.string.notify_wallet_connect_title))
-                .setContentText(getString(R.string.notify_wallet_connect_content))
-                .setContentIntent(pendingIntent)
-                .build();
-
-        startForeground(1, notification);
-        notificationManager.notify(1, notification);
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId)
+    private Notification createNotification()
     {
-        return super.onStartCommand(intent, flags, startId);
+        Intent notificationIntent = new Intent(this, WalletConnectNotificationActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle(getString(R.string.notify_wallet_connect_title))
+                .setContentText(getString(R.string.notify_wallet_connect_content))
+                .setSmallIcon(R.drawable.ic_logo)
+                .setContentIntent(pendingIntent)
+                .build();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void createNotificationChannel()
+    {
+        CharSequence name = getString(R.string.notify_wallet_connect_title);
+        String description = getString(R.string.notify_wallet_connect_content);
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setDescription(description);
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        createNotificationChannel();
+        Notification notification = createNotification();
+        startForeground(1, notification);
+        return START_STICKY;
     }
 
     @Override

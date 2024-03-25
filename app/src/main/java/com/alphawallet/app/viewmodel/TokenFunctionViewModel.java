@@ -589,7 +589,7 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     public void checkForNewScript(Token token)
     {
         if (token == null) return;
-        //check server for new tokenscript
+        //check server for new TokenScript
         scriptUpdate = assetDefinitionService.checkServerForScript(token, scriptUpdateInProgress)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.single())

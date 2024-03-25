@@ -118,6 +118,7 @@ public class WalletFragment extends BaseFragment implements
     private ActivityResultLauncher<Intent> handleBackupClick;
     private ActivityResultLauncher<Intent> tokenManagementLauncher;
     private boolean completed = false;
+    private boolean hasWCSession = false;
 
     @Inject
     AWWalletConnectClient awWalletConnectClient;
@@ -270,6 +271,7 @@ public class WalletFragment extends BaseFragment implements
         viewModel.removeDisplayTokens().observe(getViewLifecycleOwner(), this::removeTokens);
         viewModel.getTokensService().startWalletSync(this);
         viewModel.activeWalletConnectSessions().observe(getViewLifecycleOwner(), walletConnectSessionItems -> {
+            hasWCSession = !walletConnectSessionItems.isEmpty();
             adapter.showActiveWalletConnectSessions(walletConnectSessionItems);
         });
     }
@@ -828,7 +830,7 @@ public class WalletFragment extends BaseFragment implements
     @Override
     public boolean hasWCSession()
     {
-        return awWalletConnectClient != null && awWalletConnectClient.hasWalletConnectSessions();
+        return hasWCSession || (awWalletConnectClient != null && awWalletConnectClient.hasWalletConnectSessions());
     }
 
     @Override

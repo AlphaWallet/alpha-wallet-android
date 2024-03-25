@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.MutableLiveData;
 
 import com.alphawallet.app.App;
@@ -83,7 +84,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     private ActionSheetCallback actionSheetCallback;
     private boolean hasConnection;
     private Application application;
-    private PreferenceRepositoryType preferenceRepository;
+    private final PreferenceRepositoryType preferenceRepository;
 
     public AWWalletConnectClient(Context context, WalletConnectInteract walletConnectInteract, PreferenceRepositoryType preferenceRepository, GasService gasService)
     {
@@ -94,23 +95,9 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         hasConnection = false;
     }
 
-    /*public void onSessionDelete(@NonNull Model.SessionDelete deletedSession)
+    public void onSessionDelete(@NonNull Model.SessionDelete deletedSession)
     {
-        updateNotification();
-    }*/
-
-    public void onSessionProposal(@NonNull Model.SessionProposal sessionProposal)
-    {
-        WalletConnectV2SessionItem sessionItem = WalletConnectV2SessionItem.from(sessionProposal);
-        if (!validChainId(sessionItem.chains))
-        {
-            return;
-        }
-        AWWalletConnectClient.sessionProposal = sessionProposal;
-        Intent intent = new Intent(context, WalletConnectV2Activity.class);
-        intent.putExtra("session", sessionItem);
-        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        updateNotification(null);
     }
 
     public boolean hasWalletConnectSessions()
@@ -133,36 +120,6 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
             }
         }
         return true;
-    }
-
-    public void onSessionRequest(@NonNull Model.SessionRequest sessionRequest)
-    {
-        String checkMethod;
-        String method = sessionRequest.getRequest().getMethod();
-        if (method.startsWith("eth_signTypedData"))
-        {
-            checkMethod = "eth_signTypedData";
-        }
-        else
-        {
-            checkMethod = method;
-        }
-
-        if (!WCMethodChecker.includes(checkMethod))
-        {
-            reject(sessionRequest);
-            return;
-        }
-
-        Model.Session settledSession = getSession(sessionRequest.getTopic());
-
-        Activity topActivity = App.getInstance().getTopActivity();
-        if (topActivity != null)
-        {
-            WalletConnectV2SessionRequestHandler handler = new WalletConnectV2SessionRequestHandler(sessionRequest, settledSession, topActivity, this);
-            handler.handle(method, actionSheetCallback);
-            requestHandlers.append(sessionRequest.getRequest().getId(), handler);
-        }
     }
 
     private Session getSession(String topic)
@@ -223,7 +180,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         Params.SessionApprove approve = new Params.SessionApprove(proposerPublicKey, buildNamespaces(sessionProposal, selectedAccounts), sessionProposal.getRelayProtocol());
         Web3Wallet.INSTANCE.approveSession(approve, sessionApprove -> {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                //updateNotification();
+                updateNotification(sessionProposal);
                 callback.onSessionProposalApproved();
             }, 500);
             return null;
@@ -295,18 +252,35 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         return sessionItemMutableLiveData;
     }
 
-    private void updateService(Context context, List<WalletConnectSessionItem> walletConnectSessionItems)
+    public void updateNotification(Model.SessionProposal sessionProposal)
+    {
+        walletConnectInteract.fetchSessions(items -> {
+            if (sessionProposal != null && items.isEmpty())
+            {
+                items.add(WalletConnectV2SessionItem.from(sessionProposal));
+            }
+
+            updateService(items);
+            sessionItemMutableLiveData.postValue(items);
+        });
+    }
+
+    private void updateService(List<WalletConnectSessionItem> items)
     {
         try
         {
-            if (walletConnectSessionItems.isEmpty())
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             {
-                context.stopService(new Intent(context, WalletConnectV2Service.class));
-            }
-            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            {
-                Intent service = new Intent(context, WalletConnectV2Service.class);
-                context.startForegroundService(service);
+                if (items.isEmpty())
+                {
+                    context.stopService(new Intent(context, WalletConnectV2Service.class));
+                    //now signal
+                }
+                else
+                {
+                    Intent serviceIntent = new Intent(context, WalletConnectV2Service.class);
+                    ContextCompat.startForegroundService(context, serviceIntent);
+                }
             }
         }
         catch (Exception e)
@@ -319,7 +293,6 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
     public void reject(Model.SessionProposal sessionProposal, WalletConnectV2Callback callback)
     {
-
         Web3Wallet.INSTANCE.rejectSession(
                 new Params.SessionReject(sessionProposal.getProposerPublicKey(), context.getString(R.string.message_reject_request)),
                 sessionReject -> null,
@@ -363,8 +336,19 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         this.actionSheetCallback = actionSheetCallback;
     }
 
+    public String getRelayServer()
+    {
+        return String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, keyProvider.getWalletConnectProjectId());
+    }
+
     public void init(Application application)
     {
+        if (keyProvider.getWalletConnectProjectId().isEmpty())
+        {
+            //Early return for no wallet connect
+            return;
+        }
+
         this.application = application;
         Core.Model.AppMetaData appMetaData = getAppMetaData(application);
         String relayServer = String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, keyProvider.getWalletConnectProjectId());
@@ -386,6 +370,8 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         try
         {
             Web3Wallet.INSTANCE.setWalletDelegate(this);
+            //ensure notification is displayed if session is active
+            updateNotification(null);
         }
         catch (Exception e)
         {
@@ -394,7 +380,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     }
 
     @NonNull
-    private Core.Model.AppMetaData getAppMetaData(Application application)
+    public Core.Model.AppMetaData getAppMetaData(Application application)
     {
         String name = application.getString(R.string.app_name);
         String url = C.ALPHAWALLET_WEBSITE;
@@ -465,12 +451,6 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
             reject(requestHandler.getSessionRequest(), signatureFromKey.failMessage);
         }
     }
-
-    /*@Override
-    public void onAuthRequest(@NonNull Model.AuthRequest authRequest)
-    {
-        showApprovalDialog(authRequest);
-    }*/
 
     private void showApprovalDialog(Model.AuthRequest authRequest)
     {
@@ -662,12 +642,6 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
             handler.handle(method, actionSheetCallback);
             requestHandlers.append(sessionRequest.getRequest().getId(), handler);
         }
-    }
-
-    @Override
-    public void onSessionDelete(@NonNull Model.SessionDelete sessionDelete)
-    {
-
     }
 
     public Intent getSessionIntent(Context appContext)

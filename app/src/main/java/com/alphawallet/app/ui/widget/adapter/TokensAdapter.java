@@ -623,14 +623,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
     public void showActiveWalletConnectSessions(List<WalletConnectSessionItem> sessions)
     {
-        if (sessions.isEmpty())
-        {
-            removeItem(WalletConnectSessionHolder.VIEW_TYPE);
-        }
-        else
-        {
-            items.add(new WalletConnectSessionSortedItem(sessions, 2));
-        }
+        checkWalletConnect();
     }
 
     public void removeItem(int viewType)

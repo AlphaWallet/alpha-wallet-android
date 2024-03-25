@@ -265,11 +265,6 @@ public class TokenIcon extends ConstraintLayout
     {
         setupDefaultIcon();
 
-        if (token.tokenInfo.address.equalsIgnoreCase("0xfaafdc07907ff5120a76b34b731b278c38d6043c"))
-        {
-            System.out.println("YOLESS");
-        }
-
         final RequestOptions optionalCircleCrop = squareToken || iconUrl.startsWith(ALPHAWALLET_REPO_NAME) ? new RequestOptions() : new RequestOptions().circleCrop();
 
         currentRq = Glide.with(this)

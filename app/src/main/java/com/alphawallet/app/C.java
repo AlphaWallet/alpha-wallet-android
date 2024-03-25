@@ -211,6 +211,7 @@ public abstract class C {
     public static final String APP_FOREGROUND_STATE = "com.alphawallet.APP_FOREGROUND_STATE";
     public static final String EXTRA_APP_FOREGROUND = "com.alphawallet.IS_FOREGORUND";
     public static final String QRCODE_SCAN = "com.alphawallet.QRSCAN";
+    public static final String AWALLET_CODE = "com.alphawallet.AWALLET";
     public static final String SIGNAL_NFT_SYNC = "com.alphawallet.SYNC_NFT";
     public static final String SYNC_STATUS = "com.alphawallet.SYNC_STATUS";
 
@@ -278,6 +279,7 @@ public abstract class C {
     public static final String DAPP_SUFFIX_RECEIVE = "receive";
     public static final String DAPP_PREFIX_MAPS = "maps.google.com/maps?daddr=";
     public static final String DAPP_PREFIX_WALLETCONNECT = "wc";
+    public static final String DAPP_PREFIX_AWALLET = "awallet";
 
     public static final String ENS_SCAN_BLOCK = "ens_check_block";
     public static final String ENS_HISTORY = "ensHistory";

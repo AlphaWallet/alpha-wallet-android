@@ -47,7 +47,7 @@ public class AddressBar extends MaterialToolbar implements ItemClickListener
     private ImageView home;
 
     @Nullable
-    private Disposable disposable;
+    private Disposable disposable; // awallet://openURL?https%3A%2F%2Fsmart-layer.vercel.app
     private boolean focused;
 
     public AddressBar(Context context, AttributeSet attributeSet)

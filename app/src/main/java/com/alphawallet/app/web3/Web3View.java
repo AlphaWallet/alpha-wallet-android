@@ -3,7 +3,7 @@ package com.alphawallet.app.web3;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Build;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -14,7 +14,6 @@ import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.webkit.WebSettingsCompat;
 import androidx.webkit.WebViewFeature;
 
@@ -141,7 +140,7 @@ public class Web3View extends WebView {
     }
 
     @Override
-    public void setWebViewClient(WebViewClient client)
+    public void setWebViewClient(@NonNull WebViewClient client)
     {
         super.setWebViewClient(new WrapWebViewClient(webViewClient, client));
     }
@@ -366,11 +365,12 @@ public class Web3View extends WebView {
         }
 
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url)
-        {
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            final Uri uri = request.getUrl();
+            final String url = uri.toString();
             redirect = true;
 
-            return externalClient.shouldOverrideUrlLoading(view, url)
+            return externalClient.shouldOverrideUrlLoading(view, request)
                     || internalClient.shouldOverrideUrlLoading(view, url);
         }
 

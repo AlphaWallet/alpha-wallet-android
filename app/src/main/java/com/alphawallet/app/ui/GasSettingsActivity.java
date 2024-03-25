@@ -228,13 +228,12 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     {
         if (item.getItemId() == android.R.id.home)
         {
-            onBackPressed();
+            backPressed();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onBackPressed()
+    private void backPressed()
     {
         Intent result = new Intent();
         GasSpeed gs = gasSpread.getSelectedGasFee(currentGasSpeedIndex);

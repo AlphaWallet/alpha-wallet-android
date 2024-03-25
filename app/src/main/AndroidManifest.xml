@@ -14,8 +14,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
 
     <uses-feature
             android:name="android.hardware.fingerprint"
@@ -125,8 +124,7 @@
         <service
                 android:name=".service.WalletConnectV2Service"
                 android:enabled="true"
-                android:exported="false"
-                android:foregroundServiceType="connectedDevice">
+                android:exported="false">
         </service>
 
         <service
@@ -281,11 +279,6 @@
         <activity
                 android:name=".ui.TokenScriptManagementActivity"
                 android:label="@string/tokenscript_management" />
-
-        <activity
-                android:name=".ui.WalletConnectActivity"
-                android:label="WalletConnect"
-                android:launchMode="singleTop" />
 
         <activity
                 android:name=".ui.BackupFlowActivity"

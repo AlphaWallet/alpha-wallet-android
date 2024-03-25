@@ -55,7 +55,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     private final TextView wallet24hChange;
     private final TokensBalanceView tokensBalanceView;
     private final Realm realm;
-    private RealmResults<RealmWalletData> realmUpdate;
     private final WalletClickCallback clickCallback;
     private Wallet wallet = null;
     protected Disposable disposable;
@@ -83,7 +82,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
     public void bind(@Nullable Wallet data, @NonNull Bundle addition)
     {
         walletAddressText.setText(null);
-        if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
 
         if (data != null)
         {
@@ -103,54 +101,62 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 
             manageWalletBtn.setVisibility(View.VISIBLE);
 
-            if (wallet.name != null && !wallet.name.isEmpty())
-            {
-                walletNameText.setText(wallet.name);
-                walletAddressSeparator.setVisibility(View.VISIBLE);
-                walletNameText.setVisibility(View.VISIBLE);
-            }
-            else if (wallet.ENSname != null && wallet.ENSname.length() > 0)
-            {
-                walletNameText.setText(wallet.ENSname);
-                walletAddressSeparator.setVisibility(View.VISIBLE);
-                walletNameText.setVisibility(View.VISIBLE);
-            }
-            else
-            {
-                walletAddressSeparator.setVisibility(View.GONE);
-                walletNameText.setVisibility(View.GONE);
-            }
+            setWalletName(wallet.name, wallet.ENSname);
 
             walletIcon.bind(wallet, this);
 
-            String walletBalance = wallet.balance;
-            if (!TextUtils.isEmpty(walletBalance) && walletBalance.startsWith("*"))
-            {
-                walletBalance = walletBalance.substring(1);
-            }
-            walletBalanceText.setText(String.format("%s %s", walletBalance, wallet.balanceSymbol));
-
-            walletAddressText.setText(Utils.formatAddress(wallet.address));
-
-            if (addition.getBoolean(IS_SYNCED, false))
-            {
-                walletIcon.finishWaiting();
-            }
-            else
-            {
-                walletIcon.setWaiting();
-            }
-
-            double fiatValue = addition.getDouble(FIAT_VALUE, 0.00);
-            double oldFiatValue = addition.getDouble(FIAT_CHANGE, 0.00);
-
-            String balanceTxt = TickerService.getCurrencyString(fiatValue);
-            walletBalanceText.setVisibility(View.VISIBLE);
-            walletBalanceText.setText(balanceTxt);
-            setWalletChange(fiatValue != 0 ? ((fiatValue - oldFiatValue) / oldFiatValue) * 100.0 : 0.0);
+            setWalletBalance(wallet.balance, addition);
 
             checkLastBackUpTime();
-            startRealmListener();
+        }
+    }
+
+    private void setWalletBalance(String walletBalance, Bundle addition)
+    {
+        if (!TextUtils.isEmpty(walletBalance) && walletBalance.startsWith("*"))
+        {
+            walletBalance = walletBalance.substring(1);
+        }
+        walletBalanceText.setText(String.format("%s %s", walletBalance, wallet.balanceSymbol));
+
+        walletAddressText.setText(Utils.formatAddress(wallet.address));
+
+        if (addition.getBoolean(IS_SYNCED, false))
+        {
+            walletIcon.finishWaiting();
+        }
+        else
+        {
+            walletIcon.setWaiting();
+        }
+
+        double fiatValue = addition.getDouble(FIAT_VALUE, 0.00);
+        double oldFiatValue = addition.getDouble(FIAT_CHANGE, 0.00);
+
+        String balanceTxt = TickerService.getCurrencyString(fiatValue);
+        walletBalanceText.setVisibility(View.VISIBLE);
+        walletBalanceText.setText(balanceTxt);
+        setWalletChange(fiatValue != 0 ? ((fiatValue - oldFiatValue) / oldFiatValue) * 100.0 : 0.0);
+    }
+
+    private void setWalletName(String walletName, String ensName)
+    {
+        if (!TextUtils.isEmpty(ensName) && (TextUtils.isEmpty(walletName) || Utils.isDefaultName(walletName, getContext())))
+        {
+            walletNameText.setText(ensName);
+            walletAddressSeparator.setVisibility(View.VISIBLE);
+            walletNameText.setVisibility(View.VISIBLE);
+        }
+        else if (!TextUtils.isEmpty(walletName))
+        {
+            walletNameText.setText(walletName);
+            walletAddressSeparator.setVisibility(View.VISIBLE);
+            walletNameText.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            walletAddressSeparator.setVisibility(View.GONE);
+            walletNameText.setVisibility(View.GONE);
         }
     }
 
@@ -175,34 +181,6 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
         }
         catch (Exception ex)
         { /* Quietly */ }
-    }
-
-    private void startRealmListener()
-    {
-        realmUpdate = realm.where(RealmWalletData.class)
-                .equalTo("address", wallet.address).findAllAsync();
-        realmUpdate.addChangeListener(realmWallets ->
-        {
-            //update balance
-            if (realmWallets.size() == 0) return;
-            RealmWalletData realmWallet = realmWallets.first();
-            //walletBalanceText.setTextColor(blackColor);
-            //walletBalanceText.setText(realmWallet.getBalance());
-            String ensName = realmWallet.getENSName();
-            String name = realmWallet.getName();
-            if (!TextUtils.isEmpty(name))
-            {
-                walletNameText.setText(name);
-                walletAddressSeparator.setVisibility(View.VISIBLE);
-                walletNameText.setVisibility(View.VISIBLE);
-            }
-            else if (!TextUtils.isEmpty(ensName))
-            {
-                walletNameText.setText(ensName);
-                walletAddressSeparator.setVisibility(View.VISIBLE);
-                walletNameText.setVisibility(View.VISIBLE);
-            }
-        });
     }
 
     private Wallet fetchWallet(Wallet w)

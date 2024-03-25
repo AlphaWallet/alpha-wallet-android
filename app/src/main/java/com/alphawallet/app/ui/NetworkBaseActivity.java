@@ -66,12 +66,6 @@ public abstract class NetworkBaseActivity extends BaseActivity implements TestNe
         return false;
     }
 
-    @Override
-    public void onBackPressed()
-    {
-        handleSetNetworks();
-    }
-
     protected abstract void handleSetNetworks();
 
     protected void initTestNetDialog(TestNetDialog.TestNetDialogCallback callback)

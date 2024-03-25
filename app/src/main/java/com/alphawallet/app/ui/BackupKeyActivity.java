@@ -391,15 +391,14 @@ public class BackupKeyActivity extends BaseActivity implements
         {
             case android.R.id.home:
             {
-                onBackPressed();
+                backPressed();
                 return true;
             }
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onBackPressed()
+    private void backPressed()
     {
         switch (state)
         {

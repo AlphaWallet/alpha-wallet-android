@@ -1,5 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+
 import android.content.Context;
 import android.text.TextUtils;
 
@@ -12,8 +14,11 @@ import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.interact.DeleteWalletInteract;
 import com.alphawallet.app.interact.ExportWalletInteract;
 import com.alphawallet.app.interact.FetchWalletsInteract;
+import com.alphawallet.app.repository.TokenRepository;
 import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.AlphaWalletNotificationService;
+import com.alphawallet.app.util.Utils;
+import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 
 import javax.inject.Inject;
@@ -35,7 +40,9 @@ public class WalletActionsViewModel extends BaseViewModel
     private final FetchWalletsInteract fetchWalletsInteract;
     private final AlphaWalletNotificationService alphaWalletNotificationService;
     private final MutableLiveData<Integer> saved = new MutableLiveData<>();
+    private final MutableLiveData<Integer> walletCount = new MutableLiveData<>();
     private final MutableLiveData<Boolean> deleted = new MutableLiveData<>();
+    private final MutableLiveData<String> ensName = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> exportWalletError = new MutableLiveData<>();
     private final MutableLiveData<ErrorEnvelope> deleteWalletError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isTaskRunning = new MutableLiveData<>();
@@ -76,6 +83,14 @@ public class WalletActionsViewModel extends BaseViewModel
     {
         return saved;
     }
+    public LiveData<Integer> walletCount()
+    {
+        return walletCount;
+    }
+    public LiveData<String> ensName()
+    {
+        return ensName;
+    }
 
     public LiveData<Boolean> isTaskRunning()
     {
@@ -93,6 +108,16 @@ public class WalletActionsViewModel extends BaseViewModel
 
         // For now, unsubscribe to firebase topic
         alphaWalletNotificationService.unsubscribeToTopic(EthereumNetworkBase.MAINNET_ID);
+    }
+
+    public void fetchWalletCount()
+    {
+        disposable = fetchWalletsInteract
+                .fetch()
+                .map(wallets -> wallets.length)
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .subscribe(walletCount::postValue, this::onError);
     }
 
     public void deleteWallet(Wallet wallet)
@@ -138,5 +163,20 @@ public class WalletActionsViewModel extends BaseViewModel
             Timber.d("Stored %s", wallet.address);
             saved.postValue(1);
         });
+    }
+
+    public void scanForENS(Wallet wallet, Context ctx)
+    {
+        //check for ENS name
+        new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), ctx)
+                .reverseResolveEns(wallet.address)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(ensName::postValue, this::onENSError).isDisposed();
+    }
+
+    private void onENSError(Throwable throwable)
+    {
+        //No Action
     }
 }

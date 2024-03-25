@@ -2,8 +2,12 @@ package com.alphawallet.app.service;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ADDRESS;
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CHAIN;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
+import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_STORE_SERVER;
 import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
 
 import android.Manifest;
@@ -67,6 +71,8 @@ import com.alphawallet.token.entity.XMLDsigDescriptor;
 import com.alphawallet.token.tools.TokenDefinition;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.web3j.abi.DefaultFunctionEncoder;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
@@ -385,9 +391,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private TokenDefinition fileLoadComplete(List<ContractLocator> originContracts, TokenScriptFile file, TokenDefinition td)
     {
-        if (originContracts.size() == 0 || td.getAttestation() != null) return td; //no action needed, not accessible to Attestation //TODO: Refactor once we handle multiple attestations
+        if (originContracts.isEmpty() || td.getAttestation() != null) return td; //no action needed, not accessible to Attestation //TODO: Refactor once we handle multiple attestations
 
         boolean hasEvents = td.hasEvents();
+        long primaryChainId = !originContracts.isEmpty() ? originContracts.iterator().next().chainId : MAINNET_ID;
 
         try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
         {
@@ -396,7 +403,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             {
                 //delete this file and check downloads for update
                 removeFile(file.getAbsolutePath());
-                loadScriptFromServer(getFileName(file));
+                loadScriptFromServer(primaryChainId, getFileName(file));
                 return td;
             }
 
@@ -1011,7 +1018,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
      * Get asset definition given contract address
      *
      * @param address
-     * @return
+     * @return The Token Definition for the given chain, address
      */
     public TokenDefinition getAssetDefinition(long chainId, String address)
     {
@@ -1026,7 +1033,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (assetDef == null && !address.equals("ethereum"))
         {
             //try web
-            loadScriptFromServer(address.toLowerCase()); //this will complete asynchronously and display will be updated
+            loadScriptFromServer(chainId, address.toLowerCase()); //this will complete asynchronously and display will be updated
         }
 
         return assetDef; // if nothing found use default
@@ -1066,10 +1073,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         String convertedAddr = (address.equalsIgnoreCase(tokensService.getCurrentAddress())) ? "ethereum" : address.toLowerCase();
-        return getAssetDefinitionASync(getDefinition(getTSDataKey(chainId, address)), convertedAddr);
+        return getAssetDefinitionASync(getDefinition(getTSDataKey(chainId, address)), chainId, convertedAddr);
     }
 
-    private Single<TokenDefinition> getAssetDefinitionASync(final TokenDefinition assetDef, final String contractName)
+    private Single<TokenDefinition> getAssetDefinitionASync(final TokenDefinition assetDef, final long chainId, final String contractName)
     {
         if (assetDef != null)
         {
@@ -1078,7 +1085,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         else if (!contractName.equals("ethereum"))
         {
             //at this stage, this script isn't replacing any existing script, so it's safe to write to database without checking if we need to delete anything
-            return fetchXMLFromServer(contractName.toLowerCase())
+            return fetchXMLFromServer(chainId, contractName.toLowerCase())
                     .flatMap(this::handleNewTSFile);
         }
         else return Single.fromCallable(TokenDefinition::new);
@@ -1095,7 +1102,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         // hold until asset definitions have finished loading
         waitForAssets();
 
-        return getAssetDefinitionASync(getDefinition(token.getTSKey()), contractName);
+        return getAssetDefinitionASync(getDefinition(token.getTSKey()), token.tokenInfo.chainId, contractName);
     }
 
     private void waitForAssets()
@@ -1169,12 +1176,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return issuer;
     }
 
-    private void loadScriptFromServer(String correctedAddress)
+    private void loadScriptFromServer(long chainId, String correctedAddress)
     {
         //first check the last time we tried this session
         if (assetChecked.get(correctedAddress) == null || (System.currentTimeMillis() > (assetChecked.get(correctedAddress) + 1000L * 60L * 60L)))
         {
-            fetchXMLFromServer(correctedAddress)
+            fetchXMLFromServer(chainId, correctedAddress)
                     .flatMap(this::handleNewTSFile)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -1416,7 +1423,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return false;
     }
 
-    private Single<File> tryServerIfRequired(File contractScript, String address)
+    private Single<File> tryServerIfRequired(File contractScript, String address, long chainId)
     {
         if (contractScript.exists() || contractScript.getName().equals(UNCHANGED_SCRIPT))
         {
@@ -1424,15 +1431,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
         else
         {
-            return fetchXMLFromServer(address);
+            return fetchXMLFromServer(chainId, address);
         }
     }
 
-    private Single<File> fetchXMLFromServer(String address)
+    private Single<File> fetchXMLFromServer(long chainId, String address)
     {
         return Single.fromCallable(() -> {
             final File defaultReturn = new File("");
-            if (address.equals("")) return defaultReturn;
+            if (address.isEmpty()) return defaultReturn;
 
             File result = getDownloadedXMLFile(address);
 
@@ -1459,21 +1466,46 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             if (assetChecked.get(address) != null && (System.currentTimeMillis() > (assetChecked.get(address) + 1000L * 60L * 60L)))
                 return result;
 
-            String sb = TOKENSCRIPT_REPO_SERVER +
-                    TOKENSCRIPT_CURRENT_SCHEMA +
-                    "/" +
-                    address;
+            //use the updated server
+            String sb = TOKENSCRIPT_STORE_SERVER.replace(TOKENSCRIPT_ADDRESS, address).replace(TOKENSCRIPT_CHAIN, Long.toString(chainId));
 
             Pair<String, Boolean> downloadResponse = downloadScript(sb, fileTime);
-            if (!TextUtils.isEmpty(downloadResponse.first))
+            String offchainScriptUri = getOffchainScriptUri(downloadResponse);
+
+            if (!TextUtils.isEmpty(offchainScriptUri))
             {
-                result = storeFile(address, downloadResponse);
+                downloadResponse = downloadScript(offchainScriptUri, fileTime);
+                if (!TextUtils.isEmpty(downloadResponse.first))
+                {
+                    storeFile(address, downloadResponse);
+                }
             }
 
             assetChecked.put(address, System.currentTimeMillis());
 
             return result;
         });
+    }
+
+    private String getOffchainScriptUri(Pair<String, Boolean> downloadResponse)
+    {
+        String offchainScriptResponse = "";
+        try
+        {
+            JSONObject response = new JSONObject(downloadResponse.first);
+            JSONObject scriptUri = response.getJSONObject("scriptURI");
+            JSONArray offchainLinks = scriptUri.getJSONArray("offchain");
+            if (offchainLinks.length() > 0)
+            {
+                offchainScriptResponse = offchainLinks.getString(0);
+            }
+        }
+        catch (Exception e)
+        {
+            offchainScriptResponse = "";
+        }
+
+        return offchainScriptResponse;
     }
 
     private Pair<String, Boolean> downloadScript(String Uri, long currentFileTime)
@@ -3116,7 +3148,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //try the contractURI, then server
         return fetchTokenScriptFromContract(token, updateFlag)
-                .flatMap(file -> tryServerIfRequired(file, token.getAddress().toLowerCase()))
+                .flatMap(file -> tryServerIfRequired(file, token.getAddress().toLowerCase(), token.tokenInfo.chainId))
                 .flatMap(this::handleNewTSFile)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

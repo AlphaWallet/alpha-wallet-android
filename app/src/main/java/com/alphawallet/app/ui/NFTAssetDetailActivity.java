@@ -131,6 +131,8 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         initIntents();
 
         initViewModel();
+
+        usingNativeTokenScript = !viewModel.getUseTSViewer();
     }
 
     private void initIntents()
@@ -308,12 +310,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
         setTitle(token.tokenInfo.name);
         updateDefaultTokenData();
 
-        if (!viewModel.getUseTSViewer())
-        {
-            TokenDefinition td = viewModel.getAssetDefinitionService().getAssetDefinition(this.token);
-            this.usingNativeTokenScript = (td != null && td.nameSpace != null);
-        }
-
         if (asset != null && asset.isAttestation())
         {
             setupAttestation(viewModel.getAssetDefinitionService().getAssetDefinition(token));
@@ -355,11 +351,6 @@ public class NFTAssetDetailActivity extends BaseActivity implements StandardFunc
             viewModel.checkTokenScriptValidity(token);
 
             setTitle(token.getTokenName(viewModel.getAssetDefinitionService(), 1));
-
-            if (!viewModel.getUseTSViewer())
-            {
-                this.usingNativeTokenScript = td.nameSpace != null;
-            }
 
             //now re-load the verbs if already called. If wallet is null this won't complete
             setupFunctionBar(viewModel.getWallet());

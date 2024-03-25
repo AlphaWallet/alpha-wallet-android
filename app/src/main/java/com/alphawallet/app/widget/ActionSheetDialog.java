@@ -327,7 +327,7 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private GasWidgetInterface setupGasWidget()
     {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        boolean canUse1559Transactions = prefs.getBoolean(SharedPreferenceRepository.EXPERIMENTAL_1559_TX, false);
+        boolean canUse1559Transactions = prefs.getBoolean(SharedPreferenceRepository.EXPERIMENTAL_1559_TX, true);
 
         use1559Transactions = canUse1559Transactions && has1559Gas() //1559 Transactions toggled on in settings and this chain supports 1559
                 && !(token.isEthereum() && candidateTransaction.leafPosition == -2) //User not sweeping wallet (if so we need to use legacy tx)

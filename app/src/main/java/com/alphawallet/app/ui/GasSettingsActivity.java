@@ -126,7 +126,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         gasSliderView.setNonce(getIntent().getLongExtra(C.EXTRA_NONCE, -1));
         gasSliderView.initGasLimit(customGasLimit.toBigInteger(), presetGasLimit.toBigInteger());
         gasSpread = getIntent().getParcelableExtra(C.EXTRA_GAS_PRICE);
-        isUsing1559 = getIntent().getBooleanExtra(C.EXTRA_1559_TX, false);
+        isUsing1559 = getIntent().getBooleanExtra(C.EXTRA_1559_TX, true);
 
         gasSliderView.initGasPrice(gasSpread.getSelectedGasFee(TXSpeed.CUSTOM));
         adapter = new CustomAdapter(this);

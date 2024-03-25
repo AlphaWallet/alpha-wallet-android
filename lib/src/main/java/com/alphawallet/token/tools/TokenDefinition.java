@@ -80,7 +80,10 @@ public class TokenDefinition
 
     public static final String TOKENSCRIPT_MINIMUM_SCHEMA = "2020/06";
     public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2022/09";
+    public static final String TOKENSCRIPT_ADDRESS = "{TS_ADDRESS}";
+    public static final String TOKENSCRIPT_CHAIN = "{TS_CHAIN}";
     public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
+    public static final String TOKENSCRIPT_STORE_SERVER = "https://store-backend.smartlayer.network/tokenscript/" + TOKENSCRIPT_ADDRESS + "/chain/" + TOKENSCRIPT_CHAIN + "/script-uri";
     public static final String TOKENSCRIPT_NAMESPACE = "http://tokenscript.org/" + TOKENSCRIPT_CURRENT_SCHEMA + "/tokenscript";
 
     private static final String ATTESTATION = "http://attestation.id/ns/tbml";

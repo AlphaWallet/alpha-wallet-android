@@ -265,6 +265,12 @@ public class WalletsActivity extends BaseActivity implements
     }
 
     @Override
+    public void handleBackPressed()
+    {
+        backPressed();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
         if (CustomViewSettings.canChangeWallets()) getMenuInflater().inflate(R.menu.menu_add, menu);

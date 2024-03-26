@@ -5,6 +5,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.DrawableRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -48,6 +49,8 @@ public abstract class BaseActivity extends AppCompatActivity
             }
             toolbarTitle.setText(title);
         }
+
+        setDispatcher();
     }
 
     protected void setSubtitle(String subtitle)
@@ -88,7 +91,7 @@ public abstract class BaseActivity extends AppCompatActivity
         }
     }
 
-    protected void dissableDisplayHomeAsUp()
+    protected void disableDisplayHomeAsUp()
     {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
@@ -120,7 +123,7 @@ public abstract class BaseActivity extends AppCompatActivity
     {
         if (item.getItemId() == android.R.id.home)
         {
-            onBackPressed();
+            handleBackPressed();
             finish();
         }
         return true;
@@ -173,4 +176,23 @@ public abstract class BaseActivity extends AppCompatActivity
         dialog.setButtonListener(v -> dialog.dismiss());
         dialog.show();
     }
+
+    public void setDispatcher()
+    {
+        // Create an OnBackPressedCallback
+        final OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed()
+            {
+                handleBackPressed();
+            }
+        };
+
+        this.getOnBackPressedDispatcher().addCallback(callback);
+    }
+
+    public void handleBackPressed()
+    {
+        finish();
+    };
 }

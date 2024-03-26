@@ -37,6 +37,7 @@ import com.alphawallet.app.entity.analytics.QrScanResultType;
 import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.entity.cryptokeys.KeyEncodingType;
 import com.alphawallet.app.repository.EthereumNetworkBase;
+import com.alphawallet.app.router.HomeRouter;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.widget.OnImportKeystoreListener;
@@ -340,6 +341,19 @@ public class ImportWalletActivity extends BaseActivity implements OnImportSeedLi
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void handleBackPressed()
+    {
+        if (currentPage == ImportType.KEYSTORE_FORM_INDEX)
+        {
+            ((ImportKeystoreFragment) pages.get(ImportType.KEYSTORE_FORM_INDEX.ordinal()).second).backPressed();
+        }
+        else
+        {
+            finish();
+        }
     }
 
     @Override

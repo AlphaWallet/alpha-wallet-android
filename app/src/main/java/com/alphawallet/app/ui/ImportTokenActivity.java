@@ -209,15 +209,23 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
 
     //TODO: Use Activity Launcher model (eg see tokenManagementLauncher in WalletFragment)
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                new HomeRouter().open(this, true);
-                finish();
-                return true;
-            }
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == android.R.id.home)
+        {
+            new HomeRouter().open(this, true);
+            finish();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void handleBackPressed()
+    {
+        setResult(RESULT_CANCELED);
+        new HomeRouter().open(this, true);
+        finish();
     }
 
     private void setTicket(boolean ticket, boolean progress, boolean invalid)
@@ -589,12 +597,6 @@ public class ImportTokenActivity extends BaseActivity implements View.OnClickLis
         {
             gotAuthorisation(resultCode == RESULT_OK);
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        setResult(RESULT_CANCELED);
-        super.onBackPressed();
     }
 
     /**

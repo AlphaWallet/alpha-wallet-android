@@ -163,11 +163,18 @@ public class BackupFlowActivity extends BaseActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    public void backPressed() {
+    public void backPressed()
+    {
         Intent intent = new Intent();
         setResult(RESULT_CANCELED, intent);
         intent.putExtra("Key", wallet.address);
         finish();
+    }
+
+    @Override
+    public void handleBackPressed()
+    {
+        backPressed();
     }
 
     @Override

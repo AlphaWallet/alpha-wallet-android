@@ -49,7 +49,7 @@ public class SelectCurrencyActivity extends BaseActivity
     }
 
     @Override
-    public void onBackPressed()
+    public void handleBackPressed()
     {
         if (!currentCurrency.equals(adapter.getSelectedItemId()))
         {
@@ -57,7 +57,7 @@ public class SelectCurrencyActivity extends BaseActivity
         }
         else
         {
-            super.onBackPressed();
+            finish();
         }
     }
 

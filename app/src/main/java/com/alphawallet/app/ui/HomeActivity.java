@@ -262,7 +262,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         });
 
         initBottomNavigation();
-        dissableDisplayHomeAsUp();
+        disableDisplayHomeAsUp();
 
         viewModel.error().observe(this, this::onError);
         viewModel.walletName().observe(this, this::onWalletName);

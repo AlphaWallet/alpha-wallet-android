@@ -233,6 +233,12 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void handleBackPressed()
+    {
+        backPressed();
+    }
+
     private void backPressed()
     {
         Intent result = new Intent();

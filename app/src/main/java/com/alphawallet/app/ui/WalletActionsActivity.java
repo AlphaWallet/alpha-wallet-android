@@ -166,6 +166,15 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     }
 
     @Override
+    public void handleBackPressed()
+    {
+        if (isNewWallet)
+        {
+            preFinish(); //drop back to home screen, no need to recreate everything
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
         if (item.getItemId() == android.R.id.home)
@@ -311,10 +320,14 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         finish();
     }
 
-    private void doBackUp() {
-        if (wallet.type == WalletType.HDKEY) {
+    private void doBackUp()
+    {
+        if (wallet.type == WalletType.HDKEY)
+        {
             testSeedPhrase(wallet);
-        } else {
+        }
+        else
+        {
             exportJSON(wallet);
         }
     }
@@ -382,11 +395,15 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     }
 
     @Override
-    public void run() {
-        if (successOverlay.getAlpha() > 0) {
+    public void run()
+    {
+        if (successOverlay.getAlpha() > 0)
+        {
             successOverlay.animate().alpha(0.0f).setDuration(500);
             handler.postDelayed(this, 750);
-        } else {
+        }
+        else
+        {
             successOverlay.setVisibility(View.GONE);
             successOverlay.setAlpha(1.0f);
         }

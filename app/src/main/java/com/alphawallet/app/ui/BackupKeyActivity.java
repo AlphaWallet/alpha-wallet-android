@@ -387,15 +387,18 @@ public class BackupKeyActivity extends BaseActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        switch (item.getItemId())
+        if (item.getItemId() == android.R.id.home)
         {
-            case android.R.id.home:
-            {
-                backPressed();
-                return true;
-            }
+            backPressed();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void handleBackPressed()
+    {
+        backPressed();
     }
 
     private void backPressed()

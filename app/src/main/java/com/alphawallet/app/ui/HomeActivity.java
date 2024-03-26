@@ -102,7 +102,6 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
 {
     @Inject
     AWWalletConnectClient awWalletConnectClient;
-
     public static final int RC_ASSET_EXTERNAL_WRITE_PERM = 223;
     public static final int RC_ASSET_NOTIFICATION_PERM = 224;
     public static final int DAPP_BARCODE_READER_REQUEST_CODE = 1;

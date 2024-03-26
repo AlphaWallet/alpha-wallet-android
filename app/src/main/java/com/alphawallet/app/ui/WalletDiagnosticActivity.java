@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Pair;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -47,6 +48,7 @@ import java.util.regex.Pattern;
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 import wallet.core.jni.CoinType;
 import wallet.core.jni.HDWallet;
 import wallet.core.jni.PrivateKey;
@@ -152,12 +154,17 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
         if (item.getItemId() == android.R.id.home)
         {
-            onBackPressed();
-            return true;
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -402,7 +409,7 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
 
     private int wordCount(String value)
     {
-        if (value == null || value.length() == 0) return 0;
+        if (value == null || value.isEmpty()) return 0;
         String[] split = value.split("\\s+");
         return split.length;
     }
@@ -411,7 +418,7 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
     // Always use the ActionSheet + implement ActionSheetCallback as per SendActivity, NFTAssetDetailActivity etc
     private void doUnlock(UnlockCallback cb)
     {
-        if (BuildConfig.DEBUG /*&& Utils.isRunningTest()*/) //running tests in debug build mode, we don't use key unlock
+        if (BuildConfig.DEBUG && Utils.isRunningTest()) //running tests in debug build mode, we don't use key unlock
         {
             cb.carryOn(true);
             return;
@@ -455,7 +462,7 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            Timber.e(e);
         }
 
         return "";

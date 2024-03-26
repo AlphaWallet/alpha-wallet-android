@@ -56,9 +56,9 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
 
     @NotNull
     @Override
-    public BinderViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType)
+    public BinderViewHolder<?> onCreateViewHolder(@NotNull ViewGroup parent, int viewType)
     {
-        BinderViewHolder binderViewHolder = null;
+        BinderViewHolder<?> binderViewHolder = null;
         switch (viewType)
         {
             case WalletHolder.VIEW_TYPE:
@@ -80,10 +80,11 @@ public class WalletsSummaryAdapter extends RecyclerView.Adapter<BinderViewHolder
     public void onBindViewHolder(@NotNull BinderViewHolder holder, int position)
     {
         Bundle bundle;
+        Wallet wallet;
         switch (getItemViewType(position))
         {
             case WalletHolder.VIEW_TYPE:
-                Wallet wallet = wallets.get(position);
+                wallet = wallets.get(position);
                 bundle = new Bundle();
                 bundle.putBoolean(
                         WalletHolder.IS_DEFAULT_ADDITION,

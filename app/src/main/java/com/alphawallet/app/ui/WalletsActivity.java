@@ -30,7 +30,6 @@ import com.alphawallet.app.entity.ErrorEnvelope;
 import com.alphawallet.app.entity.Operation;
 import com.alphawallet.app.entity.SyncCallback;
 import com.alphawallet.app.entity.Wallet;
-import com.alphawallet.app.entity.WalletConnectActions;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
@@ -77,7 +76,6 @@ public class WalletsActivity extends BaseActivity implements
     private Dialog dialog;
     private AWalletAlertDialog aDialog;
     private WalletsSummaryAdapter adapter;
-    private Wallet selectedWallet;
     private ActivityResultLauncher<Intent> editWalletDetails;
     private AWalletAlertDialog cardReadDialog;
     private String dialogError;
@@ -256,8 +254,7 @@ public class WalletsActivity extends BaseActivity implements
         if (viewModel != null) viewModel.onDestroy();
     }
 
-    @Override
-    public void onBackPressed()
+    private void backPressed()
     {
         preFinish();
         // User can't start work without wallet.
@@ -283,7 +280,7 @@ public class WalletsActivity extends BaseActivity implements
         }
         else if (item.getItemId() == android.R.id.home)
         {
-            onBackPressed();
+            backPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -387,7 +384,6 @@ public class WalletsActivity extends BaseActivity implements
             adapter.setDefaultWallet(wallet);
             scrollToDefaultWallet();
         }
-        selectedWallet = wallet;
     }
 
     /**
@@ -429,13 +425,6 @@ public class WalletsActivity extends BaseActivity implements
         scrollToDefaultWallet();
 
         viewModel.stopUpdates();
-
-        /*Intent bIntent = new Intent(this, WalletConnectService.class);
-        bIntent.setAction(String.valueOf(WalletConnectActions.DISCONNECT.ordinal()));
-        bIntent.putExtra("wallet", selectedWallet);
-        startService(bIntent);*/
-
-        selectedWallet = wallet;
     }
 
     private void onFetchWallets(Wallet[] wallets)
@@ -461,7 +450,6 @@ public class WalletsActivity extends BaseActivity implements
         Intent intent = new Intent(this, WalletActionsActivity.class);
         intent.putExtra("wallet", wallet);
         intent.putExtra("currency", viewModel.getNetwork().symbol);
-        intent.putExtra("walletCount", adapter.getItemCount());
         intent.putExtra("isNewWallet", true);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 

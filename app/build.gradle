@@ -52,7 +52,7 @@ android {
         applicationId "io.stormbird.wallet"
         minSdk 24
         targetSdk 34
-        versionCode 259
+        versionCode 261
         versionName "3.79"
 
         android.buildFeatures.buildConfig true

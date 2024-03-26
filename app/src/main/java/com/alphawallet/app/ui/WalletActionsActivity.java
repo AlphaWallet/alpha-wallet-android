@@ -28,20 +28,26 @@ import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.BackupOperationType;
 import com.alphawallet.app.entity.ErrorEnvelope;
+import com.alphawallet.app.entity.StandardFunctionInterface;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.ui.widget.entity.AddressReadyCallback;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.WalletActionsViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.InputAddress;
+import com.alphawallet.app.widget.InputView;
 import com.alphawallet.app.widget.SettingsItemView;
 import com.alphawallet.app.widget.UserAvatar;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class WalletActionsActivity extends BaseActivity implements Runnable, View.OnClickListener, AddressReadyCallback
+public class WalletActionsActivity extends BaseActivity implements Runnable, View.OnClickListener, AddressReadyCallback, StandardFunctionInterface
 {
     WalletActionsViewModel viewModel;
 
@@ -55,12 +61,12 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     private SettingsItemView deleteWalletSetting;
     private SettingsItemView backUpSetting;
     private InputAddress inputAddress;
+    private InputView inputName;
     private LinearLayout successOverlay;
     private AWalletAlertDialog aDialog;
     private final Handler handler = new Handler();
 
     private Wallet wallet;
-    private int walletCount;
     private boolean isNewWallet;
 
     @Override
@@ -70,10 +76,12 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         toolbar();
         setTitle(getString(R.string.manage_wallet));
 
+        FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
+        functionBar.setupFunctions(this, new ArrayList<>(Collections.singletonList(R.string.action_save_name)));
+        functionBar.revealButtons();
+
         if (getIntent() != null) {
             wallet = (Wallet) getIntent().getExtras().get("wallet");
-            walletCount = getIntent().getIntExtra("walletCount", 0);
-            walletCount++;
             isNewWallet = getIntent().getBooleanExtra("isNewWallet", false);
             initViews();
         } else {
@@ -106,11 +114,34 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         viewModel.exportWalletError().observe(this, this::onExportError);
         viewModel.deleted().observe(this, this::onDeleteWallet);
         viewModel.isTaskRunning().observe(this, this::onTaskStatusChanged);
+        viewModel.walletCount().observe(this, this::setWalletName);
+        viewModel.ensName().observe(this, this::fetchedENSName);
 
-        if (isNewWallet) {
-            wallet.name = getString(R.string.wallet_name_template, walletCount);
-            viewModel.updateWallet(wallet);
+        if (isNewWallet)
+        {
+            viewModel.fetchWalletCount();
         }
+
+        if (wallet != null && TextUtils.isEmpty(wallet.ENSname))
+        {
+            //scan for ENS name
+            viewModel.scanForENS(wallet, this);
+        }
+    }
+
+    private void fetchedENSName(String ensName)
+    {
+        if (!TextUtils.isEmpty(ensName))
+        {
+            inputAddress.setENSName(ensName);
+        }
+    }
+
+    private void setWalletName(int walletCount)
+    {
+        wallet.name = getString(R.string.wallet_name_template, walletCount + 1);
+        inputName.setText(wallet.name);
+        viewModel.updateWallet(wallet);
     }
 
     @Override
@@ -139,7 +170,11 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
     {
         if (item.getItemId() == android.R.id.home)
         {
-            onBackPressed();
+            if (isNewWallet)
+            {
+                preFinish(); //drop back to home screen, no need to recreate everything
+            }
+            finish();
             return true;
         }
         else if (item.getItemId() == R.id.action_key_status)
@@ -153,18 +188,10 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onBackPressed()
+    private void onDeleteWallet(Boolean isDeleted)
     {
-        super.onBackPressed();
-        if (isNewWallet)
+        if (isDeleted)
         {
-            preFinish(); //drop back to home screen, no need to recreate everything
-        }
-    }
-
-    private void onDeleteWallet(Boolean isDeleted) {
-        if (isDeleted) {
             showWalletsActivity();
         }
     }
@@ -193,7 +220,8 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         aDialog.show();
     }
 
-    private void initViews() {
+    private void initViews()
+    {
         walletIcon = findViewById(R.id.wallet_icon);
         walletBalance = findViewById(R.id.wallet_balance);
         walletBalanceCurrency = findViewById(R.id.wallet_currency);
@@ -204,6 +232,7 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         backUpSetting = findViewById(R.id.setting_backup);
         walletSelectedIcon = findViewById(R.id.selected_wallet_indicator);
         inputAddress = findViewById(R.id.input_ens);
+        inputName = findViewById(R.id.input_name);
         walletSelectedIcon.setOnClickListener(this);
 
         walletIcon.bind(wallet);
@@ -230,20 +259,41 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
             findViewById(R.id.layout_backup_method).setVisibility(View.GONE);
         }
 
-        inputAddress.setAddress(wallet.ENSname);
-        inputAddress.setAddressCallback(this);
+        setupWalletNames();
+    }
+
+    private void setupWalletNames()
+    {
+        if (!TextUtils.isEmpty(wallet.ENSname))
+        {
+            inputAddress.setAddress(wallet.ENSname);
+        }
+
+        if (!Utils.isDefaultName(wallet.name, this))
+        {
+            inputName.setText(wallet.name);
+        }
     }
 
     private void setENSText()
     {
-        if (wallet.ENSname != null && !wallet.ENSname.isEmpty()) {
+        if (!TextUtils.isEmpty(wallet.ENSname))
+        {
             walletNameText.setText(wallet.ENSname);
             walletNameText.setVisibility(View.VISIBLE);
             walletAddressSeparator.setVisibility(View.VISIBLE);
-        } else {
+        }
+        else
+        {
             walletNameText.setVisibility(View.GONE);
             walletAddressSeparator.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void handleClick(String action, int actionId)
+    {
+        saveWalletName();
     }
 
     private void onDeleteWalletSettingClicked() {
@@ -254,13 +304,11 @@ public class WalletActionsActivity extends BaseActivity implements Runnable, Vie
         doBackUp();
     }
 
-    private void saveWalletName() {
-//        wallet.name = walletNameText.getText().toString();
+    private void saveWalletName()
+    {
+        wallet.name = inputName.getText().toString();
         viewModel.updateWallet(wallet);
-        if (isNewWallet) {
-            viewModel.showHome(this);
-            preFinish(); //drop back to home screen, no need to recreate everything
-        }
+        finish();
     }
 
     private void doBackUp() {

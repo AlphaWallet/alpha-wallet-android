@@ -1,109 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical">
 
     <!-- NB: Wrapped in RelativeLayout to enable the 'big green success tick' -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
         <include layout="@layout/layout_simple_toolbar" />
 
         <include layout="@layout/item_wallet_manage" />
 
+        <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
             <View style="@style/Aw.Component.Separator" />
 
             <View style="@style/Aw.Component.Separator.Large" />
 
             <LinearLayout
-                android:id="@+id/layout_backup_method"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                    android:id="@+id/layout_backup_method"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                 <View style="@style/Aw.Component.Separator" />
 
                 <com.alphawallet.app.widget.SettingsItemView
-                    android:id="@+id/setting_backup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:settingIcon="-1"
-                    app:settingTitle="@string/show_seed_phrase"
-                    app:settingType="default" />
+                        android:id="@+id/setting_backup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:settingIcon="-1"
+                        app:settingTitle="@string/show_seed_phrase"
+                        app:settingType="default" />
 
                 <TextView
-                    android:id="@+id/backup_text"
-                    style="@style/Aw.Typography.Sub"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/standard_16"
-                    android:text="@string/seed_phrase_loss_warning" />
+                        android:id="@+id/backup_text"
+                        style="@style/Aw.Typography.Sub"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/standard_16"
+                        android:text="@string/seed_phrase_loss_warning" />
 
             </LinearLayout>
 
             <View style="@style/Aw.Component.Separator" />
 
             <com.alphawallet.app.widget.SettingsItemView
-                android:id="@+id/delete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:settingIcon="-1"
-                app:settingTitle="@string/lose_this_wallet"
-                app:settingType="default" />
+                    android:id="@+id/delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:settingIcon="-1"
+                    app:settingTitle="@string/lose_this_wallet"
+                    app:settingType="default" />
 
             <TextView
-                style="@style/Aw.Typography.Sub"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/standard_16"
-                android:text="@string/delete_lose_funds_warning" />
+                    style="@style/Aw.Typography.Sub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/standard_16"
+                    android:text="@string/delete_lose_funds_warning" />
 
             <View
-                style="@style/Aw.Component.Separator"
-                android:layout_marginTop="@dimen/dp20" />
+                    style="@style/Aw.Component.Separator"
+                    android:layout_marginTop="@dimen/dp20" />
+
+            <com.alphawallet.app.widget.InputView
+                    android:id="@+id/input_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:label="@string/enter_wallet_name"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
             <com.alphawallet.app.widget.InputAddress
-                android:id="@+id/input_ens"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/standard_16"
-                custom:ens="true"
-                custom:hint="@string/enter_ens"
-                custom:label="@string/ens_name"
-                custom:nocam="true" />
+                    android:id="@+id/input_ens"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/standard_16"
+                    tools:visible="true"
+                    custom:ens="true"
+                    custom:show_header="false"
+                    custom:hint="@string/enter_ens"
+                    custom:label="@string/ens_name"
+                    custom:nocam="true" />
 
             <View style="@style/Aw.Component.Separator" />
 
         </LinearLayout>
 
+        </ScrollView>
+
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/layout_success_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/translucent_dark"
-        android:gravity="center"
-        android:visibility="gone">
+            android:id="@+id/layout_success_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/translucent_dark"
+            android:gravity="center"
+            android:visibility="gone">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|center_horizontal|center_vertical"
-            android:background="@drawable/big_green_tick"
-            android:foregroundGravity="center" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|center_horizontal|center_vertical"
+                android:background="@drawable/big_green_tick"
+                android:foregroundGravity="center" />
 
     </LinearLayout>
+
+    <com.alphawallet.app.widget.FunctionButtonBar
+            android:id="@+id/layoutButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
 </RelativeLayout>

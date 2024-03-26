@@ -325,7 +325,11 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
         realmTokenUpdates = realm.where(RealmToken.class).equalTo("address", dbKey)
                 .greaterThan("addedTime", System.currentTimeMillis() - 5 * DateUtils.MINUTE_IN_MILLIS).findAllAsync();
         realmTokenUpdates.addChangeListener(realmTokens -> {
-            if (realmTokens.size() == 0) return;
+            if (realmTokens.isEmpty())
+            {
+                return;
+            }
+
             for (RealmToken t : realmTokens)
             {
                 TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), t.getBalance(),
@@ -363,7 +367,6 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-//        getMenuInflater().inflate(R.menu.menu_show_contract, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

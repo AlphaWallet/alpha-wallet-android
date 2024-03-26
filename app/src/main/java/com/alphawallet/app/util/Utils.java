@@ -1451,7 +1451,7 @@ public class Utils
     {
         //wallet.name = getString(R.string.wallet_name_template, walletCount);
         String walletStr = ctx.getString(R.string.wallet_name_template, 1);
-        String walletSplit[] = walletStr.split(" ");
+        String[] walletSplit = walletStr.split(" ");
         walletStr = walletSplit[0];
         if (!TextUtils.isEmpty(name) && name.startsWith(walletStr) && walletSplit.length == 2)
         {

@@ -124,6 +124,7 @@
         <service
                 android:name=".service.WalletConnectV2Service"
                 android:enabled="true"
+                android:foregroundServiceType="shortService"
                 android:exported="false">
         </service>
 

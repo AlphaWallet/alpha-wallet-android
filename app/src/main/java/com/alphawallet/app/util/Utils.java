@@ -945,6 +945,7 @@ public class Utils
     private static final String IPFS_DESIGNATOR = "/ipfs/";
     public static final String IPFS_INFURA_RESOLVER = "https://alphawallet.infura-ipfs.io";
     public static final String IPFS_IO_RESOLVER = "https://ipfs.io";
+    public static final String IPFS_MATCHER = "^Qm[1-9A-Za-z]{44}(\\/.*)?$";
 
     public static boolean isIPFS(String url)
     {
@@ -977,9 +978,10 @@ public class Utils
         return parsed;
     }
 
-    private static boolean shouldBeIPFS(String url)
+    public static boolean shouldBeIPFS(String url)
     {
-        return url.startsWith("Qm") && url.length() == 46 && !url.contains(".") && !url.contains("/");
+        Matcher regexResult = Pattern.compile(IPFS_MATCHER).matcher(url);
+        return regexResult.find();
     }
 
     public static String loadFile(Context context, @RawRes int rawRes)

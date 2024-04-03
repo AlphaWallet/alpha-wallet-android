@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import com.alphawallet.app.entity.QueryResponse;
 import com.alphawallet.app.service.IPFSService;
 import com.alphawallet.app.service.IPFSServiceType;
+import com.alphawallet.app.util.Utils;
 
 import org.junit.Test;
 
@@ -70,5 +71,21 @@ public class IPFSServiceTest
         assertTrue(qr.isSuccessful());
 
         //TODO: Check update; pass an out of date header to TS repo endpoint
+
+        assertTrue(Utils.shouldBeIPFS("QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq"));
+        assertTrue(Utils.isIPFS("ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq"));
+        assertTrue(Utils.isIPFS("ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/uouo"));
+        assertTrue(Utils.shouldBeIPFS("QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq"));
+        assertTrue(Utils.shouldBeIPFS("QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/"));
+        assertTrue(Utils.shouldBeIPFS("QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/1"));
+        assertTrue(Utils.shouldBeIPFS("QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/some/path"));
+        assertTrue(Utils.isIPFS("/ipfs/QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/uouo"));
+        assertTrue(Utils.isIPFS("QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/some/path"));
+
+
+        assertFalse(Utils.shouldBeIPFS("QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtqwooslkj"));
+        assertFalse(Utils.shouldBeIPFS("QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWt"));
+        assertFalse(Utils.shouldBeIPFS("eSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtdd"));
+        assertFalse(Utils.isIPFS("ipff://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/uouo"));
     }
 }

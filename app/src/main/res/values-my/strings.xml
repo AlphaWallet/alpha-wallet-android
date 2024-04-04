@@ -393,7 +393,6 @@
     <string name="is_address">Ethereum လိပ်စာကိုဖတ်ပြီးပါပြီ။ တိုကင်အဖြစ်ထည့်သွင်းရန်ကြိုးစားကြည့်ပါမည်လား။</string>
     <string name="dialog_load_as_contract">တိုကင်ကိုဖော်ပြမည်</string>
     <string name="blockchain">%1$s Blockchain</string>
-    <string name="telegram">Telegram</string>
     <string name="transfer_request">အပြောင်းအရွှေ့တောင်းဆိုမှု</string>
     <string name="token_transfer_request">တိုကင်အပြောင်းအရွှေ့တောင်းဆိုမှု: %1$s</string>
     <string name="generate_payment_request">ငွေပေးချေရန်တောင်းဆိုမှုကိုပြုလုပ်မည်</string>
@@ -743,7 +742,7 @@
     <string name="disconnect">ချိတ်ဆက်မှုဖြုတ်သိမ်းမည်</string>
     <string name="keep_connect">ဆက်လက်ချိတ်ဆက်ထားမည်</string>
     <string name="beware_of_scammers">လိမ်လည်သူများကိုသတိပြုပါ။ Seed Phraseကို လုံးဝမမျှဝေပါနှင့်။</string>
-    <string name="alphawallet_never_ask">AlphaWalletသည်သင်၏Seed Phraseအားမည်သည့်အခါမှ(အထူးသဖြင့် Telegramတွင်) မေးမြန်းခြင်းမပြုပါ။.</string>
+    <string name="alphawallet_never_ask">AlphaWallet သည် သင်၏မျိုးစေ့စာစုအကြောင်း ဘယ်သောအခါမှ မေးမည်မဟုတ်ပါ (ကျွန်ုပ်တို့သည် DMs များကိုသာ စာပြန်သည်၊ DM ကို အရင်ဘယ်တော့မှ မမေးပါ)။</string>
     <string name="your_seed_phrase">သင်၏Seed Phrase(တခြားသူအားမဝေမျှမိရန်သတိပြုပါ)</string>
     <string name="hide_seed_text">Seed Phraseကိုဖုန်းကွယ်မည်။</string>
 

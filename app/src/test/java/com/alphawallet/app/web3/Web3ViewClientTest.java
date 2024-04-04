@@ -43,7 +43,6 @@ import org.robolectric.shadows.ShadowToast;
 @Config(shadows = {ShadowApp.class, ShadowRealm.class, ShadowJsInjectorClient.class})
 public class Web3ViewClientTest
 {
-    private static final String PACKAGE_NAME_OF_TELEGRAM = "org.telegram.messenger";
     private static final String URL_TG_JOIN_INVITE = "tg:join?invite=12345";
 
     @Rule
@@ -70,23 +69,21 @@ public class Web3ViewClientTest
     @Test
     public void should_start_trusted_app_if_installed()
     {
-        assumeAppInstalled(context, PACKAGE_NAME_OF_TELEGRAM);
-        boolean overrideUrlLoading = new Web3ViewClient(context).shouldOverrideUrlLoading(null, URL_TG_JOIN_INVITE);
+        //NB Telegram no longer trusted app. Should not use dapp browser for this
+        /*boolean overrideUrlLoading = new Web3ViewClient(context).shouldOverrideUrlLoading(null, URL_TG_JOIN_INVITE);
         assertTrue(overrideUrlLoading);
 
         Mockito.verify(context).startActivity(intentCaptor.capture());
         Intent expectedIntent = intentCaptor.getValue();
         assertThat(expectedIntent.getAction(), is(ACTION_VIEW));
         assertThat(expectedIntent.getData(), is(Uri.parse(URL_TG_JOIN_INVITE)));
-        assertThat(expectedIntent.getPackage(), is(PACKAGE_NAME_OF_TELEGRAM));
         assertThat(expectedIntent.getFlags(), is(FLAG_ACTIVITY_NEW_TASK));
-        assertThat(expectedIntent.getStringExtra(EXTRA_TEXT), is(URL_TG_JOIN_INVITE));
+        assertThat(expectedIntent.getStringExtra(EXTRA_TEXT), is(URL_TG_JOIN_INVITE));*/
     }
 
     @Test
     public void should_notify_user_if_trusted_app_not_installed() throws PackageManager.NameNotFoundException
     {
-        assumeNotAppInstalled(context, PACKAGE_NAME_OF_TELEGRAM);
         boolean overrideUrlLoading = new Web3ViewClient(context).shouldOverrideUrlLoading(null, URL_TG_JOIN_INVITE);
         assertTrue(overrideUrlLoading);
 

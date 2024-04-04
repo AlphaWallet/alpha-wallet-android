@@ -376,7 +376,6 @@
     <string name="is_address">刚刚扫描了一个以太坊地址。您是否要尝试将此作为通证进行加载？</string>
     <string name="dialog_load_as_contract">加载通证</string>
     <string name="blockchain">%1$s区块链</string>
-    <string name="telegram">电报 (客户支持)</string>
     <string name="transfer_request">转账请求</string>
     <string name="token_transfer_request">通证转账请求: %1$s</string>
     <string name="generate_payment_request">生成付款请求</string>
@@ -717,7 +716,7 @@
     <string name="disconnect">Disconnect</string>
     <string name="keep_connect">Keep Connected</string>
     <string name="beware_of_scammers">Beware of scammers!\nDon\'t share seed phrase.</string>
-    <string name="alphawallet_never_ask">AlphaWallet will NEVER ask about your seed phrase (especially on Telegram).</string>
+    <string name="alphawallet_never_ask">AlphaWallet 永远不会询问您的助记词（我们只回复私信，从不先私信）。</string>
     <string name="your_seed_phrase">Your seed phrase (do not share with anyone)</string>
     <string name="hide_seed_text">OK, Hide Seed Phrase</string>
     <string name="ens_not_match_wallet">ENS Name does not match wallet address</string>

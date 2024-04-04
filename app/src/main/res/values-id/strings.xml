@@ -386,7 +386,6 @@
     <string name="is_address">Baru saja memindai alamat Ethereum. Apakah Anda ingin mencoba mengunggah ini sebagai Token?</string>
     <string name="dialog_load_as_contract">Ungu Token</string>
     <string name="blockchain">%1$s Blockchain</string>
-    <string name="telegram">Telegram (Layanan Pelanggan)</string>
     <string name="transfer_request">Permintaan transfer</string>
     <string name="token_transfer_request">Permintaan transfer token: %1$s</string>
     <string name="generate_payment_request">Membuat Permintaan Pembayaran</string>
@@ -729,7 +728,7 @@
     <string name="disconnect">Putuskan hubungan</string>
     <string name="keep_connect">Tetap Terhubung</string>
     <string name="beware_of_scammers">Waspadalah terhadap penipu! Jangan membagikan Seed Phrase.</string>
-    <string name="alphawallet_never_ask">AlphaWallet TIDAK AKAN PERNAH bertanya tentang Seed Phrase Anda (terutama di Telegram).</string>
+    <string name="alphawallet_never_ask">AlphaWallet TIDAK AKAN PERNAH bertanya tentang seed frase Anda (dan kami hanya membalas DM, tidak pernah DM terlebih dahulu).</string>
     <string name="your_seed_phrase">Seed Phrase Anda (jangan bagikan dengan siapa pun)</string>
     <string name="hide_seed_text">OK, Sembunyikan Seed Phrase</string>
     <string name="ens_not_match_wallet">Nama ENS tidak cocok dengan alamat dompet</string>

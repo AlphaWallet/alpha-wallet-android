@@ -120,7 +120,7 @@ If you are forking AlphaWallet and you have a cool Token, please consider donati
 
 ### Request or submit a feature :postbox:
 
-Would you like to request a feature? Please get in touch with us [Telegram](https://t.me/AlphaWalletGroup), [Discord](https://discord.gg/mx23YWRTYf), [Twitter](https://twitter.com/AlphaWallet) or through our [community forums](https://community.tokenscript.org/).
+Would you like to request a feature? Please get in touch with us [Discord](https://discord.gg/mx23YWRTYf), [Twitter](https://twitter.com/AlphaWallet) or through our [community forums](https://community.tokenscript.org/).
 
 If you’d like to contribute code with a Pull Request, please make sure to follow code submission guidelines.
 
@@ -130,14 +130,12 @@ We want to connect businesses and consumers with the new digital economic infras
 
 <a href="http://www.linkedin.com/shareArticle?mini=true&amp;url=https://github.com/AlphaWallet/alpha-wallet-android"><img src=dmz/src/main/resources/static/readme/share_linkedin-btn.svg height="35" alt="share on linkedin"></a>
 <a href="https://twitter.com/share?url=https://github.com/AlphaWallet/alpha-wallet-android&amp;text=Open%20Source%20Wallet%20for%20Android&amp;hashtags=alphawallet"><img src=dmz/src/main/resources/static/readme/share_tweet-btn.svg height="35" alt="share on twitter"></a>
-<a href="https://t.me/share/url?url=https://github.com/AlphaWallet/alpha-wallet-android&text=Check%20this%20out!"><img src=dmz/src/main/resources/static/readme/share_telegram-btn.svg height="35" alt="share on telegram"></a>
 <a href="mailto:?Subject=open source alphawallet for android&amp;Body=Found%20this%20one,%20check%20it%20out!%20 https://github.com/AlphaWallet/alpha-wallet-android"><img src=dmz/src/main/resources/static/readme/share_mail-btn.svg height="35" alt="send via email"></a>
 <a href="http://reddit.com/submit?url=https://github.com/AlphaWallet/alpha-wallet-android&amp;title=Open%20Source%20AlphaWallet%20for%20Android"><img src=dmz/src/main/resources/static/readme/share_reddit-btn.svg height="35" alt="share on reddit"></a>
 <a href="http://www.facebook.com/sharer.php?u=https://github.com/AlphaWallet/alpha-wallet-android"><img src=dmz/src/main/resources/static/readme/share_facebook-btn.svg height="35" alt="share on facebook"></a>
 
 To learn more about us, please check our Blog or join the conversation:
 - [Blog](https://medium.com/alphawallet)
-- [Telegram](https://t.me/AlphaWalletGroup)
 - [Twitter](https://twitter.com/AlphaWallet)
 - [Facebook](https://www.facebook.com/AlphaWallet)
 - [LinkedIn](https://www.linkedin.com/company/alphawallet/)

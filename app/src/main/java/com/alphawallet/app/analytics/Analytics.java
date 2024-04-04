@@ -135,7 +135,6 @@ public class Analytics
         DAPP_ADDED("Dapp Added"),
         DAPP_EDITED("Dapp Edited"),
         RELOAD_BROWSER("Reload Browser"),
-        SUPPORT_TELEGRAM("Clicked Telegram Customer Support Link"),
         SUPPORT_DISCORD("Clicked Discord Link"),
         SUPPORT_EMAIL("Clicked Email Link"),
         SUPPORT_TWITTER("Clicked Twitter Link"),

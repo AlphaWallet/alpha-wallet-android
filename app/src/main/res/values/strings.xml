@@ -412,7 +412,6 @@
     <string name="dialog_load_as_contract">Load Token</string>
     <string name="blockchain">%1$s Blockchain</string>
     <string name="currency_00" translatable="false">0.00 %s</string>
-    <string name="telegram">Telegram (Customer Support)</string>
     <string name="transfer_request">Transfer request</string>
     <string name="token_transfer_request">Token transfer request: %1$s</string>
     <string name="generate_payment_request">Generate Payment Request</string>
@@ -776,7 +775,7 @@
     <string name="disconnect">Disconnect</string>
     <string name="keep_connect">Keep Connected</string>
     <string name="beware_of_scammers">Beware of scammers!\nDon\'t share seed phrase.</string>
-    <string name="alphawallet_never_ask">AlphaWallet will NEVER ask about your seed phrase (especially on Telegram).</string>
+    <string name="alphawallet_never_ask">AlphaWallet will NEVER ask about your seed phrase (and we only reply to DMs, never DM first).</string>
     <string name="your_seed_phrase">Your seed phrase (do not share with anyone)</string>
     <string name="hide_seed_text">OK, Hide Seed Phrase</string>
     <string name="ens_not_match_wallet">ENS Name does not match wallet address</string>

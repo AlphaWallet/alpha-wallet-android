@@ -375,7 +375,6 @@
     <string name="is_address">Acabas de escanear una dirección de Ethereum. ¿Quieres probar a cargarla como un token?</string>
     <string name="dialog_load_as_contract">Cargar token</string>
     <string name="blockchain">Cadena de bloques de %1$s</string>
-    <string name="telegram">Telegrama (Atención al Cliente)</string>
     <string name="transfer_request">Solicitud de transferencia</string>
     <string name="token_transfer_request">Solicitud de transferencia de tokens: %1$s</string>
     <string name="generate_payment_request">Generar solicitud de pago</string>
@@ -716,7 +715,7 @@
     <string name="disconnect">Disconnect</string>
     <string name="keep_connect">Keep Connected</string>
     <string name="beware_of_scammers">Beware of scammers!\nDon\'t share seed phrase.</string>
-    <string name="alphawallet_never_ask">AlphaWallet will NEVER ask about your seed phrase (especially on Telegram).</string>
+    <string name="alphawallet_never_ask">AlphaWallet NUNCA le preguntará sobre su frase inicial (y solo respondemos a los mensajes directos, nunca a los mensajes directos primero).</string>
     <string name="your_seed_phrase">Your seed phrase (do not share with anyone)</string>
     <string name="hide_seed_text">OK, Hide Seed Phrase</string>
     <string name="ens_not_match_wallet">ENS Name does not match wallet address</string>

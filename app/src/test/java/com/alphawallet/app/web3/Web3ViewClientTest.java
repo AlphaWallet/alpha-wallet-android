@@ -1,8 +1,5 @@
 package com.alphawallet.app.web3;
 
-import static android.content.Intent.ACTION_VIEW;
-import static android.content.Intent.EXTRA_TEXT;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;

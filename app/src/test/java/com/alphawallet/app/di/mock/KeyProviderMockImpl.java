@@ -149,4 +149,16 @@ public class KeyProviderMockImpl implements KeyProvider
     {
         return FAKE_KEY_FOR_TESTING;
     }
+
+    @Override
+    public String getCoinGeckoKey()
+    {
+        return FAKE_KEY_FOR_TESTING;
+    }
+
+    @Override
+    public String getBackupKey()
+    {
+        return FAKE_KEY_FOR_TESTING;
+    }
 }

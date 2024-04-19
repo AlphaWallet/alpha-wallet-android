@@ -145,4 +145,16 @@ public class KeyProviderMockNonProductionImpl implements KeyProvider
     {
         return null;
     }
+
+    @Override
+    public String getCoinGeckoKey()
+    {
+        return null;
+    }
+
+    @Override
+    public String getBackupKey()
+    {
+        return null;
+    }
 }

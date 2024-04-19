@@ -33,6 +33,8 @@ import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
+import com.alphawallet.app.repository.KeyProvider;
+import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokenRepository;
@@ -96,7 +98,7 @@ public class TickerService
     private static final boolean ALLOW_UNVERIFIED_TICKERS = false; //allows verified:false tickers from DEX.GURU. Not recommended
     public static final long TICKER_TIMEOUT = DateUtils.WEEK_IN_MILLIS; //remove ticker if not seen in one week
     public static final long TICKER_STALE_TIMEOUT = 30 * DateUtils.MINUTE_IN_MILLIS; //Use market API if AlphaWallet market oracle not updating
-
+    private final KeyProvider keyProvider = KeyProviderFactory.get();
     private final OkHttpClient httpClient;
     private final PreferenceRepositoryType sharedPrefs;
     private final TokenLocalSource localSource;
@@ -107,6 +109,7 @@ public class TickerService
     private static final ConcurrentLinkedDeque<TokenCardMeta> tokenCheckQueue = new ConcurrentLinkedDeque<>();
     private static final Map<String, TokenCardMeta> dexGuruQuery = new ConcurrentHashMap<>();
     private static long lastTickerUpdate;
+    private static int keyCycle = 0;
 
     @Nullable
     private Disposable tickerUpdateTimer;
@@ -290,7 +293,7 @@ public class TickerService
     {
         List<TokenCardMeta> tickerList = new ArrayList<>(count);
         long chainId = 0;
-        if (tokenCheckQueue.size() > 0)
+        if (!tokenCheckQueue.isEmpty())
         {
             List<TokenCardMeta> addBack = new ArrayList<>();
             TokenCardMeta firstTcm = tokenCheckQueue.removeFirst();
@@ -325,7 +328,7 @@ public class TickerService
     public Single<Integer> syncERC20Tickers(long chainId, List<TokenCardMeta> erc20Tokens)
     {
         //add to queue here
-        long staleTime = System.currentTimeMillis() - 5 * DateUtils.MINUTE_IN_MILLIS;
+        long staleTime = System.currentTimeMillis() - 10 * DateUtils.MINUTE_IN_MILLIS;
         //only check networks with value and if there's actually tokens to check
         if (!EthereumNetworkRepository.hasRealValue(chainId) || erc20Tokens.isEmpty())
         {
@@ -345,7 +348,7 @@ public class TickerService
             }
         }
 
-        if (tokenCheckQueue.size() == 0)
+        if (tokenCheckQueue.isEmpty())
         {
             return Single.fromCallable(() -> 0);
         }
@@ -425,14 +428,16 @@ public class TickerService
             isFirst = false;
         }
 
-        Request request = new Request.Builder()
+        Request.Builder buildRequest = new Request.Builder()
                 .url(COINGECKO_API.replace(CHAIN_IDS, apiChainName).replace(CONTRACT_ADDR, sb.toString()).replace(CURRENCY_TOKEN, currentCurrencySymbolTxt))
-                .get()
-                .build();
+                .get();
 
-        try (okhttp3.Response response = httpClient.newCall(request)
+        addAPIHeader(buildRequest);
+
+        try (okhttp3.Response response = httpClient.newCall(buildRequest.build())
                 .execute())
         {
+            int code = response.code();
             String responseStr = response.body().string();
             List<CoinGeckoTicker> tickers = CoinGeckoTicker.buildTickerList(responseStr, currentCurrencySymbolTxt, currentConversionRate);
             for (CoinGeckoTicker t : tickers)
@@ -448,20 +453,46 @@ public class TickerService
             }
             else
             {
-                final Map<String, TokenTicker> blankTickers = new HashMap<>(); //These tokens have no ticker, don't check them again today
-                for (String address : lookupMap.keySet())
-                {
-                    blankTickers.put(address, new TokenTicker(System.currentTimeMillis() + DateUtils.DAY_IN_MILLIS));
-                }
-                localSource.updateERC20Tickers(chainId, blankTickers);
+                addDelayCheckOnTickers(code, chainId, lookupMap);
             }
         }
         catch (Exception e)
         {
             Timber.e(e);
+            addDelayCheckOnTickers(0, chainId, lookupMap);
         }
 
         return erc20Tickers;
+    }
+
+    private void addAPIHeader(Request.Builder buildRequest)
+    {
+        String coinGeckoKey = keyProvider.getCoinGeckoKey();
+        String backupKey = keyProvider.getBackupKey();
+
+        if (!TextUtils.isEmpty(coinGeckoKey))
+        {
+            if (keyCycle%3 == 0)
+            {
+                buildRequest.addHeader("x-cg-demo-api-key", coinGeckoKey);
+            }
+            else if (keyCycle%3 == 1)
+            {
+                buildRequest.addHeader("x-cg-demo-api-key", backupKey);
+            }
+            keyCycle++;
+        }
+    }
+
+    private void addDelayCheckOnTickers(int code, long chainId, Map<String, TokenCardMeta> lookupMap)
+    {
+        long delayTime = (code/100 == 2) ? DateUtils.DAY_IN_MILLIS * 5 : DateUtils.MINUTE_IN_MILLIS * 30; // if API call was successful, and no ticker was found, don't check for 5 days
+        final Map<String, TokenTicker> blankTickers = new HashMap<>(); //These tokens have no ticker, don't check them again for another hour
+        for (String address : lookupMap.keySet())
+        {
+            blankTickers.put(address, new TokenTicker(System.currentTimeMillis() + delayTime));
+        }
+        localSource.updateERC20Tickers(chainId, blankTickers);
     }
 
     private void addDexGuruTickers(Collection<TokenCardMeta> tokens)

@@ -49,4 +49,8 @@ public interface KeyProvider
     String getSmartPassKey();
 
     String getSmartPassDevKey();
+
+    String getCoinGeckoKey();
+
+    String getBackupKey();
 }

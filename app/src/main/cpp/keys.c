@@ -311,6 +311,28 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSmartPassKey( JNIEnv* 
 }
 
 JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getCoinGeckoKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, coinGeckoKey);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBackupKey( JNIEnv* env, jclass thiz )
+{
+#if (HAS_KEYS == 1)
+    return getDecryptedKey(env, backupKey1);
+#else
+    const jstring key = "";
+    return (*env)->NewStringUTF(env, key);
+#endif
+}
+
+JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSmartPassDevKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)

@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class TransactionListResponse
+public class OkServiceResponse
 {
     @SerializedName("code")
     @Expose
@@ -45,5 +45,9 @@ public class TransactionListResponse
         @SerializedName("transactionLists")
         @Expose
         public List<OkxEvent> transactionLists;
+
+        @SerializedName("tokenList")
+        @Expose
+        public List<OkToken> tokenList;
     }
 }

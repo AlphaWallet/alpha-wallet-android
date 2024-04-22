@@ -405,7 +405,7 @@ public class TokenRepository implements TokenRepositoryType {
     {
         if (chainId == OKX_ID)
         {
-            return tokenInfoFromOKLinkService(contractAddr); //don't need type here, we can determine that from the return
+            return tokenInfoFromOKLinkService(chainId, contractAddr); //don't need type here, we can determine that from the return
         }
 
         switch (type)
@@ -424,9 +424,9 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private Single<TokenInfo> tokenInfoFromOKLinkService(String contractAddr)
+    private Single<TokenInfo> tokenInfoFromOKLinkService(long chainId, String contractAddr)
     {
-        return Single.fromCallable(() -> OkLinkService.get(okClient).getTokenInfo(contractAddr)).observeOn(Schedulers.io());
+        return Single.fromCallable(() -> OkLinkService.get(okClient).getTokenInfo(chainId, contractAddr)).observeOn(Schedulers.io());
     }
 
     @Override

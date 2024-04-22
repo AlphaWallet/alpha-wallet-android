@@ -117,6 +117,12 @@ public class KeyProviderMockNonProductionImpl implements KeyProvider
     }
 
     @Override
+    public String getOkLBKey()
+    {
+        return null;
+    }
+
+    @Override
     public String getBlockPiBaobabKey()
     {
         return null;

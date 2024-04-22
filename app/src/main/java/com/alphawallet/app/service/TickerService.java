@@ -756,7 +756,7 @@ public class TickerService
     private void onTickersError(Throwable throwable)
     {
         mainTickerUpdate = null;
-        throwable.printStackTrace();
+        Timber.e(throwable);
     }
 
     public static String getFullCurrencyString(double price)
@@ -913,5 +913,27 @@ public class TickerService
         }
 
         return true;
+    }
+
+    //Store received ticker if required
+    public void storeTickers(long chainId, Map<String, TokenTicker> tickerMap)
+    {
+        //if ticker not found or out of date update the price
+        //ticker up to date?
+        Map<String, TokenTicker> tickerUpdateMap = new HashMap<>();
+        for (String key : tickerMap.keySet())
+        {
+            String dbKey = TokensRealmSource.databaseKey(chainId, key);
+            TokenTicker fromDb = localSource.getCurrentTicker(dbKey);
+            if (fromDb == null || fromDb.getTickerAgeMillis() > TICKER_STALE_TIMEOUT)
+            {
+                tickerUpdateMap.put(key, tickerMap.get(key));
+            }
+        }
+
+        if (!tickerUpdateMap.isEmpty())
+        {
+            localSource.updateERC20Tickers(chainId, tickerUpdateMap);
+        }
     }
 }

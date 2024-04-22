@@ -18,14 +18,11 @@ import android.util.LongSparseArray;
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
-import com.alphawallet.app.entity.opensea.AssetContract;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.util.JsonUtils;
-import com.alphawallet.ethereum.EthereumNetworkBase;
-import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -58,7 +55,7 @@ public class OpenSeaService
     private final LongSparseArray<Long> networkCheckTimes = new LongSparseArray<>();
     private final Map<Long, String> pageOffsets = new ConcurrentHashMap<>();
 
-    private final Map<Long, String> API_CHAIN_MAP = Map.of(
+    private final static Map<Long, String> API_CHAIN_MAP = Map.of(
             MAINNET_ID, "ethereum",
             KLAYTN_ID, "klaytn",
             POLYGON_TEST_ID, "mumbai",
@@ -346,7 +343,7 @@ public class OpenSeaService
     public boolean canCheckChain(long networkId)
     {
         long lastCheckTime = networkCheckTimes.get(networkId, 0L);
-        return System.currentTimeMillis() > (lastCheckTime + DateUtils.MINUTE_IN_MILLIS);
+        return System.currentTimeMillis() > (lastCheckTime + 10 * DateUtils.MINUTE_IN_MILLIS);
     }
 
     public Single<String> getAsset(Token token, BigInteger tokenId)
@@ -406,5 +403,10 @@ public class OpenSeaService
     {
         String api = C.OPENSEA_COLLECTION_API_MAINNET + slug;
         return executeRequest(networkId, api);
+    }
+
+    public static boolean hasOpenSeaAPI(long chainId)
+    {
+        return API_CHAIN_MAP.containsKey(chainId);
     }
 }

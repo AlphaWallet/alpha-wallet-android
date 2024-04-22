@@ -6,6 +6,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_AMOY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 
@@ -29,6 +30,7 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.transactionAPI.TransferFetchType;
 import com.alphawallet.app.entity.transactions.TransferEvent;
+import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.TransactionsRealmCache;
@@ -494,9 +496,9 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         //get oldest record
         long lastBlockFound = getTokenBlockRead(instance, networkInfo.chainId, tfType);
 
-        if (networkInfo.chainId == OKX_ID)
+        if (EthereumNetworkBase.isOKX(networkInfo))
         {
-           events = OkLinkService.get(httpClient).getEtherscanEvents(walletAddress, lastBlockFound, tfType);
+           events = OkLinkService.get(httpClient).getEtherscanEvents(networkInfo.chainId, walletAddress, lastBlockFound, tfType);
            eventList = new ArrayList<>(Arrays.asList(events));
         }
         else
@@ -729,7 +731,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         {
             return BSC_EXPLORER_API_KEY;
         }
-        else if (networkInfo.chainId == POLYGON_ID || networkInfo.chainId == POLYGON_TEST_ID)
+        else if (networkInfo.chainId == POLYGON_ID || networkInfo.chainId == POLYGON_TEST_ID || networkInfo.chainId == POLYGON_AMOY_ID)
         {
             return POLYGONSCAN_API_KEY;
         }
@@ -1258,7 +1260,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
     {
         List<Transaction> txList = new ArrayList<>(txCollection);
 
-        Collections.sort(txList, (t1, t2) -> {
+        txList.sort((t1, t2) -> {
             long block1 = Long.parseLong(t1.blockNumber);
             long block2 = Long.parseLong(t2.blockNumber);
 

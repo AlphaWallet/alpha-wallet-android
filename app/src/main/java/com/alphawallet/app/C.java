@@ -58,6 +58,10 @@ public abstract class C {
     public static final String LINEA_TESTNET_NAME = LINEA_NAME + " (Test)";
     public static final String HOLESKY_TESTNET_NAME = "Holesky (Test)";
 
+    public static final String AMOY_TESTNET_NAME = "Amoy (Test)";
+    public static final String BASE_MAINNET_NAME = "Base";
+    public static final String BASE_TESTNET_NAME = "Base Sepolia (Test)";
+
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
     public static final String XDAI_TICKER_NAME = "dai";
@@ -90,6 +94,8 @@ public abstract class C {
     public static final String ROOTSTOCK_SYMBOL = "RBTC";
     public static final String ROOTSTOCK_TEST_SYMBOL = "tBTC";
     public static final String HOLESKY_TEST_SYMBOL = "Hol" + ETH_SYMBOL;
+
+    public static final String AMOY_TESTNET_SYMBOL = "Am" + ETH_SYMBOL;
 
     public static final String BURN_ADDRESS = "0x0000000000000000000000000000000000000000";
 

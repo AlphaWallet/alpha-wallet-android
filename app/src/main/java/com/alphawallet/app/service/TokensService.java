@@ -3,7 +3,6 @@ package com.alphawallet.app.service;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
-import android.media.Image;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Pair;
@@ -21,10 +20,12 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.okx.OkTokenCheck;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokendata.TokenUpdateType;
-import com.alphawallet.app.entity.tokens.Attestation;
+import com.alphawallet.app.entity.okx.OkProtocolType;
+import com.alphawallet.app.entity.okx.OkToken;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
@@ -33,7 +34,6 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
-import com.alphawallet.app.ui.widget.entity.IconItem;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 
@@ -44,6 +44,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,6 +59,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
 public class TokensService
@@ -75,12 +77,14 @@ public class TokensService
     private final TokenRepositoryType tokenRepository;
     private final TickerService tickerService;
     private final OpenSeaService openseaService;
+    private final OkHttpClient httpClient;
     private final AnalyticsServiceType<AnalyticsProperties> analyticsService;
     private final List<Long> networkFilter;
     private ContractLocator focusToken;
     private final ConcurrentLinkedDeque<ContractAddress> unknownTokens;
     private final ConcurrentLinkedQueue<Long> baseTokenCheck;
     private final ConcurrentLinkedQueue<ImageEntry> imagesForWrite;
+    private final ConcurrentLinkedQueue<OkTokenCheck> chainCheckList;
     private long openSeaCheckId;
     private boolean appHasFocus;
     private static boolean walletStartup = false;
@@ -107,6 +111,8 @@ public class TokensService
     private Disposable openSeaQueryDisposable;
     @Nullable
     private Disposable imageWriter;
+    @Nullable
+    private Disposable okDisposable;
 
     private static boolean done = false;
 
@@ -114,7 +120,8 @@ public class TokensService
                          TokenRepositoryType tokenRepository,
                          TickerService tickerService,
                          OpenSeaService openseaService,
-                         AnalyticsServiceType<AnalyticsProperties> analyticsService) {
+                         AnalyticsServiceType<AnalyticsProperties> analyticsService,
+                         OkHttpClient httpClient) {
         this.ethereumNetworkRepository = ethereumNetworkRepository;
         this.tokenRepository = tokenRepository;
         this.tickerService = tickerService;
@@ -126,6 +133,8 @@ public class TokensService
         this.unknownTokens = new ConcurrentLinkedDeque<>();
         this.baseTokenCheck = new ConcurrentLinkedQueue<>();
         this.imagesForWrite = new ConcurrentLinkedQueue<>();
+        this.chainCheckList = new ConcurrentLinkedQueue<>();
+        this.httpClient = httpClient;
         setCurrentAddress(ethereumNetworkRepository.getCurrentWalletAddress()); //set current wallet address at service startup
         appHasFocus = true;
         transferCheckChain = 0;
@@ -139,7 +148,7 @@ public class TokensService
             ContractAddress t = unknownTokens.pollFirst();
             Token cachedToken = t != null ? getToken(t.chainId, t.address) : null;
 
-            if (t != null && t.address.length() > 0 && (cachedToken == null || TextUtils.isEmpty(cachedToken.tokenInfo.name)))
+            if (t != null && !t.address.isEmpty() && (cachedToken == null || TextUtils.isEmpty(cachedToken.tokenInfo.name)))
             {
                 ContractType type = tokenRepository.determineCommonType(new TokenInfo(t.address, "", "", 18, false, t.chainId)).blockingGet();
 
@@ -248,7 +257,8 @@ public class TokensService
 
     public void startUpdateCycle()
     {
-        if ((lastStartCycleTime + 2000) > System.currentTimeMillis())
+        if ((eventTimer != null && !eventTimer.isDisposed() && (lastStartCycleTime + 10000) > System.currentTimeMillis())
+                || (lastStartCycleTime + 2000) > System.currentTimeMillis())
         {
             return; // Block this refresh - we need to ensure the cycle restarts but within 1 second no need to restart
         }
@@ -272,6 +282,7 @@ public class TokensService
             startupPass();
             checkIssueTokens();
             pendingTokenMap.clear();
+            checkTokensOnOKx();
             return true;
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -328,7 +339,7 @@ public class TokensService
     private boolean syncERC20Tickers(final int chainIndex, final long chainId, final TokenCardMeta[] tokenList)
     {
         List<TokenCardMeta> erc20OnChain = getERC20OnChain(chainId, tokenList);
-        if (erc20OnChain.size() > 0)
+        if (!erc20OnChain.isEmpty())
         {
             tickerService.syncERC20Tickers(chainId, erc20OnChain)
                     .subscribeOn(Schedulers.io())
@@ -344,7 +355,7 @@ public class TokensService
         }
     }
 
-    private List<TokenCardMeta> getERC20OnChain( long chainId, TokenCardMeta[] tokenList)
+    private List<TokenCardMeta> getERC20OnChain(long chainId, TokenCardMeta[] tokenList)
     {
         List<TokenCardMeta> allERC20 = new ArrayList<>();
         for (TokenCardMeta tcm : tokenList)
@@ -408,12 +419,14 @@ public class TokensService
         if (checkUnknownTokenCycle != null && !checkUnknownTokenCycle.isDisposed()) { checkUnknownTokenCycle.dispose(); }
         if (queryUnknownTokensDisposable != null && !queryUnknownTokensDisposable.isDisposed()) { queryUnknownTokensDisposable.dispose(); }
         if (openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed()) { openSeaQueryDisposable.dispose(); }
+        if (okDisposable != null && !okDisposable.isDisposed()) { okDisposable.dispose(); }
 
         pendingChainMap.clear();
         tokenStoreList.clear();
         baseTokenCheck.clear();
         pendingTokenMap.clear();
         unknownTokens.clear();
+        chainCheckList.clear();
     }
 
     public String getCurrentAddress() { return currentAddress; }
@@ -423,7 +436,7 @@ public class TokensService
     public void setupFilter(boolean userUpdated)
     {
         networkFilter.clear();
-        if (CustomViewSettings.getLockedChains().size() > 0)
+        if (!CustomViewSettings.getLockedChains().isEmpty())
         {
             networkFilter.addAll(CustomViewSettings.getLockedChains());
         }
@@ -533,6 +546,49 @@ public class TokensService
                     })
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io()).subscribe().isDisposed();
+        }
+    }
+
+    private void checkTokensOnOKx()
+    {
+        if (httpClient == null)
+        {
+            return;
+        }
+        //refresh check list
+        //get list of current chains we need to check
+        chainCheckList.clear();
+        for (long chainId : networkFilter)
+        {
+            if (OkLinkService.supportsChain(chainId))
+            {
+                chainCheckList.add(new OkTokenCheck(chainId, OkProtocolType.ERC_20));
+                chainCheckList.add(new OkTokenCheck(chainId, OkProtocolType.ERC_721));
+                chainCheckList.add(new OkTokenCheck(chainId, OkProtocolType.ERC_1155));
+            }
+        }
+
+        if (okDisposable == null || okDisposable.isDisposed())
+        {
+            okDisposable = Observable.interval(2000, 1000, TimeUnit.MILLISECONDS)
+                    .doOnNext(l -> checkChainOnOkx()).subscribe();
+        }
+    }
+
+    private void checkChainOnOkx()
+    {
+        if (chainCheckList.isEmpty())
+        {
+            okDisposable.dispose();
+            okDisposable = null;
+            return;
+        }
+
+        //perform check & update tokens
+        OkTokenCheck thisCheck = chainCheckList.poll();
+        if (thisCheck != null)
+        {
+            checkOkTokens(thisCheck.chainId, thisCheck.type);
         }
     }
 
@@ -761,6 +817,68 @@ public class TokensService
                     openSeaQueryDisposable = null;
                     openSeaCheckId = 0;
                 }, this::openSeaCallError);
+    }
+
+    private void checkOkTokens(long chainId, OkProtocolType tokenType)
+    {
+        OkLinkService.get(httpClient).getTokensForChain(chainId, currentAddress, tokenType)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(tokenList -> processOkTokenList(tokenList, chainId, tokenType))
+                .isDisposed();
+    }
+
+    private void processOkTokenList(List<OkToken> tokenList, long chainId, OkProtocolType tokenType)
+    {
+        //process the list; it's either an individual NFT or an ERC20 token
+        Map<String, TokenTicker> tickerMap = new HashMap<>();
+        for (OkToken okToken : tokenList)
+        {
+            //first check if token is known
+            Token token = getToken(chainId, okToken.tokenContractAddress);
+            if (token == null)
+            {
+                addUnknownTokenToCheck(new ContractAddress(chainId, okToken.tokenContractAddress));
+            }
+
+            switch (tokenType)
+            {
+                case ERC_20 ->
+                {
+                    if (!TextUtils.isEmpty(okToken.priceUsd) && !okToken.priceUsd.equals("0"))
+                    {
+                        TokenTicker ticker = new TokenTicker(okToken.priceUsd, "0", okToken.symbol, "", System.currentTimeMillis());
+                        tickerMap.put(okToken.tokenContractAddress, ticker);
+                    }
+                }
+                case ERC_721, ERC_1155 ->
+                {
+                    //handle each individual token
+                    //check if this tokenId is known
+                    BigInteger tokenId = new BigInteger(okToken.tokenId);
+                    if (token == null)
+                    {
+                        token = tokenFactory.createToken(okToken.createInfo(chainId), OkProtocolType.getStandardType(tokenType), ethereumNetworkRepository.getNetworkByChain(chainId).getShortName());
+                    }
+
+                    NFTAsset asset = token.getAssetForToken(tokenId);
+
+                    if (asset == null)
+                    {
+                        //create blank asset with tokenId
+                        asset = new NFTAsset(tokenId);
+                        asset.setBalance(new BigDecimal(okToken.holdingAmount));
+                        //store the asset
+                        storeAsset(token, tokenId, asset);
+                    }
+                }
+            }
+        }
+
+        if (tokenType == OkProtocolType.ERC_20)
+        {
+            tickerService.storeTickers(chainId, tickerMap);
+        }
     }
 
     private void openSeaCallError(Throwable error)
@@ -1167,7 +1285,7 @@ public class TokensService
 
     public boolean hasChainToken(long chainId)
     {
-        return EthereumNetworkRepository.getChainOverrideAddress(chainId).length() > 0;
+        return !EthereumNetworkRepository.getChainOverrideAddress(chainId).isEmpty();
     }
 
     public Token getServiceToken(long chainId)

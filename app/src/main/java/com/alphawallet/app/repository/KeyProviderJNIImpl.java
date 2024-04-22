@@ -45,6 +45,8 @@ public class KeyProviderJNIImpl implements KeyProvider
 
     public native String getOkLinkKey();
 
+    public native String getOkLBKey();
+
     public native String getBlockPiBaobabKey();
 
     public native String getBlockPiCypressKey();

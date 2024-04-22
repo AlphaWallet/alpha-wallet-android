@@ -73,4 +73,9 @@ public class TokenTicker implements Parcelable {
         dest.writeString(priceSymbol);
         dest.writeLong(updateTime);
     }
+
+    public long getTickerAgeMillis()
+    {
+        return (System.currentTimeMillis() - updateTime);
+    }
 }

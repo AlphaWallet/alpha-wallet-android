@@ -4,6 +4,7 @@ import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_AD
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BASE_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CRONOS_MAIN_ID;
@@ -756,7 +757,7 @@ public class TickerService
     private void onTickersError(Throwable throwable)
     {
         mainTickerUpdate = null;
-        throwable.printStackTrace();
+        Timber.e(throwable);
     }
 
     public static String getFullCurrencyString(double price)
@@ -837,6 +838,7 @@ public class TickerService
         put(CRONOS_MAIN_ID, "cronos");
         put(ROOTSTOCK_MAINNET_ID, "rootstock");
         put(LINEA_ID, "linea");
+        put(BASE_MAINNET_ID, "base");
     }};
 
     // For now, don't use Dexguru unless we obtain API key
@@ -875,6 +877,7 @@ public class TickerService
         put(OKX_ID, "okb");
         put(ROOTSTOCK_MAINNET_ID, "rootstock");
         put(LINEA_ID, "ethereum");
+        put(BASE_MAINNET_ID, "base");
     }};
 
     public static boolean validateCoinGeckoAPI(Token token)
@@ -913,5 +916,27 @@ public class TickerService
         }
 
         return true;
+    }
+
+    //Store received ticker if required
+    public void storeTickers(long chainId, Map<String, TokenTicker> tickerMap)
+    {
+        //if ticker not found or out of date update the price
+        //ticker up to date?
+        Map<String, TokenTicker> tickerUpdateMap = new HashMap<>();
+        for (String key : tickerMap.keySet())
+        {
+            String dbKey = TokensRealmSource.databaseKey(chainId, key);
+            TokenTicker fromDb = localSource.getCurrentTicker(dbKey);
+            if (fromDb == null || fromDb.getTickerAgeMillis() > TICKER_STALE_TIMEOUT)
+            {
+                tickerUpdateMap.put(key, tickerMap.get(key));
+            }
+        }
+
+        if (!tickerUpdateMap.isEmpty())
+        {
+            localSource.updateERC20Tickers(chainId, tickerUpdateMap);
+        }
     }
 }

@@ -149,7 +149,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
         this.tickerService = tickerService;
         this.assetService = assetService;
         this.preferenceRepository = preferenceRepository;
-        this.tokensService = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null);
+        this.tokensService = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null, null);
 
         ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), context);
         syncCallback = null;
@@ -342,7 +342,7 @@ public class WalletsViewModel extends BaseViewModel implements ServiceSyncCallba
     private Single<Wallet> startWalletSync(Wallet wallet)
     {
         return Single.fromCallable(() -> {
-            TokensService svs = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null);
+            TokensService svs = new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, null, null, null);
             svs.setCurrentAddress(wallet.address.toLowerCase());
             svs.startUpdateCycle();
             svs.setCompletionCallback(this, 2);

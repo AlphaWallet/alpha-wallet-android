@@ -1,6 +1,7 @@
 package com.alphawallet.app.util;
 
 import static com.alphawallet.app.util.Utils.isValidUrl;
+import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_AMOY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 
@@ -291,7 +292,7 @@ public class DappBrowserUtils
 
     public static String defaultDapp(long chainId)
     {
-        return (chainId == POLYGON_ID || chainId == POLYGON_TEST_ID) ? POLYGON_HOMEPAGE : DEFAULT_HOMEPAGE;
+        return (chainId == POLYGON_ID || chainId == POLYGON_TEST_ID || chainId == POLYGON_AMOY_ID) ? POLYGON_HOMEPAGE : DEFAULT_HOMEPAGE;
     }
 
     public static boolean isWithinHomePage(String url)

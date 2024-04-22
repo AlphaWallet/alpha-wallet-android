@@ -39,6 +39,7 @@ import com.alphawallet.app.service.IPFSServiceType;
 import com.alphawallet.app.service.KeyService;
 import com.alphawallet.app.service.KeystoreAccountService;
 import com.alphawallet.app.service.NotificationService;
+import com.alphawallet.app.service.OkLinkService;
 import com.alphawallet.app.service.OpenSeaService;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.SwapService;
@@ -198,9 +199,10 @@ public class RepositoriesModule
                                         TokenRepositoryType tokenRepository,
                                         TickerService tickerService,
                                         OpenSeaService openseaService,
-                                        AnalyticsServiceType analyticsService)
+                                        AnalyticsServiceType analyticsService,
+                                        OkHttpClient client)
     {
-        return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService);
+        return new TokensService(ethereumNetworkRepository, tokenRepository, tickerService, openseaService, analyticsService, client);
     }
 
     @Singleton

@@ -45,6 +45,9 @@ public abstract class EthereumNetworkBase
     public static final long HOLESKY_ID = 17000;
     public static final long LINEA_ID = 59144;
     public static final long LINEA_TEST_ID = 59140;
+    public static final long POLYGON_AMOY_ID = 80002;
+    public static final long BASE_MAINNET_ID = 8453;
+    public static final long BASE_TESTNET_ID = 84532;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -60,6 +63,7 @@ public abstract class EthereumNetworkBase
     public static final String FANTOM_TEST_RPC_URL = "https://rpc.ankr.com/fantom_testnet";
     public static final String MATIC_RPC_URL = "https://matic-mainnet.chainstacklabs.com";
     public static final String MUMBAI_TEST_RPC_URL = "https://matic-mumbai.chainstacklabs.com";
+    public static final String AMOY_TEST_RPC_URL = "https://rpc-amoy.polygon.technology";
     public static final String OPTIMISTIC_MAIN_FALLBACK_URL = "https://mainnet.optimism.io";
     public static final String CRONOS_MAIN_RPC_URL = "https://evm.cronos.org";
     public static final String CRONOS_TEST_URL = "https://evm-t3.cronos.org";
@@ -84,6 +88,10 @@ public abstract class EthereumNetworkBase
     public static final String HOLESKY_FALLBACK_URL = "https://holesky.rpc.thirdweb.com";
     public static final String LINEA_FREE_RPC = "https://linea.drpc.org";
     public static final String LINEA_TEST_FREE_RPC = "https://rpc.goerli.linea.build";
+
+    public static final String BASE_FREE_MAINNET_RPC = "https://base-rpc.publicnode.com";
+    public static final String BASE_FREE_TESTNET_RPC = "https://base-sepolia-rpc.publicnode.com";
+
 
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>()
     {
@@ -116,6 +124,8 @@ public abstract class EthereumNetworkBase
                     POLYGON_ID, false));
             put(POLYGON_TEST_ID, new NetworkInfo("Mumbai (Test)", "POLY", MUMBAI_TEST_RPC_URL, "https://mumbai.polygonscan.com/tx/",
                     POLYGON_TEST_ID, false));
+            put(POLYGON_AMOY_ID, new NetworkInfo("Amoy (Test)", "POLY", AMOY_TEST_RPC_URL, "https://amoy.polygonscan.com/tx/",
+                    POLYGON_AMOY_ID, false));
 
             put(OPTIMISTIC_MAIN_ID, new NetworkInfo("Optimistic", "ETH", OPTIMISTIC_MAIN_FALLBACK_URL, "https://optimistic.etherscan.io/tx/",
                     OPTIMISTIC_MAIN_ID, false));
@@ -164,6 +174,11 @@ public abstract class EthereumNetworkBase
                     LINEA_TEST_ID, false));
             put(HOLESKY_ID, new NetworkInfo("Rootstock (Test)", "HolETH", HOLESKY_RPC_URL, "https://holesky.etherscan.io/tx/",
                     HOLESKY_ID, false));
+
+            put(BASE_MAINNET_ID, new NetworkInfo("Base", "ETH", BASE_FREE_MAINNET_RPC, "https://basescan.org/tx/",
+                    BASE_MAINNET_ID, false));
+            put(BASE_TESTNET_ID, new NetworkInfo("Base (Test)", "ETH", BASE_FREE_TESTNET_RPC, "https://sepolia.basescan.org/tx/",
+                    BASE_TESTNET_ID, false));
         }
     };
 

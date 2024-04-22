@@ -380,6 +380,8 @@ public class GasService implements ContractGasProvider
         updateChainId(chainId);
         String finalTxData = txData;
 
+        BigInteger useGasLimit = defaultLimit.equals(BigInteger.ZERO) ? EthereumNetworkBase.getMaxGasLimit(chainId) : defaultLimit;
+
         if ((toAddress.equals("") || toAddress.equals(ZERO_ADDRESS)) && txData.length() > 0) //Check gas for constructor
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
@@ -389,7 +391,7 @@ public class GasService implements ContractGasProvider
         else
         {
             return networkRepository.getLastTransactionNonce(web3j, wallet.address)
-                    .flatMap(nonce -> ethEstimateGas(chainId, wallet.address, nonce, toAddress, amount, finalTxData))
+                    .flatMap(nonce -> ethEstimateGas(chainId, wallet.address, useGasLimit, nonce, toAddress, amount, finalTxData))
                     .flatMap(estimate -> handleOutOfGasError(estimate, chainId, toAddress, amount, finalTxData))
                     .map(estimate -> convertToGasLimit(estimate, defaultLimit));
         }
@@ -427,7 +429,7 @@ public class GasService implements ContractGasProvider
     {
         if (!estimate.hasError() || chainId != 1) return Single.fromCallable(() -> estimate);
         else return networkRepository.getLastTransactionNonce(web3j, WHALE_ACCOUNT)
-                .flatMap(nonce -> ethEstimateGas(chainId, WHALE_ACCOUNT, nonce, toAddress, amount, finalTxData));
+                .flatMap(nonce -> ethEstimateGas(chainId, WHALE_ACCOUNT, EthereumNetworkBase.getMaxGasLimit(chainId), nonce, toAddress, amount, finalTxData));
     }
 
     private BigInteger getLowGasPrice()
@@ -443,14 +445,14 @@ public class GasService implements ContractGasProvider
         return Single.fromCallable(() -> web3j.ethEstimateGas(transaction).send());
     }
 
-    private Single<EthEstimateGas> ethEstimateGas(long chainId, String fromAddress, BigInteger nonce, String toAddress,
+    private Single<EthEstimateGas> ethEstimateGas(long chainId, String fromAddress, BigInteger limit, BigInteger nonce, String toAddress,
                                                   BigInteger amount, String txData)
     {
         final Transaction transaction = new Transaction (
                 fromAddress,
                 nonce,
                 currentGasPrice,
-                EthereumNetworkBase.getMaxGasLimit(chainId),
+                limit,
                 toAddress,
                 amount,
                 txData);

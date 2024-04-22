@@ -723,7 +723,7 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private String getNetworkAPIToken(NetworkInfo networkInfo)
     {
-        if (networkInfo.etherscanAPI.contains("etherscan"))
+        if (networkInfo.etherscanAPI.contains("etherscan") /*|| networkInfo.etherscanAPI.contains("basescan.org")*/)
         {
             return ETHERSCAN_API_KEY;
         }

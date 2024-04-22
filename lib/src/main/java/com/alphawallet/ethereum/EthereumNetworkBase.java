@@ -89,6 +89,10 @@ public abstract class EthereumNetworkBase
     public static final String LINEA_FREE_RPC = "https://linea.drpc.org";
     public static final String LINEA_TEST_FREE_RPC = "https://rpc.goerli.linea.build";
 
+    public static final String BASE_FREE_MAINNET_RPC = "https://base-rpc.publicnode.com";
+    public static final String BASE_FREE_TESTNET_RPC = "https://base-sepolia-rpc.publicnode.com";
+
+
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>()
     {
         {
@@ -170,6 +174,11 @@ public abstract class EthereumNetworkBase
                     LINEA_TEST_ID, false));
             put(HOLESKY_ID, new NetworkInfo("Rootstock (Test)", "HolETH", HOLESKY_RPC_URL, "https://holesky.etherscan.io/tx/",
                     HOLESKY_ID, false));
+
+            put(BASE_MAINNET_ID, new NetworkInfo("Base", "ETH", BASE_FREE_MAINNET_RPC, "https://basescan.org/tx/",
+                    BASE_MAINNET_ID, false));
+            put(BASE_TESTNET_ID, new NetworkInfo("Base (Test)", "ETH", BASE_FREE_TESTNET_RPC, "https://sepolia.basescan.org/tx/",
+                    BASE_TESTNET_ID, false));
         }
     };
 

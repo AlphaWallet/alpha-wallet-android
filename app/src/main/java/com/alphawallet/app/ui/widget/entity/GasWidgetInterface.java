@@ -23,6 +23,7 @@ public interface GasWidgetInterface
     BigInteger getPriorityFee();
     BigInteger getGasPrice();
     void setGasEstimate(BigInteger estimate);
+    void setGasEstimateExact(BigInteger estimate);
     void onDestroy();
     boolean checkSufficientGas();
     void setupResendSettings(ActionSheetMode mode, BigInteger gasPrice);

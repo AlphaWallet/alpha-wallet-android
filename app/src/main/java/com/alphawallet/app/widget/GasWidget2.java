@@ -534,12 +534,17 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
      */
     public void setGasEstimate(BigInteger estimate)
     {
-        if (estimate.longValue() > C.GAS_LIMIT_MIN) //some kind of contract interaction
+        if (!customGasLimit.equals(estimate) && estimate.longValue() > C.GAS_LIMIT_MIN) //some kind of contract interaction
         {
             estimate = estimate.multiply(BigInteger.valueOf(6)).divide(BigInteger.valueOf(5)); // increase estimate by 20% to be safe
         }
 
-        //Override custom gas limit if required
+        setGasEstimateExact(estimate);
+    }
+
+    @Override
+    public void setGasEstimateExact(BigInteger estimate)
+    {
         if (customGasLimit.equals(presetGasLimit))
         {
             customGasLimit = estimate;

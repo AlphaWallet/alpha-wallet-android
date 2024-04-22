@@ -580,6 +580,12 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
             estimate = estimate.multiply(BigInteger.valueOf(6)).divide(BigInteger.valueOf(5)); // increase estimate by 20% to be safe
         }
 
+        setGasEstimateExact(estimate);
+    }
+
+    @Override
+    public void setGasEstimateExact(BigInteger estimate)
+    {
         //Override custom gas limit
         if (customGasLimit.equals(baseLineGasLimit))
         {

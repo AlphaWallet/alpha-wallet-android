@@ -4,6 +4,7 @@ import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_AD
 import static com.alphawallet.ethereum.EthereumNetworkBase.ARBITRUM_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BASE_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CRONOS_MAIN_ID;
@@ -837,6 +838,7 @@ public class TickerService
         put(CRONOS_MAIN_ID, "cronos");
         put(ROOTSTOCK_MAINNET_ID, "rootstock");
         put(LINEA_ID, "linea");
+        put(BASE_MAINNET_ID, "base");
     }};
 
     // For now, don't use Dexguru unless we obtain API key
@@ -875,6 +877,7 @@ public class TickerService
         put(OKX_ID, "okb");
         put(ROOTSTOCK_MAINNET_ID, "rootstock");
         put(LINEA_ID, "ethereum");
+        put(BASE_MAINNET_ID, "base");
     }};
 
     public static boolean validateCoinGeckoAPI(Token token)

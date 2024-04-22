@@ -156,7 +156,8 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
         if (!tx.gasLimit.equals(BigInteger.ZERO))
         {
-            setGasEstimate(new GasEstimate(tx.gasLimit));
+            gasWidgetInterface.setGasEstimateExact(tx.gasLimit);
+            functionBar.setPrimaryButtonEnabled(true);
         }
 
         updateAmount();

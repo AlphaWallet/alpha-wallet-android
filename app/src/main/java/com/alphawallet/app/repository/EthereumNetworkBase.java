@@ -17,6 +17,10 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AURORA_TESTNET_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.AVALANCHE_RPC_URL;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BASE_FREE_MAINNET_RPC;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BASE_FREE_TESTNET_RPC;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BASE_MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.BASE_TESTNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.BINANCE_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
@@ -160,6 +164,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static final String AMOY_RPC_FALLBACK = usesProductionKey ? AMOY_TEST_RPC_URL : "https://polygon-amoy-bor-rpc.publicnode.com";
 
+
+
     public static final String USE_KLAYTN_RPC = !TextUtils.isEmpty(keyProvider.getBlockPiCypressKey()) ? "https://klaytn.blockpi.network/v1/rpc/" + keyProvider.getBlockPiCypressKey()
             : KLAYTN_RPC;
     public static final String USE_KLAYTN_BAOBAB_RPC = !TextUtils.isEmpty(keyProvider.getBlockPiBaobabKey()) ? "https://klaytn-baobab.blockpi.network/v1/rpc/" + keyProvider.getBlockPiBaobabKey()
@@ -175,6 +181,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String LINEA_FALLBACK_RPC = usesProductionKey ? LINEA_FREE_RPC : "https://linea.drpc.org";
     public static final String LINEA_RPC = usesProductionKey ? "https://linea-mainnet.infura.io/v3/" + keyProvider.getInfuraKey() : LINEA_FALLBACK_RPC;
     public static final String LINEA_TEST_RPC = usesProductionKey ? "https://linea-goerli.infura.io/v3/" + keyProvider.getInfuraKey() : LINEA_TEST_FREE_RPC;
+    public static final String BASE_RPC = usesProductionKey ? "https://base-mainnet.infura.io/v3/" + keyProvider.getInfuraKey() : BASE_FREE_MAINNET_RPC;
+    public static final String BASE_FALLBACK_RPC = usesProductionKey ? BASE_FREE_MAINNET_RPC : "https://base-mainnet.public.blastapi.io";
+    public static final String BASE_TEST_RPC = usesProductionKey ? "https://base-sepolia.infura.io/v3/" + keyProvider.getInfuraKey() : BASE_FREE_TESTNET_RPC;
+    public static final String BASE_TEST_FALLBACK_RPC = usesProductionKey ? BASE_FREE_TESTNET_RPC : "https://sepolia.base.org";
 
     //Note that AlphaWallet now uses a double node configuration. See class AWHttpService comment 'try primary node'.
     //If you supply a main RPC and secondary it will try the secondary if the primary node times out after 10 seconds.
@@ -199,17 +209,18 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //If your wallet prioritises xDai for example, you may want to move the XDAI_ID to the front of this list,
     //Then xDai would appear as the first token at the top of the wallet
     private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
-            MAINNET_ID, GNOSIS_ID, POLYGON_ID, ROOTSTOCK_MAINNET_ID, CLASSIC_ID, LINEA_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
+            MAINNET_ID, GNOSIS_ID, POLYGON_ID, ROOTSTOCK_MAINNET_ID, CLASSIC_ID, LINEA_ID, BASE_MAINNET_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
             FANTOM_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID, OKX_ID));
 
     private static final List<Long> testnetList = new ArrayList<>(Arrays.asList(
-            SEPOLIA_TESTNET_ID, POLYGON_AMOY_ID, HOLESKY_ID, GOERLI_ID, BINANCE_TEST_ID,
+            SEPOLIA_TESTNET_ID, POLYGON_AMOY_ID, HOLESKY_ID, BASE_TESTNET_ID, GOERLI_ID, BINANCE_TEST_ID,
             ROOTSTOCK_TESTNET_ID, CRONOS_TEST_ID, OPTIMISM_GOERLI_TEST_ID, POLYGON_TEST_ID, ARBITRUM_GOERLI_TEST_ID, LINEA_TEST_ID, KLAYTN_BAOBAB_ID,
             FANTOM_TEST_ID, IOTEX_TESTNET_ID, FUJI_TEST_ID, MILKOMEDA_C1_TEST_ID,
             AURORA_TESTNET_ID, PALM_TEST_ID));
 
     private static final List<Long> deprecatedNetworkList = new ArrayList<>(Arrays.asList(
             // Add deprecated testnet IDs here
+            POLYGON_TEST_ID, GOERLI_ID
     ));
 
     private static final String INFURA_ENDPOINT = ".infura.io/v3/";
@@ -374,6 +385,14 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     HOLESKY_RPC_URL,
                     "https://holesky.etherscan.io/tx/", HOLESKY_ID, HOLESKY_BACKUP_RPC_URL,
                     "https://api-holesky.etherscan.io/api?"));
+            put(BASE_MAINNET_ID, new NetworkInfo(C.BASE_MAINNET_NAME, C.ETH_SYMBOL,
+                    BASE_RPC,
+                    "https://basescan.org/tx/", BASE_MAINNET_ID, BASE_FALLBACK_RPC,
+                    "https://api.basescan.org/api?"));
+            put(BASE_TESTNET_ID, new NetworkInfo(C.BASE_TESTNET_NAME, C.ETH_SYMBOL,
+                    BASE_TEST_RPC,
+                    "https://sepolia.basescan.org/tx/", BASE_TESTNET_ID, BASE_TEST_FALLBACK_RPC,
+                    "https://api-sepolia.basescan.org/api?"));
 
             // Add deprecated networks after this line
         }
@@ -423,6 +442,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(LINEA_TEST_ID, R.drawable.ic_icons_linea_testnet);
             put(HOLESKY_ID, R.drawable.ic_icons_holesky);
             put(POLYGON_TEST_ID, R.drawable.ic_icons_tokens_mumbai);
+            put(BASE_MAINNET_ID, R.drawable.ic_base_logo);
+            put(BASE_TESTNET_ID, R.drawable.ic_base_test_logo);
         }
     };
 
@@ -466,6 +487,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(LINEA_ID, R.drawable.ic_icons_linea);
             put(LINEA_TEST_ID, R.drawable.ic_icons_linea_testnet);
             put(HOLESKY_ID, R.drawable.ic_icons_holesky);
+            put(BASE_MAINNET_ID, R.drawable.ic_base_logo);
+            put(BASE_TESTNET_ID, R.drawable.ic_base_test_logo);
         }
     };
 
@@ -509,6 +532,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(LINEA_ID, R.color.black);
             put(LINEA_TEST_ID, R.color.pinkish_grey);
             put(HOLESKY_ID, R.color.azure);
+            put(BASE_MAINNET_ID, R.color.base_logo);
+            put(BASE_TESTNET_ID, R.color.base_logo);
         }
     };
 
@@ -517,7 +542,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //  <etherscanAPI from the above list> + GAS_API
     //If the gas oracle you're adding doesn't follow this spec then you'll have to change the getGasOracle method
     private static final List<Long> hasGasOracleAPI = Arrays.asList(MAINNET_ID, POLYGON_ID, ARBITRUM_MAIN_ID, AVALANCHE_ID, BINANCE_MAIN_ID, CRONOS_MAIN_ID, GOERLI_ID,
-            SEPOLIA_TESTNET_ID, FANTOM_ID, LINEA_ID, OPTIMISTIC_MAIN_ID, POLYGON_TEST_ID, POLYGON_AMOY_ID);
+            SEPOLIA_TESTNET_ID, FANTOM_ID, LINEA_ID, OPTIMISTIC_MAIN_ID, POLYGON_TEST_ID, POLYGON_AMOY_ID, BASE_MAINNET_ID, BASE_TESTNET_ID);
     private static final List<Long> hasEtherscanGasOracleAPI = Arrays.asList(MAINNET_ID, HECO_ID, BINANCE_MAIN_ID, POLYGON_ID);
     private static final List<Long> hasBlockNativeGasOracleAPI = Arrays.asList(MAINNET_ID, POLYGON_ID);
     //These chains don't allow custom gas

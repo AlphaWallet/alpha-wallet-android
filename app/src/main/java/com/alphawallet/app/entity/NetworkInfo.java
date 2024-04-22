@@ -69,7 +69,7 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo
         {
             return new TransferFetchType[]{TransferFetchType.ERC_20, TransferFetchType.ERC_721};
         }
-        else if (etherscanAPI.contains(MATIC_API) || etherscanAPI.contains(ETHERSCAN_API) || etherscanAPI.contains(OKX_API))
+        else if (etherscanAPI.contains(MATIC_API) || etherscanAPI.contains(ETHERSCAN_API) || etherscanAPI.contains(OKX_API) || etherscanAPI.contains("basescan.org"))
         {
             return new TransferFetchType[]{TransferFetchType.ERC_20, TransferFetchType.ERC_721, TransferFetchType.ERC_1155};
         }

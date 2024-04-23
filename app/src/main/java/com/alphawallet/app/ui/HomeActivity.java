@@ -931,27 +931,22 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         }
     }
 
-    private boolean checkNotificationPermission(int permissionTag)
+    private void checkNotificationPermission(int permissionTag)
     {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            String[] permissions;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU)
             {
-                String[] permissions;
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU)
-                {
-                    permissions = new String[]{Manifest.permission.POST_NOTIFICATIONS};
-                }
-                else
-                {
-                    permissions = new String[]{Manifest.permission.ACCESS_NOTIFICATION_POLICY};
-                }
-                requestPermissions(permissions, permissionTag);
-                return false;
+                permissions = new String[]{Manifest.permission.POST_NOTIFICATIONS};
             }
             else
             {
-                return true;
+                permissions = new String[]{Manifest.permission.ACCESS_NOTIFICATION_POLICY};
             }
+            requestPermissions(permissions, permissionTag);
+        }
     }
 
     @Override

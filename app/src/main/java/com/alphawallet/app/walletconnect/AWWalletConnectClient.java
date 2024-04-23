@@ -5,11 +5,16 @@ import static com.alphawallet.hardware.SignatureReturnType.SIGNATURE_GENERATED;
 import static com.walletconnect.web3.wallet.client.Wallet.Model;
 import static com.walletconnect.web3.wallet.client.Wallet.Params;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ServiceInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -18,8 +23,12 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.lifecycle.MutableLiveData;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.alphawallet.app.App;
 import com.alphawallet.app.C;
@@ -34,7 +43,7 @@ import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.service.GasService;
-import com.alphawallet.app.service.WalletConnectV2Service;
+import com.alphawallet.app.ui.WalletConnectNotificationActivity;
 import com.alphawallet.app.ui.WalletConnectSessionActivity;
 import com.alphawallet.app.ui.WalletConnectV2Activity;
 import com.alphawallet.app.ui.widget.entity.ActionSheetCallback;
@@ -86,6 +95,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     private boolean hasConnection;
     private Application application;
     private final PreferenceRepositoryType preferenceRepository;
+    private final int WC_NOTIFICATION_ID = 25964950;
 
     public AWWalletConnectClient(Context context, WalletConnectInteract walletConnectInteract, PreferenceRepositoryType preferenceRepository, GasService gasService)
     {
@@ -270,24 +280,76 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     {
         try
         {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            if (items.isEmpty())
             {
-                if (items.isEmpty())
-                {
-                    context.stopService(new Intent(context, WalletConnectV2Service.class));
-                    //now signal
-                }
-                else
-                {
-                    Intent serviceIntent = new Intent(context, WalletConnectV2Service.class);
-                    ContextCompat.startForegroundService(context, serviceIntent);
-                }
+                removeNotification();
+            }
+            else
+            {
+                displayNotification();
             }
         }
         catch (Exception e)
         {
             //Unable to update
             Timber.e(e);
+        }
+    }
+
+    public void displayNotification()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            createNotificationChannel();
+        }
+        Notification notification = createNotification();
+
+        // Issue the notification if we have user permission
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+        {
+            notificationManager.notify(WC_NOTIFICATION_ID, notification);
+        }
+        else
+        {
+            Intent intent = new Intent(C.REQUEST_NOTIFICATION_ACCESS);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        }
+    }
+
+    final String CHANNEL_ID = "WalletConnectV2Service";
+    private Notification createNotification()
+    {
+        Intent notificationIntent = new Intent(context, WalletConnectNotificationActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, WC_NOTIFICATION_ID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        return new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setContentTitle(context.getString(R.string.notify_wallet_connect_title))
+                .setContentText(context.getString(R.string.notify_wallet_connect_content))
+                .setSmallIcon(R.drawable.ic_logo)
+                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .build();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void createNotificationChannel()
+    {
+        CharSequence name = context.getString(R.string.notify_wallet_connect_title);
+        String description = context.getString(R.string.notify_wallet_connect_content);
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setDescription(description);
+        NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+    }
+
+    //remove notification
+    private void removeNotification()
+    {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+        {
+            notificationManager.cancel(WC_NOTIFICATION_ID);
         }
     }
 

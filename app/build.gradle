@@ -52,7 +52,7 @@ android {
         applicationId "io.stormbird.wallet"
         minSdk 24
         targetSdk 34
-        versionCode 263
+        versionCode 266
         versionName "3.81"
 
         android.buildFeatures.buildConfig true
@@ -64,13 +64,13 @@ android {
         def DEFAULT_INFURA_API_KEY = "\"da3717f25f824cc1baa32d812386d93f\""
         def DEFAULT_OPENSEA_API_KEY = "\"...\""; //Put your OpenSea developer API key in here, otherwise you are reliant on the backup NFT fetch method (which usually works ok)
         def DEFAULT_POLYGONSCAN_API_KEY = "\"...\""; //Put your Polygonscan developer API key in here to get access to Polygon/Mumbai token discovery and transactions
-        def DEFUALT_WALLETCONNECT_PROJECT_ID = "\"40c6071febfd93f4fe485c232a8a4cd9\""
+        def DEFAULT_WALLETCONNECT_PROJECT_ID = "\"40c6071febfd93f4fe485c232a8a4cd9\""
         def DEFAULT_AURORA_API_KEY = "\"HFDDY5BNKGXBB82DE2G8S64C3C41B76PYI\""; //Put your Aurorascan.dev API key here - this one will rate limit as it is common
 
         buildConfigField 'int', 'DB_VERSION', '54'
 
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
-        buildConfigField "String", "WALLETCONNECT_PROJECT_ID", DEFUALT_WALLETCONNECT_PROJECT_ID
+        buildConfigField "String", "WALLETCONNECT_PROJECT_ID", DEFAULT_WALLETCONNECT_PROJECT_ID
 
         buildConfigField "String", "NOTIFICATION_API_BASE_URL", NOTIFICATION_API_BASE_URL
 
@@ -92,7 +92,7 @@ android {
                 cFlags "-DOSKEY=" + DEFAULT_OPENSEA_API_KEY + ""
                 cFlags "-DPSKEY=" + DEFAULT_POLYGONSCAN_API_KEY + ""
                 cFlags "-DASKEY=" + DEFAULT_AURORA_API_KEY + ""
-                cFlags "-DWCKEY=" + DEFUALT_WALLETCONNECT_PROJECT_ID + ""
+                cFlags "-DWCKEY=" + DEFAULT_WALLETCONNECT_PROJECT_ID + ""
             }
             cmake {
                 cFlags "-Wno-dev"

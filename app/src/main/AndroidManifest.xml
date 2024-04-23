@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <!-- Note: this permission is used to display the active WalletConnect Notification. This is a courtesy to the user to inform them a WalletConnect channel is active -->
     <!-- This is pegged to class WalletConnectV2Service which has no data connection, the data connection is only active when the AlphaWallet app is open -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
 
     <uses-feature
@@ -120,14 +120,6 @@
         <activity
                 android:name=".ui.SplashActivity"
                 android:theme="@style/AppTheme.NoActionBar.Splash" />
-
-        <!-- Note: this service is used to display the active WalletConnect Notification. This is a courtesy to the user to inform them a WalletConnect channel is active -->
-        <service
-                android:name=".service.WalletConnectV2Service"
-                android:enabled="true"
-                android:foregroundServiceType="specialUse"
-                android:exported="false">
-        </service>
 
         <service
                 android:name=".service.AlphaWalletFirebaseMessagingService"

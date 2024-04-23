@@ -420,6 +420,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
     @Override
     public void onSessionDisconnected()
     {
+        runOnUiThread(() -> awWalletConnectClient.updateNotification(null));
         finish();
     }
 }

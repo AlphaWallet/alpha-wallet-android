@@ -235,7 +235,7 @@ public class WalletConnectSessionActivity extends BaseActivity
             @Override
             public void onSessionDisconnected()
             {
-                //runOnUiThread(() -> awWalletConnectClient.updateNotification());
+                runOnUiThread(() -> awWalletConnectClient.updateNotification(null));
             }
         }));
         cDialog.setSecondaryButtonText(R.string.action_cancel);

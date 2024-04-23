@@ -68,9 +68,9 @@ public class WalletConnectV2Service extends Service
             createNotificationChannel();
         }
         Notification notification = createNotification();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
         {
-            startForeground(startId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+            startForeground(startId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
         }
         else
         {

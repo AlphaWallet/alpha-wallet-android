@@ -5,8 +5,10 @@ import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 import static org.web3j.protocol.core.methods.request.Transaction.createFunctionCallTransaction;
 import static java.util.Collections.singletonList;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -455,7 +457,19 @@ public class TokenScriptJsActivity extends BaseActivity implements StandardFunct
         {
             tokenScriptView = findViewById(R.id.web3view);
 
-            tokenScriptView.setWebChromeClient(new WebChromeClient());
+            tokenScriptView.getSettings().setSupportMultipleWindows(true);
+            tokenScriptView.setWebChromeClient(new WebChromeClient(){
+                @Override
+                public boolean onCreateWindow(WebView view, boolean dialog, boolean userGesture, android.os.Message resultMsg)
+                {
+                    WebView.HitTestResult result = view.getHitTestResult();
+                    String data = result.getExtra();
+                    Context context = view.getContext();
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(data));
+                    context.startActivity(browserIntent);
+                    return false;
+                }
+            });
             tokenScriptView.setWebViewClient(new WebViewClient(){
                 @Override
                 public void onPageStarted(WebView view, String url, Bitmap favicon) {

@@ -2,15 +2,17 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <!-- NB: Wrapped in RelativeLayout to enable the 'big green success tick' -->
     <LinearLayout
+            android:id="@+id/main_block"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <include layout="@layout/layout_simple_toolbar" />
@@ -92,32 +94,92 @@
 
             </LinearLayout>
 
-            <LinearLayout
+        </LinearLayout>
+    </LinearLayout>
+
+    <ScrollView
+            android:id="@+id/scroll_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/layoutButtons"
+            android:layout_below="@id/main_block">
+
+        <LinearLayout
+                android:id="@+id/layout_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <View style="@style/Aw.Component.Separator" />
-
-                <TextView
-                    android:layout_margin="@dimen/standard_16"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/status" />
-
-                <TextView
-                    android:id="@+id/status_txt"
-                    android:layout_margin="@dimen/standard_16"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
-            </LinearLayout>
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
 
             <View style="@style/Aw.Component.Separator" />
 
+            <TextView
+                    android:id="@+id/text_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/standard_16"
+                    android:text="@string/status" />
+
+            <com.alphawallet.app.widget.CopyTextView
+                    android:id="@+id/copy_public"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    custom:bold="true"
+                    custom:removePadding="true"
+                    custom:text="@string/ethereum" />
+
+            <View style="@style/Aw.Component.Separator" />
+
+            <TextView
+                    android:id="@+id/title_pk"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/standard_16"
+                    android:text="@string/tab_private_key" />
+
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/standard_16"
+                    android:orientation="horizontal"
+                    tools:ignore="UseCompoundDrawables">
+
+                <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="@dimen/dp5"
+                        android:contentDescription="@string/tab_private_key"
+                        android:src="@drawable/ic_red_warning" />
+
+                <TextView
+                        android:id="@+id/title_sub_pk"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/key_secure" />
+
+            </LinearLayout>
+
+            <com.alphawallet.app.widget.CopyTextView
+                    android:id="@+id/copy_pk"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/dp5"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    custom:bold="true"
+                    custom:lines="3"
+                    custom:removePadding="true"
+                    custom:text="@string/ethereum" />
+
         </LinearLayout>
 
-    </LinearLayout>
+    </ScrollView>
+
+
 
     <LinearLayout
         android:id="@+id/layout_success_overlay"
@@ -137,7 +199,6 @@
             android:foregroundGravity="center" />
 
     </LinearLayout>
-
 
     <com.alphawallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"

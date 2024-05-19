@@ -30,8 +30,11 @@ import com.alphawallet.app.service.KeystoreAccountService;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.viewmodel.BackupKeyViewModel;
 import com.alphawallet.app.widget.AWalletAlertDialog;
+import com.alphawallet.app.widget.CopyTextView;
 import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
+
+import org.web3j.crypto.WalletUtils;
 import org.web3j.utils.Numeric;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -40,6 +43,7 @@ import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.WalletFile;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.regex.Matcher;
@@ -354,11 +358,21 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
         }
     }
 
+    private void exposeStatus()
+    {
+        LinearLayout llStatus = findViewById(R.id.layout_status);
+        llStatus.setVisibility(View.VISIBLE);
+        CopyTextView pkView = findViewById(R.id.copy_pk);
+        pkView.setVisibility(View.GONE);
+    }
+
     private boolean testKeyType(String keyData)
     {
         //could either be a seed phrase or a keystore
         Pattern pattern = Pattern.compile(ImportSeedFragment.validator, Pattern.MULTILINE);
-        TextView status = findViewById(R.id.status_txt);
+        TextView status = findViewById(R.id.text_status);
+        CopyTextView pubKeyText = findViewById(R.id.copy_public);
+        exposeStatus();
 
         //first check for seed phrase
         final Matcher matcher = pattern.matcher(keyData);
@@ -371,9 +385,14 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
                 //is valid seed phrase
                 HDWallet newWallet = new HDWallet(keyData, "");
                 PrivateKey pk = newWallet.getKeyForCoin(CoinType.ETHEREUM);
-
-                status.setText(getString(R.string.seed_phrase_public_key, Numeric.toHexString(pk.getPublicKeySecp256k1(false).data())));
+                status.setText(R.string.seed_phrase_public_key);
                 status.setTextColor(getColor(R.color.green));
+                pubKeyText.setText(Numeric.toHexString(pk.getPublicKeySecp256k1(false).data()));
+
+                CopyTextView pkView = findViewById(R.id.copy_pk);
+                pkView.setVisibility(View.VISIBLE);
+                String pkStr = (new BigInteger(1, pk.data())).toString(16);
+                pkView.setFixedText(pkStr);
                 isSeedPhrase = true;
                 return true;
             }
@@ -393,7 +412,15 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
                 }
                 else
                 {
-                    status.setText(getString(R.string.keystore_public_key, credentials.getEcKeyPair().getPublicKey().toString(16)));
+                    status.setText(R.string.keystore_public_key);
+                    status.setTextColor(getColor(R.color.green));
+                    pubKeyText.setText(credentials.getEcKeyPair().getPublicKey().toString(16));
+
+                    //show PK
+                    CopyTextView pkView = findViewById(R.id.copy_pk);
+                    pkView.setVisibility(View.VISIBLE);
+                    String pk = credentials.getEcKeyPair().getPrivateKey().toString(16);
+                    pkView.setFixedText(pk);
                     isKeyStore = true;
                     return true;
                 }
@@ -470,7 +497,7 @@ public class WalletDiagnosticActivity extends BaseActivity implements StandardFu
 
     private void showError(String error)
     {
-        TextView statusTxt = findViewById(R.id.status_txt);
+        TextView statusTxt = findViewById(R.id.text_status);
         statusTxt.setText(error);
         statusTxt.setTextColor(getColor(R.color.danger));
         if (dialog != null && dialog.isShowing()) dialog.dismiss();

@@ -913,8 +913,8 @@
     <string name="key_diagnostic">Key Diagnostic</string>
     <string name="key_found">Key found</string>
     <string name="key_not_found">Unable to find Key</string>
-    <string name="seed_phrase_public_key">Seed Phrase detected public key: %1$s</string>
-    <string name="keystore_public_key">Decoded Keystore public key: %1$s</string>
+    <string name="seed_phrase_public_key">Seed Phrase detected public key</string>
+    <string name="keystore_public_key">Decoded Keystore public key</string>
     <string name="enclave_locked">Locked</string>
     <string name="key_type_in_database">Key type in Database</string>
     <string name="key_entry_in_secure_enclave">Key Entry in Secure Enclave</string>

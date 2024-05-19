@@ -36,7 +36,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_RPC_URL;
-import static com.alphawallet.ethereum.EthereumNetworkBase.HOLESKY_FALLBACK_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HOLESKY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HOLESKY_RPC_URL;
 import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
@@ -752,7 +751,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
         private void checkCustomNetworkSetting()
         {
-            if (list.size() > 0 && !list.get(0).isCustom)
+            if (!list.isEmpty() && !list.get(0).isCustom)
             { //need to update the list
                 List<NetworkInfo> copyList = new ArrayList<>(list);
                 list.clear();
@@ -902,7 +901,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static String getChainOverrideAddress(long chainId)
     {
-        return addressOverride.containsKey(chainId) ? addressOverride.get(chainId) : "";
+        return addressOverride.getOrDefault(chainId, "");
     }
 
     @Override
@@ -969,7 +968,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             if (check != null) selectedIds.add(networkId);
         }
 
-        if (selectedIds.size() == 0)
+        if (selectedIds.isEmpty())
         {
             selectedIds.add(getDefaultNetwork());
         }
@@ -1337,14 +1336,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
     public static boolean isEventBlockLimitEnforced(long chainId)
     {
-        if (chainId == POLYGON_ID || chainId == POLYGON_TEST_ID || chainId == POLYGON_AMOY_ID)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return chainId == POLYGON_ID || chainId == POLYGON_TEST_ID || chainId == POLYGON_AMOY_ID;
     }
 
     public static BigInteger getMaxEventFetch(long chainId)

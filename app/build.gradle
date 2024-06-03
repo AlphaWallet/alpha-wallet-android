@@ -282,13 +282,14 @@ dependencies {
     //Timber
     implementation libs.timber
 
-    //noinspection UseTomlInstead,GradleDependency
-    implementation platform('com.walletconnect:android-bom:1.13.1') //TODO: Upgrade
+    implementation platform("com.walletconnect:android-bom:1.31.4") //TODO: Upgrade
     implementation("com.walletconnect:android-core", {
         exclude group: 'org.web3j', module: '*'
+        exclude group: 'org.bouncycastle', module: '*'
     })
     implementation("com.walletconnect:web3wallet", {
         exclude group: 'org.web3j', module: '*'
+        exclude group: 'org.bouncycastle', module: '*'
     })
 
     runtimeOnly libs.work.runtime.ktx

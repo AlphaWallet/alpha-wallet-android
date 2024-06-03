@@ -41,7 +41,7 @@ public class TSTokenView
             switch (node.getLocalName())
             {
                 case "name":
-                    label = node.getTextContent();
+                    label = node.getTextContent().strip();
                     break;
                 default:
                     break;
@@ -119,7 +119,7 @@ public class TSTokenView
                             lStyle += getHTMLContent(child);
                             break;
                         case "viewContent":
-                            String name = child.getAttributes().getNamedItem("name").getTextContent();
+                            String name = child.getAttributes().getNamedItem("name").getTextContent().strip();
                             Element content = td.getViewContent(name);
                             generateTokenView(content, td);
                             break;
@@ -132,7 +132,7 @@ public class TSTokenView
                     if (element.getChildNodes().getLength() == 1)
                     {
                         //handle text item-view
-                        lView = child.getTextContent().replace("\u2019", "&#x2019;");
+                        lView = child.getTextContent().replace("\u2019", "&#x2019;").strip();
                     }
                     break;
                 default:
@@ -207,7 +207,7 @@ public class TSTokenView
                     break;
                 case Node.ENTITY_REFERENCE_NODE:
                     //load in external content
-                    String entityRef = child.getTextContent();
+                    String entityRef = child.getTextContent().strip();
                     EntityReference ref = (EntityReference) child;
 
                     System.out.println(entityRef);
@@ -215,7 +215,7 @@ public class TSTokenView
                 default:
                     if (child != null && child.getTextContent() != null)
                     {
-                        String parsed = child.getTextContent().replace("\u2019", "&#x2019;");
+                        String parsed = child.getTextContent().replace("\u2019", "&#x2019;").strip();
                         sb.append(parsed);
                     }
                     break;
@@ -236,7 +236,7 @@ public class TSTokenView
                 sb.append(" ");
                 sb.append(node.getLocalName());
                 sb.append("=\"");
-                sb.append(node.getTextContent());
+                sb.append(node.getTextContent().strip());
                 sb.append("\"");
             }
         }

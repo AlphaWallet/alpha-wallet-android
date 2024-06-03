@@ -51,6 +51,10 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.LINEA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.LINEA_TEST_FREE_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.LINEA_TEST_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MANTLE_MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MANTLE_MAINNET_RPC;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MANTLE_TESTNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MANTLE_TESTNET_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_RPC;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_TEST_ID;
@@ -208,12 +212,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     //If your wallet prioritises xDai for example, you may want to move the XDAI_ID to the front of this list,
     //Then xDai would appear as the first token at the top of the wallet
     private static final List<Long> hasValue = new ArrayList<>(Arrays.asList(
-            MAINNET_ID, GNOSIS_ID, POLYGON_ID, ROOTSTOCK_MAINNET_ID, CLASSIC_ID, LINEA_ID, BASE_MAINNET_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
+            MAINNET_ID, GNOSIS_ID, POLYGON_ID, ROOTSTOCK_MAINNET_ID, CLASSIC_ID, LINEA_ID, BASE_MAINNET_ID, MANTLE_MAINNET_ID, BINANCE_MAIN_ID, HECO_ID, AVALANCHE_ID,
             FANTOM_ID, OPTIMISTIC_MAIN_ID, CRONOS_MAIN_ID, ARBITRUM_MAIN_ID, PALM_ID, KLAYTN_ID, IOTEX_MAINNET_ID, AURORA_MAINNET_ID, MILKOMEDA_C1_ID, OKX_ID));
 
     private static final List<Long> testnetList = new ArrayList<>(Arrays.asList(
             SEPOLIA_TESTNET_ID, POLYGON_AMOY_ID, HOLESKY_ID, BASE_TESTNET_ID, GOERLI_ID, BINANCE_TEST_ID,
-            ROOTSTOCK_TESTNET_ID, CRONOS_TEST_ID, OPTIMISM_GOERLI_TEST_ID, POLYGON_TEST_ID, ARBITRUM_GOERLI_TEST_ID, LINEA_TEST_ID, KLAYTN_BAOBAB_ID,
+            ROOTSTOCK_TESTNET_ID, CRONOS_TEST_ID, MANTLE_TESTNET_ID, OPTIMISM_GOERLI_TEST_ID, POLYGON_TEST_ID, ARBITRUM_GOERLI_TEST_ID, LINEA_TEST_ID, KLAYTN_BAOBAB_ID,
             FANTOM_TEST_ID, IOTEX_TESTNET_ID, FUJI_TEST_ID, MILKOMEDA_C1_TEST_ID,
             AURORA_TESTNET_ID, PALM_TEST_ID));
 
@@ -393,6 +397,16 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://sepolia.basescan.org/tx/", BASE_TESTNET_ID, BASE_TEST_FALLBACK_RPC,
                     "https://api-sepolia.basescan.org/api?"));
 
+            put(MANTLE_MAINNET_ID, new NetworkInfo(C.MANTLE_MAINNET_NAME, C.MANTLE_SYMBOL,
+                    MANTLE_MAINNET_RPC,
+                    "https://explorer.mantle.xyz/tx/", MANTLE_MAINNET_ID, MANTLE_MAINNET_RPC,
+                    "https://explorer.mantle.xyz/api?"));
+
+            put(MANTLE_TESTNET_ID, new NetworkInfo(C.MANTLE_TESTNET_NAME, C.MANTLE_SYMBOL,
+                    MANTLE_TESTNET_RPC,
+                    "https://explorer.sepolia.mantle.xyz/tx/", MANTLE_TESTNET_ID, MANTLE_TESTNET_RPC,
+                    "https://explorer.sepolia.mantle.xyz/api?"));
+
             // Add deprecated networks after this line
         }
     };
@@ -443,6 +457,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(POLYGON_TEST_ID, R.drawable.ic_icons_tokens_mumbai);
             put(BASE_MAINNET_ID, R.drawable.ic_base_logo);
             put(BASE_TESTNET_ID, R.drawable.ic_base_test_logo);
+            put(MANTLE_MAINNET_ID, R.drawable.ic_mantle_logo);
+            put(MANTLE_TESTNET_ID, R.drawable.ic_mantle_test_logo);
         }
     };
 
@@ -488,6 +504,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(HOLESKY_ID, R.drawable.ic_icons_holesky);
             put(BASE_MAINNET_ID, R.drawable.ic_base_logo);
             put(BASE_TESTNET_ID, R.drawable.ic_base_test_logo);
+            put(MANTLE_MAINNET_ID, R.drawable.ic_mantle_logo);
+            put(MANTLE_TESTNET_ID, R.drawable.ic_mantle_test_logo);
         }
     };
 
@@ -533,6 +551,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(HOLESKY_ID, R.color.azure);
             put(BASE_MAINNET_ID, R.color.base_logo);
             put(BASE_TESTNET_ID, R.color.base_logo);
+            put(MANTLE_MAINNET_ID, R.color.rootstock);
+            put(MANTLE_TESTNET_ID, R.color.rootstock);
         }
     };
 

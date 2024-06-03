@@ -15,6 +15,7 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.LINEA_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.MANTLE_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MILKOMEDA_C1_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OPTIMISTIC_MAIN_ID;
@@ -839,6 +840,7 @@ public class TickerService
         put(ROOTSTOCK_MAINNET_ID, "rootstock");
         put(LINEA_ID, "linea");
         put(BASE_MAINNET_ID, "base");
+        put(MANTLE_MAINNET_ID, "mantle");
     }};
 
     // For now, don't use Dexguru unless we obtain API key
@@ -878,6 +880,7 @@ public class TickerService
         put(ROOTSTOCK_MAINNET_ID, "rootstock");
         put(LINEA_ID, "ethereum");
         put(BASE_MAINNET_ID, "base");
+        put(MANTLE_MAINNET_ID, "mantle");
     }};
 
     public static boolean validateCoinGeckoAPI(Token token)

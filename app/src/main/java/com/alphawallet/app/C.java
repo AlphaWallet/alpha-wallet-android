@@ -61,6 +61,8 @@ public abstract class C {
     public static final String AMOY_TESTNET_NAME = "Amoy (Test)";
     public static final String BASE_MAINNET_NAME = "Base";
     public static final String BASE_TESTNET_NAME = "Base Sepolia (Test)";
+    public static final String MANTLE_MAINNET_NAME = "Mantle";
+    public static final String MANTLE_TESTNET_NAME = "Mantle Sepolia (Test)";
 
     public static final String ETHEREUM_TICKER_NAME = "ethereum";
     public static final String CLASSIC_TICKER_NAME = "ethereum-classic";
@@ -71,6 +73,8 @@ public abstract class C {
 
     public static final String USD_SYMBOL = "$";
     public static final String ETH_SYMBOL = "ETH";
+
+    public static final String MANTLE_SYMBOL = "MNT";
     public static final String xDAI_SYMBOL = "xDai";
     public static final String ETC_SYMBOL = "ETC";
     public static final String GOERLI_SYMBOL = "GÖETH";

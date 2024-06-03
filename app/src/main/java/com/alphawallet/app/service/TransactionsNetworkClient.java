@@ -503,7 +503,8 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
         }
         else
         {
-            long upperBlock = 99999999999L;
+            long currentBlock = TransactionsService.getCurrentBlock(networkInfo.chainId).longValue();
+            long upperBlock = currentBlock > 0L ? currentBlock + 1 : 99999999L;
             long lowerBlock = (lastBlockFound == 0) ? 1 : lastBlockFound;
 
             while (true)

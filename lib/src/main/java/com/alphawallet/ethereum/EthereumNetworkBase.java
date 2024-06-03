@@ -48,6 +48,8 @@ public abstract class EthereumNetworkBase
     public static final long POLYGON_AMOY_ID = 80002;
     public static final long BASE_MAINNET_ID = 8453;
     public static final long BASE_TESTNET_ID = 84532;
+    public static final long MANTLE_MAINNET_ID = 5000;
+    public static final long MANTLE_TESTNET_ID = 5003;
 
 
     public static final String MAINNET_RPC_URL = "https://mainnet.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
@@ -91,6 +93,9 @@ public abstract class EthereumNetworkBase
 
     public static final String BASE_FREE_MAINNET_RPC = "https://base-rpc.publicnode.com";
     public static final String BASE_FREE_TESTNET_RPC = "https://base-sepolia-rpc.publicnode.com";
+
+    public static final String MANTLE_MAINNET_RPC = "https://rpc.mantle.xyz";
+    public static final String MANTLE_TESTNET_RPC = "https://rpc.sepolia.mantle.xyz";
 
 
     static Map<Long, NetworkInfo> networkMap = new LinkedHashMap<Long, NetworkInfo>()
@@ -179,6 +184,10 @@ public abstract class EthereumNetworkBase
                     BASE_MAINNET_ID, false));
             put(BASE_TESTNET_ID, new NetworkInfo("Base (Test)", "ETH", BASE_FREE_TESTNET_RPC, "https://sepolia.basescan.org/tx/",
                     BASE_TESTNET_ID, false));
+            put(MANTLE_MAINNET_ID, new NetworkInfo("Mantle", "ETH", BASE_FREE_MAINNET_RPC, "https://basescan.org/tx/",
+                    MANTLE_MAINNET_ID, false));
+            put(MANTLE_TESTNET_ID, new NetworkInfo("Mantle Sepolia (Test)", "ETH", BASE_FREE_TESTNET_RPC, "https://sepolia.basescan.org/tx/",
+                    MANTLE_TESTNET_ID, false));
         }
     };
 

@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -77,6 +78,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
 import timber.log.Timber;
 
 public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
@@ -721,6 +723,31 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         }
 
         return intent;
+    }
+
+    @Nullable
+    @Override
+    public Function2<Model.SessionAuthenticate, Model.VerifyContext, Unit> getOnSessionAuthenticate()
+    {
+        return null;
+    }
+
+    @Override
+    public void onProposalExpired(@NonNull Model.ExpiredProposal expiredProposal)
+    {
+        // TODO: Remove popup if still showing
+    }
+
+    @Override
+    public void onRequestExpired(@NonNull Model.ExpiredRequest expiredRequest)
+    {
+        // TODO: remove popup if still showing
+    }
+
+    @Override
+    public void onSessionExtend(@NonNull Session session)
+    {
+        //Session extension. Do we use a timeout here?
     }
 
     public interface WalletConnectV2Callback

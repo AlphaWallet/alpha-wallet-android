@@ -376,9 +376,9 @@ public class TokenDefinition
             name = (Element) nList.item(i);
             String langAttr = getLocalisationLang(name);
             if (langAttr.equals(locale.getLanguage())) {
-                return name.getTextContent();
+                return name.getTextContent().strip();
             }
-            else if (langAttr.equals("en")) nonLocalised = name.getTextContent();
+            else if (langAttr.equals("en")) nonLocalised = name.getTextContent().strip();
         }
 
         if (nonLocalised != null) return nonLocalised;
@@ -386,7 +386,7 @@ public class TokenDefinition
         {
             name = (Element) nList.item(0);
             // TODO: catch the indice out of bound exception and throw it again suggesting dev to check schema
-            if (name != null) return name.getTextContent();
+            if (name != null) return name.getTextContent().strip();
             else return null;
         }
     }
@@ -422,16 +422,22 @@ public class TokenDefinition
                 String langAttr = getLocalisationLang((Element)n);
                 if (langAttr.equals(locale.getLanguage()))
                 {
-                    return n.getTextContent();
+                    return processText(n.getTextContent()).strip();
                 }
                 else if (nonLocalised == null && (langAttr.equals("") || langAttr.equals("en")))
                 {
-                    nonLocalised = n.getTextContent();
+                    nonLocalised = n.getTextContent().strip();
                 }
             }
         }
 
         return nonLocalised;
+    }
+
+    private String processText(String text)
+    {
+        //strip out whitespace and cr/lf
+        return text.strip();
     }
 
     private boolean hasAttribute(Element name, String typeAttr)
@@ -460,7 +466,7 @@ public class TokenDefinition
                 Node thisAttr = name.getAttributes().item(i);
                 if (thisAttr.getLocalName().equals("lang"))
                 {
-                    return thisAttr.getTextContent();
+                    return thisAttr.getTextContent().strip();
                 }
             }
         }
@@ -608,7 +614,7 @@ public class TokenDefinition
                             break;
                         case "denial":
                             Node denialNode = getLocalisedNode(element, "string");
-                            selection.denialMessage = (denialNode != null) ? denialNode.getTextContent() : null;
+                            selection.denialMessage = (denialNode != null) ? denialNode.getTextContent().strip() : null;
                             break;
                     }
                 }
@@ -969,7 +975,7 @@ public class TokenDefinition
         NodeList nList;
         nList = xml.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "KeyName");
         if (nList.getLength() > 0) {
-            this.keyName = nList.item(0).getTextContent();
+            this.keyName = nList.item(0).getTextContent().strip();
         }
         return; // even if the document is signed, often it doesn't have KeyName
     }
@@ -1060,7 +1066,7 @@ public class TokenDefinition
                 switch (node.getLocalName())
                 {
                     case "name":
-                        name = node.getTextContent();
+                        name = node.getTextContent().strip();
                         break;
                     default:
                         break;
@@ -1383,7 +1389,7 @@ public class TokenDefinition
         {
             Element element = (Element) node;
             String quantity = element.getAttribute("quantity");
-            String name = element.getTextContent();
+            String name = element.getTextContent().strip();
             if (quantity != null && name != null)
             {
                 localNames.put(quantity, name);
@@ -1514,7 +1520,7 @@ public class TokenDefinition
         String networkStr = addressElement.getAttribute("network");
         long network = 1;
         if (networkStr != null) network = Long.parseLong(networkStr);
-        String address = addressElement.getTextContent().toLowerCase();
+        String address = addressElement.getTextContent().toLowerCase().strip();
         List<String> addresses = info.addresses.get(network);
         if (addresses == null)
         {
@@ -1552,7 +1558,7 @@ public class TokenDefinition
                     break;
                 case Node.ENTITY_REFERENCE_NODE:
                     //load in external content
-                    String entityRef = child.getTextContent();
+                    String entityRef = child.getTextContent().strip();
                     EntityReference ref = (EntityReference) child;
 
                     System.out.println(entityRef);
@@ -1560,7 +1566,7 @@ public class TokenDefinition
                 default:
                     if (child != null && child.getTextContent() != null)
                     {
-                        String parsed = child.getTextContent().replace("\u2019", "&#x2019;");
+                        String parsed = child.getTextContent().replace("\u2019", "&#x2019;").strip();
                         sb.append(parsed);
                     }
                     break;
@@ -1581,7 +1587,7 @@ public class TokenDefinition
                 sb.append(" ");
                 sb.append(node.getLocalName());
                 sb.append("=\"");
-                sb.append(node.getTextContent());
+                sb.append(node.getTextContent().strip());
                 sb.append("\"");
             }
         }
@@ -1651,7 +1657,7 @@ public class TokenDefinition
     {
         TokenscriptElement tse = new TokenscriptElement();
         tse.ref = input.getAttribute("ref");
-        tse.value = input.getTextContent();
+        tse.value = input.getTextContent().strip();
         tse.localRef = input.getAttribute("local-ref");
         return tse;
 }

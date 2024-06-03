@@ -1,4 +1,4 @@
-const _currentTokenInstance = {
+const currentTokenInstance = {
 %1$s
 }
 
@@ -39,7 +39,7 @@ web3 = {
     }
 }
 
-web3.tokens.data.currentInstance = _currentTokenInstance
+web3.tokens.data.currentInstance = currentTokenInstance
 
 function refresh() {
    web3.tokens.dataChanged('test', web3.tokens.data, '%5$s') //TODO: Cache previous value of token to feed into first arg

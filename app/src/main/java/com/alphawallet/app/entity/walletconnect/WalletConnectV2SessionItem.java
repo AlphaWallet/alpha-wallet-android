@@ -2,6 +2,7 @@ package com.alphawallet.app.entity.walletconnect;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.walletconnect.web3.wallet.client.Wallet;
 
@@ -20,9 +21,9 @@ public class WalletConnectV2SessionItem extends WalletConnectSessionItem impleme
     public WalletConnectV2SessionItem(Wallet.Model.Session s)
     {
         super();
-        name = Objects.requireNonNull(s.getMetaData()).getName();
-        url = Objects.requireNonNull(s.getMetaData()).getUrl();
-        icon = s.getMetaData().getIcons().isEmpty() ? null : s.getMetaData().getIcons().get(0);
+        name = s.getMetaData() != null && !TextUtils.isEmpty((s.getMetaData()).getName()) ? (s.getMetaData()).getName() : "";
+        url = s.getMetaData() != null && !TextUtils.isEmpty((s.getMetaData()).getName()) ? (s.getMetaData()).getUrl() : "";
+        icon = s.getMetaData() != null && !s.getMetaData().getIcons().isEmpty() ? s.getMetaData().getIcons().get(0) : null;
         sessionId = s.getTopic();
         localSessionId = s.getTopic();
         settled = true;

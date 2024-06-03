@@ -1,5 +1,7 @@
 package com.alphawallet.app.interact;
 
+import android.text.TextUtils;
+
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
 import com.walletconnect.web3.wallet.client.Wallet;
@@ -51,10 +53,13 @@ public class WalletConnectInteract
         List<WalletConnectSessionItem> result = new ArrayList<>();
         try
         {
-            List<Wallet.Model.Session> listOfSettledSessions = Web3Wallet.INSTANCE.getListOfActiveSessions();
+            List<Wallet.Model.Session> listOfSettledSessions = Web3Wallet.getListOfActiveSessions();
             for (Wallet.Model.Session session : listOfSettledSessions)
             {
-                result.add(new WalletConnectV2SessionItem(session));
+                if (session.getMetaData() != null && !(TextUtils.isEmpty(session.getMetaData().name) && TextUtils.isEmpty(session.getMetaData().url)))
+                {
+                    result.add(new WalletConnectV2SessionItem(session));
+                }
             }
         }
         catch (IllegalStateException e)

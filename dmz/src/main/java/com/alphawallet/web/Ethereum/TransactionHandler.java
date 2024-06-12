@@ -1,4 +1,4 @@
-package com.alphawallet.token.web.Ethereum;
+package com.alphawallet.web.Ethereum;
 
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.alphawallet.token.entity.BadContract;
 import org.web3j.utils.Numeric;
-import com.alphawallet.token.web.Service.EthRPCNodes;
+import com.alphawallet.web.Service.EthRPCNodes;
 
 import okhttp3.OkHttpClient;
 

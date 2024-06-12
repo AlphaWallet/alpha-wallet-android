@@ -1,4 +1,4 @@
-package com.alphawallet.token.web.Service;
+package com.alphawallet.web.Service;
 
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import org.web3j.utils.Numeric;
@@ -8,7 +8,7 @@ import org.web3j.crypto.Sign;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import static com.alphawallet.token.web.Service.SpawnableLinkGenerator.bytesFromSignature;
+import static com.alphawallet.web.Service.SpawnableLinkGenerator.bytesFromSignature;
 
 public class EdconLinkGenerator {
 
@@ -43,7 +43,7 @@ public class EdconLinkGenerator {
     public static void main(String[] args) throws SalesOrderMalformed {
         int rounds = 50;
         while(rounds > 0) {
-            new com.alphawallet.token.web.Service.EdconLinkGenerator(date, VIENNA, BLOCKCHAIN_HALL, 1);
+            new com.alphawallet.web.Service.EdconLinkGenerator(date, VIENNA, BLOCKCHAIN_HALL, 1);
             rounds--;
         }
     }

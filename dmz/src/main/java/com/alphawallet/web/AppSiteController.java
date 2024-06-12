@@ -1,8 +1,8 @@
-package com.alphawallet.token.web;
+package com.alphawallet.web;
 
 import static com.alphawallet.token.tools.Convert.getEthString;
 import static com.alphawallet.token.tools.ParseMagicLink.normal;
-import static com.alphawallet.token.web.Ethereum.TokenscriptFunction.ZERO_ADDRESS;
+import static com.alphawallet.web.Ethereum.TokenscriptFunction.ZERO_ADDRESS;
 
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.AttributeInterface;
@@ -16,9 +16,9 @@ import com.alphawallet.token.entity.TokenScriptResult;
 import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.tools.ParseMagicLink;
 import com.alphawallet.token.tools.TokenDefinition;
-import com.alphawallet.token.web.Ethereum.TokenscriptFunction;
-import com.alphawallet.token.web.Ethereum.TransactionHandler;
-import com.alphawallet.token.web.Service.CryptoFunctions;
+import com.alphawallet.web.Ethereum.TokenscriptFunction;
+import com.alphawallet.web.Ethereum.TransactionHandler;
+import com.alphawallet.web.Service.CryptoFunctions;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;

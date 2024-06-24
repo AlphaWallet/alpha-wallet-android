@@ -2,8 +2,7 @@ package com.alphawallet.shadows;
 
 import android.content.Context;
 
-import com.alphawallet.app.repository.SharedPreferenceRepository;
-import com.alphawallet.app.service.AnalyticsService;
+import com.langitwallet.app.repository.SharedPreferenceRepository;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;

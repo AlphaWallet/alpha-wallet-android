@@ -14,6 +14,7 @@ import static com.alphawallet.app.util.Helper.clickMadly;
 import static org.hamcrest.CoreMatchers.allOf;
 
 import com.alphawallet.app.util.Helper;
+import com.langitwallet.app.R;
 
 import org.junit.Test;
 

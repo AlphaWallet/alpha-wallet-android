@@ -42,7 +42,7 @@
                     android:layout_marginEnd="@dimen/tiny_8"
                     tools:text="1.000000" />
 
-                <com.alphawallet.app.widget.AddressIcon
+                <com.langitwallet.app.widget.AddressIcon
                     android:id="@+id/from_token_icon"
                     android:layout_width="@dimen/token_icon_small"
                     android:layout_height="@dimen/token_icon_small"

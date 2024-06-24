@@ -64,7 +64,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/contract_info" />
 
-        <com.alphawallet.app.widget.CopyTextView
+        <com.langitwallet.app.widget.CopyTextView
             android:id="@+id/copy_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -29,6 +29,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.espresso.action.ViewActions;
 
 import com.alphawallet.app.util.Helper;
+import com.langitwallet.app.R;
 
 import org.junit.Before;
 import org.junit.Test;

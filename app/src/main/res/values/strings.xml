@@ -1073,4 +1073,6 @@
     <string name="override_warning_text">You might be about to unknowingly sign a transaction, which could empty your funds. You may want to sign bytecode as a developer, and you can override this warning if you set developer mode in Advanced settings.</string>
     <string name="constructor">Constructor</string>
     <string name="use_tokenscript_viewer">Use TokenScript Viewer</string>
+    <string name="login_with_google">Login With Google</string>
+    <string name="logout">Logout</string>
 </resources>

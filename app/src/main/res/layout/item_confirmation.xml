@@ -9,7 +9,7 @@
     android:visibility="gone"
     tools:visibility="visible">
 
-    <com.alphawallet.app.widget.ProgressKnobkerry
+    <com.langitwallet.app.widget.ProgressKnobkerry
         android:id="@+id/progress_knob"
         android:layout_width="56dp"
         android:layout_height="56dp"

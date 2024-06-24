@@ -28,7 +28,7 @@ import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.espresso.util.TreeIterables;
 
-import com.alphawallet.app.R;
+import com.langitwallet.app.R;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;

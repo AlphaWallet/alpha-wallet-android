@@ -60,7 +60,7 @@
             android:visibility="gone"
             tools:visibility="visible">
 
-            <com.alphawallet.app.widget.AddressIcon
+            <com.langitwallet.app.widget.AddressIcon
                 android:id="@+id/token_icon"
                 android:layout_width="@dimen/token_icon"
                 android:layout_height="@dimen/token_icon"

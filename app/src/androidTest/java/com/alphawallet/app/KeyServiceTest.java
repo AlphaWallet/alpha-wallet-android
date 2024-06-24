@@ -13,6 +13,7 @@ import static org.junit.Assert.fail;
 import android.os.Build;
 
 import com.alphawallet.app.util.Helper;
+import com.langitwallet.app.R;
 
 import org.junit.Test;
 

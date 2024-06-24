@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.alphawallet.app.widget.StandardHeader
+    <com.langitwallet.app.widget.StandardHeader
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
 
             </LinearLayout>
 
-            <com.alphawallet.app.ui.widget.entity.NumericInput
+            <com.langitwallet.app.ui.widget.entity.NumericInput
                 android:id="@+id/amount_entry"
                 style="@style/Aw.Typography.Title.XLarge"
                 android:layout_width="match_parent"

@@ -13,62 +13,62 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <com.alphawallet.app.widget.BottomSheetToolbarView
+        <com.langitwallet.app.widget.BottomSheetToolbarView
             android:id="@+id/bottom_sheet_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:title="@string/confirm_transaction" />
 
-        <com.alphawallet.app.widget.BalanceDisplayWidget
+        <com.langitwallet.app.widget.BalanceDisplayWidget
             android:id="@+id/balance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <com.alphawallet.app.widget.NetworkDisplayWidget
+        <com.langitwallet.app.widget.NetworkDisplayWidget
             android:id="@+id/network_display_widget"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <com.alphawallet.app.widget.AddressDetailView
+        <com.langitwallet.app.widget.AddressDetailView
             android:id="@+id/requester"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
             custom:label="@string/requester_url" />
 
-        <com.alphawallet.app.widget.GasWidget2
+        <com.langitwallet.app.widget.GasWidget2
             android:id="@+id/gas_widgetx"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <com.alphawallet.app.widget.GasWidget
+        <com.langitwallet.app.widget.GasWidget
             android:id="@+id/gas_widget_legacy"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone" />
 
-        <com.alphawallet.app.widget.TransactionDetailWidget
+        <com.langitwallet.app.widget.TransactionDetailWidget
             android:id="@+id/detail_widget"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <com.alphawallet.app.widget.AddressDetailView
+        <com.langitwallet.app.widget.AddressDetailView
             android:id="@+id/sender"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             custom:label="@string/label_from" />
 
-        <com.alphawallet.app.widget.AddressDetailView
+        <com.langitwallet.app.widget.AddressDetailView
             android:id="@+id/recipient"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <com.alphawallet.app.widget.AmountDisplayWidget
+        <com.langitwallet.app.widget.AmountDisplayWidget
             android:id="@+id/amount_display"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <com.alphawallet.app.widget.AssetDetailView
+        <com.langitwallet.app.widget.AssetDetailView
             android:id="@+id/asset_detail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -77,12 +77,12 @@
 
         <View style="@style/Aw.Component.Separator" />
 
-        <com.alphawallet.app.widget.ConfirmationWidget
+        <com.langitwallet.app.widget.ConfirmationWidget
             android:id="@+id/confirmation_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <com.alphawallet.app.widget.FunctionButtonBar
+        <com.langitwallet.app.widget.FunctionButtonBar
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

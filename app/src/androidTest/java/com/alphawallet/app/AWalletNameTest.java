@@ -18,6 +18,7 @@ import static com.alphawallet.app.util.Helper.waitUntil;
 import androidx.test.espresso.Espresso;
 
 import com.alphawallet.app.util.Helper;
+import com.langitwallet.app.R;
 
 import org.junit.Test;
 

@@ -160,7 +160,7 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <com.alphawallet.app.widget.ChainName
+                    <com.langitwallet.app.widget.ChainName
                         android:id="@+id/chain_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -170,7 +170,7 @@
                         custom:layout_constraintBottom_toBottomOf="parent"
                         custom:layout_constraintEnd_toEndOf="parent" />
 
-                    <com.alphawallet.app.widget.TokenIcon
+                    <com.langitwallet.app.widget.TokenIcon
                         android:id="@+id/chain_icon"
                         android:layout_width="@dimen/token_icon_small"
                         android:layout_height="@dimen/token_icon_small"
@@ -233,7 +233,7 @@
         android:visibility="gone"
         tools:visibility="visible" />
 
-    <com.alphawallet.app.widget.FunctionButtonBar
+    <com.langitwallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -78,7 +78,7 @@
                 android:textColor="@color/control_activated"
                 tools:text="Setting Subtitle" />
 
-            <com.alphawallet.app.widget.ChainName
+            <com.langitwallet.app.widget.ChainName
                 android:id="@+id/chain_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

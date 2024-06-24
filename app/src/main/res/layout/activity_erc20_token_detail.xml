@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.alphawallet.app.widget.CertifiedToolbarView
+        <com.langitwallet.app.widget.CertifiedToolbarView
             android:id="@+id/certified_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
         android:layout_below="@id/appbar_layout"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <com.alphawallet.app.widget.FunctionButtonBar
+    <com.langitwallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="@dimen/mini_4" />
 
-            <com.alphawallet.app.widget.ActivityHistoryList
+            <com.langitwallet.app.widget.ActivityHistoryList
                 android:id="@+id/history_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />

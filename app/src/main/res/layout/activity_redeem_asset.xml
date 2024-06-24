@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.alphawallet.app.widget.ProgressView
+        <com.langitwallet.app.widget.ProgressView
             android:id="@+id/progress_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -52,7 +52,7 @@
 
     </RelativeLayout>
 
-    <com.alphawallet.app.widget.SystemView
+    <com.langitwallet.app.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -8,7 +8,7 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
-    <com.alphawallet.app.widget.InputFiatView
+    <com.langitwallet.app.widget.InputFiatView
         android:id="@+id/input_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -19,7 +19,7 @@
         custom:label="@string/enter_target_price"
         custom:show_header="true" />
 
-    <com.alphawallet.app.widget.FunctionButtonBar
+    <com.langitwallet.app.widget.FunctionButtonBar
         android:id="@+id/button_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

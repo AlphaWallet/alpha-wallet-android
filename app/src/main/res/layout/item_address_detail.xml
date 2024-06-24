@@ -107,7 +107,7 @@
             android:visibility="gone"
             tools:visibility="visible">
 
-            <com.alphawallet.app.widget.UserAvatar
+            <com.langitwallet.app.widget.UserAvatar
                 android:id="@+id/blockie"
                 android:layout_width="30dp"
                 android:layout_height="30dp"

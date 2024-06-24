@@ -48,7 +48,7 @@
 #endif
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getInfuraKey( JNIEnv* env, jobject thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getInfuraKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, infuraKey);
@@ -61,7 +61,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getInfuraKey( JNIEnv* env
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getAnalyticsKey( JNIEnv* env, jobject thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getAnalyticsKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, mixpanelKey);
@@ -72,7 +72,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getAnalyticsKey( JNIEnv* 
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getRampKey( JNIEnv* env, jobject thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getRampKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, rampKey);
@@ -83,7 +83,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getRampKey( JNIEnv* env, 
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getCoinbasePayAppId( JNIEnv* env, jobject thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getCoinbasePayAppId( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, coinbasePayAppId);
@@ -94,7 +94,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getCoinbasePayAppId( JNIE
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSecondaryInfuraKey( JNIEnv* env, jobject thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getSecondaryInfuraKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, secondaryInfuraKey);
@@ -107,7 +107,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSecondaryInfuraKey( JN
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getTertiaryInfuraKey( JNIEnv* env, jobject thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getTertiaryInfuraKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, tertiaryInfuraKey);
@@ -120,7 +120,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getTertiaryInfuraKey( JNI
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getKlaytnKey( JNIEnv* env, jobject thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getKlaytnKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, klaytnKey);
@@ -130,7 +130,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getKlaytnKey( JNIEnv* env
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBSCExplorerKey( JNIEnv* env, jobject thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getBSCExplorerKey( JNIEnv* env, jobject thiz )
 {
 #if (HAS_KEYS == 1)
     return getBSCExplorerKey(env);
@@ -140,7 +140,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBSCExplorerKey( JNIEnv
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getEtherscanKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getEtherscanKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, etherscanKey);
@@ -151,7 +151,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getEtherscanKey( JNIEnv* 
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getMailchimpKey(JNIEnv *env, jclass clazz)
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getMailchimpKey(JNIEnv *env, jclass clazz)
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, mailchimpKey);
@@ -162,7 +162,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getMailchimpKey(JNIEnv *e
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getPolygonScanKey(JNIEnv *env, jobject thiz) {
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getPolygonScanKey(JNIEnv *env, jobject thiz) {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, polygonScanKey);
 #elif (HAS_PS == 1)
@@ -174,7 +174,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getPolygonScanKey(JNIEnv 
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getCovalentKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getCovalentKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedCKey(env, 4, '_', covalentKey);
@@ -185,7 +185,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getCovalentKey( JNIEnv* e
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getAuroraScanKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getAuroraScanKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, auroraKey);
@@ -198,7 +198,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getAuroraScanKey( JNIEnv*
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getOpenSeaKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getOpenSeaKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, openSeaKey);
@@ -211,7 +211,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getOpenSeaKey( JNIEnv* en
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getWalletConnectProjectId( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getWalletConnectProjectId( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, walletConnectProjectId);
@@ -223,7 +223,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getWalletConnectProjectId
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getInfuraSecret(JNIEnv *env, jobject thiz) {
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getInfuraSecret(JNIEnv *env, jobject thiz) {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, infuraSecret);
 #else
@@ -233,7 +233,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getInfuraSecret(JNIEnv *e
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getTSInfuraKey(JNIEnv *env, jobject thiz) {
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getTSInfuraKey(JNIEnv *env, jobject thiz) {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, tokenscriptInfuraKey);
 #elif (HAS_INFURA == 1)
@@ -245,7 +245,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getTSInfuraKey(JNIEnv *en
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getUnstoppableDomainsKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getUnstoppableDomainsKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, unstoppableDomainsKey);
@@ -256,7 +256,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getUnstoppableDomainsKey(
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getOkLinkKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getOkLinkKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, oklinkKey);
@@ -267,7 +267,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getOkLinkKey( JNIEnv* env
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getOkLBKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getOkLBKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, oklbKey);
@@ -278,7 +278,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getOkLBKey( JNIEnv* env, 
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBlockPiBaobabKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getBlockPiBaobabKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, blockpiBaobab);
@@ -289,7 +289,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBlockPiBaobabKey( JNIE
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBlockPiCypressKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getBlockPiCypressKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, blockpiCypress);
@@ -300,7 +300,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBlockPiCypressKey( JNI
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBlockNativeKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getBlockNativeKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, blockNative);
@@ -311,7 +311,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBlockNativeKey( JNIEnv
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSmartPassKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getSmartPassKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, smartpass);
@@ -322,7 +322,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSmartPassKey( JNIEnv* 
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getCoinGeckoKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getCoinGeckoKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, coinGeckoKey);
@@ -333,7 +333,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getCoinGeckoKey( JNIEnv* 
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBackupKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getBackupKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, backupKey1);
@@ -344,7 +344,7 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getBackupKey( JNIEnv* env
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getSmartPassDevKey( JNIEnv* env, jclass thiz )
+Java_com_langitwallet_app_repository_KeyProviderJNIImpl_getSmartPassDevKey( JNIEnv* env, jclass thiz )
 {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, smartpassDev);

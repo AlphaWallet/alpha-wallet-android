@@ -14,6 +14,7 @@ import static com.alphawallet.app.steps.Steps.selectMenu;
 import static com.alphawallet.app.util.Helper.click;
 
 import com.alphawallet.app.util.Helper;
+import com.langitwallet.app.R;
 
 import org.junit.Before;
 import org.junit.Test;

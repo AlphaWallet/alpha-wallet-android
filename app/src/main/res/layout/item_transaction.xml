@@ -8,7 +8,7 @@
     android:orientation="horizontal"
     android:padding="@dimen/standard_16">
 
-    <com.alphawallet.app.widget.TokenIcon
+    <com.langitwallet.app.widget.TokenIcon
         android:id="@+id/token_icon"
         android:layout_width="@dimen/token_icon"
         android:layout_height="@dimen/token_icon"

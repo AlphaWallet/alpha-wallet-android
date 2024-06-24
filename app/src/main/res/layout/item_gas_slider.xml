@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.alphawallet.app.widget.StandardHeader
+    <com.langitwallet.app.widget.StandardHeader
         android:id="@+id/title_gas_price"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-    <com.alphawallet.app.widget.StandardHeader
+    <com.langitwallet.app.widget.StandardHeader
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         custom:headerText="@string/priority_fee" />
@@ -91,7 +91,7 @@
 
     <View style="@style/Aw.Component.Separator" />
 
-    <com.alphawallet.app.widget.StandardHeader
+    <com.langitwallet.app.widget.StandardHeader
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         custom:headerText="@string/label_gas_limit" />

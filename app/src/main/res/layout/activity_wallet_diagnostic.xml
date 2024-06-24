@@ -121,7 +121,7 @@
                     android:layout_margin="@dimen/standard_16"
                     android:text="@string/status" />
 
-            <com.alphawallet.app.widget.CopyTextView
+            <com.langitwallet.app.widget.CopyTextView
                     android:id="@+id/copy_public"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -163,7 +163,7 @@
 
             </LinearLayout>
 
-            <com.alphawallet.app.widget.CopyTextView
+            <com.langitwallet.app.widget.CopyTextView
                     android:id="@+id/copy_pk"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -200,7 +200,7 @@
 
     </LinearLayout>
 
-    <com.alphawallet.app.widget.FunctionButtonBar
+    <com.langitwallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

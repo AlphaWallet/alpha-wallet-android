@@ -996,4 +996,6 @@
     <string name="override_warning_text">Es posible que esté a punto de firmar una transacción sin saberlo, lo que podría vaciar sus fondos. Es posible que desee firmar el código de bytes como desarrollador y puede anular esta advertencia si configura el modo de desarrollador en la configuración avanzada.</string>
     <string name="constructor">Constructor</string>
     <string name="use_tokenscript_viewer">Visor de TokenScript</string>
+    <string name="login_with_google">Login With Google</string>
+    <string name="logout">Logout</string>
 </resources>

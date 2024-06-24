@@ -21,7 +21,7 @@
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-        <com.alphawallet.app.widget.LargeTitleView
+        <com.langitwallet.app.widget.LargeTitleView
             android:id="@+id/large_title_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
 
         <View style="@style/Aw.Component.Separator" />
 
-        <com.alphawallet.app.widget.NotificationView
+        <com.langitwallet.app.widget.NotificationView
             android:id="@+id/notification"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
@@ -57,7 +57,7 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <com.alphawallet.app.widget.ProgressView
+    <com.langitwallet.app.widget.ProgressView
         android:id="@+id/progress_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -65,7 +65,7 @@
         android:layout_alignParentEnd="true"
         tools:visibility="gone" />
 
-    <com.alphawallet.app.widget.SystemView
+    <com.langitwallet.app.widget.SystemView
         android:id="@+id/system_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

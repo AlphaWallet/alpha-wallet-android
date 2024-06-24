@@ -3,15 +3,16 @@ package com.alphawallet.app.service;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.alphawallet.app.BuildConfig;
-import com.alphawallet.app.analytics.Analytics;
-import com.alphawallet.app.entity.AnalyticsProperties;
-import com.alphawallet.app.entity.ServiceErrorException;
-import com.alphawallet.app.repository.KeyProviderFactory;
-import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.langitwallet.app.BuildConfig;
+import com.langitwallet.app.analytics.Analytics;
+import com.langitwallet.app.entity.AnalyticsProperties;
+import com.langitwallet.app.entity.ServiceErrorException;
+import com.langitwallet.app.repository.KeyProviderFactory;
+import com.langitwallet.app.repository.PreferenceRepositoryType;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.langitwallet.app.service.AnalyticsServiceType;
 import com.mixpanel.android.mpmetrics.MixpanelAPI;
 
 import org.json.JSONException;

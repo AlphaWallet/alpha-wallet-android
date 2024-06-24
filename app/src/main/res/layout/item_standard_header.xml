@@ -17,7 +17,7 @@
         android:paddingEnd="@dimen/standard_16"
         tools:text="@string/recipient" />
 
-    <com.alphawallet.app.widget.ChainName
+    <com.langitwallet.app.widget.ChainName
         android:id="@+id/chain_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

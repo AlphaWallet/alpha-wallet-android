@@ -1001,4 +1001,6 @@
     <string name="override_warning_text">Anda mungkin tanpa sadar menandatangani transaksi, yang dapat mengosongkan dana Anda. Anda mungkin ingin menandatangani bytecode sebagai pengembang, dan Anda dapat mengabaikan peringatan ini jika Anda menyetel mode pengembang di Setelan lanjutan.</string>
     <string name="constructor">Constructor</string>
     <string name="use_tokenscript_viewer">Penampil TokenScript</string>
+    <string name="login_with_google">Login With Google</string>
+    <string name="logout">Logout</string>
 </resources>

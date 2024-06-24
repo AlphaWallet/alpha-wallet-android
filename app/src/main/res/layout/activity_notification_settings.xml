@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" />
 
-    <com.alphawallet.app.widget.SettingsItemView
+    <com.langitwallet.app.widget.SettingsItemView
         android:id="@+id/setting_transaction_notification"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

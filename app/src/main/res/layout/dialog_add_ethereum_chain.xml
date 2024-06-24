@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.alphawallet.app.widget.BottomSheetHandleView
+    <com.langitwallet.app.widget.BottomSheetHandleView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal" />
@@ -29,7 +29,7 @@
         android:lineSpacingMultiplier="1.8"
         android:text="@string/add_chain_dialog_message" />
 
-    <com.alphawallet.app.widget.FunctionButtonBar
+    <com.langitwallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

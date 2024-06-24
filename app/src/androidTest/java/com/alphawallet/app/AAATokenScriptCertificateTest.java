@@ -26,6 +26,7 @@ import androidx.test.espresso.action.ViewActions;
 import com.alphawallet.app.util.EthUtils;
 import com.alphawallet.app.util.Helper;
 import com.alphawallet.app.resources.Contracts;
+import com.langitwallet.app.R;
 
 import org.junit.Test;
 import org.web3j.crypto.Credentials;

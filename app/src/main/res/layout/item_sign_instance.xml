@@ -8,7 +8,7 @@
     android:minHeight="60dp"
     android:orientation="vertical">
 
-    <com.alphawallet.app.widget.StandardHeader
+    <com.langitwallet.app.widget.StandardHeader
         android:id="@+id/date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

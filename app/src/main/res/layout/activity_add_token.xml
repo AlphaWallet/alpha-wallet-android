@@ -8,7 +8,7 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
-    <com.alphawallet.app.widget.InputAddress
+    <com.langitwallet.app.widget.InputAddress
         android:id="@+id/input_address_view"
         android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
@@ -55,7 +55,7 @@
 
     </LinearLayout>
 
-    <com.alphawallet.app.widget.FunctionButtonBar
+    <com.langitwallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

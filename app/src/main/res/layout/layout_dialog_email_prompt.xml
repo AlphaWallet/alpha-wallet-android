@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.alphawallet.app.widget.BottomSheetHandleView
+    <com.langitwallet.app.widget.BottomSheetHandleView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal" />
@@ -27,14 +27,14 @@
         android:lineSpacingMultiplier="1.8"
         android:text="@string/email_prompt_hint" />
 
-    <com.alphawallet.app.widget.InputView
+    <com.langitwallet.app.widget.InputView
         android:id="@+id/email_input"
         android:layout_width="match_parent"
         android:layout_height="90dp"
         android:layout_marginTop="@dimen/base_24"
         custom:label="@string/hint_email_address" />
 
-    <com.alphawallet.app.widget.FunctionButtonBar
+    <com.langitwallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

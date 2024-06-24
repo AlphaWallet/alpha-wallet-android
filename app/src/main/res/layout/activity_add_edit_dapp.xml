@@ -38,7 +38,7 @@
                 android:layout_marginBottom="@dimen/standard_16"
                 android:src="@drawable/ic_launcher_foreground" />
 
-            <com.alphawallet.app.widget.InputView
+            <com.langitwallet.app.widget.InputView
                 android:id="@+id/dapp_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -49,7 +49,7 @@
                 custom:lines="1"
                 custom:maxLines="1" />
 
-            <com.alphawallet.app.widget.InputView
+            <com.langitwallet.app.widget.InputView
                 android:id="@+id/dapp_url"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

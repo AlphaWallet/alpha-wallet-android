@@ -34,7 +34,7 @@
             custom:layout_constraintBottom_toTopOf="@+id/text_new_balance"
             custom:layout_constraintTop_toTopOf="@+id/text_new_balance">
 
-            <com.alphawallet.app.widget.TokenIcon
+            <com.langitwallet.app.widget.TokenIcon
                 android:id="@+id/token_icon"
                 android:layout_width="@dimen/token_icon"
                 android:layout_height="@dimen/token_icon"

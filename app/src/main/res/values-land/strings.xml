@@ -15,4 +15,6 @@
     <string name="remove_shortcut_reminder">Transferring this token will remove the associated shortcut from the home screen.</string>
     <string name="remove_shortcut_while_token_not_found">Token does not exist, remove the shortcut?</string>
     <string name="title_remove_shortcut">Remove Shortcut</string>
+    <string name="login_with_google">Login With Google</string>
+    <string name="logout">Logout</string>
 </resources>

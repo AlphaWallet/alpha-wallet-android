@@ -6,18 +6,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
-    <com.alphawallet.app.widget.BottomSheetToolbarView
+    <com.langitwallet.app.widget.BottomSheetToolbarView
         android:id="@+id/bottom_sheet_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:title="@string/settings_label" />
 
-    <com.alphawallet.app.widget.SlippageWidget
+    <com.langitwallet.app.widget.SlippageWidget
         android:id="@+id/slippage_widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <com.alphawallet.app.widget.StandardHeader
+    <com.langitwallet.app.widget.StandardHeader
         android:id="@+id/header_exchanges"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
         app:flexDirection="row"
         app:flexWrap="wrap"/>
 
-    <com.alphawallet.app.widget.StandardHeader
+    <com.langitwallet.app.widget.StandardHeader
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:headerText="@string/subtitle_network" />

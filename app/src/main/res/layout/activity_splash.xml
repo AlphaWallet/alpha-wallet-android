@@ -47,6 +47,14 @@
             android:layout_height="wrap_content"
             android:text="@string/i_already_have_a_wallet" />
 
+        <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_login_with_google"
+                style="@style/Aw.Component.Button.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/standard_16"
+                android:text="@string/login_with_google" />
+
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_watch"

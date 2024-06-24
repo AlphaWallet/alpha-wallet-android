@@ -42,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <com.alphawallet.app.widget.GasSliderView
+        <com.langitwallet.app.widget.GasSliderView
             android:id="@+id/gasSliderView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -82,7 +82,7 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <com.alphawallet.app.ui.widget.entity.GasWarningLayout
+        <com.langitwallet.app.ui.widget.entity.GasWarningLayout
             android:id="@+id/gas_warning_bubble"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -135,10 +135,10 @@
                     android:text="@string/body_low_gas"
                     android:textAlignment="center" />
             </LinearLayout>
-        </com.alphawallet.app.ui.widget.entity.GasWarningLayout>
+        </com.langitwallet.app.ui.widget.entity.GasWarningLayout>
 
 
-        <com.alphawallet.app.ui.widget.entity.GasWarningLayout
+        <com.langitwallet.app.ui.widget.entity.GasWarningLayout
             android:id="@+id/insufficient_bubble"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -191,7 +191,7 @@
                     android:textAlignment="center" />
             </LinearLayout>
 
-        </com.alphawallet.app.ui.widget.entity.GasWarningLayout>
+        </com.langitwallet.app.ui.widget.entity.GasWarningLayout>
 
     </LinearLayout>
 

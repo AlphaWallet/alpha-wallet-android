@@ -20,14 +20,14 @@
             android:paddingHorizontal="@dimen/dp16"
             android:layout_weight="2">
 
-            <com.alphawallet.app.widget.TokenIcon
+            <com.langitwallet.app.widget.TokenIcon
                 android:id="@+id/logo_old"
                 android:layout_width="@dimen/token_icon"
                 android:layout_height="@dimen/token_icon"
                 android:contentDescription="@string/app_name"
                 android:layout_gravity="center" />
 
-            <com.alphawallet.app.widget.ChainName
+            <com.langitwallet.app.widget.ChainName
                 android:id="@+id/name_old_chain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -52,14 +52,14 @@
             android:paddingHorizontal="@dimen/dp16"
             android:layout_weight="2">
 
-            <com.alphawallet.app.widget.TokenIcon
+            <com.langitwallet.app.widget.TokenIcon
                 android:id="@+id/logo_new"
                 android:layout_width="@dimen/token_icon"
                 android:layout_height="@dimen/token_icon"
                 android:contentDescription="@string/app_name"
                 android:layout_gravity="center" />
 
-            <com.alphawallet.app.widget.ChainName
+            <com.langitwallet.app.widget.ChainName
                 android:id="@+id/name_new_chain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

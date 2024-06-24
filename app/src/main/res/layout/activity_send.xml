@@ -38,7 +38,7 @@
                     tools:text="@string/transfer_request"
                     tools:visibility="visible" />
 
-                <com.alphawallet.app.widget.InputAmount
+                <com.langitwallet.app.widget.InputAmount
                     android:id="@+id/input_amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -48,7 +48,7 @@
 
                 <View style="@style/Aw.Component.Separator" />
 
-                <com.alphawallet.app.widget.InputAddress
+                <com.langitwallet.app.widget.InputAddress
                     android:id="@+id/input_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -63,7 +63,7 @@
 
         </ScrollView>
 
-        <com.alphawallet.app.widget.FunctionButtonBar
+        <com.langitwallet.app.widget.FunctionButtonBar
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

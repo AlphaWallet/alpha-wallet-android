@@ -14,7 +14,7 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 
 import android.widget.TextView;
 
-import com.alphawallet.app.R;
+import com.langitwallet.app.R;
 
 public class Should
 {

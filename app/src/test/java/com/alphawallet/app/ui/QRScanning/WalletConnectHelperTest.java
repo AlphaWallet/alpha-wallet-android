@@ -1,6 +1,6 @@
 package com.alphawallet.app.ui.QRScanning;
 
-import com.alphawallet.app.walletconnect.util.WalletConnectHelper;
+import com.langitwallet.app.walletconnect.util.WalletConnectHelper;
 
 import org.junit.Test;
 

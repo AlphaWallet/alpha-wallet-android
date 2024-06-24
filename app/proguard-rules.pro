@@ -67,10 +67,10 @@
 
 #entities, jsInterface & listeners
 -keep class com.alphawallet.token.** { *; }
--keep class com.alphawallet.app.walletconnect.** { *; }
--keep class com.alphawallet.app.web3.** { *; }
--keep class com.alphawallet.app.web3j.** { *; }
--keep class com.alphawallet.app.entity.** { *; }
+-keep class com.langitwallet.app.walletconnect.** { *; }
+-keep class com.langitwallet.app.web3.** { *; }
+-keep class com.langitwallet.app.web3j.** { *; }
+-keep class com.langitwallet.app.entity.** { *; }
 -keep class io.stormbird.wallet.model.api.** { *; }
 
 -keep public class java.beans.* { *; }

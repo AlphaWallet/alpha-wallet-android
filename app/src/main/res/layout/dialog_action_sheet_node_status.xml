@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.alphawallet.app.widget.BottomSheetHandleView
+    <com.langitwallet.app.widget.BottomSheetHandleView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal" />
@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/giant_40">
 
-        <com.alphawallet.app.widget.NodeStatusInfo
+        <com.langitwallet.app.widget.NodeStatusInfo
             android:id="@+id/node_status_strong"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -44,7 +44,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.alphawallet.app.widget.NodeStatusInfo
+        <com.langitwallet.app.widget.NodeStatusInfo
             android:id="@+id/node_status_medium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
             app:layout_constraintStart_toStartOf="@id/node_status_strong"
             app:layout_constraintTop_toBottomOf="@id/node_status_strong" />
 
-        <com.alphawallet.app.widget.NodeStatusInfo
+        <com.langitwallet.app.widget.NodeStatusInfo
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"

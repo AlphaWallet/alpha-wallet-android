@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.alphawallet.app.widget.BottomSheetHandleView
+    <com.langitwallet.app.widget.BottomSheetHandleView
         android:id="@+id/handle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -31,7 +31,7 @@
             android:src="@drawable/tx_in_progress"
             android:visibility="visible" />
 
-        <com.alphawallet.app.widget.CopyTextView
+        <com.langitwallet.app.widget.CopyTextView
             android:id="@+id/tx_hash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
             android:text="@string/transaction_progress_detail"
             android:textAlignment="center" />
 
-        <com.alphawallet.app.widget.FunctionButtonBar
+        <com.langitwallet.app.widget.FunctionButtonBar
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -35,7 +35,7 @@
                     android:layout_marginBottom="@dimen/standard_16"
                     tools:text="10:57 PM | July 22, 2020" />
 
-                <com.alphawallet.app.widget.TokenIcon
+                <com.langitwallet.app.widget.TokenIcon
                     android:id="@+id/token_icon"
                     android:layout_width="@dimen/token_icon_large"
                     android:layout_height="@dimen/token_icon_large"
@@ -78,7 +78,7 @@
                     android:gravity="center_horizontal"
                     tools:text="+ 1.234 ETH" />
 
-                <com.alphawallet.app.widget.ChainName
+                <com.langitwallet.app.widget.ChainName
                     android:id="@+id/chain_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -118,12 +118,12 @@
 
                 <include layout="@layout/item_ticket" />
 
-                <com.alphawallet.app.widget.EventDetailWidget
+                <com.langitwallet.app.widget.EventDetailWidget
                     android:id="@+id/event_detail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
-                <com.alphawallet.app.widget.AmountDisplayWidget
+                <com.langitwallet.app.widget.AmountDisplayWidget
                     android:id="@+id/amount_display"
                     android:visibility="gone"
                     android:layout_width="match_parent"
@@ -132,7 +132,7 @@
             </LinearLayout>
         </ScrollView>
 
-        <com.alphawallet.app.widget.FunctionButtonBar
+        <com.langitwallet.app.widget.FunctionButtonBar
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -14,7 +14,7 @@
         android:layout_alignParentTop="true"
         android:paddingBottom="35dp">
 
-        <com.alphawallet.app.widget.NFTImageView
+        <com.langitwallet.app.widget.NFTImageView
             android:id="@+id/icon"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

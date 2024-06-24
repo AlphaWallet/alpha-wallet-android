@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.alphawallet.app.widget.FunctionButtonBar
+        <com.langitwallet.app.widget.FunctionButtonBar
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
                 android:layout_height="wrap_content"
                 android:padding="10dp">
 
-                <com.alphawallet.app.widget.NFTImageView
+                <com.langitwallet.app.widget.NFTImageView
                     android:id="@+id/layout_image"
                     android:layout_width="match_parent"
                     android:layout_height="350dp"
@@ -110,7 +110,7 @@
 
                 </LinearLayout>
 
-                <com.alphawallet.app.ui.widget.entity.NFTAttributeLayout
+                <com.langitwallet.app.ui.widget.entity.NFTAttributeLayout
                     android:id="@+id/attributes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

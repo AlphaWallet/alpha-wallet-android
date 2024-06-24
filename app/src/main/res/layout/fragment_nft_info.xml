@@ -20,7 +20,7 @@
             app:cardCornerRadius="0dp"
             app:cardElevation="2dp">
 
-            <com.alphawallet.app.widget.NFTImageView
+            <com.langitwallet.app.widget.NFTImageView
                 android:id="@+id/asset_image"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

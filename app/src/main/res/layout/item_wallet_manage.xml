@@ -32,7 +32,7 @@
             app:tint="?colorControlNormal"
             tools:visibility="visible" />
 
-        <com.alphawallet.app.widget.UserAvatar
+        <com.langitwallet.app.widget.UserAvatar
             android:id="@+id/wallet_icon"
             android:layout_width="@dimen/token_icon"
             android:layout_height="@dimen/token_icon" />

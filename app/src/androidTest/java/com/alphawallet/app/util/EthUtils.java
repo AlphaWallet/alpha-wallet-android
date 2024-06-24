@@ -1,7 +1,7 @@
 package com.alphawallet.app.util;
 
-import com.alphawallet.app.C;
-import com.alphawallet.app.service.AWHttpService;
+import com.langitwallet.app.C;
+import com.langitwallet.app.service.AWHttpService;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Hash;

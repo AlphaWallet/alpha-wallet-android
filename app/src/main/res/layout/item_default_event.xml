@@ -11,7 +11,7 @@
     android:visibility="gone"
     tools:visibility="visible">
 
-    <com.alphawallet.app.widget.TokenIcon
+    <com.langitwallet.app.widget.TokenIcon
         android:id="@+id/token_icon"
         android:layout_width="@dimen/token_icon_large"
         android:layout_height="@dimen/token_icon_large" />
@@ -58,7 +58,7 @@
         tools:text="+1.0 ETH"
         tools:visibility="visible" />
 
-    <com.alphawallet.app.widget.AssetDetailView
+    <com.langitwallet.app.widget.AssetDetailView
         android:id="@+id/asset_detail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

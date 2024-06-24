@@ -12,7 +12,7 @@ import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiObjectNotFoundException;
 import androidx.test.uiautomator.UiSelector;
 
-import com.alphawallet.app.ui.SplashActivity;
+import com.langitwallet.app.ui.SplashActivity;
 import com.alphawallet.app.util.CustomFailureHandler;
 
 import org.junit.Before;

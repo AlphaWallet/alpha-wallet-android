@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.alphawallet.app.widget.AddressBar
+    <com.langitwallet.app.widget.AddressBar
         android:id="@+id/address_bar_widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
@@ -36,17 +36,17 @@
         android:focusable="true"
         android:focusableInTouchMode="true">
 
-        <com.alphawallet.app.ui.widget.entity.DappBrowserSwipeLayout
+        <com.langitwallet.app.ui.widget.entity.DappBrowserSwipeLayout
             android:id="@+id/swipe_refresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.alphawallet.app.web3.Web3View
+            <com.langitwallet.app.web3.Web3View
                 android:id="@+id/web3view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
-        </com.alphawallet.app.ui.widget.entity.DappBrowserSwipeLayout>
+        </com.langitwallet.app.ui.widget.entity.DappBrowserSwipeLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"

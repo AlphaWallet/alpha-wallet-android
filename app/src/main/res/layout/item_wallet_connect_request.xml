@@ -7,14 +7,14 @@
 
     <View style="@style/Aw.Component.Separator" />
 
-    <com.alphawallet.app.widget.DialogInfoItem
+    <com.langitwallet.app.widget.DialogInfoItem
         android:id="@+id/info_website"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <View style="@style/Aw.Component.Separator" />
 
-    <com.alphawallet.app.widget.DialogInfoItem
+    <com.langitwallet.app.widget.DialogInfoItem
         android:id="@+id/info_network"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

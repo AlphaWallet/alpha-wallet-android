@@ -14,7 +14,7 @@
         app:layout_scrollFlags="scroll|snap"
         app:titleEnabled="false">
 
-        <com.alphawallet.app.widget.CertifiedToolbarView
+        <com.langitwallet.app.widget.CertifiedToolbarView
             android:id="@+id/certified_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.alphawallet.app.widget.NFTImageView
+            <com.langitwallet.app.widget.NFTImageView
                     android:id="@+id/asset_image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -58,119 +58,119 @@
 
             </LinearLayout>
 
-            <com.alphawallet.app.widget.TokenInfoCategoryView
+            <com.langitwallet.app.widget.TokenInfoCategoryView
                 android:id="@+id/label_details"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 custom:title="@string/label_details"
                 tools:visibility="visible" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/token_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/label_token_id" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/network"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/subtitle_network" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/contract_address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/contract_address" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/key_address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/key_address" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/balance" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/hint_contract_name" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/external_link"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/label_external_link" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/creator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/asset_creator" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/token_standard"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/asset_schema" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/total_supply"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/asset_total_supply" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/rarity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/asset_rarity" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/num_owners"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/asset_number_of_owners" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/owner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/asset_owner" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/last_sale"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/asset_last_sale" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/average_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 custom:tokenInfoLabel="@string/asset_average_price" />
 
-            <com.alphawallet.app.widget.TokenInfoView
+            <com.langitwallet.app.widget.TokenInfoView
                 android:id="@+id/floor_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -184,7 +184,7 @@
                 android:layout_gravity="center"
                 android:layout_margin="@dimen/small_12" />
 
-            <com.alphawallet.app.widget.TokenInfoCategoryView
+            <com.langitwallet.app.widget.TokenInfoCategoryView
                 android:id="@+id/label_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -199,12 +199,12 @@
                 android:padding="@dimen/standard_16"
                 tools:text="Test description" />
 
-            <com.alphawallet.app.ui.widget.entity.NFTAttributeLayout
+            <com.langitwallet.app.ui.widget.entity.NFTAttributeLayout
                 android:id="@+id/attributes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <com.alphawallet.app.ui.widget.entity.NFTAttributeLayout
+            <com.langitwallet.app.ui.widget.entity.NFTAttributeLayout
                     android:id="@+id/ts_attributes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
@@ -212,7 +212,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.alphawallet.app.widget.FunctionButtonBar
+    <com.langitwallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

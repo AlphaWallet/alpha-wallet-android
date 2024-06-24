@@ -15,7 +15,7 @@
             android:layout_above="@id/nav"
             android:layout_alignParentTop="true" />
 
-        <com.alphawallet.app.widget.AWalletBottomNavigationView
+        <com.langitwallet.app.widget.AWalletBottomNavigationView
             android:id="@+id/nav"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.alphawallet.app.widget.CertifiedToolbarView
+    <com.langitwallet.app.widget.CertifiedToolbarView
         android:id="@+id/certified_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

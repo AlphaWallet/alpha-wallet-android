@@ -56,7 +56,7 @@
                 android:visibility="gone"
                 tools:visibility="visible">
 
-                <com.alphawallet.app.widget.TokenSelector
+                <com.langitwallet.app.widget.TokenSelector
                     android:id="@+id/from_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -72,7 +72,7 @@
                     android:contentDescription="@string/swap"
                     android:src="@drawable/ic_swap_to" />
 
-                <com.alphawallet.app.widget.TokenSelector
+                <com.langitwallet.app.widget.TokenSelector
                     android:id="@+id/to_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -132,7 +132,7 @@
                 android:visibility="gone"
                 tools:visibility="visible">
 
-                <com.alphawallet.app.widget.StandardHeader
+                <com.langitwallet.app.widget.StandardHeader
                     android:id="@+id/header_quote"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -140,7 +140,7 @@
                     custom:headerText="@string/header_quote_details"
                     custom:showImageControl="true" />
 
-                <com.alphawallet.app.widget.TokenInfoView
+                <com.langitwallet.app.widget.TokenInfoView
                     android:id="@+id/tiv_provider"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -148,35 +148,35 @@
                     custom:tokenInfoLabel="@string/label_provider"
                     tools:visibility="visible" />
 
-                <com.alphawallet.app.widget.TokenInfoView
+                <com.langitwallet.app.widget.TokenInfoView
                     android:id="@+id/tiv_provider_website"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
                     custom:tokenInfoLabel="@string/label_provider_website" />
 
-                <com.alphawallet.app.widget.TokenInfoView
+                <com.langitwallet.app.widget.TokenInfoView
                     android:id="@+id/tiv_current_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
                     custom:tokenInfoLabel="@string/label_current_price" />
 
-                <com.alphawallet.app.widget.TokenInfoView
+                <com.langitwallet.app.widget.TokenInfoView
                     android:id="@+id/tiv_min_received"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
                     custom:tokenInfoLabel="@string/label_minimum_received" />
 
-                <com.alphawallet.app.widget.TokenInfoView
+                <com.langitwallet.app.widget.TokenInfoView
                     android:id="@+id/tiv_gas_fees"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
                     custom:tokenInfoLabel="@string/label_gas_fees" />
 
-                <com.alphawallet.app.widget.TokenInfoView
+                <com.langitwallet.app.widget.TokenInfoView
                     android:id="@+id/tiv_other_fees"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

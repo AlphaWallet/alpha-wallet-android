@@ -8,7 +8,7 @@
 
     <View style="@style/Aw.Component.Separator" />
 
-    <com.alphawallet.app.widget.StandardHeader
+    <com.langitwallet.app.widget.StandardHeader
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <com.alphawallet.app.widget.TokenIcon
+                <com.langitwallet.app.widget.TokenIcon
                     android:id="@+id/token_icon"
                     android:layout_width="@dimen/token_icon"
                     android:layout_height="@dimen/token_icon"
@@ -72,7 +72,7 @@
                 android:paddingBottom="@dimen/tiny_8"
                 android:visibility="gone" />
 
-            <com.alphawallet.app.ui.widget.entity.NumericInput
+            <com.langitwallet.app.ui.widget.entity.NumericInput
                 android:id="@+id/amount_entry"
                 style="@style/Aw.Typography.Title.XLarge"
                 android:layout_width="match_parent"

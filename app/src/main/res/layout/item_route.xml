@@ -53,7 +53,7 @@
                 android:layout_gravity="center_vertical"
                 tools:text="1234.56 " />
 
-            <com.alphawallet.app.widget.AddressIcon
+            <com.langitwallet.app.widget.AddressIcon
                 android:id="@+id/token_icon"
                 android:layout_width="@dimen/token_icon_small"
                 android:layout_height="@dimen/token_icon_small"

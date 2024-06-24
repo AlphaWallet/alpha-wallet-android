@@ -6,7 +6,7 @@
     android:gravity="center"
     android:layout_height="wrap_content">
 
-    <com.alphawallet.app.widget.TokenIcon
+    <com.langitwallet.app.widget.TokenIcon
         android:id="@+id/token_icon"
         android:layout_width="@dimen/dp22"
         android:layout_height="@dimen/dp22"

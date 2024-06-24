@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.alphawallet.app.ui.TokenScriptManagementActivity">
+    tools:context="com.langitwallet.app.ui.TokenScriptManagementActivity">
 
     <include layout="@layout/layout_simple_toolbar" />
 

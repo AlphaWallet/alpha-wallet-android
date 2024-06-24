@@ -4,17 +4,17 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.alphawallet.app.widget.BottomSheetToolbarView
+    <com.langitwallet.app.widget.BottomSheetToolbarView
         android:id="@+id/bottom_sheet_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <com.alphawallet.app.widget.WalletConnectRequestWidget
+    <com.langitwallet.app.widget.WalletConnectRequestWidget
         android:id="@+id/wallet_connect_widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <com.alphawallet.app.widget.FunctionButtonBar
+    <com.langitwallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

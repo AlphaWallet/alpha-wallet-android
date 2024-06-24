@@ -62,7 +62,7 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
-            <com.alphawallet.app.widget.CopyTextView
+            <com.langitwallet.app.widget.CopyTextView
                 android:id="@+id/copy_wallet_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -73,7 +73,7 @@
                 custom:text="@string/ethereum"
                 tools:visibility="visible" />
 
-            <com.alphawallet.app.widget.CopyTextView
+            <com.langitwallet.app.widget.CopyTextView
                 android:id="@+id/copy_address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

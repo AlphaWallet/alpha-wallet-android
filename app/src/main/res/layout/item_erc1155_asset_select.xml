@@ -20,7 +20,7 @@
         android:layout_marginStart="@dimen/tiny_8"
         android:layout_marginEnd="@dimen/standard_16">
 
-        <com.alphawallet.app.widget.NFTImageView
+        <com.langitwallet.app.widget.NFTImageView
             android:id="@+id/icon"
             android:layout_width="64dp"
             android:layout_height="64dp"

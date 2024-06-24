@@ -140,7 +140,7 @@
                     android:src="@drawable/ic_coin_eth_small"
                     tools:ignore="ContentDescription" />
 
-                <com.alphawallet.app.widget.ChainName
+                <com.langitwallet.app.widget.ChainName
                     android:id="@+id/network_name"
                     style="@style/Aw.Typography.Label"
                     android:layout_width="wrap_content"
@@ -166,7 +166,7 @@
                 android:layout_height="wrap_content"
                 tools:text="0xabced" />
 
-            <com.alphawallet.app.widget.SignDataWidget
+            <com.langitwallet.app.widget.SignDataWidget
                 android:id="@+id/sign_widget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -176,12 +176,12 @@
         </LinearLayout>
     </ScrollView>
 
-    <com.alphawallet.app.widget.ConfirmationWidget
+    <com.langitwallet.app.widget.ConfirmationWidget
         android:id="@+id/confirmation_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <com.alphawallet.app.widget.FunctionButtonBar
+    <com.langitwallet.app.widget.FunctionButtonBar
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

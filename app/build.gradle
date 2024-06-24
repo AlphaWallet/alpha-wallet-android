@@ -39,7 +39,7 @@ android_lint_reporter {
 }
 
 android {
-    namespace 'com.alphawallet.app'
+    namespace 'com.langitwallet.app'
     compileSdk 34
 
     sourceSets {
@@ -49,7 +49,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "io.stormbird.wallet"
+        applicationId "com.langitwallet.app"
         minSdk 24
         targetSdk 34
         versionCode 268
@@ -238,6 +238,7 @@ dependencies {
     implementation libs.recyclerview
     implementation libs.biometric
     implementation libs.gridlayout
+    implementation libs.google.auth
 
     // Bar code scanning
     implementation libs.zxing.android.embedded

@@ -26,7 +26,7 @@
             android:descendantFocusability="blocksDescendants"
             android:orientation="vertical">
 
-            <com.alphawallet.app.widget.StandardHeader
+            <com.langitwallet.app.widget.StandardHeader
                 android:id="@+id/mainnet_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <com.alphawallet.app.widget.StandardHeader
+            <com.langitwallet.app.widget.StandardHeader
                 android:id="@+id/testnet_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

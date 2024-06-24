@@ -2,7 +2,7 @@ package com.alphawallet.app.util;
 
 import android.app.Activity;
 
-import com.alphawallet.app.entity.FragmentMessenger;
+import com.langitwallet.app.entity.FragmentMessenger;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory;

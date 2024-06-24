@@ -12,7 +12,7 @@
         android:layout_alignParentTop="true"
         android:orientation="vertical">
 
-        <com.alphawallet.app.widget.PasswordInputView
+        <com.langitwallet.app.widget.PasswordInputView
             android:id="@+id/input_seed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

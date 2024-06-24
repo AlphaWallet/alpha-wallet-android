@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.alphawallet.app.widget.BottomSheetHandleView
+    <com.langitwallet.app.widget.BottomSheetHandleView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal" />
@@ -65,7 +65,7 @@
 
     </RelativeLayout>
 
-    <com.alphawallet.app.widget.QuantitySelector
+    <com.langitwallet.app.widget.QuantitySelector
         android:id="@+id/quantity_selector"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

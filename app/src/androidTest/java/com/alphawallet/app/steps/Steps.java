@@ -25,7 +25,7 @@ import static com.alphawallet.app.util.Helper.clickStaticListItem;
 import static com.alphawallet.app.util.Helper.waitForLoadingComplete;
 import static com.alphawallet.app.util.Helper.waitUntil;
 import static com.alphawallet.app.util.Helper.waitUntilThenBack;
-import static com.alphawallet.app.util.RootUtil.isDeviceRooted;
+import static com.langitwallet.app.util.RootUtil.isDeviceRooted;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.core.StringStartsWith.startsWith;
@@ -36,7 +36,7 @@ import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.contrib.RecyclerViewActions;
 
-import com.alphawallet.app.R;
+import com.langitwallet.app.R;
 import com.alphawallet.app.assertions.Should;
 import com.alphawallet.app.util.GetTextAction;
 import com.alphawallet.app.util.Helper;

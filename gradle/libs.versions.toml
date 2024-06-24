@@ -17,6 +17,7 @@ firebaseMessaging = "23.4.1"
 flexboxLayout = "2.0.1"
 glide = "4.16.0"
 googleServices = "4.4.1"
+googleAuth = "19.0.0"
 gradle = "8.3.2"
 gridlayout = "1.0.0"
 gson = "2.10.1"
@@ -71,6 +72,7 @@ firebase-messaging = { module = "com.google.firebase:firebase-messaging", versio
 flexbox-layout = { module = "com.github.google:flexbox-layout", version.ref = "flexboxLayout" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
+google-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "googleAuth" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 gridlayout = { module = "androidx.gridlayout:gridlayout", version.ref = "gridlayout" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }

@@ -2,8 +2,8 @@ package com.alphawallet.app.service;
 
 import android.content.Context;
 
-import com.alphawallet.app.entity.ServiceErrorException;
-import com.alphawallet.app.repository.PreferenceRepositoryType;
+import com.langitwallet.app.entity.ServiceErrorException;
+import com.langitwallet.app.repository.PreferenceRepositoryType;
 
 public class AnalyticsService<T> implements AnalyticsServiceType<T> {
 

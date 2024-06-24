@@ -23,21 +23,21 @@
                 android:focusableInTouchMode="true"
                 android:orientation="vertical">
 
-            <com.alphawallet.app.widget.InputView
+            <com.langitwallet.app.widget.InputView
                     android:id="@+id/input_network_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/standard_16"
                     custom:label="@string/hint_network_name" />
 
-            <com.alphawallet.app.widget.InputView
+            <com.langitwallet.app.widget.InputView
                     android:id="@+id/input_network_rpc_url"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/standard_16"
                     custom:label="@string/hint_network_rpc_url" />
 
-            <com.alphawallet.app.widget.InputView
+            <com.langitwallet.app.widget.InputView
                     android:id="@+id/input_network_chain_id"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -45,21 +45,21 @@
                     custom:inputType="number"
                     custom:label="@string/hint_network_chain_id" />
 
-            <com.alphawallet.app.widget.InputView
+            <com.langitwallet.app.widget.InputView
                     android:id="@+id/input_network_symbol"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/standard_16"
                     custom:label="@string/hint_network_symbol" />
 
-            <com.alphawallet.app.widget.InputView
+            <com.langitwallet.app.widget.InputView
                     android:id="@+id/input_network_block_explorer_url"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/standard_16"
                     custom:label="@string/hint_network_block_explorer_url" />
 
-            <com.alphawallet.app.widget.InputView
+            <com.langitwallet.app.widget.InputView
                     android:id="@+id/input_network_explorer_api"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -104,7 +104,7 @@
         </LinearLayout>
     </ScrollView>
 
-    <com.alphawallet.app.widget.FunctionButtonBar
+    <com.langitwallet.app.widget.FunctionButtonBar
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

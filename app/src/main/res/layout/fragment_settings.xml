@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.alphawallet.app.widget.NotificationView
+            <com.langitwallet.app.widget.NotificationView
                 android:id="@+id/notification"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -26,7 +26,7 @@
 
             <include layout="@layout/item_update" />
 
-            <com.alphawallet.app.widget.StandardHeader
+            <com.langitwallet.app.widget.StandardHeader
                 android:id="@+id/layout_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
 
-            <com.alphawallet.app.widget.StandardHeader
+            <com.langitwallet.app.widget.StandardHeader
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 custom:headerText="@string/system" />
@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
 
-            <com.alphawallet.app.widget.StandardHeader
+            <com.langitwallet.app.widget.StandardHeader
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 custom:headerText="@string/support" />

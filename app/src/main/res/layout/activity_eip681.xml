@@ -27,7 +27,7 @@
                 android:orientation="vertical"
                 android:visibility="visible">
 
-                <com.alphawallet.app.widget.InputAmount
+                <com.langitwallet.app.widget.InputAmount
                     android:id="@+id/input_amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -49,7 +49,7 @@
             android:layout_centerHorizontal="true"
             android:src="@drawable/ic_action_qrx" />
 
-        <com.alphawallet.app.widget.CopyTextView
+        <com.langitwallet.app.widget.CopyTextView
             android:id="@+id/copy_wallet_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
-        <com.alphawallet.app.widget.FunctionButtonBar
+        <com.langitwallet.app.widget.FunctionButtonBar
             android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

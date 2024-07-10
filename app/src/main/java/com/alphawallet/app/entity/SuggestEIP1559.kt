@@ -161,7 +161,15 @@ internal fun suggestPriorityFee(firstBlock: Long, feeHistory: FeeHistory, gasSer
             ptr -= blockCount + 1
         }
 
-        if (rewards.isEmpty()) {
+        var isEmpty = true;
+        for (thisReward in rewards) {
+            if (thisReward > ZERO) {
+                isEmpty = false;
+                break;
+            }
+        }
+
+        if (isEmpty || rewards.isEmpty()) {
             return@fromCallable calculatePriorityFee(feeHistory)
         }
         rewards.sort()

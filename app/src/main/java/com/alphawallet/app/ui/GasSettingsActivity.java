@@ -18,6 +18,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
@@ -313,6 +314,7 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         private final Token baseCurrency;
         private final Context context;
 
+        @NonNull
         @Override
         public GasSpeedHolder onCreateViewHolder(ViewGroup parent, int viewType)
         {

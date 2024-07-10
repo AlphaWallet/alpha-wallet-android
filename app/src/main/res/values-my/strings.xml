@@ -800,7 +800,7 @@
     <string name="safe_transfer">လုံခြုံစွာပြောင်းရွှေ့မည်</string>
     <string name="selected_tokens">ရွေးချယ်ထားသောတိုကင်များ</string>
     <string name="send_tokens">တိုကင်များကိုပို့မည်</string>
-    <string name="rate_prompt">အသုံးပြုသည်ကိုကျေနပ်မှုရှိလျှင် ကျေးဇူးပြု၍ ကျွန်တော်တို့အားအဆင့်သတ်မှတ်ပေး၍ကူညီပါ။</string>
+    <string name="rate_prompt">%1$s ကိုအသုံးပြုရတာကို နှစ်သက်တယ်ဆိုရင် အဆင့်သတ်မှတ်ခြင်းအားဖြင့် ကျေးဇူးပြု၍ ကူညီပေးပါ။</string>
     <string name="rate_later">နောက်မှ</string>
     <string name="rate_rate">အဆင့်သတ်မှတ်သည်</string>
     <string name="rate_no_thanks">မပြုလုပ်ပါ၊ ကျေးဇူးတင်ပါသည်။</string>

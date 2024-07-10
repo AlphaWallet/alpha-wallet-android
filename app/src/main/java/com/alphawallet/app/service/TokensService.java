@@ -1,6 +1,7 @@
 package com.alphawallet.app.service;
 
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.text.TextUtils;

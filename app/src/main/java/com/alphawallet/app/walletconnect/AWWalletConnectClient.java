@@ -65,6 +65,8 @@ import com.walletconnect.web3.wallet.client.Wallet;
 import com.walletconnect.web3.wallet.client.Wallet.Model.Session;
 import com.walletconnect.web3.wallet.client.Web3Wallet;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.web3j.utils.Numeric;
 
 import java.util.ArrayList;
@@ -141,7 +143,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
         try
         {
-            listOfSettledSessions = Web3Wallet.INSTANCE.getListOfActiveSessions();
+            listOfSettledSessions = Web3Wallet.getListOfActiveSessions();
         }
         catch (IllegalStateException e)
         {
@@ -221,7 +223,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
     private List<String> getSupportedMethods()
     {
-        return Arrays.asList("eth_sendTransaction", "eth_signTransaction", "eth_signTypedData", "eth_signTypedData_v3", "eth_signTypedData_v4", "personal_sign", "eth_sign");
+        return Arrays.asList("eth_sendTransaction", "eth_signTransaction", "eth_signTypedData", "eth_signTypedData_v3", "eth_signTypedData_v4", "personal_sign", "eth_sign", "wallet_switchEthereumChain");
     }
 
     private List<String> getSupportedEvents()
@@ -574,6 +576,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
                 }
                 else
                 {
+                    // TODO: Update the libs
                     Web3Wallet.INSTANCE.respondAuthRequest(new Params.AuthRequestResponse.Error(requestId, 0, "User rejected request."), (authRequestResponse) -> {
                         closeWalletConnectActivity();
                         return null;
@@ -678,6 +681,26 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     {
         String checkMethod;
         String method = sessionRequest.getRequest().getMethod();
+        if (method.equals("wallet_switchEthereumChain"))
+        {
+            //does AW support this chain? If so then proceed.
+            JSONObject response = new JSONObject();
+            try
+            {
+                response.put("jsonrpc", "2.0");
+                response.put("id", sessionRequest.request.id);
+                response.put("result", "null");
+            }
+            catch (JSONException e)
+            {
+                //
+            }
+
+            //how to respond affirmative?
+            approve(sessionRequest, response.toString());
+            return;
+        }
+
         if (method.startsWith("eth_signTypedData"))
         {
             checkMethod = "eth_signTypedData";

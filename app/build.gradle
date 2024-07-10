@@ -292,12 +292,15 @@ dependencies {
         exclude group: 'org.bouncycastle', module: '*'
     })
 
+    implementation libs.review
+    implementation libs.app.update
+
     runtimeOnly libs.work.runtime.ktx
 
     //Analytics
-    analyticsImplementation libs.play.core
+    //analyticsImplementation libs.play.core
 
-    analyticsImplementation libs.play.core
+    //analyticsImplementation libs.play.core
     analyticsImplementation libs.firebase.analytics
     analyticsImplementation libs.mixpanel.android
     analyticsImplementation libs.firebase.crashlytics

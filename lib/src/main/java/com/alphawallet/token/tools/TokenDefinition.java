@@ -79,7 +79,7 @@ public class TokenDefinition
     private int actionCount;
 
     public static final String TOKENSCRIPT_MINIMUM_SCHEMA = "2020/06";
-    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2022/09";
+    public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2024/01";
     public static final String TOKENSCRIPT_ADDRESS = "{TS_ADDRESS}";
     public static final String TOKENSCRIPT_CHAIN = "{TS_CHAIN}";
     public static final String TOKENSCRIPT_REPO_SERVER = "https://repo.tokenscript.org/";
@@ -813,6 +813,9 @@ public class TokenDefinition
             case "activity":
                 activity = processActivityView(card);
                 activityCards.put(card.getAttribute("name"), activity);
+                break;
+            case "onboarding":
+                // do not parse onboarding cards
                 break;
             default:
                 throw new SAXException("Unexpected card type found: " + type);

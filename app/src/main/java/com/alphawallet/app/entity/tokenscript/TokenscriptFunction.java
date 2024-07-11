@@ -839,6 +839,14 @@ public abstract class TokenscriptFunction
         {
             return attrRes.text;
         }
+        else if (!TextUtils.isEmpty(element.localRef) && refTags.containsKey(element.localRef)) //local input before attrs
+        {
+            return refTags.get(element.localRef);
+        }
+        else if (!TextUtils.isEmpty(element.ref) && refTags.containsKey(element.ref))
+        {
+            return refTags.get(element.ref);
+        }
         else if (definition != null && definition.attributes.containsKey(element.ref)) //resolve from attribute
         {
             Attribute attr = definition.attributes.get(element.ref);
@@ -853,10 +861,6 @@ public abstract class TokenscriptFunction
         {
             Attribute attr = localAttrs.get(element.localRef);
             return fetchArgValue(token, element, attr, tokenId, definition, attrIf);
-        }
-        else if (!TextUtils.isEmpty(element.localRef) && refTags.containsKey(element.localRef))
-        {
-            return refTags.get(element.localRef);
         }
         else
         {

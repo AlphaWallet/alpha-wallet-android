@@ -34,7 +34,12 @@ web3 = {
     },
     action: {
         setProps: function (msgParams) {
-            alpha.setValues(JSON.stringify(msgParams));
+            // Pre-parse msgParams to convert BigInt to string
+            const preParsedParams = JSON.parse(JSON.stringify(msgParams, (key, value) =>
+                typeof value === 'bigint' ? value.toString() : value
+            ));
+
+            alpha.setValues(JSON.stringify(preParsedParams));
         }
     }
 }

@@ -899,8 +899,8 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         if (newValues)
         {
             viewModel.getAssetDefinitionService().addLocalRefs(args);
-            //rebuild the view
-            getAttrs();
+            //rebuild the view // Note: Doing this blanks user input.
+            //getAttrs();
         }
     }
 

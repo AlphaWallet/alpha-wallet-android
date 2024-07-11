@@ -5,8 +5,6 @@ import static com.alphawallet.app.repository.TokensRealmSource.IMAGES_DB;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ADDRESS;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CHAIN;
-import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CURRENT_SCHEMA;
-import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_REPO_SERVER;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_STORE_SERVER;
 import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
 
@@ -77,7 +75,6 @@ import org.web3j.abi.DefaultFunctionEncoder;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
-import org.web3j.crypto.Keys;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;

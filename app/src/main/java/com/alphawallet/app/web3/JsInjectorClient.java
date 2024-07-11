@@ -86,8 +86,9 @@ public class JsInjectorClient {
         initSrc = String.format(initSrc, tokenContent, walletAddress, rpcUrl, chainId, tokenIdWrapperName);
         //now insert this source into the view
         // note that the <div> is not closed because it is closed in injectStyleAndWrap().
+        String ethersMin = "<script>" + loadFile(ctx, R.raw.ethers_js_min) + "</script>";
         String wrapper = "<div id=\"token-card-" + tokenId.toString(10) + "\" class=\"token-card\">";
-        initSrc = "<script>\n" + initSrc + "</script>\n" + wrapper;
+        initSrc = ethersMin + "<script>\n" + initSrc + "</script>\n" + wrapper;
         return injectJS(view, initSrc);
     }
 

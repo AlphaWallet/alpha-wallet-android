@@ -857,6 +857,7 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
         if (hasTokenScript(token))
         {
             attrRefresh = assetDefinitionService.resolveAttrs(token, new ArrayList<>(Collections.singleton(tokenId)), null, UpdateType.USE_CACHE)
+                    .filter(attr -> !attr.userInput)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(attr -> { attrs.add(attr); attrsTxt.append(attr.text); }, this::onError, () -> checkUpdatedAttrs(prevResult, attrsTxt, attrs, tsCb));

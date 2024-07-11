@@ -92,15 +92,15 @@ public class ContractInteract
     private Function getTokenURI(BigInteger tokenId)
     {
         return new Function("tokenURI",
-                Arrays.asList(new Uint256(tokenId)),
-                Arrays.asList(new TypeReference<Utf8String>() {}));
+                Collections.singletonList(new Uint256(tokenId)),
+                Collections.singletonList(new TypeReference<Utf8String>() {}));
     }
 
     private Function getTokenURI2(BigInteger tokenId)
     {
         return new Function("uri",
-                Arrays.asList(new Uint256(tokenId)),
-                Arrays.asList(new TypeReference<Utf8String>() {}));
+                Collections.singletonList(new Uint256(tokenId)),
+                Collections.singletonList(new TypeReference<Utf8String>() {}));
     }
 
     private static Function getScriptURI() {

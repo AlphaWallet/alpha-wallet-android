@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * Created by JB on 1/09/2022.
  */
-public class AAATokenScriptCertificateTest extends BaseE2ETest
+public class TokenScriptCertificateTest extends BaseE2ETest
 {
     private String doorContractAddress;
     private final String contractOwnerPk = "0x69c22d654be7fe75e31fbe26cb56c93ec91144fab67cb71529c8081971635069";
@@ -58,7 +58,7 @@ public class AAATokenScriptCertificateTest extends BaseE2ETest
         }
     };
 
-    public AAATokenScriptCertificateTest()
+    public TokenScriptCertificateTest()
     {
         int apiLevel = Build.VERSION.SDK_INT;
         String[] array = WALLETS_ON_GANACHE.get(String.valueOf(apiLevel));

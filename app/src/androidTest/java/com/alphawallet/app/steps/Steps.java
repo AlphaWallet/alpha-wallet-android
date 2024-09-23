@@ -140,6 +140,7 @@ public class Steps
 
     public static void ensureTransactionConfirmed()
     {
+        Helper.wait(6);
 //        onView(withText(R.string.rate_no_thanks)).perform(click());
         // now this view goes straight to activity pane
         shouldSee("Activity");

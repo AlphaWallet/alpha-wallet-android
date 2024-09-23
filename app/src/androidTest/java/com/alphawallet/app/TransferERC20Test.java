@@ -31,7 +31,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AATransferERC20Test extends BaseE2ETest
+public class TransferERC20Test extends BaseE2ETest
 {
     private String contractAddress;
     private final String contractOwnerPk = "0x69c22d654be7fe75e31fbe26cb56c93ec91144fab67cb71529c8081971635069";

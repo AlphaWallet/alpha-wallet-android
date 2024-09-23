@@ -15,13 +15,14 @@ import static org.junit.Assert.fail;
 import android.os.Build;
 
 import com.alphawallet.app.util.Helper;
+import static androidx.test.espresso.Espresso.pressBack;
 
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class TransferTest extends BaseE2ETest
+public class AATransferTest extends BaseE2ETest
 {
     // On CI server, run tests on different API levels concurrently may cause failure: Replacement transaction underpriced.
     // Use different wallet to transfer token from can avoid this error
@@ -62,6 +63,7 @@ public class TransferTest extends BaseE2ETest
 
         sendBalanceTo("GETH", "0.001", newWalletAddress);
         ensureTransactionConfirmed();
+        pressBack();
         switchToWallet(newWalletAddress);
         assertBalanceIs("0.001");
     }

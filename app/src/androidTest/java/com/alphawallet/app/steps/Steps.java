@@ -141,9 +141,11 @@ public class Steps
     public static void ensureTransactionConfirmed()
     {
 //        onView(withText(R.string.rate_no_thanks)).perform(click());
-        click(withId(R.string.action_show_tx_details));
-        onView(isRoot()).perform(waitUntil(withSubstring("Send"), 30 * 60));
-        pressBack();
+        // now this view goes straight to activity pane
+        shouldSee("Activity");
+        //click(withId(R.string.action_show_tx_details));
+        //onView(isRoot()).perform(waitUntil(withSubstring("Send"), 30 * 60));
+        //pressBack();
     }
 
     public static void sendBalanceTo(String tokenSymbol, String amountStr, String receiverAddress)

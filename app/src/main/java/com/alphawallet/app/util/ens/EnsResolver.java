@@ -12,6 +12,8 @@
  */
 package com.alphawallet.app.util.ens;
 
+import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 import android.text.TextUtils;
@@ -85,6 +87,8 @@ public class EnsResolver implements Resolvable
 
     public static final String REVERSE_NAME_SUFFIX = ".addr.reverse";
 
+    public static final long USE_ENS_CHAIN = MAINNET_ID;
+
     private final Web3j web3j;
     protected final int addressLength;
     protected long chainId;
@@ -98,7 +102,7 @@ public class EnsResolver implements Resolvable
         this.web3j = web3j;
         this.addressLength = addressLength;
 
-        chainId = 1;
+        chainId = USE_ENS_CHAIN;
 
         Single.fromCallable(() -> {
             NetVersion v = web3j.netVersion().send();
@@ -495,12 +499,11 @@ public class EnsResolver implements Resolvable
                     }));
 
             resolverAddr = getContractData(address, function, "");
-            if (!TextUtils.isEmpty(resolverAddr) && resolverAddr.length() > 2)
+            /*if (!TextUtils.isEmpty(resolverAddr) && resolverAddr.length() > 2)
             {
                 cachedNameReads.put(cacheKey(nodeData, address), new CachedENSRead(resolverAddr));
-            }
+            }*/
         }
-
         return resolverAddr;
     }
 

@@ -189,7 +189,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
     public static final String PALM_TEST_RPC_FALLBACK_URL = usesProductionKey ? FREE_PALM_RPC_URL : "https://palm-testnet.infura.io/v3/" + keyProvider.getSecondaryInfuraKey();
     public static final String LINEA_FALLBACK_RPC = usesProductionKey ? LINEA_FREE_RPC : "https://linea.drpc.org";
     public static final String LINEA_RPC = usesProductionKey ? "https://linea-mainnet.infura.io/v3/" + keyProvider.getInfuraKey() : LINEA_FALLBACK_RPC;
-    public static final String LINEA_TEST_RPC = usesProductionKey ? "https://linea-goerli.infura.io/v3/" + keyProvider.getInfuraKey() : LINEA_TEST_FREE_RPC;
+    public static final String LINEA_TEST_RPC = usesProductionKey ? "https://linea-sepolia.infura.io/v3/" + keyProvider.getInfuraKey() : LINEA_TEST_FREE_RPC;
     public static final String BASE_RPC = usesProductionKey ? "https://base-mainnet.infura.io/v3/" + keyProvider.getInfuraKey() : BASE_FREE_MAINNET_RPC;
     public static final String BASE_FALLBACK_RPC = usesProductionKey ? BASE_FREE_MAINNET_RPC : "https://base-mainnet.public.blastapi.io";
     public static final String BASE_TEST_RPC = usesProductionKey ? "https://base-sepolia.infura.io/v3/" + keyProvider.getInfuraKey() : BASE_FREE_TESTNET_RPC;
@@ -388,11 +388,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://api.lineascan.build/api?"));
             put(LINEA_TEST_ID, new NetworkInfo(C.LINEA_TESTNET_NAME, C.ETH_SYMBOL,
                     LINEA_TEST_RPC,
-                    "https://goerli.lineascan.build/tx/", LINEA_TEST_ID, LINEA_TEST_FREE_RPC,
-                    "https://api-testnet.lineascan.build/api?"));
+                    "https://sepolia.lineascan.build/tx/", LINEA_TEST_ID, LINEA_TEST_FREE_RPC,
+                    "https://api-sepolia.lineascan.build/api?"));
             put(HOLESKY_ID, new NetworkInfo(C.HOLESKY_TESTNET_NAME, C.HOLESKY_TEST_SYMBOL,
-                    HOLESKY_RPC_URL,
-                    "https://holesky.etherscan.io/tx/", HOLESKY_ID, HOLESKY_BACKUP_RPC_URL,
+                    HOLESKY_BACKUP_RPC_URL,
+                    "https://holesky.etherscan.io/tx/", HOLESKY_ID, HOLESKY_RPC_URL,
                     "https://api-holesky.etherscan.io/api?"));
             put(BASE_MAINNET_ID, new NetworkInfo(C.BASE_MAINNET_NAME, C.ETH_SYMBOL,
                     BASE_RPC,

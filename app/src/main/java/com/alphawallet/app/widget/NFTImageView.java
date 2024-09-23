@@ -261,6 +261,14 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
                 String base64 = android.util.Base64.encodeToString(loader.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
                 webView.loadData(base64, "text/html; charset=utf-8", "base64");
             }
+            else if (useType.getImageType() == ImageType.RAW_SVG)
+            {
+                //insert class="center-fit"
+                String svgClass = isThumbnail ? imageUrl : addClassToSvg(imageUrl, "center-fit");
+                String loaderSvg = loadFile(getContext(), R.raw.token_svg).replace("[SVG_IMAGE_CODE]", svgClass);
+                String base64 = android.util.Base64.encodeToString(loaderSvg.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+                webView.loadData(base64, "text/html; charset=utf-8", "base64");
+            }
             else
             {
                 String loader = loadFile(getContext(), R.raw.token_graphic).replace("[URL]", imageUrl);
@@ -272,6 +280,19 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
                 }
             }
         });
+    }
+
+    private String addClassToSvg(String svgString, String className)
+    {
+        if (svgString.contains("class=\"" + className + "\""))
+        {
+            return svgString;
+        }
+        else
+        {
+            int insertPosition = svgString.indexOf("<svg") + 4;
+            return svgString.substring(0, insertPosition) + " class=\"" + className + "\"" + svgString.substring(insertPosition);
+        }
     }
 
     private void setAttrs(Context context, AttributeSet attrs)
@@ -548,6 +569,12 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
                 mimeStr = "";
                 return;
             }
+            else if (url.startsWith("<svg") && url.endsWith("</svg>")) //ensure url is full SVG
+            {
+                type = ImageType.RAW_SVG;
+                mimeStr = "";
+                return;
+            }
 
             String extension = MimeTypeMap.getFileExtensionFromUrl(url);
 
@@ -602,6 +629,6 @@ public class NFTImageView extends RelativeLayout implements View.OnTouchListener
 
     private enum ImageType
     {
-        IMAGE, ANIM, WEB, MODEL, AUDIO
+        IMAGE, ANIM, WEB, MODEL, AUDIO, RAW_SVG
     }
 }

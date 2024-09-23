@@ -420,7 +420,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         Core.Model.AppMetaData appMetaData = getAppMetaData(application);
         String relayServer = String.format("%s/?projectId=%s", C.WALLET_CONNECT_REACT_APP_RELAY_URL, keyProvider.getWalletConnectProjectId());
         CoreClient coreClient = CoreClient.INSTANCE;
-        coreClient.initialize(appMetaData, relayServer, ConnectionType.AUTOMATIC, application, null, null, new NetworkClientTimeout(30, TimeUnit.SECONDS), error -> {
+        coreClient.initialize(appMetaData, relayServer, ConnectionType.AUTOMATIC, application, null, null, new NetworkClientTimeout(30, TimeUnit.SECONDS), false, error -> {// .initialize(appMetaData, relayServer, ConnectionType.AUTOMATIC, application, null, null, new NetworkClientTimeout(30, TimeUnit.SECONDS), error -> {
             Timber.w(error.throwable);
             return null;
         });
@@ -446,6 +446,19 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         }
     }
 
+    /*
+            data class AppMetaData(
+            val name: String,
+            val description: String,
+            val url: String,
+            val icons: List<String>,
+            val redirect: String?,
+            val appLink: String? = null,
+            val linkMode: Boolean = false,
+            val verifyUrl: String? = null
+        ) : Model()
+     */
+
     @NonNull
     public Core.Model.AppMetaData getAppMetaData(Application application)
     {
@@ -454,7 +467,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         String[] icons = {C.ALPHA_WALLET_LOGO_URL};
         String description = "The ultimate Web3 Wallet to power your tokens.";
         String redirect = "kotlin-responder-wc:/request";
-        return new Core.Model.AppMetaData(name, description, url, Arrays.asList(icons), redirect, null);
+        return new Core.Model.AppMetaData(name, description, url, Arrays.asList(icons), redirect, null, false, null);// .AppMetaData(name, description, url, Arrays.asList(icons), redirect, null);
     }
 
     public void shutdown()

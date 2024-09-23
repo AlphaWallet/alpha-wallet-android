@@ -1,7 +1,7 @@
 [versions]
 agp = "8.5.0"
 android_lint_reporter = "2.1.0"
-androidBom = "1.23.0"
+walletConnectBom = "1.35.1"
 appUpdate = "2.1.0"
 bcprovJdk15onVersion = "1.70"
 bcprovJdk18onVersion = "1.77"
@@ -56,7 +56,7 @@ workRuntimeKtx = "2.9.0"
 zxingAndroidEmbedded = "4.3.0"
 
 [libraries]
-android-bom = { module = "com.walletconnect:android-bom", version.ref = "androidBom" }
+walletConnect-bom = { module = "com.walletconnect:android-bom", version.ref = "walletConnectBom" }
 android_lint_reporter = { module = "gradle.plugin.com.worker8.android_lint_reporter:android_lint_reporter", version.ref = "android_lint_reporter" }
 app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdate" }
 biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }

@@ -52,8 +52,8 @@ android {
         applicationId "io.stormbird.wallet"
         minSdk 24
         targetSdk 34
-        versionCode 269
-        versionName "3.84"
+        versionCode 270
+        versionName "3.85"
 
         android.buildFeatures.buildConfig true
 
@@ -221,8 +221,8 @@ dependencies {
     implementation fileTree(include: ['*.aar'], dir: 'libs')
 
     //noinspection BomWithoutPlatform,GradleDependency
-    implementation platform('com.fasterxml.jackson:jackson-bom:2.13.5') //Do not upgrade! 2.13.5 is latest library with Android API24 compatibility
-    implementation 'com.fasterxml.jackson.core:jackson-core'
+    implementation platform('com.fasterxml.jackson:jackson-bom:2.13.5') //Do not upgrade! 2.13.5 is latest library with Android API24 compatibility,
+    implementation 'com.fasterxml.jackson.core:jackson-core'            //The XML code will be removed to use the online engine, so no need to touch
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
     implementation libs.slf4j.api
@@ -282,7 +282,7 @@ dependencies {
     //Timber
     implementation libs.timber
 
-    implementation platform("com.walletconnect:android-bom:1.31.4") //TODO: Upgrade
+    implementation platform(libs.walletConnect.bom)
     implementation("com.walletconnect:android-core", {
         exclude group: 'org.web3j', module: '*'
         exclude group: 'org.bouncycastle', module: '*'

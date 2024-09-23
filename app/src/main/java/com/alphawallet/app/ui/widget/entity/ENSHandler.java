@@ -4,7 +4,9 @@ package com.alphawallet.app.ui.widget.entity;
  * Created by JB on 28/10/2020.
  */
 
+import static com.alphawallet.app.util.ens.EnsResolver.USE_ENS_CHAIN;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
 
 import android.content.Context;
 import android.os.Handler;
@@ -61,7 +63,7 @@ public class ENSHandler implements Runnable
         this.handler = new Handler(Looper.getMainLooper());
         this.adapterUrl = adapter;
         this.host = host;
-        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), host.getContext(), host.getChain());
+        this.ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(USE_ENS_CHAIN), host.getContext(), host.getChain());
 
         createWatcher();
         getENSHistoryFromPrefs(host.getContext());

@@ -44,7 +44,7 @@ public abstract class EthereumNetworkBase
     public static final long ROOTSTOCK_TESTNET_ID = 31;
     public static final long HOLESKY_ID = 17000;
     public static final long LINEA_ID = 59144;
-    public static final long LINEA_TEST_ID = 59140;
+    public static final long LINEA_TEST_ID = 59141;
     public static final long POLYGON_AMOY_ID = 80002;
     public static final long BASE_MAINNET_ID = 8453;
     public static final long BASE_TESTNET_ID = 84532;
@@ -91,7 +91,7 @@ public abstract class EthereumNetworkBase
     public static final String HOLESKY_RPC_URL = "https://rpc.holesky.ethpandaops.io";
     public static final String HOLESKY_FALLBACK_URL = "https://holesky.rpc.thirdweb.com";
     public static final String LINEA_FREE_RPC = "https://linea.drpc.org";
-    public static final String LINEA_TEST_FREE_RPC = "https://rpc.goerli.linea.build";
+    public static final String LINEA_TEST_FREE_RPC = "https://rpc.sepolia.linea.build";
 
     public static final String BASE_FREE_MAINNET_RPC = "https://base-rpc.publicnode.com";
     public static final String BASE_FREE_TESTNET_RPC = "https://base-sepolia-rpc.publicnode.com";
@@ -179,9 +179,9 @@ public abstract class EthereumNetworkBase
 
             put(LINEA_ID, new NetworkInfo("Linea", "ETH", LINEA_FREE_RPC, "https://lineascan.build/tx/",
                     LINEA_ID, false));
-            put(LINEA_TEST_ID, new NetworkInfo("Linea (Test)", "ETH", LINEA_TEST_FREE_RPC, "https://goerli.lineascan.build/tx/",
+            put(LINEA_TEST_ID, new NetworkInfo("Linea (Test)", "ETH", LINEA_TEST_FREE_RPC, "https://sepolia.lineascan.build/tx/",
                     LINEA_TEST_ID, false));
-            put(HOLESKY_ID, new NetworkInfo("Rootstock (Test)", "HolETH", HOLESKY_RPC_URL, "https://holesky.etherscan.io/tx/",
+            put(HOLESKY_ID, new NetworkInfo("Holesky (Test)", "HolETH", HOLESKY_RPC_URL, "https://holesky.etherscan.io/tx/",
                     HOLESKY_ID, false));
 
             put(BASE_MAINNET_ID, new NetworkInfo("Base", "ETH", BASE_FREE_MAINNET_RPC, "https://basescan.org/tx/",

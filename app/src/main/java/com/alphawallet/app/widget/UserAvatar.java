@@ -2,6 +2,7 @@ package com.alphawallet.app.widget;
 
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.util.Utils.loadFile;
+import static com.alphawallet.app.util.ens.EnsResolver.USE_ENS_CHAIN;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.content.Context;
@@ -63,7 +64,7 @@ public class UserAvatar extends LinearLayout
         webView = findViewById(R.id.image_web_view);
         findViewById(R.id.overlay).setVisibility(View.VISIBLE);
 
-        ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(MAINNET_ID), getContext());
+        ensResolver = new AWEnsResolver(TokenRepository.getWeb3jService(USE_ENS_CHAIN), getContext());
         state = BindingState.NONE;
     }
 

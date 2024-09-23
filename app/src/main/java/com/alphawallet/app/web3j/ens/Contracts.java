@@ -13,19 +13,27 @@
 package com.alphawallet.app.web3j.ens;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.GOERLI_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.HOLESKY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
+import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
 
 /** ENS registry contract addresses. */
 public class Contracts {
 
     public static final String MAINNET = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
     public static final String GOERLI = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
+    public static final String HOLESKY = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
+    public static final String SEPOLIA = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
 
     public static String resolveRegistryContract(long chainId) {
         if (chainId == MAINNET_ID) {
             return MAINNET;
         } else if (chainId == GOERLI_ID) {
             return GOERLI;
+        } else if (chainId == HOLESKY_ID) {
+            return HOLESKY;
+        } else if (chainId == SEPOLIA_TESTNET_ID) {
+            return SEPOLIA;
         } else {
             throw new EnsResolutionException(
                     "Unable to resolve ENS registry contract for network id: " + chainId);

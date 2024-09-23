@@ -49,7 +49,7 @@ jobs:
 
       - name: Collect tests results
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: e2e-tests-results
           path: output/

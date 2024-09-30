@@ -171,6 +171,25 @@ public class Steps
         }
     }
 
+    public static void sendNFTTo(String collectionName, String nftName, String receiverAddress)
+    {
+        click(withId(R.id.nav_wallet_text));
+        click(withSubstring(collectionName));
+        click(withSubstring(nftName));
+        click(withText("Transfer"));
+        onView(withHint(R.string.recipient_address)).perform(replaceText(receiverAddress));
+        click(withId(R.string.action_transfer));
+        try
+        {
+            click(withId(R.string.action_confirm));
+        }
+        catch (Error | Exception e)
+        {
+            waitForLoadingComplete("Calculating Gas Limit");
+            click(withId(R.string.action_confirm));
+        }
+    }
+
     private static void ensureBalanceFetched()
     {
         shouldSee("Ganache");

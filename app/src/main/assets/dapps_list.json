@@ -41,8 +41,8 @@
   {"name": "xDai Bridge", "description": "xDai/Ethereum bridge for self transfers of Dai to xDai", "url": "https://dai-bridge.poa.network/", "category": "Tool"},
   {"name": "Alfacash", "description": "Trade crypto instantly. ETH, BTC, XRP and 30+ other coins and tokens", "url": "https://www.alfa.cash/", "category": "Exchange"},
   {"name": "0x Instant", "description": "A free and flexible way to offer simple crypto purchasing", "url": "http://0x-instant-staging.s3-website-us-east-1.amazonaws.com/", "category": "Exchange"},
-  {"name": "KyberSwap", "description": "Instant and Secure Token to Token Swaps", "url": "https://kyber.network/swap/eth_knc", "category": "Exchange"},  
-  {"name": "Kyber Migration Portal", "description": "Migration portal to upgrade legacy KNC to ERC-20 KNC tokens", "url": "https://kyber.org/migrate", "category": "Token Migration"},  
+  {"name": "KyberSwap", "description": "Instant and Secure Token to Token Swaps", "url": "https://kyber.network/swap/eth_knc", "category": "Exchange"},
+  {"name": "Kyber Migration Portal", "description": "Migration portal to upgrade legacy KNC to ERC-20 KNC tokens", "url": "https://kyber.org/migrate", "category": "Token Migration"},
   {"name": "localethereum", "description": "Peer-to-peer marketplace allowing to trade eth to fiat", "url": "https://localethereum.com/", "category": "Exchange"},
   {"name": "Totle", "description": "Aggregating the liquidity of the top decentralized exchanges", "url": "https://app.totle.com/", "category": "Exchange"},
   {"name": "Uniswap", "description": "Protocol for automated token exchange", "url": "https://uniswap.exchange", "category": "Exchange"},
@@ -91,5 +91,6 @@
   {"name": "Hypemoon", "description": "Your Portal Into Web3 Culture", "url": "https://hypemoon.com/", "category": "News"},
   {"name": "BeInCrypto", "description": "Unbiased crypto news", "url": "https://beincrypto.com/", "category": "News"},
   {"name": "The Defiant", "description": "The essential information platform for the open economy", "url": "https://thedefiant.io/", "category": "News"},
-  {"name": "Verse DEX", "description": "Bitcoin.com's multichain Verse DEX aims to bring everyone permissionless and non-custodial trading access, with a special focus on newcomers to DeFi.", "url": "https://verse.bitcoin.com/", "category": "Exchange"}
+  {"name": "Verse DEX", "description": "Bitcoin.com's multichain Verse DEX aims to bring everyone permissionless and non-custodial trading access, with a special focus on newcomers to DeFi.", "url": "https://verse.bitcoin.com/", "category": "Exchange"},
+  {"name": "Eth Inscription", "description": "A ethereum inscription mint tool that supports ERC-20 token, domain, and NFT ethscriptions minting.", "url": "https://ethinscription.org/", "category": "Tool"}
 ]

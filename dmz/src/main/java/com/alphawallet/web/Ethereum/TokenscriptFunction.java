@@ -1,4 +1,4 @@
-package com.alphawallet.token.web.Ethereum;
+package com.alphawallet.web.Ethereum;
 
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
@@ -13,7 +13,7 @@ import com.alphawallet.token.entity.TokenscriptContext;
 import com.alphawallet.token.entity.TokenscriptElement;
 import com.alphawallet.token.entity.TransactionResult;
 import com.alphawallet.token.tools.TokenDefinition;
-import com.alphawallet.token.web.Service.EthRPCNodes;
+import com.alphawallet.web.Service.EthRPCNodes;
 
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;

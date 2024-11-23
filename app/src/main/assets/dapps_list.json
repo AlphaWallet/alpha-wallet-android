@@ -91,5 +91,6 @@
   {"name": "Hypemoon", "description": "Your Portal Into Web3 Culture", "url": "https://hypemoon.com/", "category": "News"},
   {"name": "BeInCrypto", "description": "Unbiased crypto news", "url": "https://beincrypto.com/", "category": "News"},
   {"name": "The Defiant", "description": "The essential information platform for the open economy", "url": "https://thedefiant.io/", "category": "News"},
-  {"name": "Verse DEX", "description": "Bitcoin.com's multichain Verse DEX aims to bring everyone permissionless and non-custodial trading access, with a special focus on newcomers to DeFi.", "url": "https://verse.bitcoin.com/", "category": "Exchange"}
+  {"name": "Verse DEX", "description": "Bitcoin.com's multichain Verse DEX aims to bring everyone permissionless and non-custodial trading access, with a special focus on newcomers to DeFi.", "url": "https://verse.bitcoin.com/", "category": "Exchange"},
+  {"name": "Predi", "description": "Predi is a next-generation PredictionMarket platform.", "url": "https://www.predi.org/market", "category": "Marketplace"}
 ]

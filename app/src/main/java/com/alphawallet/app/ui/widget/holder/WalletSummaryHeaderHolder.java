@@ -15,12 +15,10 @@ import androidx.core.content.ContextCompat;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.service.TickerService;
-import com.alphawallet.app.ui.widget.entity.WalletClickCallback;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import io.realm.Realm;
 import timber.log.Timber;
 
 public class WalletSummaryHeaderHolder extends BinderViewHolder<Wallet> implements View.OnClickListener

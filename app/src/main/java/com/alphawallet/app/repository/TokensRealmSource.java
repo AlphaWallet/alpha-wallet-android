@@ -1,5 +1,6 @@
 package com.alphawallet.app.repository;
 
+import static com.alphawallet.app.service.TickerService.TICKER_STALE_TIMEOUT;
 import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
 import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
 
@@ -1409,7 +1410,13 @@ public class TokensRealmSource implements TokenLocalSource
 
                 if (realmItem != null)
                 {
-                    updateMap.put(meta.getAddress(), realmItem.getUpdatedTime());
+                    // how old is the update time?
+                    long updateTime = realmItem.getUpdatedTime();
+                    long age = System.currentTimeMillis() - updateTime;
+                    if (age < TICKER_STALE_TIMEOUT) //ticker old, don't fetch
+                    {
+                        updateMap.put(meta.getAddress(), realmItem.getUpdatedTime());
+                    }
                 }
             }
         }
@@ -1454,10 +1461,7 @@ public class TokensRealmSource implements TokenLocalSource
                         //.lessThan("updatedTime", System.currentTimeMillis() - TICKER_TIMEOUT)
                         .findAll();
 
-                for (RealmTokenTicker data : realmItems)
-                {
-                    data.deleteFromRealm();
-                }
+                realmItems.deleteAllFromRealm();
             });
         }
         catch (Exception e)

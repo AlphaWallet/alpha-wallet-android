@@ -25,6 +25,7 @@ import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSearchItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
+import com.alphawallet.app.ui.widget.entity.TokenIdSortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
 import com.alphawallet.app.ui.widget.entity.TotalBalanceSortedItem;
 import com.alphawallet.app.ui.widget.entity.WalletConnectSessionSortedItem;
@@ -599,6 +600,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
                 TokenCardMeta tcm = ((TokenSortedItem) si).value;
                 if (updatedContracts.contains(tcm.getAddress()))
                 {
+                    TokenSortedItem tsi = (TokenSortedItem) si;
+                    tsi.setFiatValue(tokensService.getTokenFiatValue(tcm.getChain(), tcm.getAddress()));
                     notifyItemChanged(i); //optimise update - no need to update elements without tickers
                 }
             }

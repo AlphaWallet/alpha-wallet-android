@@ -1,31 +1,20 @@
-package com.alphawallet.app.entity;
-
-import android.text.TextUtils;
-
-import com.alphawallet.app.entity.tokendata.TokenTicker;
+package com.alphawallet.app.entity.ticker;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by JB on 21/04/2021.
  */
-public class CoinGeckoTicker
+public class CoinGeckoTicker extends BaseTicker
 {
-    public final String address;
-    public final double fiatPrice;
-    public final BigDecimal fiatChange;
-
     public CoinGeckoTicker(String address, double fiatPrice, BigDecimal fiatChange)
     {
-        this.address = address;
-        this.fiatChange = fiatChange;
-        this.fiatPrice = fiatPrice;
+        super(address, fiatPrice, fiatChange);
     }
 
     public static List<CoinGeckoTicker> buildTickerList(String jsonData, String currencyIsoSymbol, double currentConversionRate) throws JSONException
@@ -59,25 +48,5 @@ public class CoinGeckoTicker
         }
 
         return res;
-    }
-
-    private static BigDecimal getFiatChange(String fiatChangeStr)
-    {
-        if (TextUtils.isEmpty(fiatChangeStr)) return BigDecimal.ZERO;
-
-        try
-        {
-            return new BigDecimal(fiatChangeStr);
-        }
-        catch (Exception e)
-        {
-            return BigDecimal.ZERO;
-        }
-    }
-
-    public TokenTicker toTokenTicker(String currentCurrencySymbolTxt)
-    {
-        return new TokenTicker(String.valueOf(fiatPrice),
-                fiatChange.setScale(3, RoundingMode.DOWN).toString(), currentCurrencySymbolTxt, "", System.currentTimeMillis());
     }
 }

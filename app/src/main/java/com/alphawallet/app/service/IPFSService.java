@@ -83,7 +83,7 @@ public class IPFSService implements IPFSServiceType
         if (isTestCode(url)) return loadTestCode();
 
         //try Infura first
-        String tryIPFS = Utils.resolveIPFS(url, Utils.IPFS_IO_RESOLVER);
+        String tryIPFS = Utils.resolveIPFS(url, Utils.IPFS_INFURA_RESOLVER);
         //attempt to load content
         QueryResponse r;
         try

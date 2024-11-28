@@ -973,7 +973,6 @@ public class Utils
     private static final String IPFS_PREFIX = "ipfs://";
     private static final String IPFS_DESIGNATOR = "/ipfs/";
     public static final String IPFS_INFURA_RESOLVER = "https://alphawallet.infura-ipfs.io";
-    public static final String IPFS_IO_RESOLVER = "https://ipfs.io";
     public static final String IPFS_MATCHER = "^Qm[1-9A-Za-z]{44}(\\/.*)?$";
 
     public static boolean isIPFS(String url)

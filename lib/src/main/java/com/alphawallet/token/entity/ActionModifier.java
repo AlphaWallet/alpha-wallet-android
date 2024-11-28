@@ -6,5 +6,6 @@ package com.alphawallet.token.entity;
 public enum ActionModifier
 {
     NONE,
-    ATTESTATION
+    ATTESTATION,
+    ACTIVITY
 }

@@ -59,6 +59,7 @@ import com.alphawallet.app.widget.FunctionButtonBar;
 import com.alphawallet.app.widget.SignTransactionDialog;
 import com.alphawallet.ethereum.EthereumNetworkBase;
 import com.alphawallet.hardware.SignatureFromKey;
+import com.alphawallet.token.entity.ActionModifier;
 import com.alphawallet.token.entity.Attribute;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.MethodArg;
@@ -280,7 +281,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void fillEmpty()
     {
-        findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
         tokenView.loadData("<html><body>No Data</body></html>", "text/html", "utf-8");
     }
 
@@ -339,7 +339,10 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private void setupFunctions()
     {
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
-        functionBar.setupFunctionList(this, actionMethod);
+        if (action != null && action.modifier != ActionModifier.ACTIVITY)
+        {
+            functionBar.setupFunctionList(this, actionMethod);
+        }
     }
 
     @Override
@@ -661,7 +664,6 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     @Override
     public void onPageRendered(WebView view)
     {
-        findViewById(R.id.layout_webwrapper).setVisibility(View.VISIBLE);
         if (parsePass == 1)
         {
             tokenView.reload();

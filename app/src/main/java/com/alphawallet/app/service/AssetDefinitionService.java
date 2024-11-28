@@ -2287,7 +2287,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                                                   ContractType type, UpdateType update)
     {
         return Single.fromCallable(() -> {
-            ActionModifier requiredActionModifier = type == ContractType.ATTESTATION ? ActionModifier.ATTESTATION : ActionModifier.NONE;
+            List<ActionModifier> modifiers = getAllowedTypes(type);
             Map<BigInteger, List<String>> validActions = new HashMap<>();
             TokenDefinition td = getAssetDefinition(token);
             if (td != null)
@@ -2306,7 +2306,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                     for (String actionName : actions.keySet())
                     {
                         TSAction action = actions.get(actionName);
-                        if (action == null || action.modifier != requiredActionModifier)
+                        if (action == null || !modifiers.contains(action.modifier))
                         {
                             continue; //do not include attestations if this isn't an attestation fetch
                         }
@@ -2340,6 +2340,23 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             return validActions;
         });
+    }
+
+    private List<ActionModifier> getAllowedTypes(ContractType type)
+    {
+        List<ActionModifier> modifiers = new ArrayList<>();
+        switch (type)
+        {
+            case ATTESTATION -> {
+                modifiers.add(ActionModifier.ATTESTATION);
+            }
+            default -> {
+                modifiers.add(ActionModifier.NONE);
+                modifiers.add(ActionModifier.ACTIVITY);
+            }
+        }
+
+        return modifiers;
     }
 
     private void addIntrinsicAttributes(Map<String, TokenScriptResult.Attribute> attrs, Token token, BigInteger tokenId)

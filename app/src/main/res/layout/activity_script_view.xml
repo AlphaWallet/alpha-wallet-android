@@ -6,30 +6,14 @@
 
     <include layout="@layout/layout_simple_toolbar" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/layoutButtons"
-        android:layout_below="@id/toolbar">
-
-        <LinearLayout
-            android:id="@id/token_view"
+    <com.alphawallet.app.web3.Web3TokenView
+            android:id="@+id/web3_tokenview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:orientation="vertical">
+            android:layout_height="match_parent"
+            android:layout_above="@id/layoutButtons"
+            android:layout_below="@id/toolbar">
 
-            <include layout="@layout/item_ticket" />
-
-            <com.alphawallet.app.widget.ActivityHistoryList
-                android:id="@+id/history_list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone" />
-
-        </LinearLayout>
-
-    </ScrollView>
+    </com.alphawallet.app.web3.Web3TokenView>
 
     <LinearLayout
         android:id="@+id/layout_success_overlay"

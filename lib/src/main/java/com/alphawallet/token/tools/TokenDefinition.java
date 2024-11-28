@@ -77,6 +77,7 @@ public class TokenDefinition
     public TokenscriptContext context;
     public String holdingToken = null;
     private int actionCount;
+    private TSOrigins defaultOrigin = null;
 
     public static final String TOKENSCRIPT_MINIMUM_SCHEMA = "2020/06";
     public static final String TOKENSCRIPT_CURRENT_SCHEMA = "2024/01";
@@ -542,8 +543,9 @@ public class TokenDefinition
                 switch (element.getLocalName())
                 {
                     case "origins":
-                        TSOrigins origin = parseOrigins(element); //parseOrigins(element);
+                        TSOrigins origin = parseOrigins(element);
                         if (origin.isType(TSOriginType.Contract) || origin.isType(TSOriginType.Attestation)) holdingToken = origin.getOriginName();
+                        defaultOrigin = origin;
                         break;
                     case "contract":
                         handleAddresses(element);
@@ -658,6 +660,7 @@ public class TokenDefinition
     {
         NodeList ll = card.getChildNodes();
         TSActivityView activityView = null;
+        String useName = "";
 
         for (int j = 0; j < ll.getLength(); j++)
         {
@@ -670,12 +673,25 @@ public class TokenDefinition
             {
                 case "origins":
                     TSOrigins origins = parseOrigins(element);
-                    if (origins.isType(TSOriginType.Event)) activityView = new TSActivityView(origins);
+                    if (origins.isType(TSOriginType.Event))
+                    {
+                        activityView = new TSActivityView(origins);
+                    }
                     break;
                 case "view": //TODO: Localisation
                 case "item-view":
-                    if (activityView == null) throw new SAXException("Activity card declared without origins tag");
-                    activityView.addView(node.getLocalName(), new TSTokenView(element, this));
+                    if (activityView == null)
+                    {
+                        activityView = new TSActivityView(defaultOrigin);
+                    }
+                    if (useName.isEmpty())
+                    {
+                        useName = node.getLocalName();
+                    }
+                    activityView.addView(useName, new TSTokenView(element, this));
+                    break;
+                case "label":
+                    useName = getLocalisedString(element);
                     break;
                 default:
                     throw new SAXException("Unknown tag <" + node.getLocalName() + "> tag in tokens");
@@ -767,7 +783,6 @@ public class TokenDefinition
 
     public boolean isSchemaLessThanMinimum()
     {
-
         if (nameSpace == null)
         {
             return true;
@@ -806,14 +821,15 @@ public class TokenDefinition
                 tokenViews.views.put(tv.getLabel(), tv);
                 break;
             case "action":
+            case "activity":
                 action = handleAction(card);
                 actions.put(action.name, action);
                 setModifier(action, card);
                 break;
-            case "activity":
+            /*case "activity":
                 activity = processActivityView(card);
                 activityCards.put(card.getAttribute("name"), activity);
-                break;
+                break;*/
             case "onboarding":
                 // do not parse onboarding cards
                 break;
@@ -838,6 +854,16 @@ public class TokenDefinition
                 break;
             default:
                 throw new SAXException("Unexpected modifier found: " + modifier);
+        }
+
+        String type = card.getAttribute("type");
+        switch (type)
+        {
+            case "activity":
+                action.modifier = ActionModifier.ACTIVITY;
+                break;
+            default:
+                break;
         }
     }
 

@@ -997,7 +997,7 @@
     <string name="constructor">Constructor</string>
     <string name="use_tokenscript_viewer">Visor de TokenScript</string>
     <string name="not_recommended_to_visit">Esta URL no está en la lista blanca. Aún es posible visitarla modificando las opciones de protección en la configuración, pero no se recomienda. Podrías estar a punto de perder tus fondos, especialmente si se trata de una inversión en minería de criptomonedas. Hay muchos sitios de inversión en criptomonedas regulados.</string>
-    <string name="developer_override_warning">Advertencia: estás a punto de desactivar la protección estándar. Esto evita que te estafen. Utiliza el modo de desarrollador solo si estás probando tu dapp o si estás 100 % seguro de que el sitio es seguro. Recuerda: si alguien te dice que actives esta configuración, es casi seguro que perderás tus fondos de criptomonedas.</string>
+    <string name="developer_override_warning">Advertencia: estás a punto de desactivar la protección estándar. Esto evita que te estafen. Utiliza el modo de desarrollador solo si estás probando tu dapp o si estás 100 \% seguro de que el sitio es seguro. Recuerda: si alguien te dice que actives esta configuración, es casi seguro que perderás tus fondos de criptomonedas.</string>
     <string name="warning">Advertencia</string>
     <string name="i_accept">Acepto el riesgo</string>
 </resources>

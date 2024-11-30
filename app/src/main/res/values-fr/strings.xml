@@ -1011,7 +1011,7 @@
     <string name="constructor">Constructor</string>
     <string name="use_tokenscript_viewer">Visionneuse TokenScript</string>
     <string name="not_recommended_to_visit">Cette URL n\'est pas sur liste blanche. Il est toujours possible de la visiter en modifiant les options de protection dans les paramètres, mais cela n\'est pas recommandé. Vous pourriez être sur le point de perdre vos fonds, surtout s\'il s\'agit d\'un investissement dans le minage de crypto-monnaies. Il existe de nombreux sites d\'investissement en crypto-monnaies réglementés.</string>
-    <string name="developer_override_warning">Attention : vous êtes sur le point de désactiver la protection standard. Cela vous évite de vous faire arnaquer. N\'utilisez le mode développeur que si vous testez votre dapp ou si vous êtes sûr à 100 % que le site est sûr. N\'oubliez pas : si quelqu\'un vous dit d\'activer ce paramètre, vous êtes presque certainement sur le point de perdre vos fonds cryptographiques.</string>
+    <string name="developer_override_warning">Attention : vous êtes sur le point de désactiver la protection standard. Cela vous évite de vous faire arnaquer. N\'utilisez le mode développeur que si vous testez votre dapp ou si vous êtes sûr à 100 \% que le site est sûr. N\'oubliez pas : si quelqu\'un vous dit d\'activer ce paramètre, vous êtes presque certainement sur le point de perdre vos fonds cryptographiques.</string>
     <string name="warning">Attention</string>
     <string name="i_accept">J\'accepte le risque</string>
 </resources>

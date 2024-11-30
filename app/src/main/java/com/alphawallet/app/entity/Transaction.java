@@ -224,8 +224,8 @@ public class Transaction implements Parcelable
         this.gasPrice = ethTx.getGasPrice().toString();
         this.gasUsed = ethTx.getGas().toString();
         this.chainId = chainId;
-        this.maxFeePerGas = ethTx.getMaxFeePerGas().toString();
-        this.maxPriorityFee = ethTx.getMaxPriorityFeePerGas().toString();
+        this.maxFeePerGas = ethTx.getMaxFeePerGasRaw() != null ? ethTx.getMaxFeePerGas().toString() : "";
+        this.maxPriorityFee = ethTx.getMaxPriorityFeePerGasRaw() != null ? ethTx.getMaxPriorityFeePerGas().toString() : "";
         this.functionName = "";
     }
 

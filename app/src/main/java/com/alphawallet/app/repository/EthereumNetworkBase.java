@@ -173,10 +173,9 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
 
 
-    public static final String USE_KLAYTN_RPC = !TextUtils.isEmpty(keyProvider.getBlockPiCypressKey()) ? "https://klaytn.blockpi.network/v1/rpc/" + keyProvider.getBlockPiCypressKey()
-            : KLAYTN_RPC;
-    public static final String USE_KLAYTN_BAOBAB_RPC = !TextUtils.isEmpty(keyProvider.getBlockPiBaobabKey()) ? "https://klaytn-baobab.blockpi.network/v1/rpc/" + keyProvider.getBlockPiBaobabKey()
-            : KLAYTN_BAOBAB_RPC;
+    public static final String USE_KLAYTN_RPC = "https://public-en.node.kaia.io";//!TextUtils.isEmpty(keyProvider.getBlockPiCypressKey()) ? "https://klaytn.blockpi.network/v1/rpc/" + keyProvider.getBlockPiCypressKey()
+    public static final String USE_KLAYTN_BAOBAB_RPC = "https://rpc.ankr.com/klaytn_testnet";
+
     public static final String CRONOS_MAIN_RPC_URL = "https://evm.cronos.org";
 
     public static final String MINT_MAINNET_FALLBACK = "https://asia.rpc.mintchain.io";
@@ -329,11 +328,11 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://explorer.palm-uat.xyz/api?"));
             put(KLAYTN_ID, new NetworkInfo(C.KLAYTN_NAME, C.KLAYTN_SYMBOL,
                 USE_KLAYTN_RPC,
-                "https://scope.klaytn.com/tx/", KLAYTN_ID, KLAYTN_RPC,
+                "https://kaiascan.io/tx/", KLAYTN_ID, USE_KLAYTN_RPC,
                 ""));
             put(KLAYTN_BAOBAB_ID, new NetworkInfo(C.KLAYTN_BAOBAB_NAME, C.KLAYTN_SYMBOL,
                 USE_KLAYTN_BAOBAB_RPC,
-                "https://baobab.scope.klaytn.com/tx/", KLAYTN_BAOBAB_ID, KLAYTN_BAOBAB_RPC,
+                "https://kairos.kaiascan.io/tx/", KLAYTN_BAOBAB_ID, USE_KLAYTN_BAOBAB_RPC,
                 ""));
             put(IOTEX_MAINNET_ID, new NetworkInfo(C.IOTEX_NAME, C.IOTEX_SYMBOL,
                     IOTEX_MAINNET_RPC_URL,
@@ -452,8 +451,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(ARBITRUM_MAIN_ID, R.drawable.ic_icons_arbitrum);
             put(PALM_ID, R.drawable.ic_icons_network_palm);
             put(PALM_TEST_ID, R.drawable.palm_logo_test);
-            put(KLAYTN_ID, R.drawable.ic_klaytn_network_logo);
-            put(KLAYTN_BAOBAB_ID, R.drawable.ic_klaytn_test);
+            put(KLAYTN_ID, R.drawable.ic_icons_kaia);
+            put(KLAYTN_BAOBAB_ID, R.drawable.ic_icons_kaia_test);
             put(IOTEX_MAINNET_ID, R.drawable.ic_iotex);
             put(IOTEX_TESTNET_ID, R.drawable.ic_iotex_test);
             put(AURORA_MAINNET_ID, R.drawable.ic_aurora);
@@ -502,8 +501,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             put(ARBITRUM_MAIN_ID, R.drawable.ic_icons_network_arbitrum);
             put(PALM_ID, R.drawable.ic_icons_network_palm);
             put(PALM_TEST_ID, R.drawable.palm_logo_test);
-            put(KLAYTN_ID, R.drawable.ic_klaytn_network_logo);
-            put(KLAYTN_BAOBAB_ID, R.drawable.ic_klaytn_test);
+            put(KLAYTN_ID, R.drawable.ic_icons_kaia);
+            put(KLAYTN_BAOBAB_ID, R.drawable.ic_icons_kaia_test);
             put(IOTEX_MAINNET_ID, R.drawable.ic_iotex);
             put(IOTEX_TESTNET_ID, R.drawable.ic_iotex_test);
             put(AURORA_MAINNET_ID, R.drawable.ic_aurora);

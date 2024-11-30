@@ -2,12 +2,11 @@ package com.alphawallet.app.ui;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,7 +23,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -60,6 +58,7 @@ public class WalletConnectSessionActivity extends BaseActivity
 {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private LocalBroadcastManager broadcastManager;
+    private
     WalletConnectViewModel viewModel;
     private RecyclerView recyclerView;
     private Button btnConnectWallet;
@@ -246,12 +245,26 @@ public class WalletConnectSessionActivity extends BaseActivity
 
     private void startConnectionCheck()
     {
-        broadcastManager.registerReceiver(walletConnectChangeReceiver, new IntentFilter(C.WALLET_CONNECT_COUNT_CHANGE));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
+            registerReceiver(walletConnectChangeReceiver, new IntentFilter(C.WALLET_CONNECT_COUNT_CHANGE), RECEIVER_NOT_EXPORTED);
+        }
+        else
+        {
+            broadcastManager.registerReceiver(walletConnectChangeReceiver, new IntentFilter(C.WALLET_CONNECT_COUNT_CHANGE));
+        }
     }
 
     private void stopConnectionCheck()
     {
-        broadcastManager.unregisterReceiver(walletConnectChangeReceiver);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
+            unregisterReceiver(walletConnectChangeReceiver);
+        }
+        else
+        {
+            broadcastManager.unregisterReceiver(walletConnectChangeReceiver);
+        }
     }
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>

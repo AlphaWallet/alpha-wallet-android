@@ -13,6 +13,7 @@ import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.entity.DApp;
+import com.google.android.gms.common.util.HttpUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -251,6 +252,23 @@ public class DappBrowserUtils
                 {
                 }.getType());
         return dapps;
+    }
+
+    public static boolean isInDappsList(Context context, String candidateURL)
+    {
+        List<DApp> knownDapps = getDappsList(context);
+        //strip the URL to get only the domain
+        String candidateDomain = Utils.getDomainName(candidateURL);
+        
+        for (DApp dapp : knownDapps)
+        {
+            String thisDomain = Utils.getDomainName(dapp.getUrl());
+            if (candidateDomain.equals(thisDomain))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void saveHistory(Context context, List<DApp> history)

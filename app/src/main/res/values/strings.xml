@@ -1073,4 +1073,8 @@
     <string name="override_warning_text">You might be about to unknowingly sign a transaction, which could empty your funds. You may want to sign bytecode as a developer, and you can override this warning if you set developer mode in Advanced settings.</string>
     <string name="constructor">Constructor</string>
     <string name="use_tokenscript_viewer">Use TokenScript Viewer</string>
+    <string name="not_recommended_to_visit">This URL is not whitelisted. It is still possible to visit by changing protection options in the settings, but it is not recommended. You could be about to lose your funds, especially if it\'s an investment in crypto-mining. There are plenty of regulated crypto investment sites.</string>
+    <string name="developer_override_warning">Warning: You are about to switch off standard protection. This prevents you from getting scammed. Only use the developer mode if you are testing your dapp, or if you are 100% sure that the site is safe. Remember: if someone is telling you to switch this setting on, you are almost certainly about to lose your crypto funds.</string>
+    <string name="warning">Warning</string>
+    <string name="i_accept">I accept the risk</string>
 </resources>

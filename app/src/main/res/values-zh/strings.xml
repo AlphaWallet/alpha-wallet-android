@@ -997,4 +997,8 @@
     <string name="override_warning_text">您可能会在不知情的情况下签署一项交易，这可能会清空您的资金。 您可能希望以开发人员的身份对字节码进行签名，如果您在高级设置中设置开发人员模式，则可以覆盖此警告。</string>
     <string name="constructor">Constructor</string>
     <string name="use_tokenscript_viewer">使用 TokenScript 查看器</string>
+    <string name="not_recommended_to_visit">此 URL 未列入白名单。仍可通过更改设置中的保护选项来访问，但不建议这样做。您可能会损失资金，尤其是如果这是对加密货币挖矿的投资。有很多受监管的加密货币投资网站。</string>
+    <string name="developer_override_warning">警告：您即将关闭标准保护。这可以防止您被骗。仅在测试 dapp 或 100% 确定网站安全时才使用开发者模式。请记住：如果有人告诉您打开此设置，您几乎肯定会失去您的加密货币资金。</string>
+    <string name="warning">警告</string>
+    <string name="i_accept">我接受风险</string>
 </resources>

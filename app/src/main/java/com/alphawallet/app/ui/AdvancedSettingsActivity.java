@@ -159,9 +159,46 @@ public class AdvancedSettingsActivity extends BaseActivity
         tokenScriptViewer.setToggleState(viewModel.getTokenScriptViewerState());
     }
 
+    @FunctionalInterface
+    public interface Callback 
+    {
+        void onResult(boolean choice);
+    }
+
     private void onDeveloperOverride()
     {
-        viewModel.toggleDeveloperOverride(developerOverride.getToggleState());
+        boolean developerOverrideState = developerOverride.getToggleState();
+        if (developerOverrideState)
+        {
+            //display warning popup
+            showWarningPopup(R.string.developer_override_warning, result -> {
+                viewModel.toggleDeveloperOverride(result);
+                developerOverride.setToggleState(result);
+            });
+        }
+        else
+        {
+            viewModel.toggleDeveloperOverride(developerOverride.getToggleState());
+        }
+    }
+
+    private void showWarningPopup(int message, Callback callback)
+    {
+        AWalletAlertDialog dialog = new AWalletAlertDialog(this);
+        dialog.setIcon(AWalletAlertDialog.WARNING);
+        dialog.setTitle(R.string.warning);
+        dialog.setMessage(message);
+        dialog.setButtonText(R.string.i_accept);
+        dialog.setButtonListener(v -> {
+            callback.onResult(true);
+            dialog.dismiss();
+        });
+        dialog.setSecondaryButtonText(R.string.action_cancel);
+        dialog.setSecondaryButtonListener(v -> {
+            callback.onResult(false);
+            dialog.dismiss();
+        });
+        dialog.show();
     }
 
     private void onFullScreenClicked()

@@ -1,6 +1,7 @@
 [
   {"name": "TokenScript", "description": "Smart Token Labs TokenScript Viewer", "url": "https://viewer.tokenscript.org/", "category": "Infrastructure"},
   {"name": "SmartLayer", "description": "Smart Token Labs Smart Layer Network", "url": "https://smartlayer.network", "category": "Infrastructure"},
+  {"name": "TLink", "description": "Smart Token Labs TLink", "url": "https://tlink.store/", "category": "Infrastructure"},
   {"name": "X", "description": "Social Media", "url": "https://x.com", "category": "Social Media"},
   {"name": "Aave", "description": "A decentralized non-custodial liquidity protocol where users can participate as depositors or borrowers", "url": "https://app.aave.com/", "category": "Finance"},
   {"name": "Tbull", "description": "A Utility Token on Binance Smart Chain for Payments for Services", "url": "tbull.live", "category": "Utility"},
@@ -40,7 +41,6 @@
   {"name": "SmartDrops", "description": "A platform that lets people earn crypto by joining new token projects.", "url": "https://www.smartdrops.io/", "category": "Tool"},
   {"name": "xDai Bridge", "description": "xDai/Ethereum bridge for self transfers of Dai to xDai", "url": "https://dai-bridge.poa.network/", "category": "Tool"},
   {"name": "Alfacash", "description": "Trade crypto instantly. ETH, BTC, XRP and 30+ other coins and tokens", "url": "https://www.alfa.cash/", "category": "Exchange"},
-  {"name": "0x Instant", "description": "A free and flexible way to offer simple crypto purchasing", "url": "http://0x-instant-staging.s3-website-us-east-1.amazonaws.com/", "category": "Exchange"},
   {"name": "KyberSwap", "description": "Instant and Secure Token to Token Swaps", "url": "https://kyber.network/swap/eth_knc", "category": "Exchange"},  
   {"name": "Kyber Migration Portal", "description": "Migration portal to upgrade legacy KNC to ERC-20 KNC tokens", "url": "https://kyber.org/migrate", "category": "Token Migration"},  
   {"name": "localethereum", "description": "Peer-to-peer marketplace allowing to trade eth to fiat", "url": "https://localethereum.com/", "category": "Exchange"},

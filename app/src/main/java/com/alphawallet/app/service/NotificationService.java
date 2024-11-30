@@ -19,6 +19,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
+import com.alphawallet.app.entity.HomeReceiver;
 import com.alphawallet.app.ui.HomeActivity;
 
 /**
@@ -148,6 +149,7 @@ public class NotificationService
                         != PackageManager.PERMISSION_DENIED))
         {
             Intent intent = new Intent(C.REQUEST_NOTIFICATION_ACCESS);
+            intent.setPackage("com.alphawallet.app.entity.HomeReceiver");
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }
     }

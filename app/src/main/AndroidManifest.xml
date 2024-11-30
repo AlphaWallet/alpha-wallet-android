@@ -39,6 +39,22 @@
             android:usesCleartextTraffic="true"
             tools:replace="android:name, android:theme, android:allowBackup">
 
+
+        <receiver android:name=".entity.HomeReceiver"
+                android:exported="false">
+            <intent-filter>
+                <action android:name="C.REQUEST_NOTIFICATION_ACCESS" />
+                <action android:name="C.BACKUP_WALLET_SUCCESS" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".entity.FinishReceiver"
+                android:exported="false">
+            <intent-filter>
+                <action android:name="C.PRUNE_ACTIVITY" />
+            </intent-filter>
+        </receiver>
+
         <activity
                 android:name=".ui.HomeActivity"
                 android:exported="true"

@@ -20,8 +20,6 @@ import static com.alphawallet.app.util.Helper.click;
 import static com.alphawallet.app.util.Helper.waitUntilLoaded;
 import static junit.framework.TestCase.assertTrue;
 
-import static org.hamcrest.core.IsNot.not;
-
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -36,7 +34,7 @@ import org.junit.Test;
 public class DappBrowserTest extends BaseE2ETest
 {
     private static final String DEFAULT_HOME_PAGE = "https://tlink.store/tapp?chain=84532&contract=0xb02082b18f74ab3853b6a11e5f487be4322167db&tokenId=6";
-    private static final String URL_DAPP = "https://superrare.com/explore/releases";
+    private static final String URL_DAPP = "https://rarible.com/explore/all/collections";
 
     @Override
     @Before

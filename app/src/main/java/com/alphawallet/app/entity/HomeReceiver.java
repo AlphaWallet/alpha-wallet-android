@@ -25,6 +25,12 @@ public class HomeReceiver extends BroadcastReceiver
         this.homeCommsInterface = homeCommsInterface;
     }
 
+    public HomeReceiver()
+    {
+        homeCommsInterface = null;
+        broadcastManager = null;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent)
     {

@@ -26,6 +26,12 @@ public class FinishReceiver extends BroadcastReceiver
         register(ctx);
     }
 
+    public FinishReceiver()
+    {
+        activity = null;
+        broadcastManager = null;
+    }
+
     private void register(Activity ctx)
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)

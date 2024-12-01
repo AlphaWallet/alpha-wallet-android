@@ -35,8 +35,8 @@ import org.junit.Test;
 
 public class DappBrowserTest extends BaseE2ETest
 {
-    private static final String DEFAULT_HOME_PAGE = "https://courses.cs.washington.edu/courses/cse373/99sp/assignments/hw2/test1.html";
-    private static final String URL_DAPP = "http://web.simmons.edu/~grovesd/comm244/notes/week3/html-test-page.html";
+    private static final String DEFAULT_HOME_PAGE = "https://tlink.store/tapp?chain=84532&contract=0xb02082b18f74ab3853b6a11e5f487be4322167db&tokenId=6";
+    private static final String URL_DAPP = "https://superrare.com/explore/releases";
 
     @Override
     @Before

@@ -582,7 +582,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         if (homeReceiver == null)
         {
             homeReceiver = new HomeReceiver(this, this);
-            homeReceiver.register();
+            homeReceiver.register(this);
         }
         initViews();
     }
@@ -669,7 +669,7 @@ public class HomeActivity extends BaseNavigationActivity implements View.OnClick
         viewModel.onClean();
         if (homeReceiver != null)
         {
-            homeReceiver.unregister();
+            homeReceiver.unregister(this);
             homeReceiver = null;
         }
     }

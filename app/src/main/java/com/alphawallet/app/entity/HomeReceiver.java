@@ -1,11 +1,15 @@
 package com.alphawallet.app.entity;
 
+import static androidx.core.content.ContextCompat.registerReceiver;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.alphawallet.app.C;
@@ -19,6 +23,12 @@ public class HomeReceiver extends BroadcastReceiver
     {
         broadcastManager = LocalBroadcastManager.getInstance(context);
         this.homeCommsInterface = homeCommsInterface;
+    }
+
+    public HomeReceiver()
+    {
+        homeCommsInterface = null;
+        broadcastManager = null;
     }
 
     @Override
@@ -42,17 +52,32 @@ public class HomeReceiver extends BroadcastReceiver
         }
     }
 
-    public void register()
+    public void register(Context ctx)
     {
         IntentFilter filter = new IntentFilter();
         filter.addAction(C.REQUEST_NOTIFICATION_ACCESS);
         filter.addAction(C.BACKUP_WALLET_SUCCESS);
         filter.addAction(C.WALLET_CONNECT_REQUEST);
-        broadcastManager.registerReceiver(this, filter);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
+            registerReceiver(ctx, this, new IntentFilter(C.WALLET_CONNECT_COUNT_CHANGE), ContextCompat.RECEIVER_NOT_EXPORTED);
+        }
+        else
+        {
+            broadcastManager.registerReceiver(this, filter);
+        }
     }
 
-    public void unregister()
+    public void unregister(Context ctx)
     {
-        broadcastManager.unregisterReceiver(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
+            ctx.unregisterReceiver(this);
+        }
+        else
+        {
+            broadcastManager.unregisterReceiver(this);
+        }
     }
 }

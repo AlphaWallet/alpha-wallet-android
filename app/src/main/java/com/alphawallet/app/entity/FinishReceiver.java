@@ -1,10 +1,14 @@
 package com.alphawallet.app.entity;
 
+import static androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED;
+import static androidx.core.content.ContextCompat.registerReceiver;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -19,12 +23,25 @@ public class FinishReceiver extends BroadcastReceiver
     {
         activity = ctx;
         broadcastManager = LocalBroadcastManager.getInstance(ctx);
-        register();
+        register(ctx);
     }
 
-    private void register()
+    public FinishReceiver()
     {
-        broadcastManager.registerReceiver(this, new IntentFilter(C.PRUNE_ACTIVITY));
+        activity = null;
+        broadcastManager = null;
+    }
+
+    private void register(Activity ctx)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
+            registerReceiver(ctx, this, new IntentFilter(C.WALLET_CONNECT_COUNT_CHANGE), RECEIVER_NOT_EXPORTED);
+        }
+        else
+        {
+            broadcastManager.registerReceiver(this, new IntentFilter(C.PRUNE_ACTIVITY));
+        }
     }
 
     @Override
@@ -35,6 +52,13 @@ public class FinishReceiver extends BroadcastReceiver
 
     public void unregister()
     {
-        broadcastManager.unregisterReceiver(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
+            activity.unregisterReceiver(this);
+        }
+        else
+        {
+            broadcastManager.unregisterReceiver(this);
+        }
     }
 }

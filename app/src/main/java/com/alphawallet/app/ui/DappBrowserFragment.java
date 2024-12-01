@@ -1,5 +1,6 @@
 package com.alphawallet.app.ui;
 
+import static com.alphawallet.app.C.ALPHAWALLET_WEB;
 import static com.alphawallet.app.C.ETHER_DECIMALS;
 import static com.alphawallet.app.C.RESET_TOOLBAR;
 import static com.alphawallet.app.entity.tokens.Token.TOKEN_BALANCE_PRECISION;
@@ -1485,9 +1486,21 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
 
     private boolean loadUrl(String urlText)
     {
+        requireContext();
         AnalyticsProperties props = new AnalyticsProperties();
         props.put(Analytics.PROPS_URL, urlText);
         viewModel.track(Analytics.Action.LOAD_URL, props);
+
+        // ensure the URL is whitelisted, that is it is featured in the dapp list, and check if the app is in developer override mode
+        if (!viewModel.getDeveloperOverrideState(getContext()) && !DappBrowserUtils.isInDappsList(this.getContext(), urlText))
+        {
+            //reset url string back to AlphaWallet
+            setUrlText(ALPHAWALLET_WEB);
+
+            //display a warning dialog
+            displayError(R.string.title_dialog_error, R.string.not_recommended_to_visit);
+            return false;
+        }
 
         detachFragments();
         addToBackStack(DAPP_BROWSER);
@@ -1500,6 +1513,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         {
             return true;
         }
+
         web3.resetView();
         web3.loadUrl(Utils.formatUrl(urlText));
         setUrlText(Utils.formatUrl(urlText));

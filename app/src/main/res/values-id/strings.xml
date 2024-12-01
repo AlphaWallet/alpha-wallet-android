@@ -1001,4 +1001,8 @@
     <string name="override_warning_text">Anda mungkin tanpa sadar menandatangani transaksi, yang dapat mengosongkan dana Anda. Anda mungkin ingin menandatangani bytecode sebagai pengembang, dan Anda dapat mengabaikan peringatan ini jika Anda menyetel mode pengembang di Setelan lanjutan.</string>
     <string name="constructor">Constructor</string>
     <string name="use_tokenscript_viewer">Penampil TokenScript</string>
+    <string name="not_recommended_to_visit">URL ini tidak masuk daftar putih. Anda masih dapat mengunjunginya dengan mengubah opsi perlindungan di pengaturan, tetapi tidak disarankan. Anda bisa kehilangan dana, terutama jika itu adalah investasi dalam penambangan kripto. Ada banyak situs investasi kripto yang teregulasi.</string>
+    <string name="developer_override_warning">Peringatan: Anda akan menonaktifkan perlindungan standar. Ini mencegah Anda dari penipuan. Gunakan mode pengembang hanya jika Anda sedang menguji dapp Anda, atau jika Anda 100\% yakin bahwa situs tersebut aman. Ingat: jika seseorang memberi tahu Anda untuk mengaktifkan pengaturan ini, Anda hampir pasti akan kehilangan dana kripto Anda.</string>
+    <string name="warning">Peringatan</string>
+    <string name="i_accept">Saya menerima risikonya</string>
 </resources>

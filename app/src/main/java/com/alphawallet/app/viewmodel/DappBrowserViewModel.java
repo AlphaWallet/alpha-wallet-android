@@ -1,6 +1,7 @@
 package com.alphawallet.app.viewmodel;
 
 import static com.alphawallet.app.C.Key.WALLET;
+import static com.alphawallet.app.repository.SharedPreferenceRepository.DEVELOPER_OVERRIDE;
 import static com.alphawallet.app.util.Utils.isValidUrl;
 
 import android.app.Activity;
@@ -480,5 +481,10 @@ public class DappBrowserViewModel extends BaseViewModel implements TransactionSe
     public GasService getGasService()
     {
         return gasService;
+    }
+
+    public boolean getDeveloperOverrideState(Context context)
+    {
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(DEVELOPER_OVERRIDE, false);
     }
 }

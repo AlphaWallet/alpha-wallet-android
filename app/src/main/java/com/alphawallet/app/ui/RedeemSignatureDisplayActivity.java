@@ -180,6 +180,8 @@ public class RedeemSignatureDisplayActivity extends BaseActivity implements View
         dialog.setTitle(R.string.ticket_redeemed);
         dialog.setIcon(AWalletAlertDialog.SUCCESS);
         dialog.setOnDismissListener(v -> {
+            Intent pruneIntent = new Intent(PRUNE_ACTIVITY);
+            pruneIntent.setPackage("com.alphawallet.app.entity.FinishReceiver");
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(PRUNE_ACTIVITY));
         });
         dialog.show();

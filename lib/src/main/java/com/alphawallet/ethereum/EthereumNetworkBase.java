@@ -60,7 +60,7 @@ public abstract class EthereumNetworkBase
     public static final String GOERLI_RPC_URL = "https://goerli.infura.io/v3/da3717f25f824cc1baa32d812386d93f";
     public static final String BINANCE_TEST_RPC_URL = "https://data-seed-prebsc-1-s3.binance.org:8545";
     public static final String BINANCE_MAIN_RPC_URL = "https://bsc-dataseed.binance.org";
-    public static final String HECO_RPC_URL = "https://http-mainnet-node.huobichain.com";
+    public static final String HECO_RPC_URL = "https://http-mainnet.hecochain.com";
     public static final String AVALANCHE_RPC_URL = "https://api.avax.network/ext/bc/C/rpc";
     public static final String FUJI_TEST_RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc";
     public static final String FANTOM_RPC_URL = "https://rpcapi.fantom.network";
@@ -147,9 +147,9 @@ public abstract class EthereumNetworkBase
                     PALM_ID, false));
             put(PALM_TEST_ID, new NetworkInfo("PALM (Test)", "PALM", PALM_TEST_RPC_URL, "https://explorer.palm-uat.xyz/tx/",
                     PALM_TEST_ID, false));
-            put(KLAYTN_ID, new NetworkInfo("Klaytn Cypress", "KLAY", KLAYTN_RPC, "https://scope.klaytn.com/tx/",
+            put(KLAYTN_ID, new NetworkInfo("Kaia Mainnet", "KAIA", KLAYTN_RPC, "https://scope.klaytn.com/tx/",
                     KLAYTN_ID, false));
-            put(KLAYTN_BAOBAB_ID, new NetworkInfo("Klaytn Baobab (Test)", "KLAY", KLAYTN_BAOBAB_RPC, "https://baobab.scope.klaytn.com/tx/",
+            put(KLAYTN_BAOBAB_ID, new NetworkInfo("Kaia Kairos (Test)", "KAIA", KLAYTN_BAOBAB_RPC, "https://baobab.scope.klaytn.com/tx/",
                     KLAYTN_BAOBAB_ID, false));
             put(AURORA_MAINNET_ID, new NetworkInfo("Aurora", "ETH", AURORA_MAINNET_RPC_URL, "https://aurorascan.dev/tx/",
                     AURORA_MAINNET_ID, false));

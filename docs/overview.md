@@ -44,7 +44,7 @@ Every aWallet application has a connection to 3 types of hosts.
 
                   The Ethereum Node Network
 
-Market Queue server is well explained in its own README. Let's take out the Market Queue and you get this, all of them are related to Universal Link's handling. Two types of servers are involved in the Universal Link: DMZ server and FeeMasters. The two are named so to make it crystal clear what are the security implications, that DMZ server is exposed, doesn't have any Ether in it; the FeeMaster servers each have a wallet to replenish and needs to be protected.
+Market Queue server is well explained in its own README. Let's take out the Market Queue and you get this, all of them are related to Universal Link's handling. Two types of servers are involved in the Universal Link: DMZ server and FeeMasters. The two are named so to make it crystal clear what the security implications are, that DMZ server is exposed, doesn't have any Ether in it; the FeeMaster servers each have a wallet to replenish and needs to be protected.
 
 
                                                  +------------------+

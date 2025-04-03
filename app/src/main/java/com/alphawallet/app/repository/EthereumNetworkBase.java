@@ -69,12 +69,14 @@ import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ChainSpec;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -955,9 +957,52 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
             restore();
         }
 
+        private String preProcessNetworks(String networks)
+        {
+            if (networks != null && !networks.isEmpty())
+            {
+                try
+                {
+                    Gson gson = new Gson();
+                    Type listType = new TypeToken<CustomNetworks>()
+                    {
+                    }.getType();
+                    CustomNetworks customNetworks = gson.fromJson(networks, listType);
+
+                    boolean converted = false;
+                    if (customNetworks.list != null)
+                    {
+                        for (NetworkInfo networkInfo : customNetworks.list)
+                        {
+                            if (networkInfo.rpcServerUrl != null && (networkInfo.rpcUrls == null || networkInfo.rpcUrls.length == 0))
+                            {
+                                networkInfo.rpcUrls = new String[]{networkInfo.rpcServerUrl};
+                                converted = true;
+                                break; // Moved break inside the loop
+                            }
+                        }
+                        if (converted)
+                        {
+                            String updatedNetworks = gson.toJson(customNetworks);
+                            preferences.setCustomRPCNetworks(updatedNetworks);
+                            networks = updatedNetworks; // Reinstate this line
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    System.err.println("Error processing custom networks: " + e.getMessage());
+                }
+            }
+            return networks;
+        }
+
         public void restore()
         {
             String networks = preferences.getCustomRPCNetworks();
+
+            networks = preProcessNetworks(networks);
+
             if (!TextUtils.isEmpty(networks))
             {
                 CustomNetworks cn = new Gson().fromJson(networks, CustomNetworks.class);
@@ -972,7 +1017,17 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
                 for (NetworkInfo info : list)
                 {
-                    if (!isValidUrl(info.rpcServerUrl)) //ensure RPC doesn't contain malicious code
+                    boolean containsBadUrl = false;
+                    for (String thisUrl : info.rpcUrls)
+                    {
+                        if (!isValidUrl(thisUrl)) //ensure RPC doesn't contain malicious code
+                        {
+                            containsBadUrl = true;
+                            break;
+                        }
+                    }
+
+                    if (containsBadUrl)
                     {
                         continue;
                     }
@@ -1503,7 +1558,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         NetworkInfo builtInNetwork = builtinNetworkMap.get(chainId);
         boolean isCustom = builtInNetwork == null;
         //make new entry the first in the list
-        String[] networks = builtInNetwork.rpcUrls;
+        String[] networks = builtInNetwork != null ? builtInNetwork.rpcUrls : new String[] {};
         if (isCustom)
         {
             //add new entry to the front of the list

@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: oracle
-          java-version: 17
+          java-version: 21
           architecture: x64
 
       - uses: actions/setup-node@v3

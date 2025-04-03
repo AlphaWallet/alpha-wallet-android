@@ -157,7 +157,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         viewModel.checkTokenScriptValidity(token);
         token.clearResultMap();
 
-        if (token.getArrayBalance().size() > 0 && viewModel.getAssetDefinitionService().hasDefinition(token))
+        if (!token.getArrayBalance().isEmpty() && viewModel.getAssetDefinitionService().hasDefinition(token))
         {
             loadItemViewHeight();
         }
@@ -208,7 +208,7 @@ public class AssetDisplayActivity extends BaseActivity implements StandardFuncti
         checkVal = 0;
         itemViewHeight = 0;
         //first see if we need this - is iconified equal to non iconified?
-        if (token.getArrayBalance().size() > 0)
+        if (!token.getArrayBalance().isEmpty())
         {
             BigInteger  tokenId = token.getArrayBalance().get(0);
             TicketRange data    = new TicketRange(tokenId, token.getAddress());

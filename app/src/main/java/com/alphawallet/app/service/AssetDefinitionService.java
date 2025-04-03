@@ -8,6 +8,8 @@ import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_CHAIN;
 import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_STORE_SERVER;
 import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
 
+import static org.web3j.utils.Strings.isEmpty;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -75,6 +77,7 @@ import org.web3j.abi.DefaultFunctionEncoder;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.crypto.Keys;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.EthBlock;
@@ -1326,6 +1329,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         String tempFileKey = token.getTSKey();
 
+        //ensure url is correct
+        updateScriptURLIfRequired(token.tokenInfo.chainId, token.getAddress(), scriptData.first);
+
         if (!checkFileDiff(tempFileKey, scriptData.second))
         {
             return new File(UNCHANGED_SCRIPT);
@@ -1384,9 +1390,38 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //check signature using the endpoint associated with scriptUri
         //otherwise we use the endpoint that takes the full encoded file
-        
-
         return storeFile;
+    }
+
+    private void updateScriptURLIfRequired(long chainId, String address, String scriptURL)
+    {
+        String fileUrl = getScriptUrl(chainId, address);
+        if (!isEmpty(fileUrl) && (isEmpty(scriptURL) || fileUrl.equalsIgnoreCase(scriptURL)))
+        {
+            return;
+        }
+
+        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        {
+            realm.executeTransaction(r -> {
+                String entryKey = getTSDataKey(chainId, address);
+                RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
+                        .equalTo("instanceKey", entryKey)
+                        .findFirst();
+
+                if (entry == null)
+                {
+                    entry = r.createObject(RealmTokenScriptData.class, entryKey);
+                }
+
+                entry.setIpfsPath(scriptURL);
+                r.insertOrUpdate(entry);
+            });
+        }
+        catch (Exception e)
+        {
+            Timber.w(e);
+        }
     }
 
     private boolean matchesExistingScript(Token token, String uri)
@@ -1699,7 +1734,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             }
         }
 
-        if (tokenDef.getActivityCards().size() > 0)
+        if (!tokenDef.getActivityCards().isEmpty())
         {
             for (String activityName : tokenDef.getActivityCards().keySet())
             {
@@ -1813,7 +1848,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private String processLogs(EventDefinition ev, List<EthLog.LogResult> logs, String walletAddress)
     {
-        if (logs == null || logs.size() == 0) return ""; //early return
+        if (logs == null || logs.isEmpty()) return ""; //early return
         long chainId = ev.contract.addresses.keySet().iterator().next();
         Web3j web3j = getWeb3jService(chainId);
 
@@ -2070,7 +2105,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (TextUtils.isEmpty(scriptUri))
         {
             TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
-            sig = alphaWalletService.checkTokenScriptSignature(tsf.getInputStream(), info.getfirstChainId(), info.getFirstAddress());
+            scriptUri = getScriptUrl(info.getfirstChainId(), info.getFirstAddress());
+            sig = alphaWalletService.checkTokenScriptSignature(tsf.getInputStream(), info.getfirstChainId(), info.getFirstAddress(), scriptUri);
         }
         else
         {
@@ -2373,7 +2409,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenDefinition td = getAssetDefinition(token);
         if (td != null)
         {
-            BigInteger tokenId = (tokenIds != null && tokenIds.size() > 0) ? tokenIds.get(0) : BigInteger.ZERO;
+            BigInteger tokenId = (tokenIds != null && !tokenIds.isEmpty()) ? tokenIds.get(0) : BigInteger.ZERO;
             TSAction action = td.actions.get(actionName);
             TSSelection selection = action.exclude != null ? td.getSelection(action.exclude) : null;
             if (selection != null)
@@ -2438,12 +2474,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 TokenScriptResult.Attribute attrResult = tokenscriptUtility.fetchAttrResult(token, attr, useTokenId, td, this, ViewType.VIEW, update).blockingGet();
                 if (attrResult != null)
                 {
-                    Map<String, TokenScriptResult.Attribute> tokenIdMap = resultSet.get(useTokenId);
-                    if (tokenIdMap == null)
-                    {
-                        tokenIdMap = new HashMap<>();
-                        resultSet.put(useTokenId, tokenIdMap);
-                    }
+                    Map<String, TokenScriptResult.Attribute> tokenIdMap = resultSet.computeIfAbsent(useTokenId, k -> new HashMap<>());
                     tokenIdMap.put(attrName, attrResult);
                 }
             }
@@ -2543,7 +2574,8 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 XMLDsigDescriptor sig = getCertificateFromRealm(hash);
                 if (sig == null || (sig.result != null && sig.result.equalsIgnoreCase("fail")) || sig.type == SigReturnType.NO_TOKENSCRIPT)
                 {
-                    sig = alphaWalletService.checkTokenScriptSignature(tsf.getInputStream(), chainId, contractAddress);
+                    String scriptUrl = getScriptUrl(chainId, contractAddress);
+                    sig = alphaWalletService.checkTokenScriptSignature(tsf.getInputStream(), chainId, contractAddress, scriptUrl);
                     tsf.determineSignatureType(sig);
                     storeCertificateData(hash, sig);
                 }
@@ -2552,6 +2584,24 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             return sigDescriptor;
         });
+    }
+
+    private String getScriptUrl(long chainId, String contractAddress)
+    {
+        String entryKey = getTSDataKey(chainId, contractAddress);
+        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        {
+            RealmTokenScriptData entry = realm.where(RealmTokenScriptData.class)
+                    .equalTo("instanceKey", entryKey)
+                    .findFirst();
+
+            if (entry != null)
+            {
+                return entry.getIpfsPath();
+            }
+        }
+
+        return "";
     }
 
     //Database functions
@@ -2718,33 +2768,24 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-
     //private Token
-
     private void addOpenSeaAttributes(StringBuilder attrs, Token token, BigInteger tokenId)
     {
         NFTAsset tokenAsset = token.getAssetForToken(tokenId.toString());
         if (tokenAsset == null) return;
 
-        try
-        {
-            //add all asset IDs
-            if (tokenAsset.getBackgroundColor() != null)
-                TokenScriptResult.addPair(attrs, "background_colour", URLEncoder.encode(tokenAsset.getBackgroundColor(), "utf-8"));
-            if (tokenAsset.getThumbnail() != null)
-                TokenScriptResult.addPair(attrs, "image_preview_url", tokenAsset.getThumbnail());
-            if (tokenAsset.getDescription() != null)
-                TokenScriptResult.addPair(attrs, "description", URLEncoder.encode(tokenAsset.getDescription(), "utf-8"));
-            if (tokenAsset.getExternalLink() != null)
-                TokenScriptResult.addPair(attrs, "external_link", tokenAsset.getExternalLink());
-            //if (tokenAsset.getTraits() != null) TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
-            if (tokenAsset.getName() != null)
-                TokenScriptResult.addPair(attrs, "metadata_name", tokenAsset.getName());
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            //
-        }
+        //add all asset IDs
+        if (tokenAsset.getBackgroundColor() != null)
+            TokenScriptResult.addPair(attrs, "background_colour", URLEncoder.encode(tokenAsset.getBackgroundColor(), StandardCharsets.UTF_8));
+        if (tokenAsset.getThumbnail() != null)
+            TokenScriptResult.addPair(attrs, "image_preview_url", tokenAsset.getThumbnail());
+        if (tokenAsset.getDescription() != null)
+            TokenScriptResult.addPair(attrs, "description", URLEncoder.encode(tokenAsset.getDescription(), StandardCharsets.UTF_8));
+        if (tokenAsset.getExternalLink() != null)
+            TokenScriptResult.addPair(attrs, "external_link", tokenAsset.getExternalLink());
+        //if (tokenAsset.getTraits() != null) TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
+        if (tokenAsset.getName() != null)
+            TokenScriptResult.addPair(attrs, "metadata_name", tokenAsset.getName());
     }
 
     public StringBuilder getTokenAttrs(Token token, BigInteger tokenId, BigInteger count)
@@ -2761,10 +2802,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         TokenScriptResult.addPair(attrs, "label", label);
         TokenScriptResult.addPair(attrs, "symbol", token.getSymbol());
         TokenScriptResult.addPair(attrs, "_count", count.toString());
-        TokenScriptResult.addPair(attrs, "contractAddress", token.tokenInfo.address);
+        TokenScriptResult.addPair(attrs, "contractAddress", Keys.toChecksumAddress(token.tokenInfo.address));
         TokenScriptResult.addPair(attrs, "chainId", BigInteger.valueOf(token.tokenInfo.chainId));
         TokenScriptResult.addPair(attrs, "tokenId", tokenId);
-        TokenScriptResult.addPair(attrs, "ownerAddress", token.getWallet());
+        TokenScriptResult.addPair(attrs, "ownerAddress", Keys.toChecksumAddress(token.getWallet()));
 
         if (token.isNonFungible())
         {

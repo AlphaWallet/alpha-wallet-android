@@ -10,7 +10,6 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.CLASSIC_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.CRONOS_MAIN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.FANTOM_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.GNOSIS_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.HECO_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.HOLESKY_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.IOTEX_MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
@@ -733,7 +732,6 @@ public class TickerService
         put(CLASSIC_ID, "ethereum-classic");
         put(FANTOM_ID, "fantom");
         put(AVALANCHE_ID, "avalanche");
-        put(HECO_ID, "huobi-token");
         put(ARBITRUM_MAIN_ID, "arbitrum-one");
         put(OKX_ID, "okex-chain");
         put(1666600000L, "harmony-shard-0");
@@ -776,7 +774,6 @@ public class TickerService
         put(CLASSIC_ID, "ethereum-classic");
         put(GNOSIS_ID, "xdai");
         put(BINANCE_MAIN_ID, "binancecoin");
-        put(HECO_ID, "huobi-token");
         put(AVALANCHE_ID, "avalanche-2");
         put(FANTOM_ID, "fantom");
         put(POLYGON_ID, "matic-network");

@@ -269,7 +269,7 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
 
     private void handleAction(ItemClick action)
     {
-        if (functions != null && functions.containsKey(action.buttonText))
+        if (functions != null && functions.containsKey(action.buttonText) && action.buttonId == 0)
         {
             handleUseClick(action);
         }

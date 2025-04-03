@@ -2,6 +2,7 @@ package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.entity.CryptoFunctions.sigFromByteArray;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.TOKENSCRIPT_CONVERSION_ERROR;
+import static com.alphawallet.app.util.Utils.loadFile;
 import static com.alphawallet.app.widget.AWalletAlertDialog.ERROR;
 import static com.alphawallet.app.widget.AWalletAlertDialog.WARNING;
 
@@ -21,8 +22,6 @@ import android.widget.LinearLayout;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.alphawallet.app.C;
@@ -81,6 +80,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -115,7 +117,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         actionMethod = getIntent().getStringExtra(C.EXTRA_STATE);
         String tokenIdStr = getIntent().getStringExtra(C.EXTRA_TOKEN_ID);
-        if (tokenIdStr == null || tokenIdStr.length() == 0)
+        if (tokenIdStr == null || tokenIdStr.isEmpty())
         {
             tokenIdStr = "0";
         }
@@ -166,17 +168,42 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
         }
     }
 
+    private void setupAction()
+    {
+        if (token == null)
+        {
+            System.out.println("YOLESS TOKEN NULL");
+        }
+        if (action == null)
+        {
+            System.out.println("YOLESS ACTION NULL");
+        }
+        if (token != null && action == null)
+        {
+            Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
+            System.out.println("YOLESS: " + actionMethod);
+
+            if (functions != null)
+            {
+                System.out.println("YOLESS: " + functions.toString());
+                action = functions.get(actionMethod);
+            }
+        }
+    }
+
     private void displayFunction(String tokenAttrs)
     {
         try
         {
-            Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
-            TSAction action = functions.get(actionMethod);
+            setupAction();
             String magicValues = viewModel.getAssetDefinitionService().getMagicValuesForInjection(token.tokenInfo.chainId);
+            String listener = loadFile(this, R.raw.listener); //Listener Stub TODO: hook up TX listener
 
             if (TextUtils.isEmpty(Objects.requireNonNull(action).view.getUrl()))
             {
-                String injectedView = tokenView.injectWeb3TokenInit(action.view.getTokenView(), tokenAttrs, tokenId);
+                String tsCode = tokenView.injectJSAtScriptEnd(action.view.getTokenView(), listener);
+                System.out.println(tsCode);
+                String injectedView = tokenView.injectWeb3TokenInit(tsCode, tokenAttrs, tokenId);
                 injectedView = tokenView.injectJSAtEnd(injectedView, magicValues);
                 injectedView = tokenView.injectStyleAndWrapper(injectedView, action.style + "\n" + action.view.getStyle());
 
@@ -215,7 +242,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
             return;
         }
 
-        action = functions.get(actionMethod);
+        setupAction();
         List<Attribute> localAttrs = (action != null && action.attributes != null) ? new ArrayList<>(action.attributes.values()) : null;
 
         //Add attestation attributes
@@ -230,8 +257,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void addMultipleTokenIds(StringBuilder sb)
     {
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
-        TSAction action = functions.get(actionMethod);
+        setupAction();
         boolean hasTokenIds = false;
 
         if (action != null && action.function != null)
@@ -339,6 +365,16 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     private void setupFunctions()
     {
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
+        setupAction();
+        if (action == null)
+        {
+            System.out.println("YOLESS ACTION NULL");
+        }
+
+        else
+        {
+            System.out.println("YOLESS MODIFIER: " + action.modifier);
+        }
         if (action != null && action.modifier != ActionModifier.ACTIVITY)
         {
             functionBar.setupFunctionList(this, actionMethod);
@@ -357,9 +393,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void completeTokenScriptFunction(String function)
     {
-        Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
-        if (functions == null) return;
-        action = functions.get(function);
+        setupAction();
 
         if (action != null && action.function != null) //if no function then it's handled by the token view
         {
@@ -695,10 +729,10 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     }
 
     @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState)
+    public void onRestoreInstanceState(@NonNull Bundle savedInstanceState)
     {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null)
+        if (tokenView != null)
         {
             tokenView.restoreState(savedInstanceState);
         }

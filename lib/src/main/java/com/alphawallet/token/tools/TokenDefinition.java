@@ -25,6 +25,7 @@ import com.alphawallet.token.entity.TSTokenViewHolder;
 import com.alphawallet.token.entity.TokenscriptContext;
 import com.alphawallet.token.entity.TokenscriptElement;
 
+import org.bouncycastle.jce.interfaces.ECKey;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.EntityReference;
@@ -54,6 +55,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.xml.crypto.dsig.XMLSignatureFactory;
+import javax.xml.crypto.dsig.dom.DOMSignContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -497,6 +500,8 @@ public class TokenDefinition
             dbFactory.setExpandEntityReferences(true);
             dbFactory.setCoalescing(true);
             dBuilder = dbFactory.newDocumentBuilder();
+            //DOMSignContext signContext = new DOMSignContext(privateKey, document.getDocumentElement());
+            //XMLSignatureFactory ssig;
         } catch (ParserConfigurationException e) {
             // TODO: if schema has problems (e.g. defined twice). Now, no schema, no exception.
             e.printStackTrace();
@@ -574,6 +579,10 @@ public class TokenDefinition
                     case "attestation":
                         AttestationDefinition attestation = scanAttestation(element);
                         attestations.put(attestation.name, attestation);
+                        break;
+                    case "Signature":
+                        //pull signature info
+
                         break;
                     default:
                         break;
@@ -826,10 +835,6 @@ public class TokenDefinition
                 actions.put(action.name, action);
                 setModifier(action, card);
                 break;
-            /*case "activity":
-                activity = processActivityView(card);
-                activityCards.put(card.getAttribute("name"), activity);
-                break;*/
             case "onboarding":
                 // do not parse onboarding cards
                 break;
@@ -843,12 +848,13 @@ public class TokenDefinition
     private void setModifier(TSAction action, Element card) throws Exception
     {
         String modifier = card.getAttribute("modifier");
-        switch (modifier)
+        System.out.println("YOLESS MOD: " + modifier);
+        switch (modifier.toLowerCase())
         {
             case "attestation":
                 action.modifier = ActionModifier.ATTESTATION;
                 break;
-            case "NONE":
+            case "none":
             case "":
                 action.modifier = ActionModifier.NONE;
                 break;
@@ -857,12 +863,20 @@ public class TokenDefinition
         }
 
         String type = card.getAttribute("type");
+        System.out.println("YOLESS Type: " + type);
         switch (type)
         {
             case "activity":
                 action.modifier = ActionModifier.ACTIVITY;
                 break;
+            case "action":
+                action.modifier = ActionModifier.NONE;
+                break;
             default:
+                if (action.modifier == null)
+                {
+                    action.modifier = ActionModifier.NONE;
+                }
                 break;
         }
     }
@@ -1002,6 +1016,7 @@ public class TokenDefinition
 
     private void extractSignedInfo(Document xml) {
         NodeList nList;
+        nList = xml.getElementsByTagName("http://www.w3.org/2000/09/xmldsig#");
         nList = xml.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "KeyName");
         if (nList.getLength() > 0) {
             this.keyName = nList.item(0).getTextContent().strip();

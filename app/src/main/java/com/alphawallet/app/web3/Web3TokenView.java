@@ -4,6 +4,7 @@ import static com.alphawallet.token.tools.TokenDefinition.TOKENSCRIPT_ERROR;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.http.SslError;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Base64;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.JsResult;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -306,6 +308,11 @@ public class Web3TokenView extends WebView
         return jsInjectorClient.injectJSAtEnd(view, JSCode);
     }
 
+    public String injectJSAtScriptEnd(String view, String JSCode)
+    {
+        return jsInjectorClient.injectJSAtScriptEnd(view, JSCode);
+    }
+
     public String injectStyleAndWrapper(String viewData, String style)
     {
         return jsInjectorClient.injectStyleAndWrap(viewData, style);
@@ -367,7 +374,23 @@ public class Web3TokenView extends WebView
                 return false;
             }
         }
+
+        @Override
+        public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error)
+        {
+            System.out.println("YOLESS: " + error.toString());
+            handler.proceed(); // Ignore SSL certificate errors
+        }
     }
+
+    /*
+    webView.setWebViewClient(new WebViewClient() {
+    @Override
+    public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+        handler.proceed(); // Ignore SSL certificate errors
+    }
+});
+     */
 
     // Rendering
     public void displayTicketHolder(Token token, TicketRange range, AssetDefinitionService assetService) {
@@ -488,7 +511,7 @@ public class Web3TokenView extends WebView
     {
         long lastResultTime = 0;
         RealmResults<RealmAuxData> lastEntry = RealmAuxData.getEventQuery(realm, token, tokenId, 1, 0).findAll();
-        if (lastEntry.size() > 0)
+        if (!lastEntry.isEmpty())
         {
             RealmAuxData data = lastEntry.first();
             lastResultTime = data.getResultTime();

@@ -24,6 +24,7 @@ public class TokenScriptFile extends File
     private boolean active;
     private boolean resourceFile;
     private String fileName;
+    private String scriptUrl;
 
     public TokenScriptFile(Context ctx)
     {
@@ -88,6 +89,16 @@ public class TokenScriptFile extends File
         }
 
         return null;
+    }
+
+    public void setScriptUrl(String scriptUrl)
+    {
+        this.scriptUrl = scriptUrl;
+    }
+
+    public String getScriptUrl()
+    {
+        return this.scriptUrl;
     }
 
     public boolean isValidTokenScript()

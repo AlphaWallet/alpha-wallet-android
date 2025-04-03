@@ -98,6 +98,15 @@ public class TokenScriptResult
 
             return sb.toString();
         }
+
+        public boolean requiresQuoteWrap()
+        {
+            return switch (syntax)
+            {
+                case DirectoryString, IA5String, NumericString, BitString, JPEG -> true;
+                default -> false;
+            };
+        }
     }
 
     private final Map<String, Attribute> attrs = new HashMap<>();
@@ -121,7 +130,15 @@ public class TokenScriptResult
     {
         attrs.append(attr.id);
         attrs.append(": ");
+        if (attr.requiresQuoteWrap())
+        {
+            attrs.append("\"");
+        }
         attrs.append(attr.attrValue());
+        if (attr.requiresQuoteWrap())
+        {
+            attrs.append("\"");
+        }
         attrs.append(",\n");
     }
 

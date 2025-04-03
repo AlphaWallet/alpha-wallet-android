@@ -33,6 +33,8 @@ public class JsInjectorClient {
     private static final String DEFAULT_CHARSET = "utf-8";
     private static final String DEFAULT_MIME_TYPE = "text/html";
     private final static String JS_TAG_TEMPLATE = "<script type=\"text/javascript\">%1$s%2$s</script>";
+    final String SCRIPT_TAG = "<script";
+    final String CDATA_TAG = "<![cdata[";
 
     private long chainId;
     private Address walletAddress;
@@ -103,6 +105,17 @@ public class JsInjectorClient {
         return view;
     }
 
+    String injectJSAtScriptEnd(String view, String newCode)
+    {
+        int position = getEndScriptPosition(view);
+        if (position >= 0) {
+            String beforeTag = view.substring(0, position);
+            String afterTab = view.substring(position);
+            return beforeTag + newCode + afterTab;
+        }
+        return view;
+    }
+
     String injectJS(String html, String js) {
         if (TextUtils.isEmpty(html)) {
             return html;
@@ -136,11 +149,29 @@ public class JsInjectorClient {
         return index;
     }
 
-    private int getEndInjectionPosition(String body) {
+    private int getEndInjectionPosition(String body)
+    {
         body = body.toLowerCase();
-        int firstIndex = body.indexOf("<script");
+        int firstIndex = body.indexOf(SCRIPT_TAG);
         int nextIndex = body.indexOf("web3", firstIndex);
         return body.indexOf("</script", nextIndex);
+    }
+
+    private int getEndScriptPosition(String body)
+    {
+        //<script type="text/javascript">//<![CDATA[
+        body = body.toLowerCase();
+        int scriptTag = body.indexOf(SCRIPT_TAG) + SCRIPT_TAG.length();
+        int endTag = body.indexOf(">", scriptTag) + 1;
+        int endCData = body.indexOf(CDATA_TAG, endTag) + CDATA_TAG.length();
+        if (endCData > -1)
+        {
+            return endCData;
+        }
+        else
+        {
+            return endTag;
+        }
     }
 
     @Nullable

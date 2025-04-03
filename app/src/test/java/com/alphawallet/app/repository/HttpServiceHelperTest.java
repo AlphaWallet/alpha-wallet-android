@@ -21,39 +21,5 @@ public class HttpServiceHelperTest
 {
     private final HttpService httpService = new HttpService();
 
-    @Test
-    public void should_addRequiredCredentials_for_Klaytn_baobab() throws Exception
-    {
-        HttpServiceHelper.addRequiredCredentials(1001L, httpService, "klaytn-key", "infura-key", true);
-        HashMap<String, String> headers = httpService.getHeaders();
-        assertThat(headers.get("x-chain-id"), equalTo("1001"));
-        assertThat(headers.get("Authorization"), equalTo("Basic klaytn-key"));
-    }
-
-    @Test
-    public void should_addRequiredCredentials_for_KLAYTN() throws Exception
-    {
-        HttpServiceHelper.addRequiredCredentials(8217, httpService, "klaytn-key", "infura-key", true);
-        HashMap<String, String> headers = httpService.getHeaders();
-        assertThat(headers.get("x-chain-id"), equalTo("8217"));
-        assertThat(headers.get("Authorization"), equalTo("Basic klaytn-key"));
-    }
-
-    @Test
-    public void should_not_addRequiredCredentials_for_KLAYTN_when_not_use_production_key() throws Exception
-    {
-        HttpServiceHelper.addRequiredCredentials(8217, httpService, "klaytn-key", "infura-key", false);
-        HashMap<String, String> headers = httpService.getHeaders();
-        assertFalse(headers.containsKey("x-chain-id"));
-        assertFalse(headers.containsKey("Authorization"));
-    }
-
-    @Test
-    public void should_not_addRequiredCredentials_for_non_KLAYTN_chain() throws Exception
-    {
-        HttpServiceHelper.addRequiredCredentials(1, httpService, "klaytn-key", "infura-key", false);
-        HashMap<String, String> headers = httpService.getHeaders();
-        assertFalse(headers.containsKey("x-chain-id"));
-        assertFalse(headers.containsKey("Authorization"));
-    }
+    //TODO: This test is currently worthless as we don't use Klaytn keys. Refactor to test the waterfall method
 }

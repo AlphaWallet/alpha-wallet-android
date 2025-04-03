@@ -2,7 +2,6 @@ package com.alphawallet.app.repository;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.POLYGON_TEST_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 import static java.util.Arrays.asList;
 
@@ -29,7 +28,7 @@ import com.alphawallet.app.entity.tokens.Ticket;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenInfo;
-import com.alphawallet.app.service.AWHttpService;
+import com.alphawallet.app.service.AWHttpServiceWaterfall;
 import com.alphawallet.app.service.AssetDefinitionService;
 import com.alphawallet.app.service.OkLinkService;
 import com.alphawallet.app.service.TickerService;
@@ -77,6 +76,7 @@ import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
 import okhttp3.OkHttpClient;
+import timber.log.Timber;
 
 public class TokenRepository implements TokenRepositoryType {
 
@@ -132,8 +132,10 @@ public class TokenRepository implements TokenRepositoryType {
 
     private void buildWeb3jClient(NetworkInfo networkInfo)
     {
-        AWHttpService publicNodeService = new AWHttpService(networkInfo.rpcServerUrl, networkInfo.backupNodeUrl, networkInfo.chainId, okClient, KeyProviderFactory.get().getInfuraKey(),
+        AWHttpServiceWaterfall publicNodeService = new AWHttpServiceWaterfall(networkInfo.rpcUrls, networkInfo.chainId, okClient, KeyProviderFactory.get().getInfuraKey(),
                 KeyProviderFactory.get().getInfuraSecret(), KeyProviderFactory.get().getKlaytnKey(), false);
+        //AWHttpService publicNodeService = new AWHttpService(networkInfo.rpcServerUrl, networkInfo.backupNodeUrl, networkInfo.chainId, okClient, KeyProviderFactory.get().getInfuraKey(),
+        //        KeyProviderFactory.get().getInfuraSecret(), KeyProviderFactory.get().getKlaytnKey(), false);
         web3jNodeServers.put(networkInfo.chainId, Web3j.build(publicNodeService));
     }
 
@@ -606,7 +608,7 @@ public class TokenRepository implements TokenRepositoryType {
                     return BigDecimal.valueOf(-2);
                 }
                 List<Type> response = FunctionReturnDecoder.decode(responseValue, function.getOutputParameters());
-                if (response.size() > 0) balance = new BigDecimal(((Uint256) response.get(0)).getValue());
+                if (!response.isEmpty()) balance = new BigDecimal(((Uint256) response.get(0)).getValue());
             }
         }
         catch (Exception e)
@@ -634,7 +636,6 @@ public class TokenRepository implements TokenRepositoryType {
             Function function = balanceOf(wallet.address);
             NetworkInfo network = ethereumNetworkRepository.getNetworkByChain(tokenInfo.chainId);
             String responseValue = callSmartContractFunction(function, tokenInfo.address, network, wallet);
-
 
             if (!TextUtils.isEmpty(responseValue))
             {
@@ -904,7 +905,7 @@ public class TokenRepository implements TokenRepositoryType {
         }
     }
 
-    private static Function balanceOf(String owner) {
+    public static Function balanceOf(String owner) {
         return new Function(
                 "balanceOf",
                 Collections.singletonList(new Address(owner)),
@@ -1310,14 +1311,9 @@ public class TokenRepository implements TokenRepositoryType {
                 .retryOnConnectionFailure(true)
                 .build();
 
-        String nodeUrl = EthereumNetworkBase.getNodeURLForEvents(chainId);
-        String secondaryNode = EthereumNetworkRepository.getSecondaryNodeURL(chainId);
-        if (nodeUrl.equals(secondaryNode)) //ensure backup node is different
-        {
-            secondaryNode = EthereumNetworkRepository.getNodeURLByNetworkId(chainId);
-        }
+        String[] rpcUrls = EthereumNetworkBase.getNetwork(chainId).rpcUrls;
 
-        AWHttpService publicNodeService = new AWHttpService(nodeUrl, secondaryNode, chainId, okClient, KeyProviderFactory.get().getInfuraKey(),
+        AWHttpServiceWaterfall publicNodeService = new AWHttpServiceWaterfall(rpcUrls, chainId, okClient, KeyProviderFactory.get().getInfuraKey(),
                 KeyProviderFactory.get().getInfuraSecret(), KeyProviderFactory.get().getKlaytnKey(), false);
         return Web3j.build(publicNodeService);
     }
@@ -1331,7 +1327,7 @@ public class TokenRepository implements TokenRepositoryType {
                 .retryOnConnectionFailure(true)
                 .build();
 
-        AWHttpService publicNodeService = new AWHttpService(EthereumNetworkRepository.getNodeURLByNetworkId(chainId), EthereumNetworkRepository.getSecondaryNodeURL(chainId), chainId, okClient, KeyProviderFactory.get().getInfuraKey(),
+        AWHttpServiceWaterfall publicNodeService = new AWHttpServiceWaterfall(EthereumNetworkBase.getNetwork(chainId).rpcUrls, chainId, okClient, KeyProviderFactory.get().getInfuraKey(),
                 KeyProviderFactory.get().getInfuraSecret(), KeyProviderFactory.get().getKlaytnKey(), false);
         return Web3j.build(publicNodeService);
     }
@@ -1356,6 +1352,7 @@ public class TokenRepository implements TokenRepositoryType {
         }
         catch (Exception e)
         {
+            Timber.w(e);
             //
         }
 

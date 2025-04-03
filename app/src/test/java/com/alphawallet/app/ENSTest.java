@@ -6,7 +6,7 @@ import static org.junit.Assert.assertEquals;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.alphawallet.app.service.AWHttpService;
+import com.alphawallet.app.service.AWHttpServiceWaterfall;
 import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.app.web3j.ens.Contracts;
 import com.alphawallet.app.web3j.ens.EnsResolutionException;
@@ -33,7 +33,7 @@ public class ENSTest
     private static final String Inf = "p8qs5p30583q5q65n40s8nn89s257964";
     private AWEnsResolver ensResolver;
 
-    public static AWHttpService getWeb3jService()
+    public static AWHttpServiceWaterfall getWeb3jService()
     {
         OkHttpClient okClient = new OkHttpClient.Builder()
             .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
@@ -41,10 +41,10 @@ public class ENSTest
             .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
             .build();
-        return new AWHttpService("https://mainnet.infura.io/v3/" + TextUtils.rot(Inf), "https://rpc.ankr.com/eth", 1, okClient, null, null, null, false);
+        return new AWHttpServiceWaterfall(new String[] {"https://mainnet.infura.io/v3/" + TextUtils.rot(Inf), "https://rpc.ankr.com/eth"}, 1, okClient, null, null, null, false);
     }
 
-    public static Web3j getWeb3j(AWHttpService service)
+    public static Web3j getWeb3j(AWHttpServiceWaterfall service)
     {
         return Web3j.build(service);
     }
@@ -52,7 +52,7 @@ public class ENSTest
     @Before
     public void setUp()
     {
-        AWHttpService web3jService = getWeb3jService();
+        AWHttpServiceWaterfall web3jService = getWeb3jService();
         Web3j web3j = getWeb3j(web3jService);
         ensResolver = new AWEnsResolver(web3j, null);
     }

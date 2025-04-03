@@ -15,7 +15,6 @@ public abstract class EthereumNetworkBase
     public static final long GOERLI_ID = 5;
     public static final long BINANCE_TEST_ID = 97;
     public static final long BINANCE_MAIN_ID = 56;
-    public static final long HECO_ID = 128;
     public static final long FANTOM_ID = 250;
     public static final long FANTOM_TEST_ID = 4002;
     public static final long AVALANCHE_ID = 43114;
@@ -35,10 +34,8 @@ public abstract class EthereumNetworkBase
     public static final long AURORA_MAINNET_ID = 1313161554;
     public static final long AURORA_TESTNET_ID = 1313161555;
     public static final long MILKOMEDA_C1_ID = 2001;
-    public static final long MILKOMEDA_C1_TEST_ID = 200101;
     public static final long SEPOLIA_TESTNET_ID = 11155111;
-    public static final long OPTIMISM_GOERLI_TEST_ID = 420;
-    public static final long ARBITRUM_GOERLI_TEST_ID = 421613;
+    public static final long ARBITRUM_TEST_ID = 421614;
     public static final long OKX_ID = 66;
     public static final long ROOTSTOCK_MAINNET_ID = 30;
     public static final long ROOTSTOCK_TESTNET_ID = 31;
@@ -117,8 +114,6 @@ public abstract class EthereumNetworkBase
                     BINANCE_TEST_ID, false));
             put(BINANCE_MAIN_ID, new NetworkInfo("Binance (BSC)", "BSC", BINANCE_MAIN_RPC_URL, "https://explorer.binance.org/smart/tx/",
                     BINANCE_MAIN_ID, false));
-            put(HECO_ID, new NetworkInfo("Heco", "HT", HECO_RPC_URL, "https://hecoinfo.com/tx/",
-                    HECO_ID, false));
             put(AVALANCHE_ID, new NetworkInfo("Avalanche Mainnet C-Chain", "AVAX", AVALANCHE_RPC_URL, "https://cchain.explorer.avax.network/tx/",
                     AVALANCHE_ID, false));
             put(FUJI_TEST_ID, new NetworkInfo("Avalanche FUJI C-Chain (Test)", "AVAX", FUJI_TEST_RPC_URL, "https://cchain.explorer.avax-test.network/tx/",
@@ -158,14 +153,10 @@ public abstract class EthereumNetworkBase
 
             put(MILKOMEDA_C1_ID, new NetworkInfo("Milkomeda Cardano", "milkADA", MILKOMEDA_C1_RPC, "https://explorer-mainnet-cardano-evm.c1.milkomeda.com/tx/",
                     MILKOMEDA_C1_ID, false));
-            put(MILKOMEDA_C1_TEST_ID, new NetworkInfo("Milkomeda Cardano (Test)", "milktADA", MILKOMEDA_C1_TEST_RPC, "https://explorer-devnet-cardano-evm.c1.milkomeda.com/tx/",
-                    MILKOMEDA_C1_TEST_ID, false));
             put(SEPOLIA_TESTNET_ID, new NetworkInfo("Sepolia (Test)", "ETH", SEPOLIA_TESTNET_RPC_URL, "https://sepolia.etherscan.io/tx/",
                     SEPOLIA_TESTNET_ID, false));
-            put(OPTIMISM_GOERLI_TEST_ID, new NetworkInfo("Optimism Goerli (Test)", "ETH", OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL, "https://blockscout.com/optimism/goerli/tx/",
-                    OPTIMISM_GOERLI_TEST_ID, false));
-            put(ARBITRUM_GOERLI_TEST_ID, new NetworkInfo("Arbitrum Goerli (Test)", "AGOR", OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL, "https://goerli-rollup-explorer.arbitrum.io/tx/",
-                    ARBITRUM_GOERLI_TEST_ID, false));
+            put(ARBITRUM_TEST_ID, new NetworkInfo("Arbitrum Goerli (Test)", "AGOR", OPTIMISM_GOERLI_TESTNET_FALLBACK_RPC_URL, "https://goerli-rollup-explorer.arbitrum.io/tx/",
+                    ARBITRUM_TEST_ID, false));
             put(IOTEX_MAINNET_ID, new NetworkInfo("IoTeX", "IOTX", IOTEX_MAINNET_RPC_URL, "https://iotexscan.io/tx/",
                     IOTEX_MAINNET_ID, false));
             put(IOTEX_TESTNET_ID, new NetworkInfo("IoTeX (Test)", "IOTX", IOTEX_TESTNET_RPC_URL, "https://testnet.iotexscan.io/tx/",

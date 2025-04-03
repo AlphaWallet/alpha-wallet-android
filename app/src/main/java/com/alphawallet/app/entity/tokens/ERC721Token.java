@@ -1,6 +1,8 @@
 package com.alphawallet.app.entity.tokens;
 
+import static com.alphawallet.app.repository.TokenRepository.balanceOf;
 import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunction;
+import static com.alphawallet.app.repository.TokenRepository.callSmartContractFunctionArray;
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.util.Utils.parseTokenId;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -9,12 +11,16 @@ import static org.web3j.tx.Contract.staticExtractEventParameters;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
 import com.alphawallet.app.entity.LogOverflowException;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.SyncDef;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.TransactionInput;
+import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.repository.EthereumNetworkBase;
@@ -318,6 +324,8 @@ public class ERC721Token extends Token
         return new Event("Transfer", paramList);
     }
 
+
+
     /**
      * Uses both events and balance call. Each call to updateBalance uses 3 Node calls:
      * 1. Get new Transfer events since last call
@@ -339,30 +347,36 @@ public class ERC721Token extends Token
             return balance;
         }
 
+        if (this.tokenInfo.address.equalsIgnoreCase("0x0665709A767096bA799BDc351A72EcE2E5591dCC"))
+        {
+            System.out.println("YOLESS");
+        }
+
+        final Web3j web3j = TokenRepository.getWeb3jServiceForEvents(tokenInfo.chainId);
+        if (contractType == ContractType.ERC721_ENUMERABLE)
+        {
+            updateEnumerableBalance(web3j, realm);
+            return balance;
+        }
+
         //first get current block
         SyncDef sync = eventSync.getSyncDef(realm);
         if (sync == null) return balance;
 
-        DefaultBlockParameter startBlock = DefaultBlockParameter.valueOf(sync.eventReadStartBlock);
-        DefaultBlockParameter endBlock = DefaultBlockParameter.valueOf(sync.eventReadEndBlock);
-        if (sync.eventReadEndBlock.compareTo(BigInteger.valueOf(-1L)) == 0) endBlock = DefaultBlockParameterName.LATEST;
-
-        //take a note of the current block#
-        BigInteger currentBlock = TransactionsService.getCurrentBlock(tokenInfo.chainId);
+        final DefaultBlockParameter startBlock = DefaultBlockParameter.valueOf(sync.eventReadStartBlock);
+        final DefaultBlockParameter endBlock = (sync.eventReadEndBlock.compareTo(BigInteger.valueOf(-1L)) == 0) ? DefaultBlockParameterName.LATEST : DefaultBlockParameter.valueOf(sync.eventReadEndBlock);
 
         try
         {
+            //take a note of the current block#
+            BigInteger currentBlock = TransactionsService.getCurrentBlock(tokenInfo.chainId);
+
             balanceChecks.put(tokenInfo.address, true); //set checking
-            final Web3j web3j = TokenRepository.getWeb3jServiceForEvents(tokenInfo.chainId);
-            if (contractType == ContractType.ERC721_ENUMERABLE)
-            {
-                updateEnumerableBalance(web3j, realm);
-            }
 
             Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> evRead = eventSync.processTransferEvents(web3j,
                     getTransferEvents(), startBlock, endBlock, realm);
 
-           eventSync.updateEventReads(realm, sync, currentBlock, evRead.first); //means our event read was fine
+            eventSync.updateEventReads(realm, sync, currentBlock, evRead.first); //means our event read was fine
 
             //No need to go any further if this is enumerable
             if (contractType == ContractType.ERC721_ENUMERABLE) return balance;
@@ -370,7 +384,7 @@ public class ERC721Token extends Token
             HashSet<BigInteger> allMovingTokens = new HashSet<>(evRead.second.first);
             allMovingTokens.addAll(evRead.second.second);
 
-            if (allMovingTokens.size() == 0 && balance.intValue() != tokenBalanceAssets.size()) //if there's a mismatch, check all current assets
+            if (allMovingTokens.isEmpty() && balance.intValue() != tokenBalanceAssets.size()) //if there's a mismatch, check all current assets
             {
                 allMovingTokens.addAll(tokenBalanceAssets.keySet());
             }
@@ -410,29 +424,38 @@ public class ERC721Token extends Token
     /***********
      * For ERC721Enumerable interface
      **********/
-    private void updateEnumerableBalance(Web3j web3j, Realm realm) throws IOException
+    private void updateEnumerableBalance(Web3j web3j, Realm realm)
     {
         HashSet<BigInteger> tokenIdsHeld = new HashSet<>();
         //get enumerable balance
         //find tokenIds held
-        long currentBalance = balance != null ? balance.longValue() : 0;
+        //pull balance from contract
+        long fetchBalance = checkBalance();
+        final long currentBalance = fetchBalance >= 0 ? fetchBalance : balance.longValue();
 
-        if (EthereumNetworkBase.getBatchProcessingLimit(tokenInfo.chainId) > 0 && currentBalance > 1) //no need to do batch query for 1
+        try
         {
-            updateEnumerableBatchBalance(web3j, currentBalance, tokenIdsHeld, realm);
-        }
-        else
-        {
-            for (long tokenIndex = 0; tokenIndex < currentBalance; tokenIndex++)
+            if (EthereumNetworkBase.getBatchProcessingLimit(tokenInfo.chainId) > 0 && currentBalance > 1) //no need to do batch query for 1
             {
-                // find tokenId from index
-                String tokenId = callSmartContractFunction(tokenInfo.chainId, tokenOfOwnerByIndex(BigInteger.valueOf(tokenIndex)), getAddress(), getWallet());
-                if (TextUtils.isEmpty(tokenId)) continue;
-                tokenIdsHeld.add(new BigInteger(tokenId));
+                updateEnumerableBatchBalance(web3j, currentBalance, tokenIdsHeld, realm);
             }
+            else
+            {
+                for (long tokenIndex = 0; tokenIndex < currentBalance; tokenIndex++)
+                {
+                    // find tokenId from index
+                    String tokenId = callSmartContractFunction(tokenInfo.chainId, tokenOfOwnerByIndex(BigInteger.valueOf(tokenIndex)), getAddress(), getWallet());
+                    if (TextUtils.isEmpty(tokenId)) continue;
+                    tokenIdsHeld.add(new BigInteger(tokenId));
+                }
+            }
+            updateRealmForEnumerable(realm, tokenIdsHeld);
+            balance = BigDecimal.valueOf(tokenIdsHeld.size());
         }
-
-        updateRealmForEnumerable(realm, tokenIdsHeld);
+        catch (IOException e)
+        {
+            Timber.e(e);
+        }
     }
 
     private void updateEnumerableBatchBalance(Web3j web3j, long currentBalance, HashSet<BigInteger> tokenIdsHeld, Realm realm) throws IOException
@@ -450,11 +473,30 @@ public class ERC721Token extends Token
             }
         }
 
-        if (requests.getRequests().size() > 0)
+        if (!requests.getRequests().isEmpty())
         {
             //do final call
             handleEnumerableRequests(requests, tokenIdsHeld);
         }
+    }
+
+    private long checkBalance()
+    {
+        try
+        {
+            Function getBalance = balanceOf(getWallet());
+            String responseRaw = callSmartContractFunction(tokenInfo.chainId, getBalance, tokenInfo.address, getWallet());
+            if (!responseRaw.isEmpty())
+            {
+                return new BigDecimal(responseRaw).longValue();
+            }
+        }
+        catch (Exception e)
+        {
+            Timber.w(e);
+        }
+
+        return -1;
     }
 
     private void handleEnumerableRequests(BatchRequest requests, HashSet<BigInteger> tokenIdsHeld) throws IOException
@@ -483,6 +525,12 @@ public class ERC721Token extends Token
         {
             String tokenIdStr = responseValues.get(0).getValue().toString();
             if (!TextUtils.isEmpty(tokenIdStr)) return new BigInteger(tokenIdStr);
+        }
+
+        if (rsp.hasError())
+        {
+            // remove batch processing ability for this RPC
+            EthereumNetworkBase.setBatchProcessingError(tokenInfo.chainId);
         }
 
         return null;
@@ -856,7 +904,7 @@ public class ERC721Token extends Token
 
         return assetMap;
     }
-    
+
     // Check for new/missing tokenBalanceAssets
     @Override
     public Map<BigInteger, NFTAsset> getAssetChange(Map<BigInteger, NFTAsset> oldAssetList)

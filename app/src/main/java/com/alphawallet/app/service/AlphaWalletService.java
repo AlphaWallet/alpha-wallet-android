@@ -49,7 +49,7 @@ public class AlphaWalletService
     private static final String API = "api/";
     private static final String XML_VERIFIER_ENDPOINT = "https://aw.app/api/v1/verifyXMLDSig";
     private static final String TSML_VERIFIER_ENDPOINT_STAGING = "https://doobtvjcpb8dc.cloudfront.net/tokenscript/validate";
-    private static final String TSML_VERIFIER_ENDPOINT = "https://api.smarttokenlabs.com/";
+    private static final String TSML_VERIFIER_ENDPOINT = "https://api.smarttokenlabs.com/tokenscript/validate";
     private static final String XML_VERIFIER_PASS = "pass";
     private static final MediaType MEDIA_TYPE_TOKENSCRIPT
             = MediaType.parse("text/xml; charset=UTF-8");
@@ -128,7 +128,7 @@ public class AlphaWalletService
                 if (overview != null)
                 {
                     JsonArray statuses = overview.getAsJsonArray("originStatuses");
-                    if (statuses.size() == 0)
+                    if (statuses.isEmpty())
                     {
                         return dsigDescriptor;
                     }
@@ -146,7 +146,7 @@ public class AlphaWalletService
         return dsigDescriptor;
     }
 
-    public XMLDsigDescriptor checkTokenScriptSignature(InputStream inputStream, long chainId, String address)
+    public XMLDsigDescriptor checkTokenScriptSignature(InputStream inputStream, long chainId, String address, String sourceUrl)
     {
         XMLDsigDescriptor dsigDescriptor = new XMLDsigDescriptor();
         dsigDescriptor.result = "fail";
@@ -155,7 +155,7 @@ public class AlphaWalletService
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("sourceType", "scriptUri");
             jsonObject.put("sourceId", chainId + "-" + Keys.toChecksumAddress(address));
-            jsonObject.put("sourceUrl", "");
+            jsonObject.put("sourceUrl", sourceUrl);
             jsonObject.put("base64Xml", streamToBase64(inputStream));
             RequestBody body = RequestBody.create(jsonObject.toString(), JSON_MEDIA_TYPE);
 
@@ -172,7 +172,7 @@ public class AlphaWalletService
                 if (overview != null)
                 {
                     JsonArray statuses = overview.getAsJsonArray("originStatuses");
-                    if (statuses.size() == 0)
+                    if (statuses.isEmpty())
                     {
                         return dsigDescriptor;
                     }

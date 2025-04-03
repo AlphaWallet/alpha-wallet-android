@@ -527,8 +527,8 @@ public class GasService implements ContractGasProvider
                 .url(info.rpcServerUrl)
                 .post(requestBody);
 
-        HttpServiceHelper.addRequiredCredentials(info.chainId, rqBuilder, KeyProviderFactory.get().getKlaytnKey(),
-                KeyProviderFactory.get().getInfuraSecret(), EthereumNetworkBase.usesProductionKey, EthereumNetworkBase.isInfura(info.rpcServerUrl));
+        HttpServiceHelper.addRequiredCredentials(info.rpcServerUrl, rqBuilder,
+                KeyProviderFactory.get().getInfuraSecret());
 
         return Single.fromCallable(() -> {
             Request request = rqBuilder.build();

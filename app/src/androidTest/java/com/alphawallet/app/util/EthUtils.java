@@ -1,7 +1,7 @@
 package com.alphawallet.app.util;
 
 import com.alphawallet.app.C;
-import com.alphawallet.app.service.AWHttpService;
+import com.alphawallet.app.service.AWHttpServiceWaterfall;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Hash;
@@ -41,7 +41,7 @@ public abstract class EthUtils
                 .retryOnConnectionFailure(true)
                 .build();
 
-        AWHttpService svs = new AWHttpService(url, url, chainId, client,null, null, null, false);
+        AWHttpServiceWaterfall svs = new AWHttpServiceWaterfall(new String[]{url}, chainId, client,null, null, null, false);
         return Web3j.build(svs);
     }
 

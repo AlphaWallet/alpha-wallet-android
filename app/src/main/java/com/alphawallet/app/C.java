@@ -27,14 +27,13 @@ public abstract class C {
     public static final String GOERLI_NETWORK_NAME = "Görli (Test)";
     public static final String BINANCE_TEST_NETWORK = "BSC TestNet";
     public static final String BINANCE_MAIN_NETWORK = "Binance (BSC)";
-    public static final String HECO_MAIN_NETWORK = "Heco";
     public static final String FANTOM_NETWORK = "Fantom Opera";
     public static final String FANTOM_TEST_NETWORK = "Fantom (Test)";
     public static final String AVALANCHE_NETWORK = "Avalanche";
     public static final String FUJI_TEST_NETWORK = "Avalanche FUJI (Test)";
     public static final String POLYGON_NETWORK = "Polygon";
     public static final String POLYGON_TEST_NETWORK = "Mumbai (Test)";
-    public static final String OPTIMISTIC_NETWORK = "Optimistic";
+    public static final String OPTIMISTIC_NETWORK = "Op Mainnet";
     public static final String CRONOS_MAIN_NETWORK = "Cronos";
     public static final String CRONOS_TEST_NETWORK = "Cronos (Test)";
     public static final String ARBITRUM_ONE_NETWORK = "Arbitrum One";
@@ -49,8 +48,7 @@ public abstract class C {
     public static final String MILKOMEDA_NAME = "Milkomeda Cardano";
     public static final String MILKOMEDA_TESTNET_NAME = "Milkomeda Cardano (Test)";
     public static final String SEPOLIA_TESTNET_NAME = "Sepolia (Test)";
-    public static final String OPTIMISM_GOERLI_TESTNET_NAME = "Optimism Goerli (Test)";
-    public static final String ARBITRUM_GOERLI_TESTNET_NAME = "Arbitrum Goerli (Test)";
+    public static final String ARBITRUM_TESTNET_NAME = "Arbitrum Sepolia (Test)";
     public static final String OKX_NETWORK_NAME = "OKXChain Mainnet";
     public static final String ROOTSTOCK_NETWORK_NAME = "Rootstock";
     public static final String ROOTSTOCK_TESTNET_NAME = "Rootstock (Test)";
@@ -81,7 +79,6 @@ public abstract class C {
     public static final String ETC_SYMBOL = "ETC";
     public static final String GOERLI_SYMBOL = "GÖETH";
     public static final String BINANCE_SYMBOL = "BNB";
-    public static final String HECO_SYMBOL = "HT";
     public static final String FANTOM_SYMBOL = "FTM";
     public static final String AVALANCHE_SYMBOL = "AVAX";
     public static final String POLYGON_SYMBOL = "MATIC";
@@ -94,8 +91,6 @@ public abstract class C {
     public static final String MILKOMEDA_SYMBOL = "milkADA";
     public static final String MILKOMEDA_TEST_SYMBOL = "milktADA";
     public static final String SEPOLIA_SYMBOL = "ETH";
-    public static final String OPTIMISM_GOERLI_TEST_SYMBOL = "ETH";
-    public static final String ARBITRUM_GOERLI_TEST_SYMBOL = "AGOR";
     public static final String OKX_SYMBOL = "OKT";
     public static final String ROOTSTOCK_SYMBOL = "RBTC";
     public static final String ROOTSTOCK_TEST_SYMBOL = "tBTC";

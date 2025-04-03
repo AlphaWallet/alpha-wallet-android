@@ -172,7 +172,7 @@ public class Utils
     public static boolean isValidValue(String testStr)
     {
         boolean result = false;
-        if (testStr != null && testStr.length() > 0)
+        if (testStr != null && !testStr.isEmpty())
         {
             result = true;
             for (int i = 0; i < testStr.length(); i++)
@@ -199,7 +199,14 @@ public class Utils
             if ((!Character.isLetterOrDigit(text.charAt(index)) && index > 4) || Character.isWhitespace(text.charAt(index))) break;
         }
 
-        return text.substring(0, index).trim();
+        if (!text.isEmpty())
+        {
+            return text.substring(0, index).trim();
+        }
+        else
+        {
+            return "";
+        }
     }
 
     public static String getIconisedText(String text)

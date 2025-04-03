@@ -21,34 +21,32 @@ public class NetworkInfo extends com.alphawallet.ethereum.NetworkInfo
     private final String ARBISCAN_API = "https://api.arbiscan";
     private final String PALM_API = "explorer.palm";
 
-    public  String backupNodeUrl = null;
     public  String etherscanAPI = null; //This is used by the API call to fetch transactions
+    public  String[] rpcUrls;
 
     public NetworkInfo(
             String name,
             String symbol,
-            String rpcServerUrl,
+            String[] rpcServerUrl,
             String etherscanUrl,
             long chainId,
-            String backupNodeUrl,
             String etherscanAPI,
             boolean isCustom) {
-        super(name, symbol, rpcServerUrl, etherscanUrl, chainId, isCustom);
-        this.backupNodeUrl = backupNodeUrl;
+        super(name, symbol, rpcServerUrl[0], etherscanUrl, chainId, isCustom);
         this.etherscanAPI = etherscanAPI;
+        this.rpcUrls = rpcServerUrl;
     }
 
     public NetworkInfo(
             String name,
             String symbol,
-            String rpcServerUrl,
+            String[] rpcServerUrl,
             String etherscanUrl,
             long chainId,
-            String backupNodeUrl,
             String etherscanAPI) {
-        super(name, symbol, rpcServerUrl, etherscanUrl, chainId, false);
-        this.backupNodeUrl = backupNodeUrl;
+        super(name, symbol, rpcServerUrl[0], etherscanUrl, chainId, false);
         this.etherscanAPI = etherscanAPI;
+        this.rpcUrls = rpcServerUrl;
     }
 
     public String getShortName()

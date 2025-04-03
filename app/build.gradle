@@ -52,7 +52,7 @@ android {
         applicationId "io.stormbird.wallet"
         minSdk 24
         targetSdk 34
-        versionCode 272
+        versionCode 273
         versionName "3.87"
 
         android.buildFeatures.buildConfig true
@@ -157,8 +157,8 @@ android {
         }
     }
     compileOptions {
-        targetCompatibility JavaVersion.VERSION_17
-        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_21
+        sourceCompatibility JavaVersion.VERSION_21
     }
     externalNativeBuild {
         cmake {
@@ -259,6 +259,7 @@ dependencies {
 
     // dagger-hilt
     implementation libs.hilt.android
+    implementation libs.annotations
     annotationProcessor libs.hilt.compiler
 
     // WebKit - for WebView Dark Mode (NB Can't be upgraded from 1.7.0 until migration to Gradle 8)

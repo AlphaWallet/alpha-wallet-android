@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: oracle
-          java-version: 17
+          java-version: 21
           cache: gradle
       - name: Run detekt
         run: ./gradlew :app:detekt

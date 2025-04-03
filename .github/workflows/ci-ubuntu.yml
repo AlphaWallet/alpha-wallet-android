@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: oracle
-          java-version: 17
+          java-version: 21
 
       - name: Run unit tests
         run: sh ./build.sh

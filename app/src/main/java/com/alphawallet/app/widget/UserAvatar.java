@@ -3,7 +3,6 @@ package com.alphawallet.app.widget;
 import static com.alphawallet.app.entity.tokenscript.TokenscriptFunction.ZERO_ADDRESS;
 import static com.alphawallet.app.util.Utils.loadFile;
 import static com.alphawallet.app.util.ens.EnsResolver.USE_ENS_CHAIN;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

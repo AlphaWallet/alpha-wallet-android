@@ -1,5 +1,7 @@
 package com.alphawallet.app.util.ens;
 
+import static com.alphawallet.app.util.ens.EnsResolver.CANCELLED_REQUEST;
+
 import android.content.Context;
 import android.text.TextUtils;
 
@@ -15,7 +17,6 @@ import org.web3j.utils.Numeric;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.json.JSONObject;
 import org.web3j.protocol.Web3j;
 
 import java.util.HashMap;
@@ -40,8 +41,10 @@ public class AWEnsResolver
     private static final String OPENSEA_IMAGE_ORIGINAL = "image_original_url"; //in case of SVG; Opensea breaks SVG compression
     private final Context context;
     private final OkHttpClient client;
-    private HashMap<String, Resolvable> resolvables;
+    private final HashMap<String, Resolvable> resolvables;
     private final EnsResolver ensResolver;
+    private final EnsResolver avatarEnsResolver;
+    private final long chainId;
 
     public AWEnsResolver(Web3j web3j, Context context)
     {
@@ -51,8 +54,10 @@ public class AWEnsResolver
     public AWEnsResolver(Web3j web3j, Context context, long chainId)
     {
         this.ensResolver = new EnsResolver(web3j);
+        this.avatarEnsResolver = new EnsResolver(web3j);
         this.context = context;
         this.client = setupClient();
+        this.chainId = chainId;
 
         resolvables = new HashMap<>()
         {
@@ -91,7 +96,7 @@ public class AWEnsResolver
                 {
                     //check ENS name integrity - it must point to the wallet address
                     String resolveAddress = resolve(ensName);
-                    if (!resolveAddress.equalsIgnoreCase(address))
+                    if (!resolveAddress.equals(CANCELLED_REQUEST) && !resolveAddress.equalsIgnoreCase(address))
                     {
                         ensName = "";
                     }
@@ -307,7 +312,7 @@ public class AWEnsResolver
                 // no action
             }
             return address;
-        }).onErrorReturnItem("");
+        }).onErrorReturnItem(CANCELLED_REQUEST);
     }
 
     public String resolve(String ensName) throws Exception
@@ -321,7 +326,9 @@ public class AWEnsResolver
         if (resolvable == null)
         {
             resolvable = ensResolver;
+            ensResolver.cancelCurrentResolve();
         }
+
         return resolvable.resolve(ensName);
     }
 
@@ -332,7 +339,7 @@ public class AWEnsResolver
 
     public String resolveAvatar(String ensName)
     {
-        return new AvatarResolver(ensResolver).resolve(ensName);
+        return new AvatarResolver(avatarEnsResolver).resolve(ensName);
     }
 
     public String resolveAvatarFromAddress(String address)

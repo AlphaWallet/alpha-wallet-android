@@ -5,8 +5,7 @@ package com.alphawallet.app.ui.widget.entity;
  */
 
 import static com.alphawallet.app.util.ens.EnsResolver.USE_ENS_CHAIN;
-import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
+import static com.alphawallet.app.util.ens.EnsResolver.CANCELLED_REQUEST;
 
 import android.content.Context;
 import android.os.Handler;
@@ -192,13 +191,13 @@ public class ENSHandler implements Runnable
 
     public static boolean couldBeENS(String address)
     {
-        if (address == null || address.length() == 0) return false;
+        if (address == null || address.isEmpty()) return false;
 
         String[] split = address.split("[.]");
         if (split.length > 1)
         {
             String extension = split[split.length - 1];
-            return extension.length() > 0 && Utils.isAlNum(extension);
+            return !extension.isEmpty() && Utils.isAlNum(extension);
         }
 
         return false;
@@ -220,7 +219,12 @@ public class ENSHandler implements Runnable
             disposable = ensResolver.reverseResolveEns(to)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(resolvedAddress -> onENSSuccess(resolvedAddress, to), this::onENSError);
+                    .subscribe(resolvedAddress -> {
+                        if (!resolvedAddress.equals(CANCELLED_REQUEST))
+                        {
+                            onENSSuccess(resolvedAddress, to);
+                        }
+                    }, this::onENSError);
         }
         else if (canBeENSName(to))
         {
@@ -230,7 +234,12 @@ public class ENSHandler implements Runnable
             disposable = ensResolver.resolveENSAddress(to)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(resolvedAddress -> onENSSuccess(resolvedAddress, to), this::onENSError);
+                    .subscribe(resolvedAddress -> {
+                        if (!resolvedAddress.equals(CANCELLED_REQUEST))
+                        {
+                            onENSSuccess(resolvedAddress, to);
+                        }
+                    }, this::onENSError);
         }
         else
         {

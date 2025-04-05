@@ -1,5 +1,6 @@
 package com.alphawallet.app.service;
 
+import static com.alphawallet.app.service.JsonValidator.validateAndGetStream;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_BAOBAB_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static okhttp3.ConnectionSpec.CLEARTEXT;
@@ -213,7 +214,8 @@ public class AWHttpServiceWaterfall extends HttpService
     private InputStream buildInputStream(Response response) throws IOException
     {
         ResponseBody responseBody = response.body();
-        InputStream inputStream = responseBody.byteStream();
+        InputStream inputStream = validateAndGetStream(responseBody);
+        //InputStream inputStream = responseBody.byteStream();
 
         if (includeRawResponse)
         {

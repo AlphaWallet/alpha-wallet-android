@@ -1,19 +1,6 @@
-/*
- * Copyright 2019 Web3 Labs Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- */
 package com.alphawallet.app.util.ens;
 
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
-import static com.alphawallet.ethereum.EthereumNetworkBase.SEPOLIA_TESTNET_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 import android.text.TextUtils;
@@ -62,7 +49,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
@@ -89,6 +78,8 @@ public class EnsResolver implements Resolvable
 
     public static final long USE_ENS_CHAIN = MAINNET_ID;
 
+    public static final String CANCELLED_REQUEST = "##C";
+
     private final Web3j web3j;
     protected final int addressLength;
     protected long chainId;
@@ -96,6 +87,10 @@ public class EnsResolver implements Resolvable
     private OkHttpClient client = new OkHttpClient();
 
     private static DefaultFunctionReturnDecoder decoder;
+
+    // Cancellation mechanism
+    private volatile String currentResolveRequestId = null;
+    private final ConcurrentLinkedQueue<String> cancelledRequests = new ConcurrentLinkedQueue<>();
 
     public EnsResolver(Web3j web3j, int addressLength)
     {
@@ -105,13 +100,13 @@ public class EnsResolver implements Resolvable
         chainId = USE_ENS_CHAIN;
 
         Single.fromCallable(() -> {
-            NetVersion v = web3j.netVersion().send();
-            String ver = v.getNetVersion();
-            return Long.parseLong(ver);
-        }).subscribeOn(Schedulers.io())
-          .observeOn(Schedulers.io())
-          .subscribe(id -> this.chainId = id, Timber::w)
-          .isDisposed();
+                    NetVersion v = web3j.netVersion().send();
+                    String ver = v.getNetVersion();
+                    return Long.parseLong(ver);
+                }).subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(id -> this.chainId = id, Timber::w)
+                .isDisposed();
     }
 
     public EnsResolver(Web3j web3j) {
@@ -120,28 +115,70 @@ public class EnsResolver implements Resolvable
 
     protected ContractAddress obtainOffChainResolverAddress(String ensName) throws Exception
     {
-        return new ContractAddress(chainId, getResolverAddress(ensName));
+        String resolverAddress = cachedResolver.containsKey(ensName) ? cachedResolver.get(ensName) : getResolverAddress(ensName);
+        if (!TextUtils.isEmpty(resolverAddress))
+        {
+            cachedResolver.put(ensName, resolverAddress);
+        }
+        return new ContractAddress(chainId, resolverAddress);
     }
 
-    private static class CachedENSRead
-    {
-        public final String cachedResult;
-        public final long cachedResultTime;
-
-        public CachedENSRead(String result)
-        {
-            cachedResult = result;
-            cachedResultTime = System.currentTimeMillis();
+    /**
+     * Cancels any ongoing resolve operation
+     */
+    public void cancelCurrentResolve() {
+        if (currentResolveRequestId != null) {
+            cancelledRequests.add(currentResolveRequestId);
         }
+    }
 
-        public boolean isValid()
-        {
-            return System.currentTimeMillis() < (cachedResultTime + ENS_CACHE_TIME_VALIDITY); //10 minutes cache validity
+    /**
+     * Checks if a request was cancelled
+     */
+    private boolean isRequestCancelled(String requestId) {
+        return cancelledRequests.contains(requestId);
+    }
+
+    /**
+     * Removes a request from the cancelled requests queue
+     */
+    private void removeCancelledRequest(String requestId) {
+        cancelledRequests.remove(requestId);
+    }
+
+    /**
+     * Returns the address of the resolver for the specified node.
+     *
+     * @param ensName The specified node.
+     * @return address of the resolver.
+     */
+    @Override
+    public String resolve(String ensName) throws Exception
+    {
+        String requestId = UUID.randomUUID().toString();
+        currentResolveRequestId = requestId;
+
+        try {
+            String result = resolveInternal(ensName, requestId);
+            
+            // Check if this request was cancelled before returning the result
+            if (isRequestCancelled(requestId)) {
+                removeCancelledRequest(requestId);
+                return CANCELLED_REQUEST;
+            }
+            
+            return result;
+        } finally {
+            if (requestId.equals(currentResolveRequestId)) {
+                currentResolveRequestId = null;
+            }
         }
     }
 
     //Need to cache results for Resolve
     private static final Map<String, CachedENSRead> cachedNameReads = new ConcurrentHashMap<>();
+    private static final Map<String, String> cachedResolver = new ConcurrentHashMap<>();
+    private static final Map<String, Boolean> cachedSuportsWildcard = new ConcurrentHashMap<>();
 
     private String cacheKey(String ensName, String addrFunction)
     {
@@ -173,14 +210,7 @@ public class EnsResolver implements Resolvable
         return lookupDataHex;
     }
 
-    /**
-     * Returns the address of the resolver for the specified node.
-     *
-     * @param ensName The specified node.
-     * @return address of the resolver.
-     */
-    @Override
-    public String resolve(String ensName) throws Exception
+    private String resolveInternal(String ensName, String requestId) throws Exception
     {
         if (TextUtils.isEmpty(ensName) || (ensName.trim().length() == 1 && ensName.contains("."))) {
             return null;
@@ -191,14 +221,13 @@ public class EnsResolver implements Resolvable
             {
                 ContractAddress resolverAddress = obtainOffChainResolverAddress(ensName);
 
-                boolean supportWildcard =
-                        supportsInterface(EnsUtils.ENSIP_10_INTERFACE_ID, resolverAddress.address);
+                boolean supportWildcard = getSupportsWildcard(resolverAddress.address);
                 byte[] nameHash = NameHash.nameHashAsBytes(ensName);
 
                 String resolvedName;
                 if (supportWildcard) {
                     String lookupDataHex = resolveWithCaching(ensName, nameHash, resolverAddress.address);
-                    resolvedName = resolveOffchain(lookupDataHex, resolverAddress, LOOKUP_LIMIT);
+                    resolvedName = resolveOffchain(lookupDataHex, resolverAddress, LOOKUP_LIMIT, requestId);
                 } else {
                     try {
                         resolvedName = resolverAddr(nameHash, resolverAddress.address);
@@ -222,8 +251,21 @@ public class EnsResolver implements Resolvable
         }
     }
 
+    private boolean getSupportsWildcard(String address) throws Exception
+    {
+        if (cachedSuportsWildcard.containsKey(address))
+        {
+            return cachedSuportsWildcard.get(address);
+        }
+
+        boolean supportWildcard =
+                supportsInterface(EnsUtils.ENSIP_10_INTERFACE_ID, address);
+        cachedSuportsWildcard.put(address, supportWildcard);
+        return supportWildcard;
+    }
+
     protected String resolveOffchain(
-            String lookupData, ContractAddress resolverAddress, int lookupCounter)
+            String lookupData, ContractAddress resolverAddress, int lookupCounter, String requestId)
             throws Exception
     {
         if (EnsUtils.isEIP3668(lookupData))
@@ -254,10 +296,10 @@ public class EnsResolver implements Resolvable
 
             EthCall result =
                     resolveWithProof(
-                                    Numeric.hexStringToByteArray(gatewayResponseDTO.getData()),
-                                    offchainLookup.getExtraData(), resolverAddress.address);
+                            Numeric.hexStringToByteArray(gatewayResponseDTO.getData()),
+                            offchainLookup.getExtraData(), resolverAddress.address);
 
-            String resolvedNameHex = result.isReverted() ? Utils.removeDoubleQuotes(result.getError().getData()) : result.getValue();// .toString();
+            String resolvedNameHex = result.isReverted() ? Utils.removeDoubleQuotes(result.getError().getData()) : result.getValue();
 
             // This protocol can result in multiple lookups being requested by the same contract.
             if (EnsUtils.isEIP3668(resolvedNameHex))
@@ -267,7 +309,7 @@ public class EnsResolver implements Resolvable
                     throw new EnsResolutionException("Lookup calls is out of limit.");
                 }
 
-                return resolveOffchain(lookupData, resolverAddress, --lookupCounter);
+                return resolveOffchain(lookupData, resolverAddress, --lookupCounter, requestId);
             }
             else
             {
@@ -307,6 +349,10 @@ public class EnsResolver implements Resolvable
         List<String> errorMessages = new ArrayList<>();
 
         for (String url : urls) {
+            if (isRequestCancelled(currentResolveRequestId)) {
+                return null;
+            }
+
             Request request;
             try {
                 request = buildRequest(url, sender, data);
@@ -316,6 +362,10 @@ public class EnsResolver implements Resolvable
             }
 
             try (okhttp3.Response response = client.newCall(request).execute()) {
+                if (isRequestCancelled(currentResolveRequestId)) {
+                    return null;
+                }
+
                 if (response.isSuccessful()) {
                     ResponseBody responseBody = response.body();
                     if (responseBody == null) {
@@ -328,13 +378,15 @@ public class EnsResolver implements Resolvable
                         StringBuilder sb = new StringBuilder();
                         String line;
                         while ((line = reader.readLine()) != null) {
+                            if (isRequestCancelled(currentResolveRequestId)) {
+                                return null;
+                            }
                             sb.append(line).append("\n");
                         }
                         return sb.toString();
                     }
                     catch (Exception e)
                     {
-                        //
                         return "";
                     }
                 } else {
@@ -499,10 +551,10 @@ public class EnsResolver implements Resolvable
                     }));
 
             resolverAddr = getContractData(address, function, "");
-            /*if (!TextUtils.isEmpty(resolverAddr) && resolverAddr.length() > 2)
+            if (!TextUtils.isEmpty(resolverAddr) && resolverAddr.length() > 2)
             {
                 cachedNameReads.put(cacheKey(nodeData, address), new CachedENSRead(resolverAddr));
-            }*/
+            }
         }
         return resolverAddr;
     }
@@ -532,6 +584,10 @@ public class EnsResolver implements Resolvable
 
     public EthCall resolveWithProof(byte[] response, byte[] extraData, String address) throws Exception
     {
+        if (isRequestCancelled(currentResolveRequestId)) {
+            return null;
+        }
+
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_RESOLVEWITHPROOF,
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicBytes(response),
                         new org.web3j.abi.datatypes.DynamicBytes(extraData)),
@@ -597,11 +653,19 @@ public class EnsResolver implements Resolvable
     {
         try
         {
+            if (isRequestCancelled(currentResolveRequestId)) {
+                return "0x";
+            }
+
             String encodedFunction = FunctionEncoder.encode(function);
 
             org.web3j.protocol.core.methods.request.Transaction transaction
                     = createEthCallTransaction(TokenscriptFunction.ZERO_ADDRESS, contractAddress, encodedFunction);
             EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+
+            if (isRequestCancelled(currentResolveRequestId)) {
+                return "0x";
+            }
 
             return response.getValue();
         }
@@ -609,6 +673,27 @@ public class EnsResolver implements Resolvable
         {
             //expected to happen when user switches wallets
             return "0x";
+        }
+        catch (Exception e)
+        {
+            return "0x";
+        }
+    }
+
+    private static class CachedENSRead
+    {
+        public final String cachedResult;
+        public final long cachedResultTime;
+
+        public CachedENSRead(String result)
+        {
+            cachedResult = result;
+            cachedResultTime = System.currentTimeMillis();
+        }
+
+        public boolean isValid()
+        {
+            return System.currentTimeMillis() < (cachedResultTime + ENS_CACHE_TIME_VALIDITY); //10 minutes cache validity
         }
     }
 }

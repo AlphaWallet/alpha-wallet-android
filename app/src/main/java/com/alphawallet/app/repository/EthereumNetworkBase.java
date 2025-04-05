@@ -200,7 +200,6 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         CHAIN_CONFIG_RPC.put(MAINNET_ID, new String[]{
                 "https://rpc.payload.de",
                 "https://eth-mainnet.public.blastapi.io",
-                "https://api.zan.top/eth-mainnet",
                 "https://rpc.ankr.com/eth",
                 "https://1rpc.io/eth",
                 "https://api.mycryptoapi.com/eth",

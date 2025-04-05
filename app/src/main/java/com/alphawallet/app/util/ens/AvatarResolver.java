@@ -26,6 +26,7 @@ public class AvatarResolver implements Resolvable
         {
             try
             {
+                ensResolver.cancelCurrentResolve();
                 String resolverAddress = ensResolver.getResolverAddress(ensName);
                 if (!TextUtils.isEmpty(resolverAddress))
                 {

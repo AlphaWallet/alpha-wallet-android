@@ -53,7 +53,7 @@ android {
         minSdk 24
         targetSdk 34
         versionCode 273
-        versionName "3.87"
+        versionName "3.88"
 
         android.buildFeatures.buildConfig true
 

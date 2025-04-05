@@ -49,7 +49,7 @@ Examine if the device is working properly:
 	  label:      4|54|96|0|xSDcp31PRKu24R99o33LzA==
 	  ID:         c9a8b5e61ab59320
 
-The driver should install a libary /lib/libeToken.so.9 which we will
+The driver should install a library /lib/libeToken.so.9 which we will
 use later. Make sure it's there.
 
 Of the 2 keys, the first one is used to sign. Note down its

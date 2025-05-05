@@ -1,4 +1,4 @@
-package com.alphawallet.token.web.Service;
+package com.alphawallet.web.Service;
 
 import com.alphawallet.token.entity.SalesOrderMalformed;
 import org.web3j.utils.Numeric;

@@ -379,7 +379,11 @@ public class Web3TokenView extends WebView
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error)
         {
             System.out.println("YOLESS: " + error.toString());
-            handler.proceed(); // Ignore SSL certificate errors
+            // Security fix: reject invalid SSL certificates by default.
+            // handler.proceed() was removed to prevent accepting untrusted certificates.
+            // For development/testing with self-signed certs, consider using
+            // network_security_config.xml instead.
+            handler.cancel(); // Ignore SSL certificate errors
         }
     }
 

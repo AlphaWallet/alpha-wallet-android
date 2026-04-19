@@ -15,6 +15,7 @@ import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.webkit.WebSettingsCompat;
+import androidx.webkit.WebViewCompat;
 import androidx.webkit.WebViewFeature;
 
 import com.alphawallet.app.BuildConfig;
@@ -31,8 +32,11 @@ import com.alphawallet.token.entity.Signable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import timber.log.Timber;
 
@@ -205,6 +209,16 @@ public class Web3View extends WebView {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING))
         {
             WebSettingsCompat.setAlgorithmicDarkeningAllowed(getSettings(), true);
+        }
+
+        // Inject Web3 provider at document start so window.ethereum is available
+        // before any page scripts run. This fixes CSP timing issues where sites
+        // like exchange.idex.io fail to detect the provider.
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT))
+        {
+            String providerJs = webViewClient.getJsInjectorClient().providerJs(getContext());
+            Set<String> origins = new HashSet<>(Collections.singletonList("*"));
+            WebViewCompat.addDocumentStartJavaScript(this, providerJs, origins);
         }
     }
 

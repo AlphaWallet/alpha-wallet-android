@@ -123,7 +123,11 @@ public class Web3TokenView extends WebView
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUserAgentString(webSettings.getUserAgentString()
                                                + "AlphaWallet(Platform=Android&AppVersion=" + BuildConfig.VERSION_NAME + ")");
-        WebView.setWebContentsDebuggingEnabled(true);
+        // CWE-489: Web3TokenView holds session JS for a wallet that signs
+        // transactions. Leaving WebView contents debuggable in release builds
+        // lets anyone with USB access attach chrome://inspect and read the
+        // page's DOM/JS. Restrict to debug builds only.
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
 
         if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING))
         {

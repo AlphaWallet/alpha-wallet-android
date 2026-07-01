@@ -16,8 +16,10 @@ import com.alphawallet.app.repository.TransactionsRealmCache;
 import com.alphawallet.app.repository.entity.RealmTransaction;
 import com.alphawallet.app.ui.widget.entity.ProgressCompleteCallback;
 
-import io.realm.Realm;
-import io.realm.RealmResults;
+import io.realm.kotlin.Realm;
+import io.realm.kotlin.TypedRealm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.RealmCompat.Results;
 
 /**
  * Created by JB on 27/11/2020.
@@ -27,7 +29,7 @@ public class ConfirmationWidget extends RelativeLayout
     private final ProgressKnobkerry progress;
     private final TextView hashText;
     private final RelativeLayout progressLayout;
-    private RealmResults<RealmTransaction> realmTransactionUpdates;
+    private RealmCompat.Results<RealmTransaction> realmTransactionUpdates;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     public ConfirmationWidget(Context context, AttributeSet attrs)
@@ -107,11 +109,11 @@ public class ConfirmationWidget extends RelativeLayout
     }
 
     //listen for transaction completion
-    private void createCompletionListener(Realm realm, String txHash)
+    private void createCompletionListener(TypedRealm realm, String txHash)
     {
         if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
 
-        realmTransactionUpdates = realm.where(RealmTransaction.class)
+        realmTransactionUpdates = RealmCompat.where(realm, RealmTransaction.class)
                 .equalTo("hash", txHash)
                 .findAllAsync();
 

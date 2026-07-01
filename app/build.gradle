@@ -3,13 +3,12 @@ plugins {
     alias(libs.plugins.androidApplication)
     id("com.worker8.android_lint_reporter") version "2.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.7"
-    id 'jacoco'
+    id("jacoco")
+    id("com.infomaniak.realm.kotlin")
+    id("org.jetbrains.kotlin.android")
+    id("com.google.dagger.hilt.android")
 }
 
-apply plugin: 'com.android.application'
-apply plugin: 'realm-android'
-apply plugin: 'kotlin-android'
-apply plugin: 'dagger.hilt.android.plugin'
 apply plugin: 'com.worker8.android_lint_reporter'
 apply plugin: 'io.gitlab.arturbosch.detekt'
 apply plugin: 'jacoco'
@@ -40,7 +39,7 @@ android_lint_reporter {
 
 android {
     namespace 'com.alphawallet.app'
-    compileSdk 36
+    compileSdk 37
 
     sourceSets {
         main {
@@ -55,8 +54,6 @@ android {
         versionCode 275
         versionName "4.0"
 
-        android.buildFeatures.buildConfig true
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
         def XInfuraAPI = "XInfuraAPI"
@@ -67,7 +64,7 @@ android {
         def DEFAULT_WALLETCONNECT_PROJECT_ID = "\"40c6071febfd93f4fe485c232a8a4cd9\""
         def DEFAULT_AURORA_API_KEY = "\"HFDDY5BNKGXBB82DE2G8S64C3C41B76PYI\""; //Put your Aurorascan.dev API key here - this one will rate limit as it is common
 
-        buildConfigField 'int', 'DB_VERSION', '55'
+        buildConfigField 'int', 'DB_VERSION', '57'
 
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
         buildConfigField "String", "WALLETCONNECT_PROJECT_ID", DEFAULT_WALLETCONNECT_PROJECT_ID
@@ -150,6 +147,9 @@ android {
         targetCompatibility JavaVersion.VERSION_21
         sourceCompatibility JavaVersion.VERSION_21
     }
+    kotlinOptions {
+        jvmTarget = '21'
+    }
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
@@ -168,6 +168,7 @@ android {
         includeInBundle false
     }
     buildFeatures {
+        buildConfig true
         viewBinding true
     }
     lint {
@@ -270,6 +271,8 @@ dependencies {
 
     //Timber
     implementation libs.timber
+    implementation libs.kotlinx.coroutines.android
+    implementation "com.infomaniak.realm.kotlin:library-base:${libs.versions.realmKotlin.get()}"
 
     implementation platform(libs.walletConnect.bom)
     implementation("com.walletconnect:android-core", {

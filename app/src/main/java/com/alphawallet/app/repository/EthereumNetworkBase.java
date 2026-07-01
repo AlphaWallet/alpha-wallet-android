@@ -1088,7 +1088,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 CustomNetworks cn = new Gson().fromJson(networks, CustomNetworks.class);
                 this.list = cn.list;
                 this.mapToTestNet = cn.mapToTestNet;
-                if (list == null)
+                if (list == null || list.isEmpty())
                 {
                     return;
                 }
@@ -1097,6 +1097,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
                 for (NetworkInfo info : list)
                 {
+                    if (info == null)
+                    {
+                        continue;
+                    }
                     boolean containsBadUrl = false;
                     for (String thisUrl : info.rpcUrls)
                     {

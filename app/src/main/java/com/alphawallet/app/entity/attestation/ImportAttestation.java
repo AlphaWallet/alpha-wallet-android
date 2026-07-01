@@ -64,7 +64,9 @@ import java.util.Map;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -166,23 +168,24 @@ public class ImportAttestation
         //complete the import
         //write to realm
         return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getRealmInstance(wallet))
+            try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
             {
-                realm.executeTransaction(r -> {
+            Realm realm = realmCloser.getRealm();
+                RealmCompat.executeTransaction(realm, r -> {
 
-//                            RealmResults<RealmAttestation> realmAssets = realm.where(RealmAttestation.class)
+//                            RealmCompat.Results<RealmAttestation> realmAssets = RealmCompat.where(realm, RealmAttestation.class)
 //                                    .findAll();
 //
-//                            realmAssets.deleteAllFromRealm();
+//                            realmAssets.deleteAllFromRealm(r);
 
                     String key = attn.getDatabaseKey();
-                    RealmAttestation realmAttn = r.where(RealmAttestation.class)
+                    RealmAttestation realmAttn = RealmCompat.where(r, RealmAttestation.class)
                             .equalTo("address", key)
                             .findFirst();
 
                     if (realmAttn == null)
                     {
-                        realmAttn = r.createObject(RealmAttestation.class, key);
+                        realmAttn = RealmCompat.createObject(r, RealmAttestation.class, key);
                     }
 
                     attn.populateRealmAttestation(realmAttn);
@@ -259,17 +262,18 @@ public class ImportAttestation
         String identifierHash = attn.getAttestationIdHash(td);
         removeOutdatedAttestation(identifierHash, attn.getDatabaseKey()); // detect attestation we are updating (if any) and remove
 
-        try (Realm realm = realmManager.getRealmInstance(wallet))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
         {
-            realm.executeTransaction(r -> {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
                 String key = attn.getDatabaseKey();
-                RealmAttestation realmAttn = r.where(RealmAttestation.class)
+                RealmAttestation realmAttn = RealmCompat.where(r, RealmAttestation.class)
                         .equalTo("address", key)
                         .findFirst();
 
                 if (realmAttn == null)
                 {
-                    realmAttn = r.createObject(RealmAttestation.class, key);
+                    realmAttn = RealmCompat.createObject(r, RealmAttestation.class, key);
                 }
 
                 realmAttn.setAttestationLink(originLink);
@@ -279,7 +283,7 @@ public class ImportAttestation
                 {
                     realmAttn.setCollectionId(attn.getAttestationCollectionId(td));
                 }
-                r.insertOrUpdate(realmAttn);
+                RealmCompat.insertOrUpdate(r, realmAttn);
             });
         }
         catch (Exception e)
@@ -291,18 +295,19 @@ public class ImportAttestation
 
     private void removeOutdatedAttestation(String identifierHash, String databaseUID)
     {
-        try (Realm realm = realmManager.getRealmInstance(wallet))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
         {
-            RealmAttestation realmAttn = realm.where(RealmAttestation.class)
+            Realm realm = realmCloser.getRealm();
+            RealmAttestation realmAttn = RealmCompat.where(realm, RealmAttestation.class)
                     .equalTo("identifierHash", identifierHash)
                     .findFirst();
 
             if (realmAttn != null && !realmAttn.getAttestationKey().equals(databaseUID))
             {
                 //check if this is the same
-                realm.executeTransaction(r -> {
+                RealmCompat.executeTransaction(realm, r -> {
                     realmAttn.setCollectionId(DELETE_KEY);
-                    r.insertOrUpdate(realmAttn);
+                    RealmCompat.insertOrUpdate(r, realmAttn);
                 });
             }
         }
@@ -342,16 +347,17 @@ public class ImportAttestation
         {
             return Single.fromCallable(() -> {
                 String identifierHash = attn.getAttestationIdHash(td);
-                try (Realm realm = realmManager.getRealmInstance(wallet))
+                try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
                 {
+            Realm realm = realmCloser.getRealm();
                     String key = attn.getDatabaseKey();
-                    RealmAttestation realmAttn = realm.where(RealmAttestation.class)
+                    RealmAttestation realmAttn = RealmCompat.where(realm, RealmAttestation.class)
                             .equalTo("address", key)
                             .findFirst();
 
                     if (realmAttn != null && realmAttn.getIdentifierHash() != null && !realmAttn.getIdentifierHash().equals(identifierHash))
                     {
-                        realm.executeTransaction(r -> {
+                        RealmCompat.executeTransaction(realm, r -> {
                             Timber.i("Attestation: Updated idHash: %s -> %s", realmAttn.getIdentifierHash(), identifierHash);
                             realmAttn.setIdentifierHash(identifierHash);
                             realmAttn.setCollectionId(attn.getAttestationCollectionId(td));

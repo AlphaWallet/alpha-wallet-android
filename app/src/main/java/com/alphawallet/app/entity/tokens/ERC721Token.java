@@ -68,9 +68,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.realm.Case;
-import io.realm.Realm;
-import io.realm.RealmResults;
+import io.realm.kotlin.Realm;
+import io.realm.kotlin.TypedRealm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.RealmCompat.Results;
 import timber.log.Timber;
 
 /**
@@ -340,7 +341,7 @@ public class ERC721Token extends Token
      * @return
      */
     @Override
-    public BigDecimal updateBalance(Realm realm)
+    public BigDecimal updateBalance(TypedRealm realm)
     {
         if (balanceChecks.containsKey(tokenInfo.address))
         {
@@ -424,7 +425,7 @@ public class ERC721Token extends Token
     /***********
      * For ERC721Enumerable interface
      **********/
-    private void updateEnumerableBalance(Web3j web3j, Realm realm)
+    private void updateEnumerableBalance(Web3j web3j, TypedRealm realm)
     {
         HashSet<BigInteger> tokenIdsHeld = new HashSet<>();
         //get enumerable balance
@@ -458,7 +459,7 @@ public class ERC721Token extends Token
         }
     }
 
-    private void updateEnumerableBatchBalance(Web3j web3j, long currentBalance, HashSet<BigInteger> tokenIdsHeld, Realm realm) throws IOException
+    private void updateEnumerableBatchBalance(Web3j web3j, long currentBalance, HashSet<BigInteger> tokenIdsHeld, TypedRealm realm) throws IOException
     {
         BatchRequest requests = web3j.newBatch();
 
@@ -536,7 +537,7 @@ public class ERC721Token extends Token
         return null;
     }
 
-    private void updateRealmBalance(Realm realm, Set<BigInteger> tokenIds, Set<BigInteger> allMovingTokens)
+    private void updateRealmBalance(TypedRealm realm, Set<BigInteger> tokenIds, Set<BigInteger> allMovingTokens)
     {
         boolean updated = false;
         //fill in balances
@@ -563,30 +564,30 @@ public class ERC721Token extends Token
         removeRealmBalance(realm, removedTokens);
     }
 
-    private void removeRealmBalance(Realm realm, HashSet<BigInteger> removedTokens)
+    private void removeRealmBalance(TypedRealm realm, HashSet<BigInteger> removedTokens)
     {
         if (removedTokens.size() == 0) return;
-        realm.executeTransaction(r -> {
+        RealmCompat.executeTransaction(realm, r -> {
             for (BigInteger tokenId : removedTokens)
             {
                 String key = RealmNFTAsset.databaseKey(this, tokenId);
-                RealmNFTAsset realmAsset = realm.where(RealmNFTAsset.class)
+                RealmNFTAsset realmAsset = RealmCompat.where(realm, RealmNFTAsset.class)
                         .equalTo("tokenIdAddr", key)
                         .findFirst();
 
                 if (realmAsset != null)
                 {
-                    realmAsset.deleteFromRealm();
+                    RealmCompat.deleteFromRealm(r, realmAsset);
                 }
             }
         });
     }
 
-    private void updateRealmForEnumerable(Realm realm, HashSet<BigInteger> currentTokens)
+    private void updateRealmForEnumerable(TypedRealm realm, HashSet<BigInteger> currentTokens)
     {
         HashSet<BigInteger> storedBalance = new HashSet<>();
-        RealmResults<RealmNFTAsset> results = realm.where(RealmNFTAsset.class)
-                .like("tokenIdAddr", databaseKey(this) + "-*", Case.INSENSITIVE)
+        RealmCompat.Results<RealmNFTAsset> results = RealmCompat.where(realm, RealmNFTAsset.class)
+                .like("tokenIdAddr", databaseKey(this) + "-*", RealmCompat.Case.INSENSITIVE)
                 .findAll();
 
         for (RealmNFTAsset t : results)
@@ -596,49 +597,49 @@ public class ERC721Token extends Token
 
         if (!currentTokens.equals(storedBalance))
         {
-            realm.executeTransaction(r -> {
-                results.deleteAllFromRealm();
+            RealmCompat.executeTransaction(realm, r -> {
+                results.deleteAllFromRealm(r);
                 for (BigInteger tokenId : currentTokens)
                 {
                     String key = RealmNFTAsset.databaseKey(this, tokenId);
-                    RealmNFTAsset realmAsset = realm.where(RealmNFTAsset.class)
+                    RealmNFTAsset realmAsset = RealmCompat.where(realm, RealmNFTAsset.class)
                             .equalTo("tokenIdAddr", key)
                             .findFirst();
 
                     if (realmAsset == null)
                     {
-                        realmAsset = r.createObject(RealmNFTAsset.class, key); //create asset in realm
+                        realmAsset = RealmCompat.createObject(r, RealmNFTAsset.class, key); //create asset in realm
                         realmAsset.setMetaData(new NFTAsset(tokenId).jsonMetaData());
-                        r.insertOrUpdate(realmAsset);
+                        RealmCompat.insertOrUpdate(r, realmAsset);
                     }
                 }
             });
         }
     }
 
-    private void updateRealmBalances(Realm realm, Set<BigInteger> tokenIds)
+    private void updateRealmBalances(TypedRealm realm, Set<BigInteger> tokenIds)
     {
         if (realm == null) return;
-        realm.executeTransaction(r -> {
+        RealmCompat.executeTransaction(realm, r -> {
             for (BigInteger tokenId : tokenIds)
             {
                 String key = RealmNFTAsset.databaseKey(this, tokenId);
-                RealmNFTAsset realmAsset = realm.where(RealmNFTAsset.class)
+                RealmNFTAsset realmAsset = RealmCompat.where(realm, RealmNFTAsset.class)
                         .equalTo("tokenIdAddr", key)
                         .findFirst();
 
                 if (realmAsset == null)
                 {
-                    realmAsset = r.createObject(RealmNFTAsset.class, key); //create asset in realm
+                    realmAsset = RealmCompat.createObject(r, RealmNFTAsset.class, key); //create asset in realm
                     realmAsset.setMetaData(tokenBalanceAssets.get(tokenId).jsonMetaData());
-                    r.insertOrUpdate(realmAsset);
+                    RealmCompat.insertOrUpdate(r, realmAsset);
                 }
             }
         });
     }
 
     @Override
-    public HashSet<BigInteger> processLogsAndStoreTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, Realm realm)
+    public HashSet<BigInteger> processLogsAndStoreTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, TypedRealm realm)
     {
         HashSet<BigInteger> tokenIds = new HashSet<>();
         for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())

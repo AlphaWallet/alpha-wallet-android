@@ -56,7 +56,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Single;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import io.realm.kotlin.TypedRealm;
+import com.alphawallet.app.realm.RealmCompat;
 
 public class Token
 {
@@ -182,7 +184,7 @@ public class Token
     }
 
     //Used for custom balance updates
-    public BigDecimal updateBalance(Realm realm) { return BigDecimal.ZERO; }
+    public BigDecimal updateBalance(TypedRealm realm) { return BigDecimal.ZERO; }
 
     public boolean isTerminated() { return (updateBlancaTime == -1); }
 
@@ -1101,7 +1103,7 @@ public class Token
         return null;
     }
 
-    public HashSet<BigInteger> processLogsAndStoreTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, Realm realm)
+    public HashSet<BigInteger> processLogsAndStoreTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, TypedRealm realm)
     {
         return null;
     }
@@ -1125,8 +1127,7 @@ public class Token
 
     public String getDatabaseKey()
     {
-        //pull IDs from the members
-        return TokensRealmSource.databaseKey(tokenInfo.chainId, tokenInfo.address);
+        return TokensRealmSource.databaseKey(this);
     }
 
     public String getTSKey(TokenDefinition td)

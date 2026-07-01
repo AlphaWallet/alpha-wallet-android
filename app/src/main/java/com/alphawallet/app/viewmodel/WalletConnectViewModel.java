@@ -63,8 +63,10 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
-import io.realm.Realm;
-import io.realm.RealmResults;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
+import com.alphawallet.app.realm.RealmCompat.Results;
 import timber.log.Timber;
 
 @HiltViewModel
@@ -238,9 +240,10 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     public WCSession getSession(String sessionId)
     {
         WCSession session = null;
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            RealmWCSession sessionData = realm.where(RealmWCSession.class)
+            Realm realm = realmCloser.getRealm();
+            RealmWCSession sessionData = RealmCompat.where(realm, RealmWCSession.class)
                     .equalTo("sessionId", sessionId)
                     .findFirst();
 
@@ -256,9 +259,10 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     public WCPeerMeta getRemotePeer(String sessionId)
     {
         WCPeerMeta peerMeta = null;
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            RealmWCSession sessionData = realm.where(RealmWCSession.class)
+            Realm realm = realmCloser.getRealm();
+            RealmWCSession sessionData = RealmCompat.where(realm, RealmWCSession.class)
                     .equalTo("sessionId", sessionId)
                     .findFirst();
 
@@ -274,9 +278,10 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     public String getRemotePeerId(String sessionId)
     {
         String remotePeerId = null;
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            RealmWCSession sessionData = realm.where(RealmWCSession.class)
+            Realm realm = realmCloser.getRealm();
+            RealmWCSession sessionData = RealmCompat.where(realm, RealmWCSession.class)
                     .equalTo("sessionId", sessionId)
                     .findFirst();
 
@@ -292,9 +297,10 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     public String getPeerId(String sessionId)
     {
         String peerId = null;
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            RealmWCSession sessionData = realm.where(RealmWCSession.class)
+            Realm realm = realmCloser.getRealm();
+            RealmWCSession sessionData = RealmCompat.where(realm, RealmWCSession.class)
                     .equalTo("sessionId", sessionId)
                     .findFirst();
 
@@ -310,9 +316,10 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     public long getChainId(String sessionId)
     {
         long chainId = MAINNET_ID;
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            RealmWCSession sessionData = realm.where(RealmWCSession.class)
+            Realm realm = realmCloser.getRealm();
+            RealmWCSession sessionData = RealmCompat.where(realm, RealmWCSession.class)
                     .equalTo("sessionId", sessionId)
                     .findFirst();
 
@@ -328,15 +335,16 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     public void createNewSession(String sessionId, String peerId, String remotePeerId, String sessionData,
                                  String remotePeerData, long sessionChainId)
     {
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmWCSession sessionAux = r.where(RealmWCSession.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmWCSession sessionAux = RealmCompat.where(r, RealmWCSession.class)
                         .equalTo("sessionId", sessionId)
                         .findFirst();
 
                 if (sessionAux == null)
-                    sessionAux = r.createObject(RealmWCSession.class, sessionId);
+                    sessionAux = RealmCompat.createObject(r, RealmWCSession.class, sessionId);
 
                 sessionAux.setLastUsageTime(System.currentTimeMillis());
                 sessionAux.setRemotePeerId(remotePeerId);
@@ -355,21 +363,22 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     public void updateSession(String sessionId, long sessionChainId)
     {
         Timber.tag(TAG).d("updateSession: sessionId: %s, updated chainId: %s", sessionId, sessionChainId);
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            RealmWCSession sessionData = realm.where(RealmWCSession.class)
-                    .equalTo("sessionId", sessionId)
-                    .findFirst();
-            realm.beginTransaction();
-            if (sessionData != null)
-            {
-                sessionData.setChainId(sessionChainId);
-            }
-            else
-            {
-                Timber.tag("TAG").d("updateSession: could not fin session!");
-            }
-            realm.commitTransaction();
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
+                RealmWCSession sessionData = RealmCompat.where(r, RealmWCSession.class)
+                        .equalTo("sessionId", sessionId)
+                        .findFirst();
+                if (sessionData != null)
+                {
+                    sessionData.setChainId(sessionChainId);
+                }
+                else
+                {
+                    Timber.tag("TAG").d("updateSession: could not fin session!");
+                }
+            });
         }
         catch (Exception e)
         {
@@ -397,28 +406,30 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
 
     private void deleteSessionV1(WalletConnectSessionItem session, AWWalletConnectClient.WalletConnectV2Callback callback)
     {
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmWCSession sessionAux = r.where(RealmWCSession.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmWCSession sessionAux = RealmCompat.where(r, RealmWCSession.class)
                         .equalTo("sessionId", session.sessionId)
                         .findFirst();
 
                 if (sessionAux != null)
                 {
-                    sessionAux.deleteFromRealm();
+                    RealmCompat.deleteFromRealm(r, sessionAux);
                 }
                 callback.onSessionDisconnected();
             });
         }
     }
 
-    public void recordSign(Signable signable, String sessionId, Realm.Transaction.OnSuccess onSuccess)
+    public void recordSign(Signable signable, String sessionId, RealmCompat.OnSuccess onSuccess)
     {
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmWCSignElement signMessage = r.createObject(RealmWCSignElement.class);
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmWCSignElement signMessage = RealmCompat.createObject(r, RealmWCSignElement.class);
 
                 String signType = "Message";
                 if (signable instanceof EthereumTypedMessage) signType = "TypedMessage";
@@ -433,11 +444,12 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
 
     public void recordSignTransaction(Context ctx, Web3Transaction tx, String chainIdStr, String sessionId)
     {
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            realm.executeTransactionAsync(r -> {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
                 long chainId = chainIdStr != null ? Long.parseLong(chainIdStr) : MAINNET_ID;
-                RealmWCSignElement signMessage = r.createObject(RealmWCSignElement.class);
+                RealmWCSignElement signMessage = RealmCompat.createObject(r, RealmWCSignElement.class);
                 String signType = "Transaction";
                 signMessage.setSessionId(sessionId);
                 signMessage.setSignType(signType);
@@ -450,9 +462,10 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     public ArrayList<SignRecord> getSignRecords(String sessionId)
     {
         ArrayList<SignRecord> records = new ArrayList<>();
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            RealmResults<RealmWCSignElement> sessionList = realm.where(RealmWCSignElement.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.Results<RealmWCSignElement> sessionList = RealmCompat.where(realm, RealmWCSignElement.class)
                     .equalTo("sessionId", sessionId)
                     .findAll();
 
@@ -510,17 +523,18 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
 
     public void endSession(String sessionId)
     {
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmWCSession sessionAux = r.where(RealmWCSession.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmWCSession sessionAux = RealmCompat.where(r, RealmWCSession.class)
                         .equalTo("sessionId", sessionId)
                         .findFirst();
 
                 if (sessionAux != null)
                 {
                     sessionAux.setPeerId("");
-                    r.insertOrUpdate(sessionAux);
+                    RealmCompat.insertOrUpdate(r, sessionAux);
                 }
             });
         }
@@ -550,13 +564,14 @@ public class WalletConnectViewModel extends BaseViewModel implements Transaction
     {
         if (sessionIds.isEmpty())
             return;
-        try (Realm realm = realmManager.getRealmInstance(WC_SESSION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(WC_SESSION_DB)))
         {
-            realm.executeTransactionAsync(r -> {
-                boolean isDeleted = r.where(RealmWCSession.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                boolean isDeleted = RealmCompat.where(r, RealmWCSession.class)
                         .in("sessionId", sessionIds.toArray(new String[]{}))
                         .findAll()
-                        .deleteAllFromRealm();
+                        .deleteAllFromRealm(r);
                 Timber.tag(TAG).i("deleteSessions: Success: %s\nList: %s", isDeleted, sessionIds);
             }, onSuccess::run);
         }

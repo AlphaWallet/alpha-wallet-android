@@ -25,7 +25,7 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.HiltAndroidApp;
 import io.reactivex.plugins.RxJavaPlugins;
-import io.realm.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 import timber.log.Timber;
 
 @HiltAndroidApp
@@ -67,7 +67,7 @@ public class App extends Application
     {
         super.onCreate();
         mInstance = this;
-        Realm.init(this);
+        RealmCompat.init(this);
         TimberInit.configTimber();
 
         int defaultTheme = PreferenceManager.getDefaultSharedPreferences(this)

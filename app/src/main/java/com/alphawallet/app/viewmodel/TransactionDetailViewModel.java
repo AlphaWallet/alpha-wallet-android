@@ -52,7 +52,9 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
 
 @HiltViewModel
 public class TransactionDetailViewModel extends BaseViewModel implements TransactionSendHandlerInterface
@@ -277,16 +279,17 @@ public class TransactionDetailViewModel extends BaseViewModel implements Transac
 
     private Transaction writeTransaction(Wallet wallet, Transaction tx)
     {
-        try (Realm instance = fetchTransactionsInteract.getRealmInstance(wallet))
+        try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(fetchTransactionsInteract.getRealmInstance(wallet)))
         {
-            instance.beginTransaction();
-            RealmTransaction realmTx = instance.where(RealmTransaction.class)
-                .equalTo("hash", tx.hash)
-                .findFirst();
+            Realm instance = instanceCloser.getRealm();
+            RealmCompat.executeTransaction(instance, r -> {
+                RealmTransaction realmTx = RealmCompat.where(r, RealmTransaction.class)
+                    .equalTo("hash", tx.hash)
+                    .findFirst();
 
-            if (realmTx == null) realmTx = instance.createObject(RealmTransaction.class, tx.hash);
-            TransactionsRealmCache.fill(realmTx, tx);
-            instance.commitTransaction();
+                if (realmTx == null) realmTx = RealmCompat.createObject(r, RealmTransaction.class, tx.hash);
+                TransactionsRealmCache.fill(realmTx, tx);
+            });
         }
         catch (Exception e)
         {

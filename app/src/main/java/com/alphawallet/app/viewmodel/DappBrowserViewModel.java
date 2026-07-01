@@ -62,7 +62,8 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 
 @HiltViewModel
 public class DappBrowserViewModel extends BaseViewModel implements TransactionSendHandlerInterface

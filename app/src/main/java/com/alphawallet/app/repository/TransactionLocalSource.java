@@ -8,7 +8,8 @@ import com.alphawallet.app.repository.entity.RealmAuxData;
 import java.util.List;
 
 import io.reactivex.Single;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 
 public interface TransactionLocalSource {
 	Transaction fetchTransaction(Wallet wallet, String hash);

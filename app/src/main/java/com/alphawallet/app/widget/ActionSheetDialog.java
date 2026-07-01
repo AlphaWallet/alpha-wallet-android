@@ -55,7 +55,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.Nullable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
 
 /**
  * Created by JB on 17/11/2020.
@@ -651,17 +653,18 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private void updateRealmTransactionFinishEstimate(String txHash)
     {
         final long expectedTime = System.currentTimeMillis() + gasWidgetInterface.getExpectedTransactionTime() * 1000;
-        try (Realm realm = tokensService.getWalletRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(tokensService.getWalletRealmInstance()))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmTransaction rt = r.where(RealmTransaction.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmTransaction rt = RealmCompat.where(r, RealmTransaction.class)
                         .equalTo("hash", txHash)
                         .findFirst();
 
                 if (rt != null)
                 {
                     rt.setExpectedCompletion(expectedTime);
-                    r.insertOrUpdate(rt);
+                    RealmCompat.insertOrUpdate(r, rt);
                 }
             });
         }
@@ -885,9 +888,10 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
     private boolean has1559Gas()
     {
-        try (Realm realm = tokensService.getTickerRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(tokensService.getTickerRealmInstance()))
         {
-            Realm1559Gas rgs = realm.where(Realm1559Gas.class)
+            Realm realm = realmCloser.getRealm();
+            Realm1559Gas rgs = RealmCompat.where(realm, Realm1559Gas.class)
                     .equalTo("chainId", token.tokenInfo.chainId)
                     .findFirst();
 

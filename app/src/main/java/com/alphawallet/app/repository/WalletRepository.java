@@ -13,7 +13,8 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 
 import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 
@@ -160,13 +161,13 @@ public class WalletRepository implements WalletRepositoryType
 	}
 
 	@Override
-	public void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess)
+	public void updateWalletData(Wallet wallet, RealmCompat.OnSuccess onSuccess)
 	{
 		walletDataRealmSource.updateWalletData(wallet, onSuccess);
 	}
 
 	@Override
-	public void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess)
+	public void updateWalletItem(Wallet wallet, WalletItem item, RealmCompat.OnSuccess onSuccess)
 	{
 		walletDataRealmSource.updateWalletItem(wallet, item, onSuccess);
 	}

@@ -53,7 +53,9 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -287,17 +289,18 @@ public class GasService implements ContractGasProvider
      */
     private void updateRealm(final GasPriceSpread oracleResult, final long chainId)
     {
-        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(TICKER_DB)))
         {
-            realm.executeTransaction(r -> {
-                RealmGasSpread rgs = r.where(RealmGasSpread.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
+                RealmGasSpread rgs = RealmCompat.where(r, RealmGasSpread.class)
                         .equalTo("chainId", chainId)
                         .findFirst();
                 if (rgs == null)
-                    rgs = r.createObject(RealmGasSpread.class, chainId);
+                    rgs = RealmCompat.createObject(r, RealmGasSpread.class, chainId);
 
                 rgs.setGasSpread(oracleResult, System.currentTimeMillis());
-                r.insertOrUpdate(rgs);
+                RealmCompat.insertOrUpdate(r, rgs);
             });
         }
     }
@@ -336,20 +339,21 @@ public class GasService implements ContractGasProvider
     private boolean updateEIP1559Realm(final Map<Integer, EIP1559FeeOracleResult> result, final long chainId)
     {
         boolean succeeded = true;
-        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(TICKER_DB)))
         {
-            realm.executeTransaction(r -> {
-                Realm1559Gas rgs = r.where(Realm1559Gas.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
+                Realm1559Gas rgs = RealmCompat.where(r, Realm1559Gas.class)
                         .equalTo("chainId", chainId)
                         .findFirst();
 
                 if (rgs == null)
                 {
-                    rgs = r.createObject(Realm1559Gas.class, chainId);
+                    rgs = RealmCompat.createObject(r, Realm1559Gas.class, chainId);
                 }
 
                 rgs.setResultData(result, System.currentTimeMillis());
-                //r.insertOrUpdate(rgs);
+                //RealmCompat.insertOrUpdate(r, rgs);
             });
         }
         catch (Exception e)

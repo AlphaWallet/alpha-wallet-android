@@ -1,6 +1,8 @@
 package com.alphawallet.app.service;
 
 import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.app.repository.TokensRealmSource.pendingMapKey;
+import static com.alphawallet.app.repository.TokensRealmSource.resetWalletMaintenance;
 import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
@@ -57,7 +59,8 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
@@ -101,6 +104,7 @@ public class TokensService
     private Disposable queryUnknownTokensDisposable;
     @Nullable
     private Disposable balanceCheckDisposable;
+    private volatile boolean balanceCheckInProgress;
     @Nullable
     private Disposable erc20CheckDisposable;
     @Nullable
@@ -216,6 +220,7 @@ public class TokensService
         if (newWalletAddr != null && (currentAddress == null || !currentAddress.equalsIgnoreCase(newWalletAddr)))
         {
             currentAddress = newWalletAddr.toLowerCase();
+            resetWalletMaintenance(newWalletAddr);
             stopUpdateCycle();
             addLockedTokens();
             if (openseaService != null) openseaService.resetOffsetRead(networkFilter);
@@ -229,7 +234,7 @@ public class TokensService
         syncStart = System.currentTimeMillis();
         syncTimer = syncStart + 5*DateUtils.SECOND_IN_MILLIS;
 
-        eventTimer = Observable.interval(1, 500, TimeUnit.MILLISECONDS)
+        eventTimer = Observable.interval(1, DateUtils.SECOND_IN_MILLIS, TimeUnit.MILLISECONDS)
                 .doOnNext(l -> checkTokensBalance())
                 .observeOn(Schedulers.newThread()).subscribe();
     }
@@ -293,20 +298,16 @@ public class TokensService
         for (TokenCardMeta meta : tokenList)
         {
             meta.lastTxUpdate = meta.lastUpdate;
-            String key = databaseKey(meta.getChain(), meta.getAddress());
-            if (!pendingTokenMap.containsKey(key))
+            String key = pendingMapKey(meta, currentAddress);
+            long pendingTime = pendingTokenMap.containsKey(key) ? pendingTokenMap.get(key) : 0L;
+            meta.lastUpdate = Math.max(meta.lastUpdate, pendingTime);
+            pendingTokenMap.put(key, meta.lastUpdate);
+
+            if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
+                    && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName())
             {
-                if (meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM) unSynced++;
-                pendingTokenMap.put(key, meta.lastUpdate);
+                unSynced++;
             }
-            else if (meta.lastUpdate <= pendingTokenMap.get(key))
-            {
-                meta.lastUpdate = pendingTokenMap.get(key);
-                if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
-                        && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName()) { unSynced++; }
-            }
-            else if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
-                    && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName()) { unSynced++; }
         }
 
         checkSyncStatus(unSynced, tokenList);
@@ -409,6 +410,7 @@ public class TokensService
         }
 
         if (balanceCheckDisposable != null && !balanceCheckDisposable.isDisposed()) { balanceCheckDisposable.dispose(); }
+        balanceCheckInProgress = false;
         if (erc20CheckDisposable != null && !erc20CheckDisposable.isDisposed()) { erc20CheckDisposable.dispose(); }
         if (tokenStoreDisposable != null && !tokenStoreDisposable.isDisposed()) { tokenStoreDisposable.dispose(); }
         if (openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed()) { openSeaQueryDisposable.dispose(); }
@@ -658,14 +660,21 @@ public class TokensService
 
     private void checkTokensBalance()
     {
+        if (balanceCheckInProgress)
+        {
+            return;
+        }
+
         final Token t = getNextInBalanceUpdateQueue();
 
         if (t != null)
         {
+            balanceCheckInProgress = true;
             Timber.tag(TAG).d("Updating: " + t.tokenInfo.chainId + (t.isEthereum() ? " (Base Chain) ":"") + " : " + t.getAddress() + " : " + t.getFullName());
             balanceCheckDisposable = tokenRepository.updateTokenBalance(currentAddress, t)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
+                    .doFinally(() -> balanceCheckInProgress = false)
                     .subscribe(newBalance -> onBalanceChange(newBalance, t), this::onError);
         }
 
@@ -745,7 +754,7 @@ public class TokensService
         }
 
         //update check time
-        pendingTokenMap.put(databaseKey(t), System.currentTimeMillis());
+        pendingTokenMap.put(pendingMapKey(t), System.currentTimeMillis());
 
         //Switch this token chain on
         if (t.isEthereum() && newBalance.compareTo(BigDecimal.ZERO) > 0)
@@ -1033,7 +1042,11 @@ public class TokensService
         long currentTime = System.currentTimeMillis();
         Token storeToken = pendingBaseCheck();
         if (storeToken == null) { storeToken = tokenStoreList.poll(); }
-        if (storeToken != null) { return storeToken; }
+        if (storeToken != null)
+        {
+            pendingTokenMap.put(pendingMapKey(storeToken), System.currentTimeMillis());
+            return storeToken;
+        }
 
         TokenCardMeta highestToken = null;
 
@@ -1088,7 +1101,7 @@ public class TokensService
 
         if (highestToken != null)
         {
-            pendingTokenMap.put(databaseKey(highestToken.getChain(), highestToken.getAddress()), System.currentTimeMillis());
+            pendingTokenMap.put(pendingMapKey(highestToken, currentAddress), System.currentTimeMillis());
             return getToken(highestToken.getChain(), highestToken.getAddress());
         }
         else
@@ -1394,7 +1407,7 @@ public class TokensService
             tokenRepository.deleteRealmTokens(new Wallet(currentAddress), metasToDelete);
             for (TokenCardMeta tcm : metasToDelete)
             {
-                pendingTokenMap.remove(databaseKey(tcm.getChain(), tcm.getAddress()));
+                pendingTokenMap.remove(pendingMapKey(tcm, currentAddress));
             }
             return true;
         });

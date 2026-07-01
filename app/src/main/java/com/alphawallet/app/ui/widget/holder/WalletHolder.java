@@ -26,8 +26,9 @@ import com.alphawallet.app.widget.UserAvatar;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import io.realm.Realm;
-import io.realm.RealmResults;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.RealmCompat.Results;
 
 public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnClickListener, AvatarWriteCallback
 {
@@ -50,7 +51,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	private final TextView wallet24hChange;
 	private final ImageView walletSelectedIcon;
 	private final Realm realm;
-	private RealmResults<RealmWalletData> realmUpdate;
+	private RealmCompat.Results<RealmWalletData> realmUpdate;
 
 	private final WalletClickCallback clickCallback;
 	private Wallet wallet = null;
@@ -154,7 +155,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 	private void startRealmListener()
 	{
 		if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
-		realmUpdate = realm.where(RealmWalletData.class)
+		realmUpdate = RealmCompat.where(realm, RealmWalletData.class)
 				.equalTo("address", wallet.address).findAllAsync();
 		realmUpdate.addChangeListener(realmWallets -> {
 			//update balance
@@ -177,7 +178,7 @@ public class WalletHolder extends BinderViewHolder<Wallet> implements View.OnCli
 
 	private Wallet fetchWallet(Wallet w)
 	{
-		RealmWalletData realmWallet = realm.where(RealmWalletData.class)
+		RealmWalletData realmWallet = RealmCompat.where(realm, RealmWalletData.class)
 				.equalTo("address", w.address)
 				.findFirst();
 

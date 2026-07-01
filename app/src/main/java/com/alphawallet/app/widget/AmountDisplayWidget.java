@@ -27,7 +27,9 @@ import java.util.Locale;
 
 import javax.annotation.Nullable;
 
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
 
 /**
  * Created by Jenny Jingjing Li on 21/03/2021
@@ -73,9 +75,10 @@ public class AmountDisplayWidget extends LinearLayout {
     {
         String formattedValue = BalanceUtils.getScaledValueMinimal(amount, token.tokenInfo.decimals);
         //fetch ticker if required
-        try (Realm realm = tokensService.getTickerRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(tokensService.getTickerRealmInstance()))
         {
-            RealmTokenTicker rtt = realm.where(RealmTokenTicker.class)
+            Realm realm = realmCloser.getRealm();
+            RealmTokenTicker rtt = RealmCompat.where(realm, RealmTokenTicker.class)
                     .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()))
                     .findFirst();
 

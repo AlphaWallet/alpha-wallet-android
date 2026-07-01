@@ -13,7 +13,7 @@ buildscript {
     }
     dependencies {
         classpath libs.gradle
-        classpath libs.realm.gradle.plugin
+        classpath libs.realm.kotlin.gradle.plugin
         // WARNING WARNING WARNING
         // you are about to add here a dependency to be used in the Android app
         // don't do that. add that dependency to app/build.gradle
@@ -24,4 +24,5 @@ buildscript {
 
 plugins {
     alias(libs.plugins.androidApplication) apply false
+    alias(libs.plugins.androidLibrary) apply false
 }

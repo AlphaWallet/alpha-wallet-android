@@ -35,8 +35,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.realm.Realm;
-import io.realm.RealmResults;
+import io.realm.kotlin.Realm;
+import io.realm.kotlin.TypedRealm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
+import com.alphawallet.app.realm.RealmCompat.Results;
 
 /**
  * Created by JB on 26/06/2020.
@@ -49,7 +52,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
     private SystemView systemView;
     private ActivityAdapter adapter;
     private RecyclerView listView;
-    private RealmResults<RealmTransaction> realmUpdates;
+    private RealmCompat.Results<RealmTransaction> realmUpdates;
     private boolean checkTimer;
     private Realm realm;
     private long lastUpdateTime = 0;
@@ -81,8 +84,9 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
 
     private void onItemsLoaded(ActivityMeta[] activityItems)
     {
-        try (Realm realm = viewModel.getRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(viewModel.getRealmInstance()))
         {
+            Realm realm = realmCloser.getRealm();
             adapter.updateActivityItems(buildTransactionList(realm, activityItems).toArray(new ActivityMeta[0]));
             showEmptyTx();
 
@@ -104,7 +108,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         if (viewModel == null || viewModel.defaultWallet().getValue() == null || TextUtils.isEmpty(viewModel.defaultWallet().getValue().address))
             return;
 
-        realmUpdates = realm.where(RealmTransaction.class).greaterThan("timeStamp", lastUpdateTime).findAllAsync();
+        realmUpdates = RealmCompat.where(realm, RealmTransaction.class).greaterThan("timeStamp", lastUpdateTime).findAllAsync();
         realmUpdates.addChangeListener(realmTransactions -> {
             List<TransactionMeta> metas = new ArrayList<>();
             //make list
@@ -128,7 +132,7 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         });
     }
 
-    private List<ActivityMeta> buildTransactionList(Realm realm, ActivityMeta[] activityItems)
+    private List<ActivityMeta> buildTransactionList(TypedRealm realm, ActivityMeta[] activityItems)
     {
         //selectively filter the items with the following rules:
         // - allow through all normal transactions with no token transfer consequences
@@ -152,12 +156,12 @@ public class ActivityFragment extends BaseFragment implements View.OnClickListen
         return filteredList;
     }
 
-    private List<TokenTransferData> getTokenTransfersForHash(Realm realm, TransactionMeta tm)
+    private List<TokenTransferData> getTokenTransfersForHash(TypedRealm realm, TransactionMeta tm)
     {
         List<TokenTransferData> transferData = new ArrayList<>();
         //summon realm items
         //get matching entries for this transaction
-        RealmResults<RealmTransfer> transfers = realm.where(RealmTransfer.class)
+        RealmCompat.Results<RealmTransfer> transfers = RealmCompat.where(realm, RealmTransfer.class)
                 .equalTo("hash", RealmTransfer.databaseKey(tm.chainId, tm.hash))
                 .findAll();
 

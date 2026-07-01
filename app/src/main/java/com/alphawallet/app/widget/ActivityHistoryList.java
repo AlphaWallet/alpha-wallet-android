@@ -26,11 +26,11 @@ import com.alphawallet.app.ui.widget.entity.TokenTransferData;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.realm.Case;
-import io.realm.Realm;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
-import io.realm.Sort;
+import io.realm.kotlin.Realm;
+import io.realm.kotlin.TypedRealm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.RealmQueryBuilder;
+import com.alphawallet.app.realm.RealmCompat.Results;
 
 /**
  * Created by JB on 5/08/2020.
@@ -42,9 +42,9 @@ public class ActivityHistoryList extends LinearLayout
     private final ProgressBar loadingTransactions;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private ActivityAdapter activityAdapter;
-    private Realm realm;
-    private RealmResults<RealmTransaction> realmTransactionUpdates;
-    private RealmQuery<RealmTransaction> realmUpdateQuery;
+    private TypedRealm realm;
+    private RealmCompat.Results<RealmTransaction> realmTransactionUpdates;
+    private RealmQueryBuilder<RealmTransaction> realmUpdateQuery;
 
     public ActivityHistoryList(Context context, @Nullable AttributeSet attrs)
     {
@@ -63,7 +63,7 @@ public class ActivityHistoryList extends LinearLayout
         recentTransactionsView.setAdapter(adapter);
     }
 
-    public void startActivityListeners(Realm realm, Wallet wallet, Token token, TokensService svs, final int historyCount)
+    public void startActivityListeners(TypedRealm realm, Wallet wallet, Token token, TokensService svs, final int historyCount)
     {
         this.realm = realm;
 
@@ -99,7 +99,7 @@ public class ActivityHistoryList extends LinearLayout
         }
     }
 
-    private void handleRealmTransactions(RealmResults<RealmTransaction> realmTransactions, Wallet wallet)
+    private void handleRealmTransactions(RealmCompat.Results<RealmTransaction> realmTransactions, Wallet wallet)
     {
         boolean hasPending = false;
         List<ActivityMeta> metas = new ArrayList<>();
@@ -119,7 +119,7 @@ public class ActivityHistoryList extends LinearLayout
             {
                 if (realm != null && !realm.isClosed()) //in theory this shouldn't happen because we remove all handler messages in onDestroy
                 {
-                    realm.refresh();
+                    RealmCompat.refresh(realm);
                 }
             }, 5000);
         }
@@ -130,7 +130,7 @@ public class ActivityHistoryList extends LinearLayout
         List<TokenTransferData> transferData = new ArrayList<>();
         //summon realm items
         //get matching entries for this transaction
-        RealmResults<RealmTransfer> transfers = realm.where(RealmTransfer.class)
+        RealmCompat.Results<RealmTransfer> transfers = RealmCompat.where(realm, RealmTransfer.class)
                 .equalTo("hash", RealmTransfer.databaseKey(tm.chainId, tm.hash))
                 .findAll();
 
@@ -161,28 +161,28 @@ public class ActivityHistoryList extends LinearLayout
         return transferData;
     }
 
-    private RealmQuery<RealmTransaction> getContractListener(long chainId, String tokenAddress, int count)
+    private RealmQueryBuilder<RealmTransaction> getContractListener(long chainId, String tokenAddress, int count)
     {
-        return realm.where(RealmTransaction.class)
-                .sort("timeStamp", Sort.DESCENDING)
+        return RealmCompat.where(realm, RealmTransaction.class)
+                .sort("timeStamp", RealmCompat.Sort.DESCENDING)
                 .beginGroup().not().equalTo("input", "0x").and()
-                .beginGroup().equalTo("to", tokenAddress, Case.INSENSITIVE)
-                .or().equalTo("contractAddress", tokenAddress, Case.INSENSITIVE).endGroup().endGroup()
+                .beginGroup().equalTo("to", tokenAddress, RealmCompat.Case.INSENSITIVE)
+                .or().equalTo("contractAddress", tokenAddress, RealmCompat.Case.INSENSITIVE).endGroup().endGroup()
                 .equalTo("chainId", chainId)
                 .limit(count);
     }
 
-    private RealmQuery<RealmTransaction> getEthListener(long chainId, Wallet wallet, int count)
+    private RealmQueryBuilder<RealmTransaction> getEthListener(long chainId, Wallet wallet, int count)
     {
-        return realm.where(RealmTransaction.class)
-                .sort("timeStamp", Sort.DESCENDING)
+        return RealmCompat.where(realm, RealmTransaction.class)
+                .sort("timeStamp", RealmCompat.Sort.DESCENDING)
                 .beginGroup()
                 .equalTo("input", "0x").or().equalTo("input", "")
                 .endGroup()
                 .beginGroup()
-                .equalTo("to", wallet.address, Case.INSENSITIVE)
+                .equalTo("to", wallet.address, RealmCompat.Case.INSENSITIVE)
                 .or()
-                .equalTo("from", wallet.address, Case.INSENSITIVE)
+                .equalTo("from", wallet.address, RealmCompat.Case.INSENSITIVE)
                 .endGroup()
                 .equalTo("chainId", chainId)
                 .limit(count);
@@ -209,7 +209,7 @@ public class ActivityHistoryList extends LinearLayout
     {
         handler.removeCallbacksAndMessages(null);
         if (realmTransactionUpdates != null) realmTransactionUpdates.removeAllChangeListeners();
-        if (realm != null && !realm.isClosed()) realm.close();
+        if (realm != null && !RealmCompat.isClosed(realm)) RealmCompat.close(realm);
         if (activityAdapter != null && recentTransactionsView != null)
             activityAdapter.onDestroy(recentTransactionsView);
         realmUpdateQuery = null;

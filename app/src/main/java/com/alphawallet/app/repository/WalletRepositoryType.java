@@ -4,7 +4,8 @@ import com.alphawallet.app.entity.Wallet;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 
 public interface WalletRepositoryType {
     Single<Wallet[]> fetchWallets();
@@ -29,8 +30,8 @@ public interface WalletRepositoryType {
     Single<Wallet[]> storeWallets(Wallet[] wallets);
 
     Single<Wallet> storeWallet(Wallet wallet);
-    void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess);
-    void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess);
+    void updateWalletData(Wallet wallet, RealmCompat.OnSuccess onSuccess);
+    void updateWalletItem(Wallet wallet, WalletItem item, RealmCompat.OnSuccess onSuccess);
 
     Single<String> getName(String address);
 

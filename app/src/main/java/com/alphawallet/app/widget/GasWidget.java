@@ -36,8 +36,11 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import io.realm.Realm;
-import io.realm.RealmQuery;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
+import com.alphawallet.app.realm.RealmCompat.Results;
+import com.alphawallet.app.realm.RealmQueryBuilder;
 import timber.log.Timber;
 
 /**
@@ -46,7 +49,7 @@ import timber.log.Timber;
 public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterface
 {
     private GasPriceSpread gasSpread;
-    private RealmGasSpread realmGasSpread;
+    private Results<RealmGasSpread> realmGasSpread;
     private TokensService tokensService;
     private BigInteger customGasLimit;    //from slider
     private BigInteger initialTxGasLimit; //this is the gas limit specified from the dapp transaction.
@@ -142,9 +145,10 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
 
     private void setupGasSpeeds(Web3Transaction w3tx)
     {
-        try (Realm realm = tokensService.getTickerRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(tokensService.getTickerRealmInstance()))
         {
-            RealmGasSpread gasReturn = realm.where(RealmGasSpread.class)
+            Realm realm = realmCloser.getRealm();
+            RealmGasSpread gasReturn = RealmCompat.where(realm, RealmGasSpread.class)
                     .equalTo("chainId", token.tokenInfo.chainId).findFirst();
 
             if (gasReturn != null)
@@ -281,9 +285,9 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
         return sendAllValue;
     }
 
-    private RealmQuery<RealmGasSpread> getGasQuery()
+    private RealmQueryBuilder<RealmGasSpread> getGasQuery()
     {
-        return tokensService.getTickerRealmInstance().where(RealmGasSpread.class)
+        return RealmCompat.where(tokensService.getTickerRealmInstance(), RealmGasSpread.class)
                 .equalTo("chainId", token.tokenInfo.chainId);
     }
 
@@ -291,10 +295,10 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
     {
         if (realmGasSpread != null) realmGasSpread.removeAllChangeListeners();
         realmGasSpread = getGasQuery().findFirstAsync();
-        realmGasSpread.addChangeListener(realmToken -> {
-            if (realmGasSpread.isValid())
+        realmGasSpread.addChangeListener(results -> {
+            if (realmGasSpread.isValid() && results.first() != null)
             {
-                initGasSpeeds(((RealmGasSpread) realmToken));
+                initGasSpeeds(results.first());
             }
         });
     }
@@ -345,9 +349,10 @@ public class GasWidget extends LinearLayout implements Runnable, GasWidgetInterf
         String displayStr = getContext().getString(R.string.gas_amount, gasAmountInBase, baseCurrency.getSymbol());
 
         //Can we display value for gas?
-        try (Realm realm = tokensService.getTickerRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(tokensService.getTickerRealmInstance()))
         {
-            RealmTokenTicker rtt = realm.where(RealmTokenTicker.class)
+            Realm realm = realmCloser.getRealm();
+            RealmTokenTicker rtt = RealmCompat.where(realm, RealmTokenTicker.class)
                     .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, "eth"))
                     .findFirst();
 

@@ -18,5 +18,7 @@ dependencies {
     implementation libs.gson
 }
 
-sourceCompatibility = "21"
-targetCompatibility = "21"
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}

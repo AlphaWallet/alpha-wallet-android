@@ -5,13 +5,12 @@ import android.content.Context;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
-import io.realm.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 
-@Implements(Realm.class)
+@Implements(RealmCompat.class)
 public class ShadowRealm
 {
-
     @Implementation
-    public static synchronized void init(Context context) {
+    public static void init(Context context) {
     }
 }

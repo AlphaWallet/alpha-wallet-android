@@ -4,8 +4,8 @@ import android.text.TextUtils;
 
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.entity.walletconnect.WalletConnectV2SessionItem;
-import com.walletconnect.web3.wallet.client.Wallet;
-import com.walletconnect.web3.wallet.client.Web3Wallet;
+import com.reown.walletkit.client.Wallet;
+import com.reown.walletkit.client.WalletKit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +53,7 @@ public class WalletConnectInteract
         List<WalletConnectSessionItem> result = new ArrayList<>();
         try
         {
-            List<Wallet.Model.Session> listOfSettledSessions = Web3Wallet.getListOfActiveSessions();
+            List<Wallet.Model.Session> listOfSettledSessions = WalletKit.getListOfActiveSessions();
             for (Wallet.Model.Session session : listOfSettledSessions)
             {
                 if (session.getMetaData() != null && !(TextUtils.isEmpty(session.getMetaData().name) && TextUtils.isEmpty(session.getMetaData().url)))

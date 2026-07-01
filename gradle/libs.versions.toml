@@ -1,7 +1,7 @@
 [versions]
 agp = "9.1.1"
 android_lint_reporter = "2.1.0"
-walletConnectBom = "1.35.2"
+reownBom = "1.4.1"
 appUpdate = "2.1.0"
 bcprovJdk18onVersion = "1.83"
 biometric = "1.2.0-alpha05"
@@ -55,7 +55,7 @@ jacksonCore = "2.21.0"
 jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jacksonBom"}
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jacksonCore"}
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
-walletConnect-bom = { module = "com.walletconnect:android-bom", version.ref = "walletConnectBom" }
+reown-bom = { module = "com.reown:android-bom", version.ref = "reownBom" }
 android_lint_reporter = { module = "gradle.plugin.com.worker8.android_lint_reporter:android_lint_reporter", version.ref = "android_lint_reporter" }
 app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdate" }
 biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }

@@ -136,7 +136,10 @@ android {
     }
     packagingOptions {
         jniLibs {
-            excludes += ['solidity/*']
+            // Reown WalletKit bundles its unused Chain Abstraction/Pay feature (yttrium/JNA),
+            // whose native libs are not yet built for 16KB page sizes. AlphaWallet doesn't use
+            // that feature, so strip the libraries to keep the APK 16KB-page-size compliant.
+            excludes += ['solidity/*', '**/libuniffi_yttrium.so', '**/libjnidispatch.so']
             useLegacyPackaging true
         }
         resources {
@@ -274,12 +277,12 @@ dependencies {
     implementation libs.kotlinx.coroutines.android
     implementation "com.infomaniak.realm.kotlin:library-base:${libs.versions.realmKotlin.get()}"
 
-    implementation platform(libs.walletConnect.bom)
-    implementation("com.walletconnect:android-core", {
+    implementation platform(libs.reown.bom)
+    implementation("com.reown:android-core", {
         exclude group: 'org.web3j', module: '*'
         exclude group: 'org.bouncycastle', module: '*'
     })
-    implementation("com.walletconnect:web3wallet", {
+    implementation("com.reown:walletkit", {
         exclude group: 'org.web3j', module: '*'
         exclude group: 'org.bouncycastle', module: '*'
     })

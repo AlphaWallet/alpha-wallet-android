@@ -305,12 +305,12 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
         awWalletConnectClient.disconnect(sessionId, this);
     }
 
-    private void reject(com.walletconnect.web3.wallet.client.Wallet.Model.SessionProposal sessionProposal)
+    private void reject(com.reown.walletkit.client.Wallet.Model.SessionProposal sessionProposal)
     {
         awWalletConnectClient.reject(sessionProposal, this);
     }
 
-    private void approve(com.walletconnect.web3.wallet.client.Wallet.Model.SessionProposal sessionProposal)
+    private void approve(com.reown.walletkit.client.Wallet.Model.SessionProposal sessionProposal)
     {
         List<Long> disabledNetworks = disabledNetworks(sessionProposal.getRequiredNamespaces());
         if (disabledNetworks.isEmpty())
@@ -351,7 +351,7 @@ public class WalletConnectV2Activity extends BaseActivity implements StandardFun
                 .collect(Collectors.joining(", "));
     }
 
-    private List<Long> disabledNetworks(Map<String, com.walletconnect.web3.wallet.client.Wallet.Model.Namespace.Proposal> requiredNamespaces)
+    private List<Long> disabledNetworks(Map<String, com.reown.walletkit.client.Wallet.Model.Namespace.Proposal> requiredNamespaces)
     {
         NamespaceParser namespaceParser = new NamespaceParser();
         namespaceParser.parseProposal(requiredNamespaces);

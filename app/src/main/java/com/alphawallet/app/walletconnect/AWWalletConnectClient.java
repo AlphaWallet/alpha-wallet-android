@@ -2,8 +2,8 @@ package com.alphawallet.app.walletconnect;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.alphawallet.hardware.SignatureReturnType.SIGNATURE_GENERATED;
-import static com.walletconnect.web3.wallet.client.Wallet.Model;
-import static com.walletconnect.web3.wallet.client.Wallet.Params;
+import static com.reown.walletkit.client.Wallet.Model;
+import static com.reown.walletkit.client.Wallet.Params;
 
 import android.Manifest;
 import android.app.Activity;
@@ -56,14 +56,14 @@ import com.alphawallet.hardware.SignatureFromKey;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
-import com.walletconnect.android.Core;
-import com.walletconnect.android.CoreClient;
-import com.walletconnect.android.cacao.signature.SignatureType;
-import com.walletconnect.android.relay.ConnectionType;
-import com.walletconnect.android.relay.NetworkClientTimeout;
-import com.walletconnect.web3.wallet.client.Wallet;
-import com.walletconnect.web3.wallet.client.Wallet.Model.Session;
-import com.walletconnect.web3.wallet.client.Web3Wallet;
+import com.reown.android.Core;
+import com.reown.android.CoreClient;
+import com.reown.android.cacao.signature.SignatureType;
+import com.reown.android.relay.ConnectionType;
+import com.reown.android.relay.NetworkClientTimeout;
+import com.reown.walletkit.client.Wallet;
+import com.reown.walletkit.client.Wallet.Model.Session;
+import com.reown.walletkit.client.WalletKit;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,7 +83,7 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
 import timber.log.Timber;
 
-public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
+public class AWWalletConnectClient implements WalletKit.WalletDelegate
 {
     private static final String TAG = AWWalletConnectClient.class.getName();
     private static final String ISS_DID_PREFIX = "did:pkh:";
@@ -143,7 +143,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
         try
         {
-            listOfSettledSessions = Web3Wallet.getListOfActiveSessions();
+            listOfSettledSessions = WalletKit.getListOfActiveSessions();
         }
         catch (IllegalStateException e)
         {
@@ -175,7 +175,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     {
         Model.JsonRpcResponse jsonRpcResponse = new Model.JsonRpcResponse.JsonRpcResult(sessionRequest.getRequest().getId(), result);
         Params.SessionRequestResponse response = new Params.SessionRequestResponse(sessionRequest.getTopic(), jsonRpcResponse);
-        Web3Wallet.INSTANCE.respondSessionRequest(response, srr -> null, this::onSessionRequestApproveError);
+        WalletKit.INSTANCE.respondSessionRequest(response, srr -> null, this::onSessionRequestApproveError);
     }
 
     private Unit onSessionRequestApproveError(Model.Error error)
@@ -192,8 +192,8 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     public void approve(Model.SessionProposal sessionProposal, List<String> selectedAccounts, WalletConnectV2Callback callback)
     {
         String proposerPublicKey = sessionProposal.getProposerPublicKey();
-        Params.SessionApprove approve = new Params.SessionApprove(proposerPublicKey, buildNamespaces(sessionProposal, selectedAccounts), sessionProposal.getRelayProtocol());
-        Web3Wallet.INSTANCE.approveSession(approve, sessionApprove -> {
+        Params.SessionApprove approve = new Params.SessionApprove(proposerPublicKey, buildNamespaces(sessionProposal, selectedAccounts), null, null, sessionProposal.getRelayProtocol());
+        WalletKit.INSTANCE.approveSession(approve, sessionApprove -> {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 updateNotification(sessionProposal);
                 callback.onSessionProposalApproved();
@@ -211,7 +211,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
                 getSupportedEvents()));
         try
         {
-            return Web3Wallet.INSTANCE.generateApprovedNamespaces(sessionProposal, supportedNamespaces);
+            return WalletKit.INSTANCE.generateApprovedNamespaces(sessionProposal, supportedNamespaces);
         }
         catch (Exception e)
         {
@@ -360,7 +360,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
     public void reject(Model.SessionProposal sessionProposal, WalletConnectV2Callback callback)
     {
-        Web3Wallet.INSTANCE.rejectSession(
+        WalletKit.INSTANCE.rejectSession(
                 new Params.SessionReject(sessionProposal.getProposerPublicKey(), context.getString(R.string.message_reject_request)),
                 sessionReject -> null,
                 this::onSessionRejectError);
@@ -375,7 +375,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
     public void disconnect(String sessionId, WalletConnectV2Callback callback)
     {
-        Web3Wallet.INSTANCE.disconnectSession(new Params.SessionDisconnect(sessionId), sd -> null, this::onDisconnectError);
+        WalletKit.INSTANCE.disconnectSession(new Params.SessionDisconnect(sessionId), sd -> null, this::onDisconnectError);
         callback.onSessionDisconnected();
     }
 
@@ -389,7 +389,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     {
         Model.JsonRpcResponse.JsonRpcError jsonRpcResponse = new Model.JsonRpcResponse.JsonRpcError(sessionRequest.getRequest().getId(), 0, failMessage);
         Params.SessionRequestResponse response = new Params.SessionRequestResponse(sessionRequest.getTopic(), jsonRpcResponse);
-        Web3Wallet.INSTANCE.respondSessionRequest(response, srr -> null, this::onSessionRequestRejectError);
+        WalletKit.INSTANCE.respondSessionRequest(response, srr -> null, this::onSessionRequestRejectError);
     }
 
     private Unit onSessionRequestRejectError(Model.Error error)
@@ -425,7 +425,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
             return null;
         });
 
-        Web3Wallet.INSTANCE.initialize(new Params.Init(coreClient), () -> {
+        WalletKit.INSTANCE.initialize(new Params.Init(coreClient), () -> {
             Timber.tag(TAG).i("Wallet Connect init success");
             return null;
         }, e ->
@@ -436,7 +436,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
 
         try
         {
-            Web3Wallet.INSTANCE.setWalletDelegate(this);
+            WalletKit.INSTANCE.setWalletDelegate(this);
             //ensure notification is displayed if session is active
             updateNotification(null);
         }
@@ -532,30 +532,32 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         }
     }
 
-    private void showApprovalDialog(Model.AuthRequest authRequest)
+    private void showApprovalDialog(Model.SessionAuthenticate sessionAuthenticate)
     {
         String activeWallet = preferenceRepository.getCurrentWalletAddress();
-        String issuer = ISS_DID_PREFIX + formatCAIP10(authRequest.payloadParams.chainId, activeWallet);
-        String message = Web3Wallet.INSTANCE.formatMessage(new Params.FormatMessage(authRequest.payloadParams, issuer));
-        String origin = authRequest.payloadParams.domain;
+        Model.PayloadAuthRequestParams payloadParams = sessionAuthenticate.getPayloadParams();
+        String chainId = payloadParams.getChains().isEmpty() ? "" : payloadParams.getChains().get(0);
+        String issuer = ISS_DID_PREFIX + formatCAIP10(chainId, activeWallet);
+        String message = WalletKit.INSTANCE.formatAuthMessage(new Params.FormatAuthMessage(payloadParams, issuer));
+        String origin = payloadParams.getDomain();
 
-        new Handler(Looper.getMainLooper()).post(() -> doShowApprovalDialog(activeWallet, message, authRequest.getId(), origin, issuer));
+        new Handler(Looper.getMainLooper()).post(() -> doShowApprovalDialog(activeWallet, message, sessionAuthenticate.getId(), origin, issuer, payloadParams));
     }
 
-    private void doShowApprovalDialog(String walletAddress, String message, long requestId, String origin, String issuer)
+    private void doShowApprovalDialog(String walletAddress, String message, long requestId, String origin, String issuer, Model.PayloadAuthRequestParams payloadParams)
     {
         EthereumMessage ethereumMessage = new EthereumMessage(message, origin, 0,
                 SignMessageType.SIGN_MESSAGE);
         Activity topActivity = App.getInstance().getTopActivity();
         if (topActivity != null)
         {
-            ActionSheet actionSheet = new ActionSheetSignDialog(topActivity, newActionSheetCallback(requestId, issuer), ethereumMessage);
+            ActionSheet actionSheet = new ActionSheetSignDialog(topActivity, newActionSheetCallback(requestId, issuer, payloadParams), ethereumMessage);
             actionSheet.setSigningWallet(walletAddress);
             actionSheet.show();
         }
     }
 
-    private ActionSheetCallback newActionSheetCallback(long requestId, String issuer)
+    private ActionSheetCallback newActionSheetCallback(long requestId, String issuer, Model.PayloadAuthRequestParams payloadParams)
     {
         return new ActionSheetCallback()
         {
@@ -589,8 +591,7 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
                 }
                 else
                 {
-                    // TODO: Update the libs
-                    Web3Wallet.INSTANCE.respondAuthRequest(new Params.AuthRequestResponse.Error(requestId, 0, "User rejected request."), (authRequestResponse) -> {
+                    WalletKit.INSTANCE.rejectSessionAuthenticate(new Params.RejectSessionAuthenticate(requestId, "User rejected request."), (rejectSessionAuthenticate) -> {
                         closeWalletConnectActivity();
                         return null;
                     }, (error) -> {
@@ -621,19 +622,25 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
             @Override
             public void signingComplete(SignatureFromKey signature, Signable message)
             {
-                Web3Wallet.INSTANCE.respondAuthRequest(
-                        new Wallet.Params.AuthRequestResponse.Result(
-                                requestId,
-                                new Model.Cacao.Signature(SignatureType.EIP191.header, Numeric.toHexString(signature.signature), null),
-                                issuer
-                        ), (authRequestResponse) -> {
-                            Timber.i("Sign in with Ethereum succeed.");
-                            return null;
-                        }, (error) -> {
-                            Timber.w("Sign in with Ethereum failed.");
-                            Timber.w(error.throwable);
-                            return null;
-                        });
+                Model.Cacao.Signature cacaoSignature = new Model.Cacao.Signature(SignatureType.EIP191.header, Numeric.toHexString(signature.signature), null);
+                try
+                {
+                    Model.Cacao cacao = WalletKit.INSTANCE.generateAuthObject(payloadParams, issuer, cacaoSignature);
+                    WalletKit.INSTANCE.approveSessionAuthenticate(
+                            new Params.ApproveSessionAuthenticate(requestId, Collections.singletonList(cacao)),
+                            (approveSessionAuthenticate) -> {
+                                Timber.i("Sign in with Ethereum succeed.");
+                                return null;
+                            }, (error) -> {
+                                Timber.w("Sign in with Ethereum failed.");
+                                Timber.w(error.throwable);
+                                return null;
+                            });
+                }
+                catch (Exception e)
+                {
+                    Timber.tag(TAG).e(e, "Failed to generate CACAO for Sign in with Ethereum");
+                }
             }
         };
     }
@@ -666,12 +673,6 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
     public void onSessionUpdateResponse(@NonNull Model.SessionUpdateResponse sessionUpdateResponse)
     {
         Timber.tag(TAG).i("onSessionUpdateResponse");
-    }
-
-    @Override
-    public void onAuthRequest(@NonNull Model.AuthRequest authRequest, @NonNull Model.VerifyContext verifyContext)
-    {
-        showApprovalDialog(authRequest);
     }
 
     @Override
@@ -761,11 +762,14 @@ public class AWWalletConnectClient implements Web3Wallet.WalletDelegate
         return intent;
     }
 
-    @Nullable
+    @NonNull
     @Override
     public Function2<Model.SessionAuthenticate, Model.VerifyContext, Unit> getOnSessionAuthenticate()
     {
-        return null;
+        return (sessionAuthenticate, verifyContext) -> {
+            showApprovalDialog(sessionAuthenticate);
+            return null;
+        };
     }
 
     @Override

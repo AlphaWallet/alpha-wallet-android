@@ -49,8 +49,8 @@ import io.reactivex.schedulers.Schedulers;
 public class TransactionDialogBuilder extends DialogFragment
 {
     private final Activity activity;
-    private final com.walletconnect.web3.wallet.client.Wallet.Model.SessionRequest sessionRequest;
-    private final com.walletconnect.web3.wallet.client.Wallet.Model.Session settledSession;
+    private final com.reown.walletkit.client.Wallet.Model.SessionRequest sessionRequest;
+    private final com.reown.walletkit.client.Wallet.Model.Session settledSession;
     private final AWWalletConnectClient awWalletConnectClient;
     private final SignType signType;
     private WalletConnectViewModel viewModel;
@@ -59,7 +59,7 @@ public class TransactionDialogBuilder extends DialogFragment
             result -> actionSheetDialog.setCurrentGasIndex(result));
     private boolean isApproved;
 
-    public TransactionDialogBuilder(Activity activity, com.walletconnect.web3.wallet.client.Wallet.Model.SessionRequest sessionRequest, com.walletconnect.web3.wallet.client.Wallet.Model.Session settledSession, AWWalletConnectClient awWalletConnectClient, SignType signType)
+    public TransactionDialogBuilder(Activity activity, com.reown.walletkit.client.Wallet.Model.SessionRequest sessionRequest, com.reown.walletkit.client.Wallet.Model.Session settledSession, AWWalletConnectClient awWalletConnectClient, SignType signType)
     {
         this.activity = activity;
         this.sessionRequest = sessionRequest;

@@ -25,7 +25,7 @@ import com.alphawallet.app.widget.ActionSheetSignDialog;
 import com.alphawallet.token.entity.EthereumMessage;
 import com.alphawallet.token.entity.SignMessageType;
 import com.alphawallet.token.entity.Signable;
-import com.walletconnect.web3.wallet.client.Wallet;
+import com.reown.walletkit.client.Wallet;
 
 import java.util.ArrayList;
 import java.util.List;

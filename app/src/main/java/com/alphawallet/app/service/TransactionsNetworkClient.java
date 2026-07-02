@@ -303,14 +303,20 @@ public class TransactionsNetworkClient implements TransactionsNetworkClientType
 
     private EtherscanEvent[] getEtherscanEvents(String response) throws JSONException
     {
-        JSONObject stateData = new JSONObject(response);
+        JSONObject stateData = null;
+        try {
+            stateData = new JSONObject(response);
+        } catch (JSONException e) {
+            Timber.e(e);
+            return null;
+        }
         JSONArray orders = stateData.getJSONArray("result");
         return gson.fromJson(orders.toString(), EtherscanEvent[].class);
     }
 
     private void writeTransactions(TypedRealm instance, List<Transaction> txList) throws Exception
     {
-        if (txList.size() == 0) return;
+        if (txList.isEmpty()) return;
 
         RealmCompat.executeTransaction(instance, r -> {
             for (Transaction tx : txList)

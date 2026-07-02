@@ -2,11 +2,7 @@ package com.alphawallet.app.ui.widget.entity;
 
 import static com.alphawallet.app.repository.EthereumNetworkBase.getChainOrdinal;
 
-import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 import timber.log.Timber;
 

@@ -322,7 +322,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         //Set the fiat equivalent (leftmost value)
         BigDecimal correctedBalance = token.getCorrectedBalance(Convert.Unit.ETHER.getFactor());
-        BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(Convert.Unit.ETHER.getFactor(), RoundingMode.DOWN);
+        BigDecimal fiatBalance = correctedBalance.multiply(parseOrZero(ticker.price)).setScale(Convert.Unit.ETHER.getFactor(), RoundingMode.DOWN);
         String converted = TickerService.getCurrencyString(fiatBalance.doubleValue());
         String formattedPercents = "";
         int color = Color.RED;
@@ -359,12 +359,26 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
 
         //This sets the crypto price value (middle amount)
-        BigDecimal currencyChange = new BigDecimal(fiatBalance.doubleValue()).multiply((
-            new BigDecimal(ticker.percentChange24h)).divide(new BigDecimal(100)));
+        BigDecimal currencyChange = new BigDecimal(fiatBalance.doubleValue()).multiply(
+            parseOrZero(ticker.percentChange24h).divide(new BigDecimal(100)));
         String formattedValue = TickerService.getCurrencyString(currencyChange.doubleValue());
 
         this.textAppreciation.setTextColor(color);
         this.textAppreciation.setText(formattedValue);
+    }
+
+    //Malformed/legacy ticker data can't always be parsed as a decimal string - don't crash the Wallet list over display data.
+    private static BigDecimal parseOrZero(String value)
+    {
+        if (TextUtils.isEmpty(value)) return BigDecimal.ZERO;
+        try
+        {
+            return new BigDecimal(value);
+        }
+        catch (NumberFormatException e)
+        {
+            return BigDecimal.ZERO;
+        }
     }
 
     private String shortTitle()

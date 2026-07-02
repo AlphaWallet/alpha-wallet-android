@@ -1,5 +1,7 @@
 package com.alphawallet.app.entity.tokens;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.getNetworkInfo;
+
 import android.text.TextUtils;
 
 import com.alphawallet.app.entity.ContractType;

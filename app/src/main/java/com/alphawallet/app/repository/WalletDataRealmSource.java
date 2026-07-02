@@ -125,6 +125,8 @@ public class WalletDataRealmSource {
             }
         }
 
+        recoverOrphanedKeys(walletList, walletUpdates, keyService);
+
         if (walletUpdates.size() > 0)
         {
             storeWallets(realm, walletUpdates.toArray(new Wallet[0]));
@@ -132,6 +134,28 @@ public class WalletDataRealmSource {
 
         Timber.tag("RealmDebug").d("loadorcreate %s", walletList.size());
         return walletList;
+    }
+
+    /**
+     * Re-registers wallets whose RealmKeyType record was lost (eg through an inconsistent
+     * OEM backup/restore, or a failed database migration) but whose encrypted key file, iv file
+     * and Android Keystore alias are still intact on disk. See
+     * {@link KeyService#findRecoverableOrphanedKeys} for the safety checks performed.
+     */
+    private void recoverOrphanedKeys(Map<String, Wallet> walletList, List<Wallet> walletUpdates, KeyService keyService)
+    {
+        List<String> orphanedAddresses = keyService.findRecoverableOrphanedKeys(walletList.keySet());
+        for (String address : orphanedAddresses)
+        {
+            Wallet w = new Wallet(address);
+            w.type = WalletType.HDKEY;
+            w.walletCreationTime = System.currentTimeMillis();
+            w.authLevel = KeyService.AuthenticationLevel.NOT_SET; //original auth level was lost along with the record
+
+            walletList.put(w.address.toLowerCase(), w);
+            walletUpdates.add(w);
+            Timber.tag("RealmDebug").w("Recovered orphaned wallet key with intact key material: %s", address);
+        }
     }
 
     private List<String> walletArrayToAddressList(Wallet[] wallets)

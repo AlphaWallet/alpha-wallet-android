@@ -25,10 +25,8 @@ import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSearchItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
-import com.alphawallet.app.ui.widget.entity.TokenIdSortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
 import com.alphawallet.app.ui.widget.entity.TotalBalanceSortedItem;
-import com.alphawallet.app.ui.widget.entity.WalletConnectSessionSortedItem;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.entity.WarningSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
@@ -51,7 +49,6 @@ import java.util.Locale;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 {
-    private static final String TAG = "TKNADAPTER";
     private TokenFilter filterType = TokenFilter.ALL;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;

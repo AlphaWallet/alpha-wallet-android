@@ -593,8 +593,16 @@ public class Token
     public String getTransactionValue(Transaction transaction, int precision)
     {
         if (transaction.hasError()) return "";
-        else if (transaction.value.equals("0") || transaction.value.equals("0x0")) return "0";
-        return transaction.getPrefix(this) + BalanceUtils.getScaledValueFixed(new BigDecimal(transaction.value), tokenInfo.decimals, precision);
+        else if (TextUtils.isEmpty(transaction.value) || transaction.value.equals("0") || transaction.value.equals("0x0")) return "0";
+        try
+        {
+            return transaction.getPrefix(this) + BalanceUtils.getScaledValueFixed(new BigDecimal(transaction.value), tokenInfo.decimals, precision);
+        }
+        catch (NumberFormatException e)
+        {
+            //Malformed/legacy transaction value that can't be parsed as a decimal string - don't crash the Activity list over display data.
+            return "0";
+        }
     }
 
     /**

@@ -139,16 +139,14 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
                 if (resultMap.get("amount") != null)
                 {
                     value = eventData.getFunctionId().equals("sent") ? "- " : "+ ";
-                    value += BalanceUtils.getScaledValueFixed(new BigDecimal(resultMap.get("amount").value),
-                            decimals, 4);
+                    value += scaledValueOrZero(resultMap.get("amount").value, decimals);
                 }
                 break;
             case "approvalObtained":
             case "ownerApproved":
                 if (resultMap.get("value") != null)
                 {
-                    value = BalanceUtils.getScaledValueFixed(new BigDecimal(resultMap.get("value").value),
-                            decimals, 4);
+                    value = scaledValueOrZero(resultMap.get("value").value, decimals);
                 }
                 break;
             default:
@@ -160,6 +158,20 @@ public class EventHolder extends BinderViewHolder<EventMeta> implements View.OnC
         }
 
         return value;
+    }
+
+    //Malformed/legacy event result data can't always be parsed as a decimal string - don't crash the Activity list over display data.
+    private String scaledValueOrZero(String rawValue, int decimals)
+    {
+        if (TextUtils.isEmpty(rawValue)) return "0";
+        try
+        {
+            return BalanceUtils.getScaledValueFixed(new BigDecimal(rawValue), decimals, 4);
+        }
+        catch (NumberFormatException e)
+        {
+            return "0";
+        }
     }
 
     private String getTitle(RealmAuxData eventData)

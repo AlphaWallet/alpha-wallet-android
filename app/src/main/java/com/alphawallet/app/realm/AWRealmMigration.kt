@@ -148,8 +148,8 @@ object AWRealmMigration : AutomaticSchemaMigration {
                 val spec = readInt("interfaceSpec") ?: 0
                 if (spec == 0) {
                     when {
-                        key.regionMatches(0, "eth-", 0, 4, ignoreCase = true) -> set("interfaceSpec", 1)
-                        key.startsWith("0x", ignoreCase = true) -> set("interfaceSpec", 2)
+                        key.regionMatches(0, "eth-", 0, 4, ignoreCase = true) -> set("interfaceSpec", 1L)
+                        key.startsWith("0x", ignoreCase = true) -> set("interfaceSpec", 2L)
                     }
                 }
 
@@ -338,7 +338,10 @@ object AWRealmMigration : AutomaticSchemaMigration {
         oldObject: io.realm.kotlin.dynamic.DynamicRealmObject,
         field: String,
     ) {
-        oldObject.readInt(field)?.let { set(field, it) }
+        // Realm Kotlin's dynamic migration API always represents integral properties
+        // (however they are declared - Byte/Short/Int/Long - on the actual model class)
+        // as Long; passing a raw Int to set() throws IllegalArgumentException.
+        oldObject.readInt(field)?.let { set(field, it.toLong()) }
     }
 
     private fun io.realm.kotlin.dynamic.DynamicMutableRealmObject.copyBooleanField(

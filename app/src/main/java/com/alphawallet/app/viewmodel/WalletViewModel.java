@@ -521,7 +521,7 @@ public class WalletViewModel extends BaseViewModel
             }
         }
 
-        if (metasToDelete.size() > 0)
+        if (!metasToDelete.isEmpty())
         {
             disposable = tokensService.deleteTokens(metasToDelete)
                     .subscribeOn(Schedulers.io())

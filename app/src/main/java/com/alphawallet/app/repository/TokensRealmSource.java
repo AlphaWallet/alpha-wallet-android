@@ -1,5 +1,6 @@
 package com.alphawallet.app.repository;
 
+import static com.alphawallet.app.repository.EthereumNetworkBase.getNetwork;
 import static com.alphawallet.app.service.TickerService.TICKER_STALE_TIMEOUT;
 import static com.alphawallet.app.service.TickerService.TICKER_TIMEOUT;
 import static com.alphawallet.app.service.TokensService.EXPIRED_CONTRACT;
@@ -22,6 +23,8 @@ import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
 import com.alphawallet.app.entity.tokens.TokenInfo;
+import com.alphawallet.app.realm.AutoCloseableRealm;
+import com.alphawallet.app.realm.RealmCompat;
 import com.alphawallet.app.repository.entity.RealmAttestation;
 import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.repository.entity.RealmNFTAsset;
@@ -46,9 +49,6 @@ import java.util.Map;
 import io.reactivex.Single;
 import io.realm.kotlin.Realm;
 import io.realm.kotlin.TypedRealm;
-import com.alphawallet.app.realm.RealmCompat;
-import com.alphawallet.app.realm.AutoCloseableRealm;
-import com.alphawallet.app.realm.RealmCompat.Results;
 import timber.log.Timber;
 
 public class TokensRealmSource implements TokenLocalSource
@@ -266,7 +266,7 @@ public class TokensRealmSource implements TokenLocalSource
             List<RealmToken> invalid = new ArrayList<>();
             for (RealmToken token : RealmCompat.where(r, RealmToken.class).findAll())
             {
-                if (shouldPurgeRealmToken(token.getAddress()))
+                if (shouldPurgeRealmToken(token.getAddress()) || token.getTokenAddress().equals("eth") && token.getName().isEmpty())
                 {
                     invalid.add(token);
                 }
@@ -1477,7 +1477,8 @@ public class TokensRealmSource implements TokenLocalSource
                 long chainId = resolveChainId(t);
                 ContractType contractType = resolveContractType(t, wallet);
                 String tokenAddress = t.getTokenAddress();
-                if (contractType == ContractType.ETHEREUM && !isWalletNativeToken(contractType, tokenAddress, wallet))
+                String name = t.getName();
+                if (contractType == ContractType.ETHEREUM && (!isWalletNativeToken(contractType, tokenAddress, wallet) || name.isEmpty()))
                 {
                     continue;
                 }
@@ -1522,7 +1523,17 @@ public class TokensRealmSource implements TokenLocalSource
             //create metas for any chain root token not previously saved
             for (Long chainId : rootChainTokenCards)
             {
-                TokenCardMeta meta = new TokenCardMeta(chainId, wallet.address.toLowerCase(), "0", 0, svs, "", "", ContractType.ETHEREUM, TokenGroup.ASSET);
+                String name = "";
+                String symbol = "";
+                //get name for root token
+                NetworkInfo chainNet = getNetwork(chainId);
+                if (chainNet != null)
+                {
+                    name = chainNet.name;
+                    symbol = chainNet.symbol;
+                }
+
+                TokenCardMeta meta = new TokenCardMeta(chainId, wallet.address.toLowerCase(), "0", 0, svs, name, symbol, ContractType.ETHEREUM, TokenGroup.ASSET);
                 meta.lastTxUpdate = 0;
                 meta.isEnabled = meta.group != TokenGroup.SPAM;
                 tokenMetas.add(meta);

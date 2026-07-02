@@ -72,7 +72,11 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -590,6 +594,42 @@ public class KeyService implements AuthenticationCallback, PinAuthenticationCall
         }
 
         return new Pair<>(retVal, keyData);
+    }
+
+    private static final Pattern ADDRESS_FILE_PATTERN = Pattern.compile("^0x[0-9a-fA-F]{40}$");
+
+    /**
+     * Finds encrypted HD/imported-key wallet blobs sitting in the app's private files directory
+     * that are not accounted for in {@code knownAddressesLowercase}. This can happen if the wallet
+     * index (RealmKeyType) loses a record - eg through an inconsistent OEM backup/restore, or a
+     * failed database migration - while the underlying encrypted key file, its iv, and its Android
+     * Keystore alias remain completely intact.
+     * <p>
+     * Each candidate is verified with {@link #testCipher} before being reported: only addresses
+     * whose encrypted file, iv file and Keystore alias are all mutually consistent are returned, so
+     * unrelated stray files can never be mistaken for a recoverable wallet. No key material is
+     * mutated, deleted, or persisted by this scan - it is purely a read-only consistency check.
+     */
+    public List<String> findRecoverableOrphanedKeys(Set<String> knownAddressesLowercase)
+    {
+        List<String> recovered = new ArrayList<>();
+        File[] files = context.getFilesDir().listFiles();
+        if (files == null) return recovered;
+
+        for (File f : files)
+        {
+            String name = f.getName();
+            if (!ADDRESS_FILE_PATTERN.matcher(name).matches()) continue;
+            if (knownAddressesLowercase.contains(name.toLowerCase())) continue;
+
+            Pair<KeyExceptionType, String> result = testCipher(name, CIPHER_ALGORITHM);
+            if (result.first == KeyExceptionType.SUCCESSFUL_DECODE || result.first == KeyExceptionType.REQUIRES_AUTH)
+            {
+                recovered.add(name);
+            }
+        }
+
+        return recovered;
     }
 
     private void createHDKey()

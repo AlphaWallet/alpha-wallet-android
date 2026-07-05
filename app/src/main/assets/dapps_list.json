@@ -2,6 +2,7 @@
   {"name": "TokenScript", "description": "Smart Token Labs TokenScript Viewer", "url": "https://viewer.tokenscript.org/", "category": "Infrastructure"},
   {"name": "SmartLayer", "description": "Smart Token Labs Smart Layer Network", "url": "https://smartlayer.network", "category": "Infrastructure"},
   {"name": "TLink", "description": "Smart Token Labs TLink", "url": "https://tlink.store/", "category": "Infrastructure"},
+  {"name": "GridMind", "description": "Testnet wallet and explorer for GridMind asset flows", "url": "https://www.grid-mind.com/blockchain", "category": "Tool"},
   {"name": "X", "description": "Social Media", "url": "https://x.com", "category": "Social Media"},
   {"name": "Aave", "description": "A decentralized non-custodial liquidity protocol where users can participate as depositors or borrowers", "url": "https://app.aave.com/", "category": "Finance"},
   {"name": "Tbull", "description": "A Utility Token on Binance Smart Chain for Payments for Services", "url": "https://tbull.live", "category": "Utility"},

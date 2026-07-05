@@ -1003,6 +1003,12 @@ public class TokensService
         return tokenRepository.getTotalValue(currentAddress, EthereumNetworkBase.getAllMainNetworks());
     }
 
+    /** Last cached total wallet value (USD), persisted whenever a value scan completes. */
+    public double getStoredWalletValue()
+    {
+        return tokenRepository.getStoredWalletValue(currentAddress);
+    }
+
     public Single<List<String>> getTickerUpdateList()
     {
         return tokenRepository.getTickerUpdateList(networkFilter);

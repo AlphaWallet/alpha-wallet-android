@@ -74,6 +74,8 @@ public interface TokenLocalSource
 
     Map<String, TokenTicker> getCurrentTickers(List<String> keys);
 
+    double getStoredWalletValue(String walletAddress);
+
     void setVisibilityChanged(Wallet wallet, ContractAddress cAddr);
 
     boolean getEnabled(Token token);

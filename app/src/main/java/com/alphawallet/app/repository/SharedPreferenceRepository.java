@@ -177,7 +177,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public boolean getFullScreenState()
     {
-        return pref.getBoolean(FULL_SCREEN_STATE, false);
+        return pref.getBoolean(FULL_SCREEN_STATE, true);
     }
 
     @Override

@@ -133,10 +133,6 @@ public class TokenIconViewModel extends BaseViewModel
             //attempt usual fetch
             icon = getPrimaryIconURL(token);
         }
-        else
-        {
-            System.out.println("FROM DB: " + icon);
-        }
 
         return icon;
     }

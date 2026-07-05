@@ -58,6 +58,7 @@ public class TokensRealmSource implements TokenLocalSource
     public static final String ATOKENS_DB = "a_tokens_db";
     public static final String TICKER_DB = "tickers_db";
     public static final String ADDRESS_FORMAT = "0x????????????????????????????????????????-*";
+    private static final String WALLET_VALUE_KEY_PREFIX = "VALUE_";
 
     public static final String EVENT_CARDS = "-eventName";
 
@@ -1593,8 +1594,73 @@ public class TokensRealmSource implements TokenLocalSource
                 }
             }
 
+            storeWalletValue(wallet.address, newBalance.doubleValue());
+
             return new Pair<>(newBalance.doubleValue(), historicalBalance.doubleValue());
         });
+    }
+
+    private static String walletValueKey(String walletAddress)
+    {
+        return WALLET_VALUE_KEY_PREFIX + walletAddress.toLowerCase();
+    }
+
+    /**
+     * Caches the wallet's last computed total value (in USD) so it can be displayed immediately
+     * on startup/wallet-switch, before the fresh balance/ticker scan completes.
+     */
+    private void storeWalletValue(String walletAddress, double value)
+    {
+        if (TextUtils.isEmpty(walletAddress)) return;
+
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(TICKER_DB)))
+        {
+            Realm realm = realmCloser.getRealm();
+            String key = walletValueKey(walletAddress);
+            RealmCompat.executeTransaction(realm, r -> {
+                RealmAuxData entry = RealmCompat.where(r, RealmAuxData.class)
+                        .equalTo("instanceKey", key)
+                        .findFirst();
+
+                if (entry == null)
+                {
+                    entry = RealmCompat.createObject(r, RealmAuxData.class, key);
+                }
+
+                entry.setResult(String.valueOf(value));
+                entry.setResultTime(System.currentTimeMillis());
+                RealmCompat.insertOrUpdate(r, entry);
+            });
+        }
+        catch (Exception e)
+        {
+            Timber.tag(TAG).e(e, "Failed to store wallet value for %s", walletAddress);
+        }
+    }
+
+    /**
+     * Returns the last cached total wallet value (in USD), or 0.0 if none has been stored yet.
+     */
+    @Override
+    public double getStoredWalletValue(String walletAddress)
+    {
+        if (TextUtils.isEmpty(walletAddress)) return 0.0;
+
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(TICKER_DB)))
+        {
+            Realm realm = realmCloser.getRealm();
+            RealmAuxData entry = RealmCompat.where(realm, RealmAuxData.class)
+                    .equalTo("instanceKey", walletValueKey(walletAddress))
+                    .findFirst();
+
+            if (entry == null || TextUtils.isEmpty(entry.getResult())) return 0.0;
+
+            return Double.parseDouble(entry.getResult());
+        }
+        catch (Exception e)
+        {
+            return 0.0;
+        }
     }
 
     private Map<Long, Map<String, TokenTicker>> fetchAllTokenTickers()

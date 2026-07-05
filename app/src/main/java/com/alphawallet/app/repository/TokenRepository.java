@@ -224,6 +224,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public double getStoredWalletValue(String walletAddress)
+    {
+        return localSource.getStoredWalletValue(walletAddress);
+    }
+
+    @Override
     public Single<List<String>> getTickerUpdateList(List<Long> networkFilter)
     {
         return localSource.getTickerUpdateList(networkFilter);

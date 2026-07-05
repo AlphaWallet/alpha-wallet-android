@@ -517,7 +517,6 @@ public abstract class TokenscriptFunction
                         }
                         break;
                     default:
-                        System.out.println("NOT IMPLEMENTED: " + arg.parameterType);
                         break;
                 }
             }

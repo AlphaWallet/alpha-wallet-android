@@ -83,8 +83,6 @@ public abstract class EthUtils
             TransactionReceipt transactionReceipt = Transfer.sendFunds(
                     web3j, credentials, targetAddr,
                     ethAmount, Convert.Unit.ETHER).send();
-
-            System.out.println("TX: " + transactionReceipt.getTransactionHash());
         }
         catch (Exception e)
         {
@@ -107,8 +105,6 @@ public abstract class EthUtils
 
             EthSendTransaction raw = web3j
                     .ethSendRawTransaction(org.web3j.utils.Numeric.toHexString(signedDeployTransaction)).send();
-
-            System.out.println("Deploy hash: " + raw.getTransactionHash());
 
             nonceReturn = nonce.longValue();
         }

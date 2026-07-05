@@ -180,12 +180,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     }
 
-    @Override
-    public void onDestroyView()
-    {
-
-    }
-
     private void handleAttestation(TokenCardMeta data)
     {
         Attestation attestation = (Attestation) tokensService.getAttestation(data.getChain(), data.getAddress(), data.getAttestationId());

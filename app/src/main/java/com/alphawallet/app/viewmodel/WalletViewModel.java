@@ -215,7 +215,23 @@ public class WalletViewModel extends BaseViewModel
         tokensService.setCurrentAddress(wallet.address);
         assetDefinitionService.startEventListener();
         defaultWallet.postValue(wallet);
+        loadStoredFiatValue();
         fetchTokens(wallet);
+    }
+
+    /**
+     * Shows the wallet's last known total value (cached from the previous value scan) immediately,
+     * so the header doesn't show a blank/zero value while the fresh balance/ticker scan runs.
+     * This is superseded as usual by {@link #calculateFiatValues()} once that scan completes.
+     */
+    private void loadStoredFiatValue()
+    {
+        disposable = Single.fromCallable(tokensService::getStoredWalletValue)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .toMaybe()
+                .filter(value -> value != 0.00)
+                .subscribe(value -> fiatValues.postValue(new Pair<>(value, value)), Timber::e);
     }
 
     private void fetchTokens(Wallet wallet)

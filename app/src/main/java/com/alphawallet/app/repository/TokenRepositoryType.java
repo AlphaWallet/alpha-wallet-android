@@ -101,6 +101,8 @@ public interface TokenRepositoryType
 
     Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters);
 
+    double getStoredWalletValue(String walletAddress);
+
     Single<List<String>> getTickerUpdateList(List<Long> networkFilter);
 
     TokenGroup getTokenGroup(long chainId, String address, ContractType type);

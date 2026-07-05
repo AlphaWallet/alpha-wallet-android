@@ -54,6 +54,42 @@ object AWRealmMigration : AutomaticSchemaMigration {
                 if (address.isNotEmpty()) {
                     set("address", address)
                 }
+                // Realm Java declared these as nullable Strings; Realm Kotlin's model uses
+                // non-nullable Strings, so the automatic migration drops the old value instead
+                // of carrying it over. Re-copy explicitly, same as RealmToken/RealmAuxData below.
+                copyStringField(oldObject, "name")
+                copyStringField(oldObject, "ENSName")
+                copyStringField(oldObject, "balance")
+                copyStringField(oldObject, "ENSAvatar")
+                copyLongField(oldObject, "lastWarning")
+            }
+        }
+
+        // Realm Java -> Realm Kotlin: RealmWCSession's String fields were nullable in the old Java
+        // model and non-nullable here, so the automatic migration silently drops them. Re-copy
+        // explicitly so existing WalletConnect sessions survive the upgrade.
+        migrationContext.enumerateIfPresent("RealmWCSession") { oldObject, newObject ->
+            newObject?.run {
+                copyStringField(oldObject, "peerId")
+                copyStringField(oldObject, "sessionData")
+                copyStringField(oldObject, "remotePeerData")
+                copyStringField(oldObject, "remotePeerId")
+                copyStringField(oldObject, "walletAccount")
+            }
+        }
+
+        // Realm Java -> Realm Kotlin: RealmAttestation's String fields (including the attestation
+        // blob itself) were nullable in the old Java model and non-nullable here, so the automatic
+        // migration silently drops them instead of carrying the value over. Re-copy explicitly.
+        migrationContext.enumerateIfPresent("RealmAttestation") { oldObject, newObject ->
+            newObject?.run {
+                copyStringField(oldObject, "name")
+                copyStringField(oldObject, "chains")
+                copyStringField(oldObject, "subTitle")
+                copyStringField(oldObject, "id")
+                copyStringField(oldObject, "collectionId")
+                copyStringField(oldObject, "attestation")
+                copyStringField(oldObject, "identifierHash")
             }
         }
 

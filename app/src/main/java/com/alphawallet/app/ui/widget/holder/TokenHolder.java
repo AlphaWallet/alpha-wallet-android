@@ -166,6 +166,8 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
             populateTicker(token.group);
 
             greyOutSpamTokenValue();
+
+            Timber.d("TIMER: Display Token");
         }
         catch (Exception ex)
         {

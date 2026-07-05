@@ -142,4 +142,8 @@ public interface PreferenceRepositoryType
     boolean getUseTSViewer();
 
     void setUseTSViewer(boolean toggleState);
+
+    boolean getShowAllTokens();
+
+    void setShowAllTokens(boolean showAll);
 }

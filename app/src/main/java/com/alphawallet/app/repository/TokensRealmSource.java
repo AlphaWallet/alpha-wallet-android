@@ -187,28 +187,6 @@ public class TokensRealmSource implements TokenLocalSource
         return TextUtils.isEmpty(address) || address.regionMatches(true, 0, "migrated-", 0, 9);
     }
 
-    /** Debug helper: log every RealmToken row in the wallet database. */
-    public static void logRealmTokenTable(RealmManager realmManager, Wallet wallet, String reason)
-    {
-        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
-        {
-            Realm realm = realmCloser.getRealm();
-            RealmCompat.Results<RealmToken> rows = RealmCompat.where(realm, RealmToken.class).findAll();
-            Timber.tag(TAG).w("RealmToken dump (%s): %d rows in %s", reason, rows.size(),
-                    realmManager.getRealmInstanceName(wallet));
-            for (RealmToken row : rows)
-            {
-                Timber.tag(TAG).w("  pk=%s chainId=%d spec=%d enabled=%s balance=%s name=%s",
-                        row.getAddress(), row.getChainId(), row.getInterfaceSpec(),
-                        row.getEnabled(), row.getBalance(), row.getName());
-            }
-        }
-        catch (Exception e)
-        {
-            Timber.tag(TAG).e(e, "RealmToken dump failed (%s)", reason);
-        }
-    }
-
     private static boolean isNativeTokenRow(RealmToken token, Wallet wallet)
     {
         String key = token.getAddress();
@@ -1058,7 +1036,7 @@ public class TokensRealmSource implements TokenLocalSource
             if (realmToken != null)
             {
                 final String currentBalance = realmToken.getBalance();
-                final String newBalance = (balanceArray == null || balanceArray.size() == 0) ? balance.toString() : Utils.bigIntListToString(balanceArray, true);
+                final String newBalance = (balanceArray == null || balanceArray.isEmpty()) ? balance.toString() : Utils.bigIntListToString(balanceArray, true);
 
                 //does the token need updating?
                 if (token.checkInfoRequiresUpdate(realmToken))
@@ -1138,7 +1116,6 @@ public class TokensRealmSource implements TokenLocalSource
                     token.balance = balance;
                     saveTokenLocal(r, token);
                 });
-                logRealmTokenTable(realmManager, wallet, "after insert in updateTokenBalance");
             }
         }
         catch (Exception e)
@@ -1447,20 +1424,21 @@ public class TokensRealmSource implements TokenLocalSource
     {
         List<TokenCardMeta> tokenMetas = new ArrayList<>();
         List<Long> rootChainTokenCards = new ArrayList<>(networkFilters);
+        Timber.d("TIMER: Start meta load");
         try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
         {
             Realm realm = realmCloser.getRealm();
-            runWalletMaintenanceIfNeeded(realm, wallet, forceMaintenance);
-            if (forceMaintenance)
-            {
-                logRealmTokenTable(realmManager, wallet, "after purge/repair, before load");
-            }
+            //runWalletMaintenanceIfNeeded(realm, wallet, forceMaintenance);
             RealmCompat.Results<RealmToken> realmItems = RealmCompat.where(realm, RealmToken.class)
                     .sort("addedTime", RealmCompat.Sort.ASCENDING)
                     .findAll();
 
+            Timber.d("TIMER: iterate metas");
+
             for (RealmToken t : realmItems)
             {
+                long chainId = resolveChainId(t);
+                String name = t.getName();
                 if (!isValidTokenDatabaseKey(t.getAddress()) || !matchesWalletTokenQuery(t, wallet))
                 {
                     continue;
@@ -1474,10 +1452,8 @@ public class TokensRealmSource implements TokenLocalSource
                     continue;
                 }
 
-                long chainId = resolveChainId(t);
                 ContractType contractType = resolveContractType(t, wallet);
                 String tokenAddress = t.getTokenAddress();
-                String name = t.getName();
                 if (contractType == ContractType.ETHEREUM && (!isWalletNativeToken(contractType, tokenAddress, wallet) || name.isEmpty()))
                 {
                     continue;
@@ -1504,7 +1480,7 @@ public class TokensRealmSource implements TokenLocalSource
 
                 long lastBalanceCheck = Math.max(t.getUpdateTime(), t.getBalanceUpdateTime());
                 TokenCardMeta meta = new TokenCardMeta(chainId, displayAddress, balance, lastBalanceCheck, svs,
-                        t.getName(), t.getSymbol(), contractType, getTokenGroup(chainId, displayAddress, contractType));
+                        name, t.getSymbol(), contractType, getTokenGroup(chainId, displayAddress, contractType));
                 meta.lastTxUpdate = t.getLastTxTime();
                 meta.isEnabled = t.isEnabled();
                 if (restoreDisplayFlags && !meta.isEnabled && !t.isVisibilityChanged() && !balance.equals("0"))
@@ -1539,6 +1515,8 @@ public class TokensRealmSource implements TokenLocalSource
                 tokenMetas.add(meta);
             }
         }
+
+        Timber.d("TIMER: return metas");
 
         return tokenMetas.toArray(new TokenCardMeta[0]);
     }
@@ -1709,7 +1687,7 @@ public class TokensRealmSource implements TokenLocalSource
 
                 for (RealmToken t : realmItems)
                 {
-                    if (networkFilters.size() > 0 && !networkFilters.contains(t.getChainId()))
+                    if (!networkFilters.isEmpty() && !networkFilters.contains(t.getChainId()))
                         continue;
                     String balance = convertStringBalance(t.getBalance(), t.getContractType());
                     TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), balance, t.getUpdateTime(), null, t.getAuxData(), t.getSymbol(), t.getContractType(), getTokenGroup(t.getChainId(), t.getTokenAddress(), t.getContractType()));
@@ -1736,7 +1714,7 @@ public class TokensRealmSource implements TokenLocalSource
                 TokenFactory tf = new TokenFactory();
                 for (RealmToken realmItem : realmItems)
                 {
-                    if (networkFilters.size() > 0 && !networkFilters.contains(realmItem.getChainId())) continue;
+                    if (!networkFilters.isEmpty() && !networkFilters.contains(realmItem.getChainId())) continue;
                     if ((!TextUtils.isEmpty(realmItem.getName()) && realmItem.getName().contains("??"))
                         || (!TextUtils.isEmpty(realmItem.getSymbol()) && realmItem.getSymbol().contains("??")))
                     {
@@ -1763,7 +1741,7 @@ public class TokensRealmSource implements TokenLocalSource
 
                 for (RealmToken realmItem : realmItems)
                 {
-                    if (networkFilters.size() > 0 && !networkFilters.contains(realmItem.getChainId())) continue;
+                    if (!networkFilters.isEmpty() && !networkFilters.contains(realmItem.getChainId())) continue;
                     if (TextUtils.isEmpty(realmItem.getName()))
                     {
                         tokens.add(new ContractAddress(realmItem.getChainId(), realmItem.getTokenAddress()));
@@ -1978,6 +1956,34 @@ public class TokensRealmSource implements TokenLocalSource
         }
 
         return tt;
+    }
+
+    /**
+     * Batch ticker lookup: opens a single Realm session and fetches tickers for all supplied keys,
+     * avoiding the overhead of opening/closing a Realm instance for every individual token.
+     */
+    @Override
+    public Map<String, TokenTicker> getCurrentTickers(List<String> keys)
+    {
+        Map<String, TokenTicker> result = new HashMap<>();
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(TICKER_DB)))
+        {
+            Realm realm = realmCloser.getRealm();
+            for (String key : keys)
+            {
+                RealmTokenTicker realmItem = RealmCompat.where(realm, RealmTokenTicker.class)
+                        .equalTo("contract", key)
+                        .findFirst();
+
+                TokenTicker tt = convertRealmTicker(realmItem);
+                if (tt != null)
+                {
+                    result.put(key, tt);
+                }
+            }
+        }
+
+        return result;
     }
 
     @Override

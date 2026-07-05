@@ -30,6 +30,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String CURRENCY_SYMBOL_KEY = "currency_symbol";
     public static final String USER_LOCALE_PREF = "user_locale_pref";
     public static final String HIDE_ZERO_BALANCE_TOKENS = "hide_zero_balance_tokens";
+    public static final String SHOW_ALL_TOKENS = "show_all_tokens";
     public static final String FULL_SCREEN_STATE = "full_screen";
     public static final String EXPERIMENTAL_1559_TX = "ex_1559_tx";
     public static final String USE_TOKENSCRIPT_VIEWER = "use_ts_viewer";
@@ -471,6 +472,18 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public void setUseTSViewer(boolean state)
     {
         pref.edit().putBoolean(USE_TOKENSCRIPT_VIEWER, state).apply();
+    }
+
+    @Override
+    public boolean getShowAllTokens()
+    {
+        return pref.getBoolean(SHOW_ALL_TOKENS, false);
+    }
+
+    @Override
+    public void setShowAllTokens(boolean showAll)
+    {
+        pref.edit().putBoolean(SHOW_ALL_TOKENS, showAll).apply();
     }
 
     @NonNull

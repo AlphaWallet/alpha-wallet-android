@@ -2,8 +2,6 @@ package com.alphawallet.app.viewmodel;
 
 import static com.alphawallet.app.C.EXTRA_ADDRESS;
 import static com.alphawallet.app.widget.CopyTextView.KEY_ADDRESS;
-import static com.alphawallet.token.tools.TokenDefinition.NO_SCRIPT;
-import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
 
 import android.app.Activity;
 import android.content.ClipData;
@@ -23,26 +21,25 @@ import androidx.lifecycle.MutableLiveData;
 import com.alphawallet.app.C;
 import com.alphawallet.app.R;
 import com.alphawallet.app.entity.ContractType;
-import com.alphawallet.app.entity.EasAttestation;
-import com.alphawallet.app.entity.QRResult;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.WalletType;
 import com.alphawallet.app.entity.analytics.QrScanSource;
 import com.alphawallet.app.entity.attestation.ImportAttestation;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
+import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Attestation;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
-import com.alphawallet.app.entity.tokens.TokenInfo;
 import com.alphawallet.app.entity.walletconnect.WalletConnectSessionItem;
 import com.alphawallet.app.interact.ChangeTokenEnableInteract;
 import com.alphawallet.app.interact.FetchTokensInteract;
 import com.alphawallet.app.interact.GenericWalletInteract;
+import com.alphawallet.app.realm.AutoCloseableRealm;
+import com.alphawallet.app.realm.RealmCompat;
 import com.alphawallet.app.repository.CoinbasePayRepository;
 import com.alphawallet.app.repository.OnRampRepositoryType;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
-import com.alphawallet.app.repository.TokensMappingRepositoryType;
 import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.repository.WalletItem;
 import com.alphawallet.app.repository.entity.RealmAttestation;
@@ -59,11 +56,9 @@ import com.alphawallet.app.ui.QRScanning.QRScannerActivity;
 import com.alphawallet.app.ui.TokenManagementActivity;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
 import com.alphawallet.app.widget.WalletFragmentActionsView;
-import com.alphawallet.token.entity.AttestationValidationStatus;
-import com.alphawallet.token.tools.TokenDefinition;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.gson.Gson;
+import com.reown.android.internal.utils.Time;
 
 import org.jetbrains.annotations.NotNull;
 import org.web3j.crypto.Keys;
@@ -71,6 +66,7 @@ import org.web3j.crypto.Keys;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -82,16 +78,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.kotlin.Realm;
-import com.alphawallet.app.realm.RealmCompat;
-import com.alphawallet.app.realm.AutoCloseableRealm;
-import com.alphawallet.app.realm.RealmCompat.Results;
 import timber.log.Timber;
 
 @HiltViewModel
 public class WalletViewModel extends BaseViewModel
 {
-    public static long BALANCE_BACKUP_CHECK_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
-    public static double VALUE_THRESHOLD = 200.0; //$200 USD value is difference between red and grey backup warnings
+    public static final long BALANCE_BACKUP_CHECK_INTERVAL = 5 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long VALUE_INTERVAL = 2 * DateUtils.MINUTE_IN_MILLIS;
+    public static final double VALUE_THRESHOLD = 200.0; //$200 USD value is difference between red and grey backup warnings
     private final MutableLiveData<TokenCardMeta[]> tokens = new MutableLiveData<>();
     private final MutableLiveData<TokenCardMeta[]> updatedTokens = new MutableLiveData<>();
     private final MutableLiveData<Wallet> defaultWallet = new MutableLiveData<>();
@@ -112,6 +106,7 @@ public class WalletViewModel extends BaseViewModel
     private final OnRampRepositoryType onRampRepository;
     private long lastBackupCheck = 0;
     private long lastTokenFetchTime = 0;
+    private long lastValueCheck = 0;
     private BottomSheetDialog dialog;
     private final AWWalletConnectClient awWalletConnectClient;
     @Nullable
@@ -146,6 +141,8 @@ public class WalletViewModel extends BaseViewModel
         this.realmManager = realmManager;
         this.onRampRepository = onRampRepository;
         this.awWalletConnectClient = awWalletConnectClient;
+
+        lastValueCheck = System.currentTimeMillis() - (VALUE_INTERVAL) + 10 * DateUtils.SECOND_IN_MILLIS;
     }
 
     public LiveData<TokenCardMeta[]> tokens()
@@ -214,6 +211,7 @@ public class WalletViewModel extends BaseViewModel
 
     private void onDefaultWallet(Wallet wallet)
     {
+        Timber.d("TIMER: onDefaultWallet");
         tokensService.setCurrentAddress(wallet.address);
         assetDefinitionService.startEventListener();
         defaultWallet.postValue(wallet);
@@ -225,6 +223,7 @@ public class WalletViewModel extends BaseViewModel
         disposable =
                 fetchTokensInteract.fetchTokenMetas(wallet, tokensService.getNetworkFilters(), assetDefinitionService)
                         .subscribeOn(Schedulers.io())
+                        .map(this::filterTokensByValue)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onTokenMetas, this::onError);
     }
@@ -234,6 +233,73 @@ public class WalletViewModel extends BaseViewModel
         lastTokenFetchTime = System.currentTimeMillis();
         tokens.postValue(metaTokens);
         tokensService.updateTickers();
+        calculateFiatValues();
+    }
+
+    /**
+     * When "Show all Tokens" is off, ERC20 tokens with no known ticker value are removed from the list
+     * to cut down on spam/clutter. Tokens are always shown when the "Show all Tokens" preference is on.
+     *
+     * Runs on the IO thread (called before observeOn(mainThread)) and fetches all required tickers
+     * in a single batched Realm lookup, rather than opening a Realm instance per token, to avoid
+     * blocking the UI with hundreds of individual database reads.
+     */
+    private TokenCardMeta[] filterTokensByValue(TokenCardMeta[] metaTokens)
+    {
+        if (preferenceRepository.getShowAllTokens())
+        {
+            return metaTokens;
+        }
+
+        Map<String, TokenTicker> tickers = fetchErc20Tickers(metaTokens);
+
+        List<TokenCardMeta> filtered = new ArrayList<>();
+        for (TokenCardMeta meta : metaTokens)
+        {
+            if (meta.type == ContractType.ERC20 && !hasTickerValue(tickers.get(tickerKey(meta))))
+            {
+                continue;
+            }
+            filtered.add(meta);
+        }
+
+        return filtered.toArray(new TokenCardMeta[0]);
+    }
+
+    private Map<String, TokenTicker> fetchErc20Tickers(TokenCardMeta[] metaTokens)
+    {
+        List<String> keys = new ArrayList<>();
+        for (TokenCardMeta meta : metaTokens)
+        {
+            if (meta.type == ContractType.ERC20)
+            {
+                keys.add(tickerKey(meta));
+            }
+        }
+
+        return tokensService.getTokenTickers(keys);
+    }
+
+    private String tickerKey(TokenCardMeta meta)
+    {
+        return TokensRealmSource.databaseKey(meta.getChain(), meta.isEthereum() ? "eth" : meta.getAddress().toLowerCase());
+    }
+
+    private boolean hasTickerValue(TokenTicker ticker)
+    {
+        if (ticker == null || TextUtils.isEmpty(ticker.price))
+        {
+            return false;
+        }
+
+        try
+        {
+            return new BigDecimal(ticker.price).compareTo(BigDecimal.ZERO) > 0;
+        }
+        catch (NumberFormatException e)
+        {
+            return false;
+        }
     }
 
     public void searchTokens(String search)
@@ -241,8 +307,19 @@ public class WalletViewModel extends BaseViewModel
         disposable =
                 fetchTokensInteract.searchTokenMetas(defaultWallet.getValue(), tokensService.getNetworkFilters(), search)
                         .subscribeOn(Schedulers.io())
+                        .map(this::filterTokensByValue)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onTokenMetas, this::onError);
+    }
+
+    public boolean getShowAllTokens()
+    {
+        return preferenceRepository.getShowAllTokens();
+    }
+
+    public void setShowAllTokens(boolean showAll)
+    {
+        preferenceRepository.setShowAllTokens(showAll);
     }
 
     public void startUpdateListener()
@@ -461,6 +538,7 @@ public class WalletViewModel extends BaseViewModel
 
     public void notifyRefresh()
     {
+        lastValueCheck = 0;
         tokensService.clearFocusToken(); //ensure if we do a refresh there's no focus token preventing correct update
         tokensService.onWalletRefreshSwipe();
     }
@@ -472,10 +550,15 @@ public class WalletViewModel extends BaseViewModel
 
     public void calculateFiatValues()
     {
-        disposable = tokensService.getFiatValuePair()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(fiatValues::postValue);
+        long currentTime = System.currentTimeMillis();
+        if ((lastValueCheck + VALUE_INTERVAL) < currentTime)
+        {
+            lastValueCheck = currentTime;
+            disposable = tokensService.getFiatValuePair()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(fiatValues::postValue);
+        }
     }
 
     public void showManageWallets(Context context, boolean clearStack)

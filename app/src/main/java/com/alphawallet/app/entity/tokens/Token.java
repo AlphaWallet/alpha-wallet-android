@@ -2,6 +2,9 @@ package com.alphawallet.app.entity.tokens;
 
 import static android.text.Html.FROM_HTML_MODE_COMPACT;
 
+import static com.alphawallet.app.service.TokensService.DEBUG_TOKEN;
+import static com.alphawallet.app.service.TokensService.hasNameIssue;
+
 import android.content.Context;
 import android.text.Html;
 import android.text.TextUtils;
@@ -58,6 +61,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.reactivex.Single;
 import io.realm.kotlin.Realm;
 import io.realm.kotlin.TypedRealm;
+import timber.log.Timber;
+
 import com.alphawallet.app.realm.RealmCompat;
 
 public class Token
@@ -1051,6 +1056,7 @@ public class Token
         if (TextUtils.isEmpty(realmToken.getName()) || (!TextUtils.isEmpty(tokenInfo.name) && !tokenInfo.name.equals(realmToken.getName()))) { return true; }
         if (TextUtils.isEmpty(realmToken.getSymbol()) || (!TextUtils.isEmpty(tokenInfo.symbol) && !tokenInfo.symbol.equals(realmToken.getSymbol()))) { return true; }
         if (realmToken.getContractType() != contractType) { return true; }
+        if (hasNameIssue(realmToken.getName())) { return true; }
         return realmToken.getDecimals() != tokenInfo.decimals;
     }
 

@@ -554,11 +554,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://api.etherscan.io/v2/api?chainid=1&"));
             put(CLASSIC_ID, new NetworkInfo(C.CLASSIC_NETWORK_NAME, C.ETC_SYMBOL,
                     CHAIN_CONFIG_RPC.get(CLASSIC_ID),
-                    "https://blockscout.com/etc/mainnet/tx/", CLASSIC_ID,
-                    "https://blockscout.com/etc/mainnet/api?"));
+                    "https://etc.blockscout.com/tx/", CLASSIC_ID,
+                    "https://api.blockscout.com/v2/api?chainid=61&"));
             put(GNOSIS_ID, new NetworkInfo(C.XDAI_NETWORK_NAME, C.xDAI_SYMBOL,
                     CHAIN_CONFIG_RPC.get(GNOSIS_ID),
-                    "https://gnosis.blockscout.com/tx/", GNOSIS_ID, "https://gnosis.blockscout.com?"));
+                    "https://gnosis.blockscout.com/tx/", GNOSIS_ID,
+                    "https://api.blockscout.com/v2/api?chainid=100&"));
             put(BINANCE_TEST_ID, new NetworkInfo(C.BINANCE_TEST_NETWORK, C.BINANCE_SYMBOL,
                     CHAIN_CONFIG_RPC.get(BINANCE_TEST_ID),
                     "https://testnet.bscscan.com/tx/", BINANCE_TEST_ID,
@@ -658,8 +659,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
             put(ROOTSTOCK_MAINNET_ID, new NetworkInfo(C.ROOTSTOCK_NETWORK_NAME, C.ROOTSTOCK_SYMBOL,
                     CHAIN_CONFIG_RPC.get(ROOTSTOCK_MAINNET_ID),
-                    "https://blockscout.com/rsk/mainnet/tx/", ROOTSTOCK_MAINNET_ID,
-                    "https://blockscout.com/rsk/mainnet/api?"));
+                    "https://rootstock.blockscout.com/tx/", ROOTSTOCK_MAINNET_ID,
+                    "https://api.blockscout.com/v2/api?chainid=30&"));
             put(ROOTSTOCK_TESTNET_ID, new NetworkInfo(C.ROOTSTOCK_TESTNET_NAME, C.ROOTSTOCK_TEST_SYMBOL,
                     CHAIN_CONFIG_RPC.get(ROOTSTOCK_TESTNET_ID),
                     "", ROOTSTOCK_TESTNET_ID,

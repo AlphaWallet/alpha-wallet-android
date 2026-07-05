@@ -1,5 +1,6 @@
 package com.alphawallet.app.repository;
 
+import static com.alphawallet.app.service.TokensService.DEBUG_TOKEN;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -310,6 +311,12 @@ public class TokenRepository implements TokenRepositoryType {
     public TokenTicker getTokenTicker(Token token)
     {
         return localSource.getCurrentTicker(token);
+    }
+
+    @Override
+    public Map<String, TokenTicker> getTokenTickers(List<String> databaseKeys)
+    {
+        return localSource.getCurrentTickers(databaseKeys);
     }
 
     /**

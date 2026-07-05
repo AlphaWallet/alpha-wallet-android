@@ -20,6 +20,7 @@ import com.alphawallet.token.entity.ContractAddress;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -47,6 +48,8 @@ public interface TokenRepositoryType
     Single<TokenTicker> getEthTicker(long chainId);
 
     TokenTicker getTokenTicker(Token token);
+
+    Map<String, TokenTicker> getTokenTickers(List<String> databaseKeys);
 
     Single<BigInteger> fetchLatestBlockNumber(long chainId);
 

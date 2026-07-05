@@ -848,7 +848,6 @@ public class TokenDefinition
     private void setModifier(TSAction action, Element card) throws Exception
     {
         String modifier = card.getAttribute("modifier");
-        System.out.println("YOLESS MOD: " + modifier);
         switch (modifier.toLowerCase())
         {
             case "attestation":
@@ -863,7 +862,6 @@ public class TokenDefinition
         }
 
         String type = card.getAttribute("type");
-        System.out.println("YOLESS Type: " + type);
         switch (type)
         {
             case "activity":

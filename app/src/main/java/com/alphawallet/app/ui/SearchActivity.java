@@ -24,6 +24,7 @@ import com.alphawallet.app.ui.widget.adapter.TokensAdapter;
 import com.alphawallet.app.ui.widget.entity.SearchToolbarCallback;
 import com.alphawallet.app.viewmodel.WalletViewModel;
 import com.alphawallet.app.widget.SearchToolbar;
+import com.alphawallet.app.widget.SettingsItemView;
 
 import org.web3j.crypto.WalletUtils;
 
@@ -41,6 +42,7 @@ public class SearchActivity extends BaseActivity implements SearchToolbarCallbac
     private TokensAdapter adapter;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
+    private SettingsItemView showAllTokensSwitch;
     private String searchText;
 
     @Override
@@ -55,6 +57,8 @@ public class SearchActivity extends BaseActivity implements SearchToolbarCallbac
 
         initList();
 
+        initShowAllTokensToggle();
+
         initIntentLaunchers();
     }
 
@@ -62,6 +66,7 @@ public class SearchActivity extends BaseActivity implements SearchToolbarCallbac
     {
         recyclerView = findViewById(R.id.list);
         progressBar = findViewById(R.id.progress_bar);
+        showAllTokensSwitch = findViewById(R.id.setting_show_all_tokens);
         SearchToolbar searchBar = findViewById(R.id.search);
         searchBar.setSearchCallback(this);
         searchBar.getEditView().requestFocus();
@@ -88,10 +93,33 @@ public class SearchActivity extends BaseActivity implements SearchToolbarCallbac
         recyclerView.setAdapter(adapter);
     }
 
+    private void initShowAllTokensToggle()
+    {
+        showAllTokensSwitch.setToggleState(viewModel.getShowAllTokens());
+        showAllTokensSwitch.setListener(() -> {
+            viewModel.setShowAllTokens(showAllTokensSwitch.getToggleState());
+            refreshTokenList();
+        });
+    }
+
+    private void refreshTokenList()
+    {
+        progressBar.setVisibility(View.VISIBLE);
+        adapter.clear();
+        if (TextUtils.isEmpty(searchText))
+        {
+            viewModel.reloadTokens();
+        }
+        else
+        {
+            viewModel.searchTokens(searchText);
+        }
+    }
+
     private void onTokens(TokenCardMeta[] tokens)
     {
         adapter.setTokens(tokens);
-        viewModel.calculateFiatValues();
+        //viewModel.calculateFiatValues();
         progressBar.setVisibility(View.GONE);
 
         //If no results, try searching

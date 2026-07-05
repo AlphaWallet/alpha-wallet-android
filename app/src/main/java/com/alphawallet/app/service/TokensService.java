@@ -1,9 +1,7 @@
 package com.alphawallet.app.service;
 
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
 import static com.alphawallet.app.repository.TokensRealmSource.pendingMapKey;
 import static com.alphawallet.app.repository.TokensRealmSource.resetWalletMaintenance;
-import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.text.TextUtils;
@@ -21,12 +19,12 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.okx.OkProtocolType;
+import com.alphawallet.app.entity.okx.OkToken;
 import com.alphawallet.app.entity.okx.OkTokenCheck;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokendata.TokenUpdateType;
-import com.alphawallet.app.entity.okx.OkProtocolType;
-import com.alphawallet.app.entity.okx.OkToken;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
@@ -60,7 +58,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.kotlin.Realm;
-import com.alphawallet.app.realm.RealmCompat;
 import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
@@ -118,6 +115,8 @@ public class TokensService
 
     private static boolean done = false;
 
+    public static String DEBUG_TOKEN = "0x54f7";
+
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
                          TokenRepositoryType tokenRepository,
                          TickerService tickerService,
@@ -146,9 +145,11 @@ public class TokensService
         if (queryUnknownTokensDisposable == null || queryUnknownTokensDisposable.isDisposed())
         {
             ContractAddress t = unknownTokens.pollFirst();
-            Token cachedToken = t != null ? getToken(t.chainId, t.address) : null;
+            Token cachedToken = getToken(t.chainId, t.address);
+            boolean cachedNameBad = cachedToken != null
+                    && (hasNameIssue(cachedToken.tokenInfo.name));
 
-            if (t != null && !t.address.isEmpty() && (cachedToken == null || TextUtils.isEmpty(cachedToken.tokenInfo.name)))
+            if (!t.address.isEmpty() && (cachedToken == null || cachedNameBad))
             {
                 ContractType type = tokenRepository.determineCommonType(new TokenInfo(t.address, "", "", 18, false, t.chainId)).blockingGet();
 
@@ -158,12 +159,6 @@ public class TokensService
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe(this::finishAddToken, err -> onCheckError(err, t));
-            }
-            else if (t == null)
-            {
-                //stop the check
-                if (checkUnknownTokenCycle != null && !checkUnknownTokenCycle.isDisposed())
-                    checkUnknownTokenCycle.dispose();
             }
         }
     }
@@ -196,6 +191,12 @@ public class TokensService
     public TokenTicker getTokenTicker(Token token)
     {
         return tokenRepository.getTokenTicker(token);
+    }
+
+    /** Batch ticker lookup keyed by the token database key (see TokensRealmSource.databaseKey). */
+    public Map<String, TokenTicker> getTokenTickers(List<String> databaseKeys)
+    {
+        return tokenRepository.getTokenTickers(databaseKeys);
     }
 
     public Single<TokenCardMeta[]> getAllTokenMetas(String searchString)
@@ -234,7 +235,7 @@ public class TokensService
         syncStart = System.currentTimeMillis();
         syncTimer = syncStart + 5*DateUtils.SECOND_IN_MILLIS;
 
-        eventTimer = Observable.interval(1, DateUtils.SECOND_IN_MILLIS, TimeUnit.MILLISECONDS)
+        eventTimer = Observable.interval(10, DateUtils.SECOND_IN_MILLIS, TimeUnit.MILLISECONDS)
                 .doOnNext(l -> checkTokensBalance())
                 .observeOn(Schedulers.newThread()).subscribe();
     }
@@ -294,14 +295,21 @@ public class TokensService
     private TokenCardMeta[] buildUpdateMap()
     {
         int unSynced = 0;
+        Timber.d("TIMER: buildUpdateMap");
         TokenCardMeta[] tokenList = tokenRepository.fetchTokenMetasForUpdate(new Wallet(currentAddress), networkFilter);
         for (TokenCardMeta meta : tokenList)
         {
             meta.lastTxUpdate = meta.lastUpdate;
             String key = pendingMapKey(meta, currentAddress);
-            long pendingTime = pendingTokenMap.containsKey(key) ? pendingTokenMap.get(key) : 0L;
+            long pendingTime = pendingTokenMap.getOrDefault(key, 0L);
             meta.lastUpdate = Math.max(meta.lastUpdate, pendingTime);
             pendingTokenMap.put(key, meta.lastUpdate);
+
+            //populate the update list
+            if (requiresUpdate(meta))
+            {
+                addUnknownToken(meta);
+            }
 
             if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
                     && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName())
@@ -665,6 +673,8 @@ public class TokensService
             return;
         }
 
+        Timber.d("TIMER: checkTokensBalance");
+
         final Token t = getNextInBalanceUpdateQueue();
 
         if (t != null)
@@ -989,6 +999,7 @@ public class TokensService
 
     public Single<Pair<Double, Double>> getFiatValuePair()
     {
+        Timber.d("TIMER: getFiatValuePair");
         return tokenRepository.getTotalValue(currentAddress, EthereumNetworkBase.getAllMainNetworks());
     }
 
@@ -1437,5 +1448,44 @@ public class TokensService
     public boolean isOnFocus()
     {
         return appHasFocus;
+    }
+
+    public static boolean hasNameIssue(String name)
+    {
+        return !TextUtils.isEmpty(name) && name.matches("0x[0-9a-fA-F]{4}\\.\\.\\.[0-9a-fA-F]{4}");
+    }
+
+    private boolean requiresUpdate(TokenCardMeta meta)
+    {
+        String filter = meta.getFilterText();
+        String name = filter.length() > 6 ? filter.startsWith("'") ? filter.toLowerCase().substring(1) : filter : "";
+        if (name.length() > 7 && name.toLowerCase().startsWith(DEBUG_TOKEN)){
+            Timber.d("Bad");
+        }
+
+        return hasNameIssue(name);
+    }
+
+    public void addUnknownToken(TokenCardMeta meta)
+    {
+        long chainId = meta.getChain();
+        String address = meta.getAddress();
+        for (ContractAddress check : unknownTokens)
+        {
+            if (check.chainId == chainId && check.address.equalsIgnoreCase(address))
+            {
+                return;
+            }
+        }
+
+        if (chainId == 1L)
+        {
+            unknownTokens.addFirst(new ContractAddress(chainId, address));
+        }
+        else
+        {
+            unknownTokens.addLast(new ContractAddress(chainId, address));
+        }
+        startUnknownCheck();
     }
 }

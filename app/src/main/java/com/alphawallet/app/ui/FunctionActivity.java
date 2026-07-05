@@ -170,22 +170,12 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
 
     private void setupAction()
     {
-        if (token == null)
-        {
-            System.out.println("YOLESS TOKEN NULL");
-        }
-        if (action == null)
-        {
-            System.out.println("YOLESS ACTION NULL");
-        }
         if (token != null && action == null)
         {
             Map<String, TSAction> functions = viewModel.getAssetDefinitionService().getTokenFunctionMap(token);
-            System.out.println("YOLESS: " + actionMethod);
 
             if (functions != null)
             {
-                System.out.println("YOLESS: " + functions.toString());
                 action = functions.get(actionMethod);
             }
         }
@@ -364,15 +354,7 @@ public class FunctionActivity extends BaseActivity implements FunctionCallback,
     {
         FunctionButtonBar functionBar = findViewById(R.id.layoutButtons);
         setupAction();
-        if (action == null)
-        {
-            System.out.println("YOLESS ACTION NULL");
-        }
 
-        else
-        {
-            System.out.println("YOLESS MODIFIER: " + action.modifier);
-        }
         if (action != null && action.modifier != ActionModifier.ACTIVITY)
         {
             functionBar.setupFunctionList(this, actionMethod);

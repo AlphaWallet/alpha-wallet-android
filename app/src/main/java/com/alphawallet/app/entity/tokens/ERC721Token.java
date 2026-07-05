@@ -348,11 +348,6 @@ public class ERC721Token extends Token
             return balance;
         }
 
-        if (this.tokenInfo.address.equalsIgnoreCase("0x0665709A767096bA799BDc351A72EcE2E5591dCC"))
-        {
-            System.out.println("YOLESS");
-        }
-
         final Web3j web3j = TokenRepository.getWeb3jServiceForEvents(tokenInfo.chainId);
         if (contractType == ContractType.ERC721_ENUMERABLE)
         {

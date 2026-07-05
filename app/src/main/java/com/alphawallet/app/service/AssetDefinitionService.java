@@ -100,6 +100,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -158,7 +159,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final Semaphore assetLoadingLock;  // used to block if someone calls getAssetDefinitionASync() while loading
     private Disposable eventListener;           // timer thread that periodically checks event logs for scripts that require events
     private final Semaphore eventConnection;
-    private FragmentMessenger homeMessenger;
 
     private final TokenscriptFunction tokenscriptUtility;
 
@@ -2794,6 +2794,27 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
+    private String urlEncode(String value)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8);
+        }
+        else
+        {
+            try
+            {
+                // StandardCharsets.UTF_8.name() returns "UTF-8"
+                return URLEncoder.encode(value, StandardCharsets.UTF_8.name());
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                // UTF-8 is guaranteed to be supported on all Android devices
+                return value;
+            }
+        }
+    }
+
     //private Token
     private void addOpenSeaAttributes(StringBuilder attrs, Token token, BigInteger tokenId)
     {
@@ -2802,11 +2823,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //add all asset IDs
         if (tokenAsset.getBackgroundColor() != null)
-            TokenScriptResult.addPair(attrs, "background_colour", URLEncoder.encode(tokenAsset.getBackgroundColor(), StandardCharsets.UTF_8));
+            TokenScriptResult.addPair(attrs, "background_colour", urlEncode(tokenAsset.getBackgroundColor()));
         if (tokenAsset.getThumbnail() != null)
             TokenScriptResult.addPair(attrs, "image_preview_url", tokenAsset.getThumbnail());
         if (tokenAsset.getDescription() != null)
-            TokenScriptResult.addPair(attrs, "description", URLEncoder.encode(tokenAsset.getDescription(), StandardCharsets.UTF_8));
+            TokenScriptResult.addPair(attrs, "description", urlEncode(tokenAsset.getDescription()));
         if (tokenAsset.getExternalLink() != null)
             TokenScriptResult.addPair(attrs, "external_link", tokenAsset.getExternalLink());
         //if (tokenAsset.getTraits() != null) TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
@@ -3143,7 +3164,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public void setErrorCallback(FragmentMessenger callback)
     {
-        homeMessenger = callback;
+
     }
 
     /**
@@ -3175,7 +3196,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             FileInputStream input = new FileInputStream(file);
                             TokenDefinition tokenDef = parseFile(input);
                             ContractInfo origins = tokenDef.contracts.get(tokenDef.holdingToken);
-                            if (origins.addresses.size() > 0)
+                            if (!origins.addresses.isEmpty())
                             {
                                 TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
                                 tokenLocators.add(new TokenLocator(tokenDef.getTokenName(1), origins, tsf));

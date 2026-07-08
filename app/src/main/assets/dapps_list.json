@@ -89,5 +89,6 @@
   {"name": "Hypemoon", "description": "Your Portal Into Web3 Culture", "url": "https://hypemoon.com/", "category": "News"},
   {"name": "BeInCrypto", "description": "Unbiased crypto news", "url": "https://beincrypto.com/", "category": "News"},
   {"name": "The Defiant", "description": "The essential information platform for the open economy", "url": "https://thedefiant.io/", "category": "News"},
-  {"name": "Verse DEX", "description": "Bitcoin.com's multichain Verse DEX aims to bring everyone permissionless and non-custodial trading access, with a special focus on newcomers to DeFi.", "url": "https://verse.bitcoin.com/", "category": "Exchange"}
+  {"name": "Verse DEX", "description": "Bitcoin.com's multichain Verse DEX aims to bring everyone permissionless and non-custodial trading access, with a special focus on newcomers to DeFi.", "url": "https://verse.bitcoin.com/", "category": "Exchange"},
+  {"name": "Eswap","description": "The world's first 0% interest Spot Margin DEX offering ethical, interest-free leverage trading.","url": "https://ewap-margin.vercel.app/trade","category": "Exchange"},
 ]

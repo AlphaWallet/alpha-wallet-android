@@ -24,6 +24,7 @@
   {"name": "Name Bazaar", "description": "A peer-to-peer marketplace for the exchange of names registered via the ENS", "url": "https://namebazaar.io/", "category": "Marketplace"},
   {"name": "OpenSea", "description": "Peer-to-peer marketplace for scarce digital goods", "url": "https://opensea.io", "category": "Marketplace"},
     {"name": "Veil", "description": "A peer-to-peer trading platform for prediction markets and derivatives", "url": "https://app.veil.co/", "category": "Marketplace"},
+  {"name": "1024EX Predict", "description": "Trade on-chain event contracts across sports, crypto, and macro events with up to 10x leverage.", "url": "https://www.1024ex.com/", "category": "Defi"},
   {"name": "Gravity", "description": "Create your gravatar.", "url": "https://gravity.cool/", "category": "Property"},
   {"name": "Mokens", "description": "Create your own collectibles", "url": "https://mokens.io/", "category": "Property"},
   {"name": "TENZ-ID", "description": "TENZ-ID is a Decentralized Blockchain naming system", "url": "https://tenzorum.org/tenz_id/", "category": "Property"},

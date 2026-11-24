@@ -11,6 +11,7 @@ import io.realm.kotlin.query.RealmQuery
 import io.realm.kotlin.query.Sort as RealmSort
 import com.alphawallet.app.repository.entity.RealmAttestation
 import com.alphawallet.app.repository.entity.RealmAuxData
+import com.alphawallet.app.repository.entity.RealmBlockedRpc
 import com.alphawallet.app.repository.entity.RealmKeyType
 import com.alphawallet.app.repository.entity.RealmNFTAsset
 import com.alphawallet.app.repository.entity.RealmToken
@@ -173,6 +174,7 @@ object RealmCompat {
             RealmTokenTicker::class.java -> RealmTokenTicker().apply { contractKey = key }
             RealmTransaction::class.java -> RealmTransaction().apply { hash = key }
             RealmAttestation::class.java -> RealmAttestation().apply { address = key }
+            RealmBlockedRpc::class.java -> RealmBlockedRpc().apply { this.key = key }
             else -> clazz.kotlin.createInstance().also { setPrimaryKey(it, primaryKey) }
         } as T
         verifyPrimaryKey(clazz, instance, key)
@@ -197,6 +199,7 @@ object RealmCompat {
             is RealmTokenTicker -> instance.contractKey
             is RealmTransaction -> instance.hash
             is RealmAttestation -> instance.address
+            is RealmBlockedRpc -> instance.key
             else -> {
                 val pkProperty = instance::class.memberProperties.firstOrNull {
                     it.annotations.any { ann -> ann.annotationClass.simpleName == "PrimaryKey" }
@@ -424,7 +427,9 @@ class RealmQueryBuilder<T : TypedRealmObject>(
 
     fun `in`(field: String, values: Array<String>): RealmQueryBuilder<T> {
         appendFilter("$field IN \$${args.size}")
-        args.add(values)
+        // Realm Kotlin accepts collections for IN query arguments, but not a
+        // Java array passed through the dynamic query argument converter.
+        args.add(values.toList())
         return this
     }
 

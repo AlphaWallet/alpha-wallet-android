@@ -150,10 +150,11 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         balanceDisplay.setupBalance(token, transaction);
         networkDisplay.setNetwork(token.tokenInfo.chainId);
 
-        gasWidgetInterface = setupGasWidget();
-
-        //ensure gas service is started
+        // Start fee polling before widget selection so 1559 data can land ASAP.
+        // Widget choice itself must not wait on Realm cache for known EIP-1559 chains.
         actionSheetCallback.getGasService().startGasPriceCycle(token.tokenInfo.chainId);
+
+        gasWidgetInterface = setupGasWidget();
 
         if (!tx.gasLimit.equals(BigInteger.ZERO))
         {
@@ -888,6 +889,13 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
     private boolean has1559Gas()
     {
+        // Prefer EIP-1559 for known networks immediately (e.g. Base Sepolia), rather than
+        // waiting until the first successful fee fetch writes Realm1559Gas.
+        if (EthereumNetworkBase.supportsEIP1559(token.tokenInfo.chainId))
+        {
+            return true;
+        }
+
         try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(tokensService.getTickerRealmInstance()))
         {
             Realm realm = realmCloser.getRealm();

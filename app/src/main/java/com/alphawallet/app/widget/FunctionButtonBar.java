@@ -173,23 +173,6 @@ public class FunctionButtonBar extends LinearLayout implements AdapterView.OnIte
         getFunctionMap(assetSvs, token.getInterfaceSpec());
     }
 
-    public void setupFunctionsForJsViewer(StandardFunctionInterface functionInterface, int functionNameResource, Token token, List<BigInteger> tokenIds)
-    {
-        callStandardFunctions = functionInterface;
-        adapter = null;
-        functions = null;
-        addTokenSelection(tokenIds);
-        resetButtonCount();
-        //buttonCount = 2;
-        this.token = token;
-        addFunction(functionNameResource);
-
-        this.addStandardTokenFunctions(token);
-
-        //always show buttons
-        findViewById(R.id.layoutButtons).setVisibility(View.VISIBLE);
-    }
-
     public void setupAttestationFunctions(StandardFunctionInterface functionInterface, AssetDefinitionService assetSvs, Token token, NonFungibleAdapterInterface adp, List<BigInteger> tokenIds)
     {
         callStandardFunctions = functionInterface;

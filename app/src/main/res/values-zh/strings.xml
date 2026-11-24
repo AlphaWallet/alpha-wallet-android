@@ -789,11 +789,6 @@
     <string name="exchange_with_oneinch">使用 1inch 交换</string>
     <string name="swap">交换</string>
     <string name="action_send_to_this_address">发送到此地址</string>
-    <string name="stay_updated">保持更新</string>
-    <string name="email_prompt_hint">我们会发送邮件通知重要功能。您想收到这些邮件吗？（每周最多 1 封邮件）</string>
-    <string name="hint_email_address">邮箱地址</string>
-    <string name="action_want_to_receive_email">我想接收这些邮件</string>
-    <string name="email_is_invalid">请提供有效的邮箱地址</string>
     <string name="github">Github (报告问题)</string>
     <string name="chains_to_scan">要扫描的链</string>
     <string name="action_view">查看</string>
@@ -944,10 +939,6 @@
     <string name="title_session_details">会话详情</string>
     <string name="title_session_proposal">会话提案</string>
     <string name="message_wc_wallet_different_from_active_wallet">钱包不同于活动钱包。</string>
-    <string name="settings_title_analytics">分析</string>
-    <string name="settings_title_crash_reporting">崩溃报告</string>
-    <string name="message_share_anonymous_data">与我们分享您的匿名数据，帮助我们改进 AlphaWallet。 这不包括任何财务信息。</string>
-    <string name="share_anonymous_data">共享匿名数据？</string>
     <string name="enable_required_chains">启用所需的链？</string>
     <string name="enable_required_chains_message">选定的代币位于当前未选择的链上，启用未选择的链？</string>
     <string name="dialog_title_search_token">搜索令牌？</string>
@@ -996,9 +987,10 @@
     <string name="developer_override">开发者覆盖</string>
     <string name="override_warning_text">您可能会在不知情的情况下签署一项交易，这可能会清空您的资金。 您可能希望以开发人员的身份对字节码进行签名，如果您在高级设置中设置开发人员模式，则可以覆盖此警告。</string>
     <string name="constructor">Constructor</string>
-    <string name="use_tokenscript_viewer">使用 TokenScript 查看器</string>
     <string name="not_recommended_to_visit">此 URL 未列入白名单。仍可通过更改设置中的保护选项来访问，但不建议这样做。您可能会损失资金，尤其是如果这是对加密货币挖矿的投资。有很多受监管的加密货币投资网站。</string>
     <string name="developer_override_warning">警告：您即将关闭标准保护。这可以防止您被骗。仅在测试 dapp 或 100\% 确定网站安全时才使用开发者模式。请记住：如果有人告诉您打开此设置，您几乎肯定会失去您的加密货币资金。</string>
     <string name="warning">警告</string>
     <string name="i_accept">我接受风险</string>
+    <string name="multicast_transactions">多播交易</string>
+    <string name="multicast_transactions_sub">使用最多 3 个 RPC 广播交易</string>
 </resources>

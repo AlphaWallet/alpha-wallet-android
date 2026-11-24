@@ -34,6 +34,8 @@ public interface TokenLocalSource
 
     Token fetchToken(long chainId, Wallet wallet, String address);
 
+    Map<String, Token> fetchTokens(Wallet wallet, List<ContractAddress> addresses);
+
     void setEnable(Wallet wallet, ContractAddress cAddr, boolean isEnabled);
 
     String getTokenImageUrl(long chainId, String address);

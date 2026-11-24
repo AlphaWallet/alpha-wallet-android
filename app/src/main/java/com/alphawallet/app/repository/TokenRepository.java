@@ -301,6 +301,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Map<String, Token> fetchTokens(String walletAddress, List<ContractAddress> addresses)
+    {
+        return localSource.fetchTokens(new Wallet(walletAddress), addresses);
+    }
+
+    @Override
     public Token fetchAttestation(long chainId, String walletAddress, String address, String attnId)
     {
         Wallet wallet = new Wallet(walletAddress);

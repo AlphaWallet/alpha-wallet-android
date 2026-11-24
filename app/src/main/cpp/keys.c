@@ -151,17 +151,6 @@ Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getEtherscanKey( JNIEnv* 
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getMailchimpKey(JNIEnv *env, jclass clazz)
-{
-#if (HAS_KEYS == 1)
-    return getDecryptedKey(env, mailchimpKey);
-#else
-    const jstring key = "--";
-    return (*env)->NewStringUTF(env, key);
-#endif
-}
-
-JNIEXPORT jstring JNICALL
 Java_com_alphawallet_app_repository_KeyProviderJNIImpl_getPolygonScanKey(JNIEnv *env, jobject thiz) {
 #if (HAS_KEYS == 1)
     return getDecryptedKey(env, polygonScanKey);

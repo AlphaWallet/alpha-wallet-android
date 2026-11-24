@@ -1029,9 +1029,4 @@ public class TokenFunctionViewModel extends BaseViewModel implements Transaction
     {
         return gasService;
     }
-
-    public boolean getUseTSViewer()
-    {
-        return preferences.getUseTSViewer();
-    }
 }

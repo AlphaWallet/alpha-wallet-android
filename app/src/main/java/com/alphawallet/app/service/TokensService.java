@@ -72,6 +72,8 @@ public class TokensService
     private final ConcurrentLinkedDeque<Token> tokenStoreList = new ConcurrentLinkedDeque<>(); //used to hold tokens that will be stored
     private final Map<String, Long> pendingTokenMap = new ConcurrentHashMap<>(); //used to determine which token to update next
     private String currentAddress = null;
+    private volatile boolean initialMetaLoadComplete = true;
+    private volatile boolean updateCyclePending;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokenRepositoryType tokenRepository;
     private final TickerService tickerService;
@@ -179,6 +181,15 @@ public class TokensService
         else return tokenRepository.fetchToken(chainId, currentAddress, addr.toLowerCase());
     }
 
+    public Map<String, Token> getTokens(List<ContractAddress> addresses)
+    {
+        if (TextUtils.isEmpty(currentAddress) || addresses == null || addresses.isEmpty())
+        {
+            return new HashMap<>();
+        }
+        return tokenRepository.fetchTokens(currentAddress, addresses);
+    }
+
     public void storeToken(Token token)
     {
         if (TextUtils.isEmpty(currentAddress) || token == null || token.getInterfaceSpec() == ContractType.OTHER) return;
@@ -259,6 +270,12 @@ public class TokensService
 
     public void startUpdateCycle()
     {
+        if (!initialMetaLoadComplete)
+        {
+            updateCyclePending = true;
+            return;
+        }
+
         if ((eventTimer != null && !eventTimer.isDisposed() && (lastStartCycleTime + 10000) > System.currentTimeMillis())
                 || (lastStartCycleTime + 2000) > System.currentTimeMillis())
         {
@@ -291,11 +308,48 @@ public class TokensService
                 .subscribe(this::updateCycle, this::onError);
     }
 
+    public void beginInitialMetaLoad(String walletAddress)
+    {
+        if (TextUtils.isEmpty(walletAddress)
+                || TextUtils.isEmpty(currentAddress)
+                || !currentAddress.equalsIgnoreCase(walletAddress))
+        {
+            return;
+        }
+
+        boolean cycleWasRunning = eventTimer != null && !eventTimer.isDisposed();
+        if (cycleWasRunning)
+        {
+            stopUpdateCycle();
+        }
+        // The wallet screen expects the normal update cycle after its initial
+        // snapshot, even when a wallet switch already stopped the old cycle.
+        updateCyclePending = true;
+        initialMetaLoadComplete = false;
+    }
+
+    public void completeInitialMetaLoad(String walletAddress)
+    {
+        if (TextUtils.isEmpty(walletAddress)
+                || TextUtils.isEmpty(currentAddress)
+                || !currentAddress.equalsIgnoreCase(walletAddress))
+        {
+            return;
+        }
+
+        initialMetaLoadComplete = true;
+        if (updateCyclePending)
+        {
+            updateCyclePending = false;
+            lastStartCycleTime = 0;
+            startUpdateCycle();
+        }
+    }
+
     // Constructs a map of tokens requiring update
     private TokenCardMeta[] buildUpdateMap()
     {
         int unSynced = 0;
-        Timber.d("TIMER: buildUpdateMap");
         TokenCardMeta[] tokenList = tokenRepository.fetchTokenMetasForUpdate(new Wallet(currentAddress), networkFilter);
         for (TokenCardMeta meta : tokenList)
         {
@@ -673,8 +727,6 @@ public class TokensService
             return;
         }
 
-        Timber.d("TIMER: checkTokensBalance");
-
         final Token t = getNextInBalanceUpdateQueue();
 
         if (t != null)
@@ -969,6 +1021,11 @@ public class TokensService
     public void updateTickers()
     {
         tickerService.updateTickers();
+    }
+
+    public Observable<Integer> tickerUpdateComplete()
+    {
+        return tickerService.tickerUpdateComplete();
     }
 
     public Realm getRealmInstance(Wallet wallet)

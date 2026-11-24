@@ -25,7 +25,6 @@ appcompat = "1.7.1"
 keyboardvisibilityevent = "3.0.0-RC3"
 kotlinGradlePlugin = "2.2.10"
 kotson = "2.5.0"
-mailchimpSdkAndroid = "1.0.0"
 material = "1.13.0"
 constraintlayout = "2.2.1"
 lifecycleLivedataKtx = "2.10.0"
@@ -82,7 +81,6 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 keyboardvisibilityevent = { module = "net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent", version.ref = "keyboardvisibilityevent" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
 kotson = { module = "com.github.salomonbrys.kotson:kotson", version.ref = "kotson" }
-mailchimp-sdk-android = { module = "com.github.mailchimp:mailchimp-sdk-android", version.ref = "mailchimpSdkAndroid" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }

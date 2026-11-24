@@ -81,12 +81,6 @@ public class KeyProviderMockNonProductionImpl implements KeyProvider
     }
 
     @Override
-    public String getMailchimpKey()
-    {
-        return null;
-    }
-
-    @Override
     public String getCoinbasePayAppId()
     {
         return null;

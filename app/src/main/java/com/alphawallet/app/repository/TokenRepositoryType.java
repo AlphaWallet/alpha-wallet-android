@@ -55,6 +55,8 @@ public interface TokenRepositoryType
 
     Token fetchToken(long chainId, String walletAddress, String address);
 
+    Map<String, Token> fetchTokens(String walletAddress, List<ContractAddress> addresses);
+
     String getTokenImageUrl(long chainId, String address);
 
     Single<Token[]> storeTokens(Wallet wallet, Token[] tokens);

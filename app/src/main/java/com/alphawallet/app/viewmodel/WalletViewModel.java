@@ -75,6 +75,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.kotlin.Realm;
@@ -107,10 +108,12 @@ public class WalletViewModel extends BaseViewModel
     private long lastBackupCheck = 0;
     private long lastTokenFetchTime = 0;
     private long lastValueCheck = 0;
+    private volatile boolean initialMetaLoaded;
     private BottomSheetDialog dialog;
     private final AWWalletConnectClient awWalletConnectClient;
     @Nullable
     private Disposable balanceUpdateCheck;
+    private final CompositeDisposable tokenFilterDisposables = new CompositeDisposable();
 
     @Inject
     WalletViewModel(
@@ -143,6 +146,17 @@ public class WalletViewModel extends BaseViewModel
         this.awWalletConnectClient = awWalletConnectClient;
 
         lastValueCheck = System.currentTimeMillis() - (VALUE_INTERVAL) + 10 * DateUtils.SECOND_IN_MILLIS;
+        tokenFilterDisposables.add(tokensService.tickerUpdateComplete()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(ignored -> refreshTickerFilteredTokens(), this::onError));
+    }
+
+    @Override
+    protected void onCleared()
+    {
+        stopUpdateListener();
+        tokenFilterDisposables.clear();
+        super.onCleared();
     }
 
     public LiveData<TokenCardMeta[]> tokens()
@@ -213,6 +227,8 @@ public class WalletViewModel extends BaseViewModel
     {
         Timber.d("TIMER: onDefaultWallet");
         tokensService.setCurrentAddress(wallet.address);
+        tokensService.beginInitialMetaLoad(wallet.address);
+        initialMetaLoaded = false;
         assetDefinitionService.startEventListener();
         defaultWallet.postValue(wallet);
         loadStoredFiatValue();
@@ -241,13 +257,19 @@ public class WalletViewModel extends BaseViewModel
                         .subscribeOn(Schedulers.io())
                         .map(this::filterTokensByValue)
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onTokenMetas, this::onError);
+                        .subscribe(this::onTokenMetas, error -> {
+                            initialMetaLoaded = true;
+                            tokensService.completeInitialMetaLoad(wallet.address);
+                            onError(error);
+                        });
     }
 
     private void onTokenMetas(TokenCardMeta[] metaTokens)
     {
         lastTokenFetchTime = System.currentTimeMillis();
         tokens.postValue(metaTokens);
+        initialMetaLoaded = true;
+        tokensService.completeInitialMetaLoad(tokensService.getCurrentAddress());
         tokensService.updateTickers();
         calculateFiatValues();
     }
@@ -272,7 +294,9 @@ public class WalletViewModel extends BaseViewModel
         List<TokenCardMeta> filtered = new ArrayList<>();
         for (TokenCardMeta meta : metaTokens)
         {
-            if (meta.type == ContractType.ERC20 && !hasTickerValue(tickers.get(tickerKey(meta))))
+            if (meta.type == ContractType.ERC20
+                    && !"-2".equals(meta.balance)
+                    && !hasTickerValue(tickers.get(tickerKey(meta))))
             {
                 continue;
             }
@@ -342,7 +366,7 @@ public class WalletViewModel extends BaseViewModel
     {
         if (balanceUpdateCheck == null || balanceUpdateCheck.isDisposed())
         {
-            balanceUpdateCheck = Observable.interval(2, 2, TimeUnit.SECONDS) //check every 2 seconds for new tokens
+            balanceUpdateCheck = Observable.interval(2, 10, TimeUnit.SECONDS) //check every 2 seconds for new tokens
                     .doOnNext(l -> checkTokenUpdates()).subscribe();
         }
     }
@@ -358,12 +382,26 @@ public class WalletViewModel extends BaseViewModel
 
     private void checkTokenUpdates()
     {
-        if (defaultWallet.getValue() == null) return;
+        if (!initialMetaLoaded || defaultWallet.getValue() == null) return;
 
         disposable = getUpdatedTokenMetas()
                 .subscribeOn(Schedulers.io())
+                .map(this::filterTokensByValue)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(updatedTokens::postValue, this::onError);
+    }
+
+    private void refreshTickerFilteredTokens()
+    {
+        Wallet wallet = defaultWallet.getValue();
+        if (wallet == null || preferenceRepository.getShowAllTokens()) return;
+
+        tokenFilterDisposables.add(fetchTokensInteract
+                .fetchTokenMetas(wallet, tokensService.getNetworkFilters(), assetDefinitionService)
+                .subscribeOn(Schedulers.io())
+                .map(this::filterTokensByValue)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(tokens::postValue, this::onError));
     }
 
     public AssetDefinitionService getAssetDefinitionService()

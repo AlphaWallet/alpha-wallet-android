@@ -43,8 +43,10 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.reactivex.Single;
 import io.realm.kotlin.Realm;
@@ -749,6 +751,92 @@ public class TokensRealmSource implements TokenLocalSource
         }
     }
 
+    /**
+     * Fetch a bounded set of tokens with one Realm open and one primary-key query.
+     * Results are keyed using the requested display address, which is also the key
+     * held by TokenCardMeta (native tokens display the wallet address, not "eth").
+     */
+    @Override
+    public Map<String, Token> fetchTokens(Wallet wallet, List<ContractAddress> addresses)
+    {
+        Map<String, Token> tokens = new HashMap<>();
+        if (wallet == null || TextUtils.isEmpty(wallet.address) || addresses == null || addresses.isEmpty())
+        {
+            return tokens;
+        }
+
+        Set<String> storageKeys = new LinkedHashSet<>();
+        for (ContractAddress address : addresses)
+        {
+            if (address == null || TextUtils.isEmpty(address.address)) continue;
+
+            if (isNativeTokenLookup(address.address, wallet))
+            {
+                storageKeys.add(nativeTokenStorageKey(address.chainId));
+                storageKeys.add(databaseKey(address.chainId, wallet.address));
+            }
+            else
+            {
+                storageKeys.add(databaseKey(address.chainId, address.address));
+            }
+        }
+
+        if (storageKeys.isEmpty()) return tokens;
+
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
+        {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.Results<RealmToken> rows = RealmCompat.where(realm, RealmToken.class)
+                    .in("address", storageKeys.toArray(new String[0]))
+                    .findAll();
+            Map<String, RealmToken> rowsByKey = new HashMap<>();
+            for (RealmToken row : rows)
+            {
+                rowsByKey.put(row.getAddress().toLowerCase(), row);
+            }
+
+            TokenFactory tokenFactory = new TokenFactory();
+            for (ContractAddress address : addresses)
+            {
+                if (address == null || TextUtils.isEmpty(address.address)) continue;
+
+                String responseKey = address.getAddressKey();
+                boolean nativeToken = isNativeTokenLookup(address.address, wallet);
+                RealmToken row;
+                if (nativeToken)
+                {
+                    row = rowsByKey.get(nativeTokenStorageKey(address.chainId));
+                    if (row == null)
+                    {
+                        row = rowsByKey.get(databaseKey(address.chainId, wallet.address));
+                    }
+                }
+                else
+                {
+                    row = rowsByKey.get(databaseKey(address.chainId, address.address));
+                }
+
+                Token token = convertSingle(row, realm, tokenFactory, wallet);
+                if (token == null && nativeToken)
+                {
+                    NetworkInfo info = ethereumNetworkRepository.getNetworkByChain(address.chainId);
+                    if (info != null)
+                    {
+                        token = createCurrencyToken(info, wallet);
+                    }
+                }
+
+                if (token != null)
+                {
+                    token.group = getTokenGroup(address.chainId, address.address, ContractType.NOT_SET);
+                    tokens.put(responseKey, token);
+                }
+            }
+        }
+
+        return tokens;
+    }
+
     private Token fetchAttestation(long chainId, Wallet wallet, RealmAttestation rAttn)
     {
         Token token = fetchToken(chainId, wallet, rAttn.getTokenAddress()); //<-- getTokenAddress() should be the key
@@ -1421,11 +1509,16 @@ public class TokensRealmSource implements TokenLocalSource
                 .flatMap(metas -> joinAttestations(wallet, metas, networkFilters, svs));
     }
 
+    static int timerCounter = 0;
+
     private TokenCardMeta[] loadTokenMetasFromRealm(Wallet wallet, List<Long> networkFilters, AssetDefinitionService svs, boolean restoreDisplayFlags, boolean forceMaintenance)
     {
+        int thisTimerCounter = timerCounter;
+        timerCounter++;
+
         List<TokenCardMeta> tokenMetas = new ArrayList<>();
         List<Long> rootChainTokenCards = new ArrayList<>(networkFilters);
-        Timber.d("TIMER: Start meta load");
+        Timber.d("TIMER: Start meta load %s", thisTimerCounter);
         try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
         {
             Realm realm = realmCloser.getRealm();
@@ -1434,7 +1527,7 @@ public class TokensRealmSource implements TokenLocalSource
                     .sort("addedTime", RealmCompat.Sort.ASCENDING)
                     .findAll();
 
-            Timber.d("TIMER: iterate metas");
+            Timber.d("TIMER: iterate metas %s", thisTimerCounter);
 
             for (RealmToken t : realmItems)
             {
@@ -1517,7 +1610,7 @@ public class TokensRealmSource implements TokenLocalSource
             }
         }
 
-        Timber.d("TIMER: return metas");
+        Timber.d("TIMER: return metas %s", thisTimerCounter);
 
         return tokenMetas.toArray(new TokenCardMeta[0]);
     }

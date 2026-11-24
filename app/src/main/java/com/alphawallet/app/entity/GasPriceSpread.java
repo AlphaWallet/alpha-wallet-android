@@ -119,7 +119,7 @@ public class GasPriceSpread implements Parcelable
     {
         hasLockedGas = false;
         timeStamp = System.currentTimeMillis();
-        if (result == null || result.size() == 0) return;
+        if (result == null || result.isEmpty()) return;
         setComponents(ctx, result);
 
         fees.put(TXSpeed.CUSTOM, new GasSpeed(ctx.getString(R.string.speed_custom), STANDARD_SECONDS, fees.get(TXSpeed.STANDARD).gasPrice));
@@ -129,7 +129,7 @@ public class GasPriceSpread implements Parcelable
     {
         hasLockedGas = false;
         timeStamp = System.currentTimeMillis();
-        if (result == null || result.size() == 0) return;
+        if (result == null || result.isEmpty()) return;
         setComponents(ctx, result);
 
         GasSpeed custom = gs.getSelectedGasFee(TXSpeed.CUSTOM);

@@ -51,8 +51,8 @@ android {
         applicationId "io.stormbird.wallet"
         minSdk 25
         targetSdk 36
-        versionCode 275
-        versionName "4.0"
+        versionCode 280
+        versionName "4.01"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
@@ -64,7 +64,7 @@ android {
         def DEFAULT_WALLETCONNECT_PROJECT_ID = "\"40c6071febfd93f4fe485c232a8a4cd9\""
         def DEFAULT_AURORA_API_KEY = "\"HFDDY5BNKGXBB82DE2G8S64C3C41B76PYI\""; //Put your Aurorascan.dev API key here - this one will rate limit as it is common
 
-        buildConfigField 'int', 'DB_VERSION', '57'
+        buildConfigField 'int', 'DB_VERSION', '58'
 
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
         buildConfigField "String", "WALLETCONNECT_PROJECT_ID", DEFAULT_WALLETCONNECT_PROJECT_ID
@@ -117,13 +117,11 @@ android {
     buildTypes {
         debug {
             minifyEnabled false
-            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
         release {
             minifyEnabled false
-            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             ndk {
                 abiFilters "armeabi-v7a", "arm64-v8a"
@@ -269,7 +267,6 @@ dependencies {
     implementation 'com.github.florent37:TutoShowcase:d8b91be8a2'
     implementation libs.flexbox.layout
     implementation libs.kotson
-    implementation libs.mailchimp.sdk.android
     implementation libs.preference.ktx
 
     //Timber

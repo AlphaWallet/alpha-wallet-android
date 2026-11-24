@@ -7,6 +7,7 @@ EIP-1559 transaction fee parameter suggestion algorithm based on the eth_feeHist
 based on: https://github.com/zsfelfoldi/feehistory
 */
 
+import com.alphawallet.app.C
 import com.alphawallet.app.service.GasService
 import io.reactivex.Single
 import org.web3j.utils.Numeric
@@ -27,7 +28,7 @@ private const val rewardBlockPercentile = 40        // suggested priority fee to
 private const val maxTimeFactor = 15                // highest timeFactor index in the returned list of suggestion
 private const val extraPriorityFeeRatio = 0.25      // extra priority fee offered in case of expected baseFee rise
 private const val fallbackPriorityFee = 2000000000L // priority fee offered when there are no recent transactions
-private const val MIN_PRIORITY_FEE = 100000000L       // Minimum priority fee in Wei, 0.1 Gwei
+private val MIN_PRIORITY_FEE = BigInteger.valueOf(C.GAS_PRIORITY_FEE_MIN) // 0.1 Gwei
 
 fun suggestEIP1559(gasService: GasService, feeHistory: FeeHistory): Single<MutableMap<Int, EIP1559FeeOracleResult>> {
     return suggestPriorityFee(parseLong(feeHistory.oldestBlock.removePrefix("0x"), 16), feeHistory, gasService)
@@ -173,12 +174,14 @@ internal fun suggestPriorityFee(firstBlock: Long, feeHistory: FeeHistory, gasSer
             return@fromCallable calculatePriorityFee(feeHistory)
         }
         rewards.sort()
-        return@fromCallable rewards[floor((rewards.size - 1) * rewardBlockPercentile / 100.0).toInt()]
+        val suggested = rewards[floor((rewards.size - 1) * rewardBlockPercentile / 100.0).toInt()]
+        // Quiet L2s often return tiny non-zero rewards that still fail inclusion.
+        return@fromCallable suggested.max(MIN_PRIORITY_FEE)
     }
 }
 
-fun calculatePriorityFee(feeHistory: FeeHistory): BigInteger? {
-    var priorityFee = BigInteger.valueOf(MIN_PRIORITY_FEE)
+fun calculatePriorityFee(feeHistory: FeeHistory): BigInteger {
+    var priorityFee = MIN_PRIORITY_FEE
 
     feeHistory.baseFeePerGas.forEach { element ->
         run {
@@ -189,7 +192,7 @@ fun calculatePriorityFee(feeHistory: FeeHistory): BigInteger? {
         }
     }
 
-    return priorityFee
+    return priorityFee.max(MIN_PRIORITY_FEE)
 }
 
 internal fun maxBlockCount(gasUsedRatio: DoubleArray, _ptr: Int, _needBlocks: Int): Int {

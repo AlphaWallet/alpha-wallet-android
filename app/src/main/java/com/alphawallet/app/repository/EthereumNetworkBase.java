@@ -1007,6 +1007,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return hasLockedGas.contains(chainId);
     }
 
+    /**
+     * Known networks that should use EIP-1559 transactions, even before the first
+     * {@code Realm1559Gas} row is cached. Locked-gas chains (e.g. Klaytn) are excluded.
+     */
+    public static boolean supportsEIP1559(long chainId)
+    {
+        return networkMap.indexOfKey(chainId) >= 0 && !hasLockedGas.contains(chainId);
+    }
+
     @Override
     public boolean hasBlockNativeGasAPI(long chainId)
     {

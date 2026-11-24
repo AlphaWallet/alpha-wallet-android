@@ -3,6 +3,7 @@ package com.alphawallet.app.realm
 import com.alphawallet.app.repository.entity.Realm1559Gas
 import com.alphawallet.app.repository.entity.RealmAttestation
 import com.alphawallet.app.repository.entity.RealmAuxData
+import com.alphawallet.app.repository.entity.RealmBlockedRpc
 import com.alphawallet.app.repository.entity.RealmCertificateData
 import com.alphawallet.app.repository.entity.RealmGasSpread
 import com.alphawallet.app.repository.entity.RealmKeyType
@@ -26,6 +27,7 @@ object RealmSchema {
         Realm1559Gas::class,
         RealmAttestation::class,
         RealmAuxData::class,
+        RealmBlockedRpc::class,
         RealmCertificateData::class,
         RealmGasSpread::class,
         RealmKeyType::class,

@@ -3,9 +3,8 @@ package com.alphawallet.app.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.alphawallet.app.util.BalanceUtils;
+import com.alphawallet.app.C;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
@@ -13,22 +12,25 @@ import java.math.BigInteger;
  */
 public class EIP1559FeeOracleResult implements Parcelable
 {
+    public static final BigInteger MIN_PRIORITY_FEE = BigInteger.valueOf(C.GAS_PRIORITY_FEE_MIN);
+
     public final BigInteger maxFeePerGas;
     public final BigInteger priorityFee;
     public final BigInteger baseFee;
 
     public EIP1559FeeOracleResult(BigInteger maxFee, BigInteger maxPriority, BigInteger base)
     {
-        maxFeePerGas = fixGasPriceReturn(maxFee);  // Some chains (eg Phi) have a gas price lower than 1Gwei.
-        priorityFee = fixGasPriceReturn(maxPriority);
-        baseFee = base;
+        baseFee = base != null ? base : BigInteger.ZERO;
+        BigInteger originalPriority = maxPriority != null ? maxPriority : BigInteger.ZERO;
+        priorityFee = floorPriorityFee(originalPriority);
+        // If the tip was raised to the floor, raise maxFee by the same delta so the tip remains payable.
+        maxFeePerGas = floorMaxFee(maxFee, baseFee, originalPriority, priorityFee);
     }
 
     public EIP1559FeeOracleResult(EIP1559FeeOracleResult r)
     {
-        maxFeePerGas = r.maxFeePerGas;
-        priorityFee = r.priorityFee;
-        baseFee = r.baseFee;
+        // Re-apply the floor so Gson-loaded Realm rows with a zero tip are corrected.
+        this(r.maxFeePerGas, r.priorityFee, r.baseFee);
     }
 
     protected EIP1559FeeOracleResult(Parcel in)
@@ -64,22 +66,25 @@ public class EIP1559FeeOracleResult implements Parcelable
         dest.writeString(baseFee.toString(16));
     }
 
-    // Returns minimum 1 Gwei
-    private BigInteger minOneGwei(BigInteger input)
+    private static BigInteger floorPriorityFee(BigInteger input)
     {
-        return input.max(BalanceUtils.gweiToWei(BigDecimal.ONE));
+        if (input.compareTo(BigInteger.ZERO) <= 0)
+        {
+            return MIN_PRIORITY_FEE;
+        }
+        return input.max(MIN_PRIORITY_FEE);
     }
 
-    //returns 1 gwei if null
-    private BigInteger fixGasPriceReturn(BigInteger input)
+    private static BigInteger floorMaxFee(BigInteger maxFee, BigInteger base,
+                                         BigInteger originalPriority, BigInteger flooredPriority)
     {
-        if (input == null)
+        BigInteger tipBump = flooredPriority.subtract(originalPriority.max(BigInteger.ZERO)).max(BigInteger.ZERO);
+
+        if (maxFee == null || maxFee.compareTo(BigInteger.ZERO) <= 0)
         {
-            return BalanceUtils.gweiToWei(BigDecimal.ONE);
+            return base.add(flooredPriority);
         }
-        else
-        {
-            return input;
-        }
+
+        return maxFee.add(tipBump).max(flooredPriority);
     }
 }

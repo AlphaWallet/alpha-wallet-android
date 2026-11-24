@@ -64,6 +64,8 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import io.realm.kotlin.Realm;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -74,6 +76,7 @@ import timber.log.Timber;
 
 public class TickerService
 {
+    private final Subject<Integer> tickerUpdateComplete = PublishSubject.<Integer>create().toSerialized();
     private static final int UPDATE_TICKER_CYCLE = 5; //5 Minutes
     private static final String CONTRACT_ADDR = "[CONTRACT_ADDR]";
     private static final String CHAIN_IDS = "[CHAIN_ID]";
@@ -189,6 +192,12 @@ public class TickerService
         Timber.d("Tickers Updated: %s", tickerCount);
         mainTickerUpdate = null;
         lastTickerUpdate = System.currentTimeMillis();
+        tickerUpdateComplete.onNext(tickerCount);
+    }
+
+    public Observable<Integer> tickerUpdateComplete()
+    {
+        return tickerUpdateComplete.hide();
     }
 
     public Single<Double> updateCurrencyConversion()

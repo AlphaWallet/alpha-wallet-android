@@ -255,13 +255,19 @@ public class WalletViewModel extends BaseViewModel
         disposable =
                 fetchTokensInteract.fetchTokenMetas(wallet, tokensService.getNetworkFilters(), assetDefinitionService)
                         .subscribeOn(Schedulers.io())
-                        .map(this::filterTokensByValue)
+                        .map(this::prepareTokenMetas)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onTokenMetas, error -> {
                             initialMetaLoaded = true;
                             tokensService.completeInitialMetaLoad(wallet.address);
                             onError(error);
                         });
+    }
+
+    /** Filter + attach fiat off Main so the adapter never opens Realm for sort values. */
+    private TokenCardMeta[] prepareTokenMetas(TokenCardMeta[] metaTokens)
+    {
+        return tokensService.attachFiatValues(filterTokensByValue(metaTokens));
     }
 
     private void onTokenMetas(TokenCardMeta[] metaTokens)
@@ -347,7 +353,7 @@ public class WalletViewModel extends BaseViewModel
         disposable =
                 fetchTokensInteract.searchTokenMetas(defaultWallet.getValue(), tokensService.getNetworkFilters(), search)
                         .subscribeOn(Schedulers.io())
-                        .map(this::filterTokensByValue)
+                        .map(this::prepareTokenMetas)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onTokenMetas, this::onError);
     }
@@ -386,7 +392,7 @@ public class WalletViewModel extends BaseViewModel
 
         disposable = getUpdatedTokenMetas()
                 .subscribeOn(Schedulers.io())
-                .map(this::filterTokensByValue)
+                .map(this::prepareTokenMetas)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(updatedTokens::postValue, this::onError);
     }
@@ -399,7 +405,7 @@ public class WalletViewModel extends BaseViewModel
         tokenFilterDisposables.add(fetchTokensInteract
                 .fetchTokenMetas(wallet, tokensService.getNetworkFilters(), assetDefinitionService)
                 .subscribeOn(Schedulers.io())
-                .map(this::filterTokensByValue)
+                .map(this::prepareTokenMetas)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(tokens::postValue, this::onError));
     }

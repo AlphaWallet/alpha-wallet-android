@@ -33,6 +33,7 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
+import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 
@@ -45,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -1093,6 +1095,73 @@ public class TokensService
         BigDecimal correctedBalance = token.getCorrectedBalance(18);
         BigDecimal fiatValue = correctedBalance.multiply(new BigDecimal(tt.price)).setScale(18, RoundingMode.DOWN);
         return fiatValue.doubleValue();
+    }
+
+    /**
+     * Batch-compute fiat values onto metas using one ticker Realm open and one wallet Realm open.
+     * Must be called off the main thread. Mutates and returns the same array.
+     */
+    public TokenCardMeta[] attachFiatValues(TokenCardMeta[] metas)
+    {
+        if (metas == null || metas.length == 0 || TextUtils.isEmpty(currentAddress))
+        {
+            return metas;
+        }
+
+        List<String> tickerKeys = new ArrayList<>(metas.length);
+        List<ContractAddress> addresses = new ArrayList<>(metas.length);
+        for (TokenCardMeta meta : metas)
+        {
+            if (meta == null || meta.isNFT() || meta.group == TokenGroup.SPAM)
+            {
+                if (meta != null)
+                {
+                    meta.setFiatValue(0);
+                }
+                continue;
+            }
+            String tickerAddress = meta.isEthereum() ? "eth" : meta.getAddress().toLowerCase(Locale.ROOT);
+            tickerKeys.add(TokensRealmSource.databaseKey(meta.getChain(), tickerAddress));
+            addresses.add(new ContractAddress(meta.getChain(), meta.getAddress()));
+        }
+
+        Map<String, TokenTicker> tickers = tickerKeys.isEmpty()
+                ? Collections.emptyMap()
+                : getTokenTickers(tickerKeys);
+        Map<String, Token> tokens = addresses.isEmpty()
+                ? Collections.emptyMap()
+                : getTokens(addresses);
+
+        for (TokenCardMeta meta : metas)
+        {
+            if (meta == null || meta.isNFT() || meta.group == TokenGroup.SPAM)
+            {
+                continue;
+            }
+
+            String tickerAddress = meta.isEthereum() ? "eth" : meta.getAddress().toLowerCase(Locale.ROOT);
+            TokenTicker ticker = tickers.get(TokensRealmSource.databaseKey(meta.getChain(), tickerAddress));
+            Token token = tokens.get(ContractAddress.toAddressKey(meta.getChain(), meta.getAddress()));
+            if (token == null || ticker == null || TextUtils.isEmpty(ticker.price))
+            {
+                meta.setFiatValue(0);
+                continue;
+            }
+
+            try
+            {
+                BigDecimal correctedBalance = token.getCorrectedBalance(18);
+                BigDecimal fiat = correctedBalance.multiply(new BigDecimal(ticker.price))
+                        .setScale(18, RoundingMode.DOWN);
+                meta.setFiatValue(fiat.doubleValue());
+            }
+            catch (Exception e)
+            {
+                meta.setFiatValue(0);
+            }
+        }
+
+        return metas;
     }
 
     ///////////////////////////////////////////

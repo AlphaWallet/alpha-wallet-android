@@ -1170,10 +1170,8 @@ public class TokensRealmSource implements TokenLocalSource
                     Timber.tag(TAG).d("Update Token Balance: %s :%s", realmToken.getName(), token.getAddress());
                     balanceChanged = true;
                 }
-                else if (!TextUtils.isEmpty(newBalance))
-                {
-                    markBalanceChecked(realm, realmToken);
-                }
+                // Unchanged balance: do not writeBlocking. TokensService.pendingTokenMap already
+                // stamps the check time in memory and feeds the update throttle.
 
                 if (!realmToken.isVisibilityChanged() && realmToken.isEnabled() && newBalance != null && newBalance.equals("0") && !(token.isEthereum() && CustomViewSettings.alwaysShow(token.tokenInfo.chainId)))
                 {
@@ -1213,15 +1211,6 @@ public class TokensRealmSource implements TokenLocalSource
         }
 
         return balanceChanged;
-    }
-
-    /** Records that a balance RPC completed without changing stored value (feeds update throttle). */
-    private static void markBalanceChecked(TypedRealm realm, RealmToken realmToken)
-    {
-        RealmCompat.executeTransaction(realm, r -> {
-            RealmToken live = RealmCompat.latest(r, realmToken);
-            live.setAddedTime(System.currentTimeMillis());
-        });
     }
 
     private void validateTokenName(TypedRealm realm, RealmToken realmToken, Token token, BigDecimal balance)
@@ -1516,11 +1505,11 @@ public class TokensRealmSource implements TokenLocalSource
         int thisTimerCounter = timerCounter;
         timerCounter++;
 
-        List<TokenCardMeta> tokenMetas = new ArrayList<>();
+            List<TokenCardMeta> tokenMetas = new ArrayList<>();
         List<Long> rootChainTokenCards = new ArrayList<>(networkFilters);
         Timber.d("TIMER: Start meta load %s", thisTimerCounter);
-        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
-        {
+            try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
+            {
             Realm realm = realmCloser.getRealm();
             //runWalletMaintenanceIfNeeded(realm, wallet, forceMaintenance);
             RealmCompat.Results<RealmToken> realmItems = RealmCompat.where(realm, RealmToken.class)
@@ -1529,21 +1518,21 @@ public class TokensRealmSource implements TokenLocalSource
 
             Timber.d("TIMER: iterate metas %s", thisTimerCounter);
 
-            for (RealmToken t : realmItems)
-            {
+                for (RealmToken t : realmItems)
+                {
                 long chainId = resolveChainId(t);
                 String name = t.getName();
                 if (!isValidTokenDatabaseKey(t.getAddress()) || !matchesWalletTokenQuery(t, wallet))
                 {
-                    continue;
+                        continue;
                 }
                 if (!networkFilters.isEmpty() && !networkFilters.contains(resolveChainId(t)))
                 {
-                    continue;
+                        continue;
                 }
                 if (!t.getEnabled() && t.isVisibilityChanged())
                 {
-                    continue;
+                        continue;
                 }
 
                 ContractType contractType = resolveContractType(t, wallet);
@@ -1565,28 +1554,28 @@ public class TokensRealmSource implements TokenLocalSource
                     if (rootChainTokenCards.contains(chainId))
                     {
                         rootChainTokenCards.remove(chainId);
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
-                    else
-                    {
-                        continue;
-                    }
-                }
 
                 long lastBalanceCheck = Math.max(t.getUpdateTime(), t.getBalanceUpdateTime());
                 TokenCardMeta meta = new TokenCardMeta(chainId, displayAddress, balance, lastBalanceCheck, svs,
                         name, t.getSymbol(), contractType, getTokenGroup(chainId, displayAddress, contractType));
-                meta.lastTxUpdate = t.getLastTxTime();
-                meta.isEnabled = t.isEnabled();
+                    meta.lastTxUpdate = t.getLastTxTime();
+                    meta.isEnabled = t.isEnabled();
                 if (restoreDisplayFlags && !meta.isEnabled && !t.isVisibilityChanged() && !balance.equals("0"))
                 {
                     meta.isEnabled = true;
                 }
                 tokenMetas.add(meta);
+                }
             }
-        }
-        catch (Exception e)
-        {
-            Timber.e(e);
+            catch (Exception e)
+            {
+                Timber.e(e);
         }
         finally
         {
@@ -1612,7 +1601,7 @@ public class TokensRealmSource implements TokenLocalSource
 
         Timber.d("TIMER: return metas %s", thisTimerCounter);
 
-        return tokenMetas.toArray(new TokenCardMeta[0]);
+            return tokenMetas.toArray(new TokenCardMeta[0]);
     }
 
     private Single<TokenCardMeta[]> joinAttestations(Wallet wallet, TokenCardMeta[] metas, List<Long> networkFilters, AssetDefinitionService svs)
@@ -1808,8 +1797,8 @@ public class TokensRealmSource implements TokenLocalSource
                 RealmCompat.Results<RealmToken> realmItems = RealmCompat.where(realm, RealmToken.class).sort("addedTime", RealmCompat.Sort.ASCENDING).like("address", ADDRESS_FORMAT).findAll();
 
                 RealmCompat.executeTransaction(realm, r -> {
-                    for (RealmToken t : realmItems)
-                    {
+                for (RealmToken t : realmItems)
+                {
                         RealmToken live = RealmCompat.latest(r, t);
                         String svsName = svs.getTokenName(live.getChainId(), live.getTokenAddress(), 1);
                         final String fullName = svsName != null ? svsName : live.getName();

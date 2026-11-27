@@ -85,6 +85,7 @@ import java.util.Random;
 import java.util.Set;
 
 import io.reactivex.Single;
+import timber.log.Timber;
 
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
@@ -200,63 +201,58 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
-    public static boolean applyRpcConfigJson(String json)
+    public static void applyRpcConfigJson(String json)
     {
-        if (TextUtils.isEmpty(json))
+        if (!TextUtils.isEmpty(json))
         {
-            return false;
-        }
-
-        try
-        {
-            RpcRankingsPayload payload = new Gson().fromJson(json, RpcRankingsPayload.class);
-            if (payload == null || payload.chains == null)
+            try
             {
-                return false;
-            }
-
-            Map<Long, String[]> updates = new HashMap<>();
-            for (RpcChainEntry chainEntry : payload.chains)
-            {
-                if (chainEntry == null || chainEntry.rpcs == null || chainEntry.rpcs.isEmpty() || !isChainSupported(chainEntry.chainId))
+                RpcRankingsPayload payload = new Gson().fromJson(json, RpcRankingsPayload.class);
+                if (payload == null || payload.chains == null)
                 {
-                    continue;
+                    return;
                 }
 
-                List<String> urls = new ArrayList<>();
-                for (RpcEntry rpcEntry : chainEntry.rpcs)
+                Map<Long, String[]> updates = new HashMap<>();
+                for (RpcChainEntry chainEntry : payload.chains)
                 {
-                    if (rpcEntry != null && !TextUtils.isEmpty(rpcEntry.url))
+                    if (chainEntry == null || chainEntry.rpcs == null || chainEntry.rpcs.isEmpty() || !isChainSupported(chainEntry.chainId))
                     {
-                        urls.add(rpcEntry.url);
+                        continue;
+                    }
+
+                    List<String> urls = new ArrayList<>();
+                    for (RpcEntry rpcEntry : chainEntry.rpcs)
+                    {
+                        if (rpcEntry != null && !TextUtils.isEmpty(rpcEntry.url))
+                        {
+                            urls.add(rpcEntry.url);
+                        }
+                    }
+
+                    if (!urls.isEmpty())
+                    {
+                        updates.put(chainEntry.chainId, urls.toArray(new String[0]));
                     }
                 }
 
-                if (!urls.isEmpty())
+                if (!updates.isEmpty())
                 {
-                    updates.put(chainEntry.chainId, urls.toArray(new String[0]));
+                    synchronized (rpcConfigLock)
+                    {
+                        for (Map.Entry<Long, String[]> entry : updates.entrySet())
+                        {
+                            CHAIN_CONFIG_RPC.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+
+                    refreshBuiltInNetworkRpcConfig();
                 }
             }
-
-            if (updates.isEmpty())
+            catch (Exception e)
             {
-                return false;
+                Timber.e(e, "applyRpcConfigJson");
             }
-
-            synchronized (rpcConfigLock)
-            {
-                for (Map.Entry<Long, String[]> entry : updates.entrySet())
-                {
-                    CHAIN_CONFIG_RPC.put(entry.getKey(), entry.getValue());
-                }
-            }
-
-            refreshBuiltInNetworkRpcConfig();
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
         }
     }
 

@@ -442,7 +442,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
             }
 
             TokenSortedItem tsi = new TokenSortedItem(TokenHolder.VIEW_TYPE, token, token.getNameWeight());
-            tsi.setFiatValue(tokensService.getTokenFiatValue(token.getChain(), token.getAddress()));
+            tsi.setFiatValue(token.getFiatValue());
             if (debugView) tsi.debug();
             int index = findItem(tsi);
             if (index > -1)
@@ -756,18 +756,66 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
     public void notifyTickerUpdate(List<String> updatedContracts)
     {
-        //check through tokens; refresh relevant tickers
+        if (updatedContracts == null || updatedContracts.isEmpty())
+        {
+            return;
+        }
+
+        List<TokenCardMeta> toRefresh = new ArrayList<>();
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
             if (si instanceof TokenSortedItem)
             {
                 TokenCardMeta tcm = ((TokenSortedItem) si).value;
-                if (updatedContracts.contains(tcm.getAddress()))
+                if (updatedContracts.contains(tcm.getAddress())
+                        || (tcm.isEthereum() && updatedContracts.contains("eth")))
                 {
-                    TokenSortedItem tsi = (TokenSortedItem) si;
-                    tsi.setFiatValue(tokensService.getTokenFiatValue(tcm.getChain(), tcm.getAddress()));
-                    notifyItemChanged(i); //optimise update - no need to update elements without tickers
+                    toRefresh.add(tcm);
+                }
+            }
+        }
+
+        if (toRefresh.isEmpty())
+        {
+            return;
+        }
+
+        // Recompute fiat off Main (batched Realm), then apply to SortedList on Main.
+        prefetchDisposables.add(Single.fromCallable(() ->
+                        tokensService.attachFiatValues(toRefresh.toArray(new TokenCardMeta[0])))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::applyFiatUpdates, Timber::e));
+    }
+
+    private void applyFiatUpdates(TokenCardMeta[] updatedMetas)
+    {
+        if (updatedMetas == null || updatedMetas.length == 0)
+        {
+            return;
+        }
+
+        Set<String> updatedIds = new HashSet<>();
+        for (TokenCardMeta meta : updatedMetas)
+        {
+            if (meta != null)
+            {
+                updatedIds.add(meta.tokenId);
+            }
+        }
+
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                TokenSortedItem tsi = (TokenSortedItem) si;
+                TokenCardMeta tcm = tsi.value;
+                if (updatedIds.contains(tcm.tokenId))
+                {
+                    tsi.setFiatValue(tcm.getFiatValue());
+                    notifyItemChanged(i);
                 }
             }
         }

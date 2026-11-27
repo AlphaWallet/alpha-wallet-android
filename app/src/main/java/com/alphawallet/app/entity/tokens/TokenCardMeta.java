@@ -36,6 +36,12 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
 
     public final TokenGroup group;
 
+    /**
+     * Cached fiat value for list sorting. Computed off the main thread
+     * ({@code TokensService.attachFiatValues}) so the adapter never opens Realm on Main.
+     */
+    private double fiatValue = 0;
+
     /*
     Initial value is False as Token considered to be Hidden
      */
@@ -109,11 +115,22 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         filterText = in.readString();
         int groupOrdinal = in.readInt();
         group = TokenGroup.values()[groupOrdinal];
+        fiatValue = in.readDouble();
     }
 
     public long getNameWeight()
     {
         return nameWeight;
+    }
+
+    public double getFiatValue()
+    {
+        return fiatValue;
+    }
+
+    public void setFiatValue(double value)
+    {
+        fiatValue = value;
     }
 
     public ContractAddress getContractAddress()
@@ -154,6 +171,7 @@ public class TokenCardMeta implements Comparable<TokenCardMeta>, Parcelable
         dest.writeString(balance);
         dest.writeString(filterText);
         dest.writeInt(group.ordinal());
+        dest.writeDouble(fiatValue);
     }
 
     public String getAddress()

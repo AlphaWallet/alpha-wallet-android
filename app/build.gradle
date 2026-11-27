@@ -51,8 +51,8 @@ android {
         applicationId "io.stormbird.wallet"
         minSdk 25
         targetSdk 36
-        versionCode 280
-        versionName "4.01"
+        versionCode 281
+        versionName "4.02"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'

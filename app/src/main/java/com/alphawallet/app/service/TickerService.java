@@ -29,12 +29,15 @@ import androidx.annotation.Nullable;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
+import com.alphawallet.app.realm.AutoCloseableRealm;
+import com.alphawallet.app.realm.RealmCompat;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.KeyProvider;
 import com.alphawallet.app.repository.KeyProviderFactory;
 import com.alphawallet.app.repository.PreferenceRepositoryType;
 import com.alphawallet.app.repository.TokenLocalSource;
 import com.alphawallet.app.repository.TokensRealmSource;
+import com.alphawallet.app.repository.entity.RealmAuxData;
 import com.alphawallet.app.util.BalanceUtils;
 
 import org.json.JSONArray;
@@ -48,6 +51,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,6 +64,9 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
+import io.realm.kotlin.Realm;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -68,6 +76,7 @@ import timber.log.Timber;
 
 public class TickerService
 {
+    private final Subject<Integer> tickerUpdateComplete = PublishSubject.<Integer>create().toSerialized();
     private static final int UPDATE_TICKER_CYCLE = 5; //5 Minutes
     private static final String CONTRACT_ADDR = "[CONTRACT_ADDR]";
     private static final String CHAIN_IDS = "[CHAIN_ID]";
@@ -92,17 +101,33 @@ public class TickerService
     private static long lastTickerUpdate;
     private static int keyCycle = 0;
     private static final String AW_HOST = "ticker.percolate.one";//"192.168.50.206:8088";// "percolate.one:8088"; "192.168.50.147:8088";
-    private static final String FULL_AW_HOST = "http://" + AW_HOST;//"https://" + AW_HOST;
+    private static final String FULL_AW_HOST = "https://" + AW_HOST;//"https://" + AW_HOST;
     private static final int AW_API_BATCH_SIZE = 20;
+    private static final String TOKEN_LIST_PATH = "/token-list";
+    private static final String TOKEN_LIST_ENTRY_KEY = "tokenListJson";
+    private static final long TOKEN_LIST_UPDATE_INTERVAL = DateUtils.DAY_IN_MILLIS;
 
     /** Chain ID -> addresses the AW API doesn't have (no entry returned). Skip these in future requests. */
     private static final Map<Long, Set<String>> awApiTokensNotFound = new ConcurrentHashMap<>();
+
+    /**
+     * Chain ID -> set of known-token keys (first 8 + last 2 hex chars of the address, lowercase) returned by the
+     * AW token-list API. Only chains present in the last successful response have an entry here; a chain with no
+     * entry is treated as "unknown" and is not filtered (fail-open).
+     */
+    private final Map<Long, Set<String>> tokenListKeys = new ConcurrentHashMap<>();
 
     @Nullable
     private Disposable tickerUpdateTimer;
 
     @Nullable
     private Disposable mainTickerUpdate;
+
+    @Nullable
+    private Disposable tokenListUpdateTimer;
+
+    @Nullable
+    private Disposable tokenListDisposable;
 
     public TickerService(OkHttpClient httpClient, PreferenceRepositoryType sharedPrefs, TokenLocalSource localSource)
     {
@@ -115,6 +140,8 @@ public class TickerService
         resetTickerUpdate();
         initCurrency();
         lastTickerUpdate = 0;
+
+        startTokenListUpdate();
     }
 
     public void updateTickers()
@@ -165,6 +192,12 @@ public class TickerService
         Timber.d("Tickers Updated: %s", tickerCount);
         mainTickerUpdate = null;
         lastTickerUpdate = System.currentTimeMillis();
+        tickerUpdateComplete.onNext(tickerCount);
+    }
+
+    public Observable<Integer> tickerUpdateComplete()
+    {
+        return tickerUpdateComplete.hide();
     }
 
     public Single<Double> updateCurrencyConversion()
@@ -407,7 +440,7 @@ public class TickerService
         for (TokenCardMeta tcm : tokens)
         {
             String addr = tcm.getAddress().toLowerCase();
-            if (!notFound.contains(addr))
+            if (!notFound.contains(addr) && isTokenOnKnownList(chainId, addr))
             {
                 tokensToFetch.add(tcm);
             }
@@ -450,6 +483,268 @@ public class TickerService
             {
                 notFound.add(addr);
             }
+        }
+    }
+
+    ///////////////////////////////////////////
+    // Token list - once-a-day allow-list of addresses the AW ticker API actually has data for.
+    // Used to avoid wasting signed AW API requests on tokens it doesn't cover.
+
+    /**
+     * Starts the once-a-day check for a new token list. Fires immediately on startup (which will
+     * load from cache without hitting the network if the cached copy is still fresh), then once every
+     * 24 hours afterwards.
+     */
+    private void startTokenListUpdate()
+    {
+        if (tokenListUpdateTimer != null && !tokenListUpdateTimer.isDisposed())
+        {
+            return;
+        }
+
+        tokenListUpdateTimer = Observable.interval(0, 1, TimeUnit.DAYS)
+                .doOnNext(l -> checkTokenListUpdate())
+                .subscribe();
+    }
+
+    private void checkTokenListUpdate()
+    {
+        if (tokenListDisposable != null && !tokenListDisposable.isDisposed())
+        {
+            return;
+        }
+
+        tokenListDisposable = Single.fromCallable(this::refreshTokenListIfRequired)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(count -> Timber.d("Token list keys loaded: %s", count), Timber::e);
+    }
+
+    /**
+     * Loads the cached token list into memory (cheap, no network) if it hasn't been loaded yet, then
+     * fetches a fresh copy from the AW API if the cached copy is more than a day old.
+     *
+     * @return the number of chains currently held in the in-memory token list
+     */
+    private int refreshTokenListIfRequired()
+    {
+        if (tokenListKeys.isEmpty())
+        {
+            String cachedJson = getStoredTokenListJson();
+            if (!TextUtils.isEmpty(cachedJson))
+            {
+                parseTokenListJson(cachedJson);
+            }
+        }
+
+        if (System.currentTimeMillis() - getStoredTokenListTime() < TOKEN_LIST_UPDATE_INTERVAL)
+        {
+            return tokenListKeys.size(); //not due for a refresh yet
+        }
+
+        String json = fetchTokenListFromApi();
+        if (!TextUtils.isEmpty(json))
+        {
+            parseTokenListJson(json);
+            storeTokenListJson(json);
+        }
+
+        return tokenListKeys.size();
+    }
+
+    /**
+     * @return true if this chain has no known-token data (fail-open, don't restrict), or if the address
+     * is present in the chain's known-token list.
+     */
+    private boolean isTokenOnKnownList(long chainId, String address)
+    {
+        Set<String> keys = tokenListKeys.get(chainId);
+        if (keys == null)
+        {
+            return true;
+        }
+        return keys.contains(tokenListKey(address));
+    }
+
+    /**
+     * The token-list API identifies addresses by the first 8 and last 2 hex characters (10 chars total,
+     * lowercase, no "0x" prefix).
+     */
+    private static String tokenListKey(String address)
+    {
+        String addr = address.toLowerCase();
+        if (addr.startsWith("0x"))
+        {
+            addr = addr.substring(2);
+        }
+        if (addr.length() < 10)
+        {
+            return addr;
+        }
+        return addr.substring(0, 8) + addr.substring(addr.length() - 2);
+    }
+
+    @Nullable
+    private String fetchTokenListFromApi()
+    {
+        if (TextUtils.isEmpty(keyProvider.getAwApiKey()))
+        {
+            return null;
+        }
+
+        try
+        {
+            JSONObject body = getJsonObjectForTokenList();
+
+            RequestBody requestBody = RequestBody.create(
+                    body.toString(),
+                    MediaType.parse("application/json"));
+
+            Request request = new Request.Builder()
+                    .url(FULL_AW_HOST + TOKEN_LIST_PATH)
+                    .post(requestBody)
+                    .build();
+
+            try (Response response = httpClient.newCall(request).execute())
+            {
+                if (response.code() / 100 != 2 || response.body() == null)
+                {
+                    return null;
+                }
+
+                JSONObject json = new JSONObject(response.body().string());
+                return json.has("data") ? json.getJSONObject("data").toString() : null;
+            }
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+            return null;
+        }
+    }
+
+    @NonNull
+    private JSONObject getJsonObjectForTokenList() throws JSONException
+    {
+        long unixMinutes = System.currentTimeMillis() / 60000;
+        String message = AW_HOST + TOKEN_LIST_PATH + "//" + unixMinutes;
+
+        Timber.d("AW API token-list message: %s", message);
+
+        Credentials credentials = Credentials.create(keyProvider.getAwApiKey());
+        Sign.SignatureData signatureData = Sign.signPrefixedMessage(
+                message.getBytes(), credentials.getEcKeyPair());
+
+        byte[] sigBytes = new byte[65];
+        System.arraycopy(signatureData.getR(), 0, sigBytes, 0, 32);
+        System.arraycopy(signatureData.getS(), 0, sigBytes, 32, 32);
+        System.arraycopy(signatureData.getV(), 0, sigBytes, 64, 1);
+        String sig = Numeric.toHexStringNoPrefix(sigBytes);
+
+        JSONObject body = new JSONObject();
+        body.put("sig", sig);
+        return body;
+    }
+
+    /**
+     * Parses the "data" object of the token-list response: chain ID (as string) -> array of known-token keys.
+     */
+    private void parseTokenListJson(String dataJson)
+    {
+        try
+        {
+            JSONObject data = new JSONObject(dataJson);
+            Map<Long, Set<String>> newMap = new HashMap<>();
+            Iterator<String> chainKeys = data.keys();
+            while (chainKeys.hasNext())
+            {
+                String chainKeyStr = chainKeys.next();
+                long chainId;
+                try
+                {
+                    chainId = Long.parseLong(chainKeyStr);
+                }
+                catch (NumberFormatException e)
+                {
+                    continue;
+                }
+
+                JSONArray addressKeys = data.getJSONArray(chainKeyStr);
+                Set<String> keySet = new HashSet<>();
+                for (int i = 0; i < addressKeys.length(); i++)
+                {
+                    keySet.add(addressKeys.getString(i).toLowerCase());
+                }
+                newMap.put(chainId, keySet);
+            }
+
+            tokenListKeys.clear();
+            tokenListKeys.putAll(newMap);
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+        }
+    }
+
+    @Nullable
+    private String getStoredTokenListJson()
+    {
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(localSource.getTickerRealmInstance()))
+        {
+            Realm realm = realmCloser.getRealm();
+            RealmAuxData entry = RealmCompat.where(realm, RealmAuxData.class)
+                    .equalTo("instanceKey", TOKEN_LIST_ENTRY_KEY)
+                    .findFirst();
+            return entry != null ? entry.getResult() : null;
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+            return null;
+        }
+    }
+
+    private long getStoredTokenListTime()
+    {
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(localSource.getTickerRealmInstance()))
+        {
+            Realm realm = realmCloser.getRealm();
+            RealmAuxData entry = RealmCompat.where(realm, RealmAuxData.class)
+                    .equalTo("instanceKey", TOKEN_LIST_ENTRY_KEY)
+                    .findFirst();
+            return entry != null ? entry.getResultTime() : 0;
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
+            return 0;
+        }
+    }
+
+    private void storeTokenListJson(String json)
+    {
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(localSource.getTickerRealmInstance()))
+        {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
+                RealmAuxData entry = RealmCompat.where(r, RealmAuxData.class)
+                        .equalTo("instanceKey", TOKEN_LIST_ENTRY_KEY)
+                        .findFirst();
+
+                if (entry == null)
+                {
+                    entry = RealmCompat.createObject(r, RealmAuxData.class, TOKEN_LIST_ENTRY_KEY);
+                }
+
+                entry.setResult(json);
+                entry.setResultTime(System.currentTimeMillis());
+                RealmCompat.insertOrUpdate(r, entry);
+            });
+        }
+        catch (Exception e)
+        {
+            Timber.e(e);
         }
     }
 

@@ -27,7 +27,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import io.realm.kotlin.TypedRealm;
+import com.alphawallet.app.realm.RealmCompat;
 import timber.log.Timber;
 
 /**
@@ -61,7 +63,7 @@ public class EventSync
     //6.     if no events found, or less than full widen scan again and continue to 1
     //7.     Start scanning from the upperbound to LATEST. Update upper bound if any event found.
 
-    public SyncDef getSyncDef(Realm realm)
+    public SyncDef getSyncDef(TypedRealm realm)
     {
         BigInteger currentBlock = TransactionsService.getCurrentBlock(token.tokenInfo.chainId);
         EventSyncState syncState = getCurrentTokenSyncState(realm);
@@ -174,7 +176,7 @@ public class EventSync
         return eventReadEndBlock;
     }
 
-    public boolean handleEthLogError(Response.Error error, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock, SyncDef sync, Realm realm)
+    public boolean handleEthLogError(Response.Error error, DefaultBlockParameter startBlock, DefaultBlockParameter endBlock, SyncDef sync, TypedRealm realm)
     {
         if (error.getMessage().toLowerCase(Locale.ROOT).contains("block")) //trigger on block range error
         {
@@ -251,9 +253,9 @@ public class EventSync
         }
     }
 
-    private long getCurrentEventBlockSize(Realm instance)
+    private long getCurrentEventBlockSize(TypedRealm instance)
     {
-        RealmAuxData rd = instance.where(RealmAuxData.class)
+        RealmAuxData rd = RealmCompat.where(instance, RealmAuxData.class)
                 .equalTo("instanceKey", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress()))
                 .findFirst();
 
@@ -267,9 +269,9 @@ public class EventSync
         }
     }
 
-    protected EventSyncState getCurrentTokenSyncState(Realm instance)
+    protected EventSyncState getCurrentTokenSyncState(TypedRealm instance)
     {
-        RealmAuxData rd = instance.where(RealmAuxData.class)
+        RealmAuxData rd = RealmCompat.where(instance, RealmAuxData.class)
                 .equalTo("instanceKey", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress()))
                 .findFirst();
 
@@ -294,28 +296,28 @@ public class EventSync
         }
     }
 
-    public void writeCurrentTokenSyncState(Realm realm, EventSyncState newState)
+    public void writeCurrentTokenSyncState(TypedRealm realm, EventSyncState newState)
     {
         if (realm == null) return;
-        realm.executeTransaction(r -> {
+        RealmCompat.executeTransaction(realm, r -> {
             String key = TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress());
-            RealmAuxData rd = r.where(RealmAuxData.class)
+            RealmAuxData rd = RealmCompat.where(r, RealmAuxData.class)
                     .equalTo("instanceKey", key)
                     .findFirst();
 
             if (rd == null)
             {
-                rd = r.createObject(RealmAuxData.class, key); //create asset in realm
+                rd = RealmCompat.createObject(r, RealmAuxData.class, key); //create asset in realm
             }
 
             rd.setTokenId(String.valueOf(newState.ordinal()));
-            r.insertOrUpdate(rd);
+            RealmCompat.insertOrUpdate(r, rd);
         });
     }
 
-    protected long getLastEventRead(Realm instance)
+    protected long getLastEventRead(TypedRealm instance)
     {
-        RealmAuxData rd = instance.where(RealmAuxData.class)
+        RealmAuxData rd = RealmCompat.where(instance, RealmAuxData.class)
                 .equalTo("instanceKey", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress()))
                 .findFirst();
 
@@ -330,9 +332,9 @@ public class EventSync
         }
     }
 
-    private long getSyncStart(Realm instance)
+    private long getSyncStart(TypedRealm instance)
     {
-        RealmAuxData rd = instance.where(RealmAuxData.class)
+        RealmAuxData rd = RealmCompat.where(instance, RealmAuxData.class)
                 .equalTo("instanceKey", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress()))
                 .findFirst();
 
@@ -346,26 +348,26 @@ public class EventSync
         }
     }
 
-    protected void writeStartSyncBlock(Realm realm, long currentBlock)
+    protected void writeStartSyncBlock(TypedRealm realm, long currentBlock)
     {
         if (realm == null) return;
-        realm.executeTransaction(r -> {
+        RealmCompat.executeTransaction(realm, r -> {
             String key = TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress());
-            RealmAuxData rd = r.where(RealmAuxData.class)
+            RealmAuxData rd = RealmCompat.where(r, RealmAuxData.class)
                     .equalTo("instanceKey", key)
                     .findFirst();
 
             if (rd == null)
             {
-                rd = r.createObject(RealmAuxData.class, key); //create asset in realm
+                rd = RealmCompat.createObject(r, RealmAuxData.class, key); //create asset in realm
             }
 
             rd.setFunctionId(String.valueOf(currentBlock));
-            r.insertOrUpdate(rd);
+            RealmCompat.insertOrUpdate(r, rd);
         });
     }
 
-    public void updateEventReads(Realm realm, SyncDef sync, BigInteger currentBlock, int evReads)
+    public void updateEventReads(TypedRealm realm, SyncDef sync, BigInteger currentBlock, int evReads)
     {
         switch (sync.state)
         {
@@ -388,23 +390,23 @@ public class EventSync
         updateEventReads(realm, sync.eventReadEndBlock.longValue(), calcNewIntervalSize(sync, evReads), sync.state);
     }
 
-    public void resetEventReads(Realm realm)
+    public void resetEventReads(TypedRealm realm)
     {
         updateEventReads(realm, 0, 0, EventSyncState.DOWNWARD_SYNC_START);
     }
 
-    private void updateEventReads(Realm realm, long lastRead, long readInterval, EventSyncState state)
+    private void updateEventReads(TypedRealm realm, long lastRead, long readInterval, EventSyncState state)
     {
         if (realm == null) return;
-        realm.executeTransaction(r -> {
+        RealmCompat.executeTransaction(realm, r -> {
             String key = TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.getAddress());
-            RealmAuxData rd = r.where(RealmAuxData.class)
+            RealmAuxData rd = RealmCompat.where(r, RealmAuxData.class)
                     .equalTo("instanceKey", key)
                     .findFirst();
 
             if (rd == null)
             {
-                rd = r.createObject(RealmAuxData.class, key); //create asset in realm
+                rd = RealmCompat.createObject(r, RealmAuxData.class, key); //create asset in realm
             }
 
             rd.setResultTime(lastRead);
@@ -413,7 +415,7 @@ public class EventSync
 
             EVENT_DEBUG("WriteState: " + state + " " + lastRead);
 
-            r.insertOrUpdate(rd);
+            RealmCompat.insertOrUpdate(r, rd);
         });
     }
 
@@ -450,7 +452,7 @@ public class EventSync
      */
 
     public Pair<Integer, Pair<HashSet<BigInteger>, HashSet<BigInteger>>> processTransferEvents(Web3j web3j, Event transferEvent, DefaultBlockParameter startBlock,
-                                                                       DefaultBlockParameter endBlock, Realm realm)
+                                                                       DefaultBlockParameter endBlock, TypedRealm realm)
             throws IOException, LogOverflowException
     {
         int eventCount = 0;
@@ -644,28 +646,28 @@ public class EventSync
         return VALUES.replace(TO_TOKEN, to).replace(FROM_TOKEN, from).replace(AMOUNT_TOKEN, tokenID);
     }
 
-    public void storeTransferData(Realm realm, String from, String to,
+    public void storeTransferData(TypedRealm realm, String from, String to,
                                   Pair<List<BigInteger>, List<BigInteger>> idResult,
                                   String txHash)
     {
         String activityName = getActivityName(to);
         String value = getIds(idResult);
         String valueList = generateValueListForTransferEvent(to, from, value);
-        realm.executeTransaction(r -> {
+        RealmCompat.executeTransaction(realm, r -> {
             storeTransferData(realm, txHash, valueList, activityName);
         });
     }
 
-    private void storeTransferData(Realm instance, String hash, String valueList, String activityName)
+    private void storeTransferData(TypedRealm instance, String hash, String valueList, String activityName)
     {
         if (activityName.equals("receive"))
         {
-            instance.where(RealmTransfer.class)
+            RealmCompat.where(instance, RealmTransfer.class)
                     .like("hash", RealmTransfer.databaseKey(token.tokenInfo.chainId, hash))
-                    .findAll().deleteAllFromRealm();
+                    .findAll().deleteAllFromRealm(instance);
         }
 
-        RealmTransfer matchingEntry = instance.where(RealmTransfer.class)
+        RealmTransfer matchingEntry = RealmCompat.where(instance, RealmTransfer.class)
                 .equalTo("hash", RealmTransfer.databaseKey(token.tokenInfo.chainId, hash))
                 .equalTo("tokenAddress", token.tokenInfo.address)
                 .equalTo("eventName", activityName)
@@ -674,14 +676,14 @@ public class EventSync
 
         if (matchingEntry == null) //prevent duplicates
         {
-            matchingEntry = instance.createObject(RealmTransfer.class);
+            matchingEntry = RealmCompat.createObject(instance, RealmTransfer.class);
             matchingEntry.setHashKey(token.tokenInfo.chainId, hash);
             matchingEntry.setTokenAddress(token.tokenInfo.address);
         }
 
         matchingEntry.setEventName(activityName);
         matchingEntry.setTransferDetail(valueList);
-        instance.insertOrUpdate(matchingEntry);
+        RealmCompat.insertOrUpdate(instance, matchingEntry);
     }
 
     private void EVENT_DEBUG(String message)

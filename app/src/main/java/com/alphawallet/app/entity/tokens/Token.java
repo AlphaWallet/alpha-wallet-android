@@ -2,6 +2,9 @@ package com.alphawallet.app.entity.tokens;
 
 import static android.text.Html.FROM_HTML_MODE_COMPACT;
 
+import static com.alphawallet.app.service.TokensService.DEBUG_TOKEN;
+import static com.alphawallet.app.service.TokensService.hasNameIssue;
+
 import android.content.Context;
 import android.text.Html;
 import android.text.TextUtils;
@@ -56,7 +59,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Single;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import io.realm.kotlin.TypedRealm;
+import timber.log.Timber;
+
+import com.alphawallet.app.realm.RealmCompat;
 
 public class Token
 {
@@ -182,7 +189,7 @@ public class Token
     }
 
     //Used for custom balance updates
-    public BigDecimal updateBalance(Realm realm) { return BigDecimal.ZERO; }
+    public BigDecimal updateBalance(TypedRealm realm) { return BigDecimal.ZERO; }
 
     public boolean isTerminated() { return (updateBlancaTime == -1); }
 
@@ -591,8 +598,16 @@ public class Token
     public String getTransactionValue(Transaction transaction, int precision)
     {
         if (transaction.hasError()) return "";
-        else if (transaction.value.equals("0") || transaction.value.equals("0x0")) return "0";
-        return transaction.getPrefix(this) + BalanceUtils.getScaledValueFixed(new BigDecimal(transaction.value), tokenInfo.decimals, precision);
+        else if (TextUtils.isEmpty(transaction.value) || transaction.value.equals("0") || transaction.value.equals("0x0")) return "0";
+        try
+        {
+            return transaction.getPrefix(this) + BalanceUtils.getScaledValueFixed(new BigDecimal(transaction.value), tokenInfo.decimals, precision);
+        }
+        catch (NumberFormatException e)
+        {
+            //Malformed/legacy transaction value that can't be parsed as a decimal string - don't crash the Activity list over display data.
+            return "0";
+        }
     }
 
     /**
@@ -1041,6 +1056,7 @@ public class Token
         if (TextUtils.isEmpty(realmToken.getName()) || (!TextUtils.isEmpty(tokenInfo.name) && !tokenInfo.name.equals(realmToken.getName()))) { return true; }
         if (TextUtils.isEmpty(realmToken.getSymbol()) || (!TextUtils.isEmpty(tokenInfo.symbol) && !tokenInfo.symbol.equals(realmToken.getSymbol()))) { return true; }
         if (realmToken.getContractType() != contractType) { return true; }
+        if (hasNameIssue(realmToken.getName())) { return true; }
         return realmToken.getDecimals() != tokenInfo.decimals;
     }
 
@@ -1101,7 +1117,7 @@ public class Token
         return null;
     }
 
-    public HashSet<BigInteger> processLogsAndStoreTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, Realm realm)
+    public HashSet<BigInteger> processLogsAndStoreTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, TypedRealm realm)
     {
         return null;
     }
@@ -1125,8 +1141,7 @@ public class Token
 
     public String getDatabaseKey()
     {
-        //pull IDs from the members
-        return TokensRealmSource.databaseKey(tokenInfo.chainId, tokenInfo.address);
+        return TokensRealmSource.databaseKey(this);
     }
 
     public String getTSKey(TokenDefinition td)

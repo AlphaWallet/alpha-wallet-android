@@ -36,9 +36,10 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
-import io.realm.Case;
-import io.realm.Realm;
-import io.realm.RealmQuery;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.RealmCompat.Results;
+import com.alphawallet.app.realm.RealmQueryBuilder;
 import timber.log.Timber;
 
 import static com.alphawallet.app.C.GAS_LIMIT_MIN;
@@ -69,8 +70,8 @@ public class InputAmount extends LinearLayout
     private boolean amountReady;
 
     //These need to be members because the listener is shut down if the object doesn't exist
-    private RealmTokenTicker realmTickerUpdate;
-    private RealmToken realmTokenUpdate;
+    private Results<RealmTokenTicker> realmTickerUpdate;
+    private Results<RealmToken> realmTokenUpdate;
 
     private boolean showingCrypto;
 
@@ -146,13 +147,11 @@ public class InputAmount extends LinearLayout
         if (realmTickerUpdate != null) realmTickerUpdate.removeAllChangeListeners();
         if (realm != null)
         {
-            realm.removeAllChangeListeners();
-            if (!realm.isClosed()) realm.close();
+            if (!RealmCompat.isClosed(realm)) RealmCompat.close(realm);
         }
         if (tickerRealm != null)
         {
-            tickerRealm.removeAllChangeListeners();
-            if (!tickerRealm.isClosed()) tickerRealm.close();
+            if (!RealmCompat.isClosed(tickerRealm)) RealmCompat.close(tickerRealm);
         }
 
         realmTickerUpdate = null;
@@ -212,17 +211,17 @@ public class InputAmount extends LinearLayout
     {
         if (realmTokenUpdate != null) realmTokenUpdate.removeAllChangeListeners();
 
-        realmTokenUpdate = realm.where(RealmToken.class)
-                .equalTo("address", databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase()), Case.INSENSITIVE)
+        realmTokenUpdate = RealmCompat.where(realm, RealmToken.class)
+                .equalTo("address", databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase()), RealmCompat.Case.INSENSITIVE)
                 .findFirstAsync();
 
         //if the token doesn't exist yet, first ask the TokensService to pick it up
         tokensService.storeToken(token);
 
-        realmTokenUpdate.addChangeListener(realmToken -> {
-            RealmToken rt = (RealmToken)realmToken;
-            if (rt.isValid() && exactAmount.compareTo(BigDecimal.ZERO) == 0)
+        realmTokenUpdate.addChangeListener(results -> {
+            if (results.isValid() && exactAmount.compareTo(BigDecimal.ZERO) == 0 && results.first() != null)
             {
+                RealmToken rt = results.first();
                 token = tokensService.getToken(rt.getChainId(), rt.getTokenAddress());
                 updateAvailableBalance();
             }
@@ -246,7 +245,7 @@ public class InputAmount extends LinearLayout
             else
             {
                 showingCrypto = true;
-                if (tickerRealm != null) tickerRealm.removeAllChangeListeners(); //stop ticker listener
+                if (realmTickerUpdate != null) realmTickerUpdate.removeAllChangeListeners(); //stop ticker listener
             }
 
             updateAvailableBalance();
@@ -288,11 +287,11 @@ public class InputAmount extends LinearLayout
         });
     }
 
-    private RealmQuery<RealmTokenTicker> getTickerQuery()
+    private RealmQueryBuilder<RealmTokenTicker> getTickerQuery()
     {
         if (tickerRealm != null)
         {
-            return tickerRealm.where(RealmTokenTicker.class)
+            return RealmCompat.where(tickerRealm, RealmTokenTicker.class)
                     .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, token.isEthereum() ? "eth" : token.getAddress().toLowerCase()));
         }
         else
@@ -324,7 +323,7 @@ public class InputAmount extends LinearLayout
     {
         icon.showLocalCurrency();
 
-        RealmQuery<RealmTokenTicker> rawQuery = getTickerQuery();
+        RealmQueryBuilder<RealmTokenTicker> rawQuery = getTickerQuery();
         if (rawQuery == null) return;
 
         try
@@ -381,7 +380,7 @@ public class InputAmount extends LinearLayout
         allFunds.setOnClickListener(v -> {
             if (token.isEthereum() && token.hasPositiveBalance())
             {
-                RealmGasSpread gasSpread = tokensService.getTickerRealmInstance().where(RealmGasSpread.class)
+                RealmGasSpread gasSpread = RealmCompat.where(tokensService.getTickerRealmInstance(), RealmGasSpread.class)
                             .equalTo("chainId", token.tokenInfo.chainId)
                             .findFirst();
 

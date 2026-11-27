@@ -209,8 +209,6 @@ public class TSTokenView
                     //load in external content
                     String entityRef = child.getTextContent().strip();
                     EntityReference ref = (EntityReference) child;
-
-                    System.out.println(entityRef);
                     break;
                 default:
                     if (child != null && child.getTextContent() != null)

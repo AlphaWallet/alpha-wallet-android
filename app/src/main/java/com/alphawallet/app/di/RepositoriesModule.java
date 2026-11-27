@@ -39,6 +39,7 @@ import com.alphawallet.app.service.KeystoreAccountService;
 import com.alphawallet.app.service.NotificationService;
 import com.alphawallet.app.service.OkLinkService;
 import com.alphawallet.app.service.OpenSeaService;
+import com.alphawallet.app.service.BlockedRpcService;
 import com.alphawallet.app.service.RPCRankingManager;
 import com.alphawallet.app.service.RealmManager;
 import com.alphawallet.app.service.SwapService;
@@ -116,13 +117,17 @@ public class RepositoriesModule
         EthereumNetworkRepositoryType networkRepository,
         AccountKeystoreService accountKeystoreService,
         TransactionLocalSource inDiskCache,
-        TransactionsService transactionsService)
+        TransactionsService transactionsService,
+        PreferenceRepositoryType preferenceRepository,
+        BlockedRpcService blockedRpcService)
     {
         return new TransactionRepository(
             networkRepository,
             accountKeystoreService,
             inDiskCache,
-            transactionsService);
+            transactionsService,
+            preferenceRepository,
+            blockedRpcService);
     }
 
     @Singleton
@@ -296,9 +301,17 @@ public class RepositoriesModule
 
     @Singleton
     @Provides
-    RPCRankingManager provideRPCRankingManager(RpcConfigRepository rpcConfigRepository)
+    BlockedRpcService provideBlockedRpcService(RealmManager realmManager, OkHttpClient httpClient)
     {
-        return new RPCRankingManager(rpcConfigRepository);
+        return new BlockedRpcService(realmManager, httpClient);
+    }
+
+    @Singleton
+    @Provides
+    RPCRankingManager provideRPCRankingManager(RpcConfigRepository rpcConfigRepository,
+                                               BlockedRpcService blockedRpcService)
+    {
+        return new RPCRankingManager(rpcConfigRepository, blockedRpcService);
     }
 
 }

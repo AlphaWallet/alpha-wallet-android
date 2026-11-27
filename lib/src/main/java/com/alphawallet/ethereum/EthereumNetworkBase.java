@@ -102,9 +102,9 @@ public abstract class EthereumNetworkBase
         {
             put(MAINNET_ID, new NetworkInfo("Ethereum", "ETH", MAINNET_RPC_URL, "https://etherscan.io/tx/",
                     MAINNET_ID, false));
-            put(CLASSIC_ID, new NetworkInfo("Ethereum Classic", "ETC", CLASSIC_RPC_URL, "https://blockscout.com/etc/mainnet/tx/",
+            put(CLASSIC_ID, new NetworkInfo("Ethereum Classic", "ETC", CLASSIC_RPC_URL, "https://etc.blockscout.com/tx/",
                     CLASSIC_ID, false));
-            put(GNOSIS_ID, new NetworkInfo("Gnosis", "xDAi", XDAI_RPC_URL, "https://blockscout.com/xdai/mainnet/tx/",
+            put(GNOSIS_ID, new NetworkInfo("Gnosis", "xDAi", XDAI_RPC_URL, "https://gnosis.blockscout.com/tx/",
                     GNOSIS_ID, false));
             put(BINANCE_TEST_ID, new NetworkInfo("BSC TestNet (Test)", "T-BSC", BINANCE_TEST_RPC_URL, "https://explorer.binance.org/smart-testnet/tx/",
                     BINANCE_TEST_ID, false));
@@ -159,7 +159,7 @@ public abstract class EthereumNetworkBase
                     IOTEX_TESTNET_ID, false));
             put(OKX_ID, new NetworkInfo("OKXChain Mainnet", "OKT", OKX_RPC_URL, "https://www.oklink.com/en/okc",
                 OKX_ID, false));
-            put(ROOTSTOCK_MAINNET_ID, new NetworkInfo("Rootstock", "RBTC", ROOTSTOCK_MAINNET_RPC_URL, "https://blockscout.com/rsk/mainnet/tx/",
+            put(ROOTSTOCK_MAINNET_ID, new NetworkInfo("Rootstock", "RBTC", ROOTSTOCK_MAINNET_RPC_URL, "https://rootstock.blockscout.com/tx/",
                     ROOTSTOCK_MAINNET_ID, false));
             put(ROOTSTOCK_TESTNET_ID, new NetworkInfo("Rootstock (Test)", "tBTC", ROOTSTOCK_TESTNET_RPC_URL, "",
                     ROOTSTOCK_TESTNET_ID, false));

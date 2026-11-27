@@ -33,8 +33,6 @@ public class KeyProviderJNIImpl implements KeyProvider
 
     public native String getOpenSeaKey();
 
-    public native String getMailchimpKey();
-
     public native String getCoinbasePayAppId();
 
     public native String getWalletConnectProjectId();

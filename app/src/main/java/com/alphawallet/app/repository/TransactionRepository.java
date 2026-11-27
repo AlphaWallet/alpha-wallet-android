@@ -5,11 +5,15 @@ import static com.alphawallet.app.repository.TokenRepository.getWeb3jService;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.alphawallet.app.C;
 import com.alphawallet.app.entity.ActivityMeta;
+import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.Transaction;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.repository.entity.RealmAuxData;
+import com.alphawallet.app.service.AWHttpServiceWaterfall;
 import com.alphawallet.app.service.AccountKeystoreService;
+import com.alphawallet.app.service.BlockedRpcService;
 import com.alphawallet.app.service.TransactionsService;
 import com.alphawallet.app.web3.entity.Web3Transaction;
 import com.alphawallet.hardware.SignatureFromKey;
@@ -24,31 +28,45 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import okhttp3.OkHttpClient;
+import timber.log.Timber;
+import com.alphawallet.app.realm.RealmCompat;
 
 public class TransactionRepository implements TransactionRepositoryType
 {
+    private static final int MULTICAST_RPC_LIMIT = 3;
 
     private final String TAG = "TREPO";
     private final EthereumNetworkRepositoryType networkRepository;
     private final AccountKeystoreService accountKeystoreService;
     private final TransactionLocalSource inDiskCache;
     private final TransactionsService transactionsService;
+    private final PreferenceRepositoryType preferenceRepository;
+    private final BlockedRpcService blockedRpcService;
 
     public TransactionRepository(
             EthereumNetworkRepositoryType networkRepository,
             AccountKeystoreService accountKeystoreService,
             TransactionLocalSource inDiskCache,
-            TransactionsService transactionsService)
+            TransactionsService transactionsService,
+            PreferenceRepositoryType preferenceRepository,
+            BlockedRpcService blockedRpcService)
     {
         this.networkRepository = networkRepository;
         this.accountKeystoreService = accountKeystoreService;
         this.inDiskCache = inDiskCache;
         this.transactionsService = transactionsService;
+        this.preferenceRepository = preferenceRepository;
+        this.blockedRpcService = blockedRpcService;
     }
 
     @Override
@@ -98,14 +116,7 @@ public class TransactionRepository implements TransactionRepositoryType
             {
                 throw new Exception(sigData.failMessage);
             }
-            EthSendTransaction raw = getWeb3jService(chainId)
-                    .ethSendRawTransaction(Numeric.toHexString(sigData.signature))
-                    .send();
-            if (raw.hasError())
-            {
-                throw new Exception(raw.getError().getMessage());
-            }
-            return raw.getTransactionHash();
+            return broadcastRawTransaction(chainId, Numeric.toHexString(sigData.signature));
         }).flatMap(txHash -> storeUnconfirmedTransaction(from, txHash, rtx.getTransaction(), chainId, rtx.getData().length() > 2 ? rtx.getTo() : ""))
         .subscribeOn(Schedulers.io());
     }
@@ -114,7 +125,6 @@ public class TransactionRepository implements TransactionRepositoryType
     @Override
     public Single<String> resendTransaction(Wallet from, String to, BigInteger subunitAmount, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit, byte[] data, long chainId)
     {
-        final Web3j web3j = getWeb3jService(chainId);
         final BigInteger useGasPrice = gasPriceForNode(chainId, gasPrice);
 
         return accountKeystoreService.signTransaction(from, to, subunitAmount, useGasPrice, gasLimit, nonce.longValue(), data, chainId)
@@ -123,17 +133,163 @@ public class TransactionRepository implements TransactionRepositoryType
                     {
                         throw new Exception(signedMessage.failMessage);
                     }
-                    EthSendTransaction raw = web3j
-                            .ethSendRawTransaction(Numeric.toHexString(signedMessage.signature))
-                            .send();
-                    if (raw.hasError())
-                    {
-                        throw new Exception(raw.getError().getMessage());
-                    }
-                    return raw.getTransactionHash();
+                    return broadcastRawTransaction(chainId, Numeric.toHexString(signedMessage.signature));
                 }))
                 .flatMap(txHash -> storeUnconfirmedTransaction(from, txHash, to, subunitAmount, nonce, useGasPrice, gasLimit, chainId, data != null ? Numeric.toHexString(data) : "0x"))
                 .subscribeOn(Schedulers.io());
+    }
+
+    /**
+     * Broadcast a signed raw tx. With multicast enabled, send the same payload to up to 3
+     * RPC endpoints for this chain (never across different chain IDs — chainId is signed).
+     */
+    private String broadcastRawTransaction(long chainId, String rawHex) throws Exception
+    {
+        if (!preferenceRepository.getMulticastTransactions())
+        {
+            EthSendTransaction raw = getWeb3jService(chainId).ethSendRawTransaction(rawHex).send();
+            if (raw.hasError())
+            {
+                throw new Exception(raw.getError().getMessage());
+            }
+            return raw.getTransactionHash();
+        }
+
+        String[] urls = getMulticastRpcUrls(chainId);
+        if (urls.length <= 1)
+        {
+            EthSendTransaction raw = getWeb3jService(chainId).ethSendRawTransaction(rawHex).send();
+            if (raw.hasError())
+            {
+                throw new Exception(raw.getError().getMessage());
+            }
+            return raw.getTransactionHash();
+        }
+
+        String txHash = null;
+        Exception lastError = null;
+
+        for (String url : urls)
+        {
+            try
+            {
+                EthSendTransaction raw = buildWeb3jForUrl(chainId, url)
+                        .ethSendRawTransaction(rawHex)
+                        .send();
+                if (raw.hasError())
+                {
+                    String message = raw.getError().getMessage();
+                    if (txHash != null && isBenignDuplicateBroadcast(message))
+                    {
+                        Timber.d("%s: multicast duplicate/accepted on %s: %s", TAG, url, message);
+                        continue;
+                    }
+                    lastError = new Exception(url + ": " + message);
+                    Timber.w("%s: multicast send failed on %s: %s", TAG, url, message);
+                    continue;
+                }
+
+                if (txHash == null)
+                {
+                    txHash = raw.getTransactionHash();
+                }
+                Timber.d("%s: multicast accepted on %s hash=%s", TAG, url, raw.getTransactionHash());
+            }
+            catch (Exception e)
+            {
+                lastError = e;
+                Timber.w(e, "%s: multicast send exception on %s", TAG, url);
+                if (blockedRpcService != null)
+                {
+                    blockedRpcService.recordFailureIfBlocked(url, e);
+                }
+            }
+        }
+
+        if (txHash != null)
+        {
+            return txHash;
+        }
+        throw lastError != null ? lastError : new Exception("Multicast broadcast failed");
+    }
+
+    private String[] getMulticastRpcUrls(long chainId)
+    {
+        LinkedHashSet<String> urls = new LinkedHashSet<>();
+        String[] configured = EthereumNetworkBase.getConfiguredRPCUrls(chainId);
+        if (configured != null)
+        {
+            for (String url : configured)
+            {
+                if (!TextUtils.isEmpty(url))
+                {
+                    urls.add(url);
+                }
+            }
+        }
+
+        NetworkInfo info = EthereumNetworkBase.getNetwork(chainId);
+        if (info != null && info.rpcUrls != null)
+        {
+            for (String url : info.rpcUrls)
+            {
+                if (!TextUtils.isEmpty(url))
+                {
+                    urls.add(url);
+                }
+            }
+        }
+
+        String[] candidates = urls.toArray(new String[0]);
+        if (blockedRpcService != null)
+        {
+            candidates = blockedRpcService.filterBlocked(candidates);
+        }
+
+        List<String> limited = new ArrayList<>();
+        for (String url : candidates)
+        {
+            limited.add(url);
+            if (limited.size() >= MULTICAST_RPC_LIMIT)
+            {
+                break;
+            }
+        }
+        return limited.toArray(new String[0]);
+    }
+
+    private Web3j buildWeb3jForUrl(long chainId, String url)
+    {
+        OkHttpClient okClient = new OkHttpClient.Builder()
+                .connectTimeout(C.CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(C.READ_TIMEOUT * 3L, TimeUnit.SECONDS)
+                .writeTimeout(C.LONG_WRITE_TIMEOUT, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
+                .build();
+
+        AWHttpServiceWaterfall service = new AWHttpServiceWaterfall(
+                new String[]{url},
+                chainId,
+                okClient,
+                KeyProviderFactory.get().getInfuraKey(),
+                KeyProviderFactory.get().getInfuraSecret(),
+                KeyProviderFactory.get().getKlaytnKey(),
+                false);
+        return Web3j.build(service);
+    }
+
+    private boolean isBenignDuplicateBroadcast(String message)
+    {
+        if (TextUtils.isEmpty(message))
+        {
+            return false;
+        }
+        String lower = message.toLowerCase(Locale.ROOT);
+        return lower.contains("already known")
+                || lower.contains("alreadyimported")
+                || lower.contains("nonce too low")
+                || lower.contains("known transaction")
+                || lower.contains("transaction already imported");
     }
 
     private BigInteger gasPriceForNode(long chainId, BigInteger gasPrice)

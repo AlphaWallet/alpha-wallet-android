@@ -46,6 +46,10 @@ public interface PreferenceRepositoryType
 
     void setUse1559Transactions(boolean toggleState);
 
+    boolean getMulticastTransactions();
+
+    void setMulticastTransactions(boolean toggleState);
+
     boolean getDeveloperOverride();
 
     void setDeveloperOverride(boolean toggleState);
@@ -123,10 +127,6 @@ public interface PreferenceRepositoryType
 
     void setAnalyticsEnabled(boolean isEnabled);
 
-    boolean isCrashReportingEnabled();
-
-    void setCrashReportingEnabled(boolean isEnabled);
-
     long getLoginTime(String address);
 
     void logIn(String address);
@@ -139,7 +139,7 @@ public interface PreferenceRepositoryType
 
     void setPostNotificationsPermissionRequested(String address, boolean hasRequested);
 
-    boolean getUseTSViewer();
+    boolean getShowAllTokens();
 
-    void setUseTSViewer(boolean toggleState);
+    void setShowAllTokens(boolean showAll);
 }

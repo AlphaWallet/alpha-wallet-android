@@ -144,8 +144,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
-import io.realm.RealmResults;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.RealmCompat.Results;
 import timber.log.Timber;
 
 @AndroidEntryPoint
@@ -187,7 +188,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
                 }
             });
     private WebChromeClient.FileChooserParams fileChooserParams;
-    private RealmResults<RealmToken> realmUpdate;
+    private RealmCompat.Results<RealmToken> realmUpdate;
     private Realm realm = null;
     private ActionSheet confirmationDialog;
     ActivityResultLauncher<Intent> getGasSettings = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -690,7 +691,7 @@ public class DappBrowserFragment extends BaseFragment implements OnSignTransacti
         if (realm == null || realm.isClosed()) realm = viewModel.getRealmInstance(wallet);
 
         if (realmUpdate != null) realmUpdate.removeAllChangeListeners();
-        realmUpdate = realm.where(RealmToken.class)
+        realmUpdate = RealmCompat.where(realm, RealmToken.class)
                 .equalTo("address", TokensRealmSource.databaseKey(activeNetwork.chainId, "eth")).findAllAsync();
         realmUpdate.addChangeListener(realmTokens -> {
             //update balance

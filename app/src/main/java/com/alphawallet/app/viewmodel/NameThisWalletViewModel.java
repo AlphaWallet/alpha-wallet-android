@@ -24,7 +24,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 
 @HiltViewModel
 public class NameThisWalletViewModel extends BaseViewModel
@@ -95,14 +96,14 @@ public class NameThisWalletViewModel extends BaseViewModel
         ensName.setValue(address);
     }
 
-    public void setWalletName(String name, Realm.Transaction.OnSuccess onSuccess)
+    public void setWalletName(String name, RealmCompat.OnSuccess onSuccess)
     {
         Wallet wallet = defaultWallet().getValue();
         wallet.name = name;
         genericWalletInteract.updateWalletItem(wallet, WalletItem.NAME, onSuccess);
     }
 
-    public boolean checkEnsName(String newName, Realm.Transaction.OnSuccess onSuccess)
+    public boolean checkEnsName(String newName, RealmCompat.OnSuccess onSuccess)
     {
         if (!TextUtils.isEmpty(newName) && EnsResolver.isValidEnsName(newName))
         {
@@ -122,7 +123,7 @@ public class NameThisWalletViewModel extends BaseViewModel
     }
 
     //check if this is a valid ENS name, if so then replace the ENS name
-    private void checkAddress(String address, String ensName, Realm.Transaction.OnSuccess onSuccess)
+    private void checkAddress(String address, String ensName, RealmCompat.OnSuccess onSuccess)
     {
         if (defaultWallet.getValue() != null && !TextUtils.isEmpty(address) && address.equalsIgnoreCase(defaultWallet.getValue().address))
         {

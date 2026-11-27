@@ -100,6 +100,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -121,12 +122,12 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Case;
-import io.realm.Realm;
-import io.realm.RealmResults;
-import io.realm.Sort;
-import io.realm.exceptions.RealmException;
-import io.realm.exceptions.RealmPrimaryKeyConstraintException;
+import io.realm.kotlin.Realm;
+import io.realm.kotlin.TypedRealm;
+import io.realm.kotlin.exceptions.RealmException;
+import com.alphawallet.app.realm.AutoCloseableRealm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.RealmCompat.Results;
 import timber.log.Timber;
 
 
@@ -158,7 +159,6 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private final Semaphore assetLoadingLock;  // used to block if someone calls getAssetDefinitionASync() while loading
     private Disposable eventListener;           // timer thread that periodically checks event logs for scripts that require events
     private final Semaphore eventConnection;
-    private FragmentMessenger homeMessenger;
 
     private final TokenscriptFunction tokenscriptUtility;
 
@@ -232,9 +232,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //First check all the previously parsed scripts to check for any changes
         List<String> handledHashes = new ArrayList<>();
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            RealmResults<RealmTokenScriptData> realmData = realm.where(RealmTokenScriptData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.Results<RealmTokenScriptData> realmData = RealmCompat.where(realm, RealmTokenScriptData.class)
                     .findAll();
 
             for (RealmTokenScriptData entry : realmData)
@@ -262,7 +263,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                                 .isDisposed();
                     }
                 }
-                else if (entry.hasEvents())
+                else if (entry.getHasEvents())
                 {
                     //populate events
                     TokenDefinition td = parseFile(tsf.getInputStream());
@@ -310,20 +311,20 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 });
     }
 
-    private void deleteTokenScriptFromRealm(Realm realm, String fileHash) throws RealmException
+    private void deleteTokenScriptFromRealm(TypedRealm realm, String fileHash) 
     {
         //delete from realm
-        realm.executeTransactionAsync(r -> {
+        RealmCompat.executeTransactionAsync(realm, r -> {
             //have to remove all instances of this hash
-            RealmResults<RealmTokenScriptData> hashInstances = r.where(RealmTokenScriptData.class)
+            RealmCompat.Results<RealmTokenScriptData> hashInstances = RealmCompat.where(r, RealmTokenScriptData.class)
                     .equalTo("fileHash", fileHash)
                     .findAll();
 
-            RealmCertificateData realmCert = r.where(RealmCertificateData.class)
+            RealmCertificateData realmCert = RealmCompat.where(r, RealmCertificateData.class)
                     .equalTo("instanceKey", fileHash)
                     .findFirst();
 
-            if (realmCert != null) realmCert.deleteFromRealm();
+            if (realmCert != null) RealmCompat.deleteFromRealm(r, realmCert);
 
             //now delete all associated event data; script event descriptions may have changed
             for (RealmTokenScriptData script : hashInstances)
@@ -331,21 +332,22 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                 deleteEventDataForScript(script);
             }
 
-            hashInstances.deleteAllFromRealm();
+            hashInstances.deleteAllFromRealm(r);
         });
     }
 
     private void deleteEventDataForScript(RealmTokenScriptData scriptData)
     {
-        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(tokensService.getCurrentAddress())))
         {
-            realm.executeTransaction(r -> {
-                RealmResults<RealmAuxData> realmEvents = r.where(RealmAuxData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
+                RealmCompat.Results<RealmAuxData> realmEvents = RealmCompat.where(r, RealmAuxData.class)
                         .equalTo("tokenAddress", scriptData.getOriginTokenAddress())
                         .or()
                         .contains("instanceKey", scriptData.getOriginTokenAddress())
                         .findAll();
-                realmEvents.deleteAllFromRealm();
+                realmEvents.deleteAllFromRealm(r);
             });
         }
         catch (Exception e)
@@ -367,14 +369,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void deleteAllInternalScriptFromRealm()
     {
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            realm.executeTransactionAsync(r -> {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
                 //have to remove all instances of this hash
-                RealmResults<RealmTokenScriptData> hashInstances = r.where(RealmTokenScriptData.class)
+                RealmCompat.Results<RealmTokenScriptData> hashInstances = RealmCompat.where(r, RealmTokenScriptData.class)
                         .equalTo("fileHash", BUNDLED_SCRIPT)
                         .findAll();
-                hashInstances.deleteAllFromRealm();
+                hashInstances.deleteAllFromRealm(r);
             });
         }
         catch (Exception e)
@@ -395,8 +398,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         boolean hasEvents = td.hasEvents();
         long primaryChainId = !originContracts.isEmpty() ? originContracts.iterator().next().chainId : MAINNET_ID;
 
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
+            Realm realm = realmCloser.getRealm();
             //check for out-of-date script in the secure (downloaded) zone
             if (isInSecureZone(file) && td.isSchemaLessThanMinimum())
             {
@@ -408,17 +412,17 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
             final String hash = file.calcMD5();
 
-            realm.executeTransaction(r -> {
+            RealmCompat.executeTransaction(realm, r -> {
                 for (ContractLocator cl : originContracts)
                 {
                     String entryKey = getTSDataKey(cl.chainId, cl.address);
-                    RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
+                    RealmTokenScriptData entry = RealmCompat.where(r, RealmTokenScriptData.class)
                             .equalTo("instanceKey", entryKey)
                             .findFirst();
 
                     if (entry == null)
                     {
-                        entry = r.createObject(RealmTokenScriptData.class, entryKey);
+                        entry = RealmCompat.createObject(r, RealmTokenScriptData.class, entryKey);
                     }
 
                     //don't allow secure zone script to replace debug script; require user to delete the debug script first
@@ -629,8 +633,9 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public Single<Boolean> resetAttributes(TokenDefinition td)
     {
         return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+            try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(tokensService.getCurrentAddress())))
             {
+            Realm realm = realmCloser.getRealm();
                 for (ContractInfo cInfo : td.contracts.values())
                 {
                     for (Map.Entry<Long, List<String>> e : cInfo.addresses.entrySet())
@@ -638,14 +643,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                         for (String addr : e.getValue())
                         {
                             String dataBaseKey = addr + "-*-" + e.getKey() + "-*-" + "-func-key";
-                            RealmResults<RealmAuxData> functionResults = realm.where(RealmAuxData.class)
-                                    .like("instanceKey", dataBaseKey, Case.INSENSITIVE)
+                            RealmCompat.Results<RealmAuxData> functionResults = RealmCompat.where(realm, RealmAuxData.class)
+                                    .like("instanceKey", dataBaseKey, RealmCompat.Case.INSENSITIVE)
                                     .findAll();
 
                             if (functionResults.isEmpty()) continue;
 
-                            realm.executeTransaction(r -> {
-                                functionResults.deleteAllFromRealm();
+                            RealmCompat.executeTransaction(realm, r -> {
+                                functionResults.deleteAllFromRealm(r);
                             });
                         }
                     }
@@ -814,9 +819,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             return cachedDefinition;
         }
 
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmTokenScriptData tsData = RealmCompat.where(realm, RealmTokenScriptData.class)
                     .equalTo("instanceKey", tsKey)
                     .findFirst();
 
@@ -863,9 +869,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public TokenScriptFile getTokenScriptFile(long chainId, String address)
     {
         //pull from database
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmTokenScriptData tsData = RealmCompat.where(realm, RealmTokenScriptData.class)
                     .equalTo("instanceKey", getTSDataKey(chainId, address))// getTSDataKey(chainId, address))
                     .findFirst();
 
@@ -961,10 +968,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         //1. load TokenScripts with matching schemaUID
         //2. for each: calculate the collectionId using that tokenscript's collectionIdFields
         //3. find matching collectionId, return collectionId
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
+            Realm realm = realmCloser.getRealm();
             //Otherwise, attempt to match this attestation with a valid script
-            RealmResults<RealmTokenScriptData> realmData = realm.where(RealmTokenScriptData.class)
+            RealmCompat.Results<RealmTokenScriptData> realmData = RealmCompat.where(realm, RealmTokenScriptData.class)
                     .equalTo("schemaUID", attn.getSchemaUID())
                     .findAll();
 
@@ -1124,9 +1132,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         String tokenName = null;
         if (address.equalsIgnoreCase(tokensService.getCurrentAddress())) address = "ethereum";
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmTokenScriptData tsData = RealmCompat.where(realm, RealmTokenScriptData.class)
                     .equalTo("instanceKey", getTSDataKey(chainId, address))
                     .findFirst();
 
@@ -1155,9 +1164,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         String issuer = token.getNetworkName();
 
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmTokenScriptData tsData = RealmCompat.where(realm, RealmTokenScriptData.class)
                     .equalTo("instanceKey", token.getTSKey())
                     .findFirst();
 
@@ -1255,29 +1265,30 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void updateScriptEntriesInRealm(List<ContractLocator> origins, boolean isDebug, String newFileHash, String schemaUID)
     {
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            realm.executeTransaction(r -> {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
                 for (ContractLocator cl : origins)
                 {
                     String entryKey = getTSDataKey(cl.chainId, cl.address);
-                    RealmTokenScriptData realmData = r.where(RealmTokenScriptData.class)
+                    RealmTokenScriptData realmData = RealmCompat.where(r, RealmTokenScriptData.class)
                             .equalTo("instanceKey", entryKey)
                             .findFirst();
 
                     if (realmData != null && (isDebug || isInSecureZone(realmData.getFilePath()))) //delete the existing entry if this script is debug, or if the old script is in the server area
                     {
-                        RealmCertificateData realmCert = r.where(RealmCertificateData.class)
+                        RealmCertificateData realmCert = RealmCompat.where(r, RealmCertificateData.class)
                                 .equalTo("instanceKey", realmData.getFileHash())
                                 .findFirst();
                         if (realmCert != null && !realmData.getFileHash().equals(newFileHash))
                         {
-                            realmCert.deleteFromRealm(); //don't delete cert if new cert will overwrite it
+                            RealmCompat.deleteFromRealm(r, realmCert); //don't delete cert if new cert will overwrite it
                         }
                         deleteEventDataForScript(realmData);
                         if (!realmData.getFileHash().equals(newFileHash))
                         {
-                            realmData.deleteFromRealm();
+                            RealmCompat.deleteFromRealm(r, realmData);
                         }
                     }
                 }
@@ -1363,17 +1374,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         final String tokenKey = tempFileKey;
         final File storeFile = tsf;
 
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            realm.executeTransaction(r -> {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
                 //String entryKey = getTSDataKey(token.tokenInfo.chainId, token.tokenInfo.address);
-                RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
+                RealmTokenScriptData entry = RealmCompat.where(r, RealmTokenScriptData.class)
                         .equalTo("instanceKey", tokenKey)
                         .findFirst();
 
                 if (entry == null)
                 {
-                    entry = r.createObject(RealmTokenScriptData.class, tokenKey);
+                    entry = RealmCompat.createObject(r, RealmTokenScriptData.class, tokenKey);
                 }
 
                 entry.setFileHash(fileHash);
@@ -1400,21 +1412,22 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             return;
         }
 
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            realm.executeTransaction(r -> {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
                 String entryKey = getTSDataKey(chainId, address);
-                RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
+                RealmTokenScriptData entry = RealmCompat.where(r, RealmTokenScriptData.class)
                         .equalTo("instanceKey", entryKey)
                         .findFirst();
 
                 if (entry == null)
                 {
-                    entry = r.createObject(RealmTokenScriptData.class, entryKey);
+                    entry = RealmCompat.createObject(r, RealmTokenScriptData.class, entryKey);
                 }
 
                 entry.setIpfsPath(scriptURL);
-                r.insertOrUpdate(entry);
+                RealmCompat.insertOrUpdate(r, entry);
             });
         }
         catch (Exception e)
@@ -1426,13 +1439,14 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private boolean matchesExistingScript(Token token, String uri)
     {
         //TODO: calculate and use the IPFS CID to validate existing script against IPFS locator
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
+            Realm realm = realmCloser.getRealm();
             String entryKey = token.getTSKey(); //getTSDataKey(token.tokenInfo.chainId, token.tokenInfo.address);
 
             TokenScriptFile tsf = getTokenScriptFile(token);
 
-            RealmTokenScriptData entry = realm.where(RealmTokenScriptData.class)
+            RealmTokenScriptData entry = RealmCompat.where(realm, RealmTokenScriptData.class)
                     .equalTo("instanceKey", entryKey)
                     .findFirst();
 
@@ -1675,15 +1689,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void updateRealmForBundledScript(long chainId, String address, String asset, TokenDefinition td)
     {
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            realm.executeTransaction(r -> {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
                 String entryKey = getTSDataKey(chainId, address);
-                RealmTokenScriptData entry = r.where(RealmTokenScriptData.class)
+                RealmTokenScriptData entry = RealmCompat.where(r, RealmTokenScriptData.class)
                         .equalTo("instanceKey", entryKey)
                         .findFirst();
 
-                if (entry == null) entry = r.createObject(RealmTokenScriptData.class, entryKey);
+                if (entry == null) entry = RealmCompat.createObject(r, RealmTokenScriptData.class, entryKey);
                 entry.setFilePath(asset);
                 entry.setViewList(td.getViews());
                 entry.setNames(td.getTokenNameList());
@@ -1890,18 +1905,19 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void storeLatestEventBlockTime(String walletAddress, EventDefinition ev, BigInteger readBlock)
     {
         ev.readBlock = readBlock.add(BigInteger.ONE);
-        try (Realm realm = realmManager.getRealmInstance(walletAddress))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(walletAddress)))
         {
+            Realm realm = realmCloser.getRealm();
             long chainId = ev.getEventChainId();
             String eventAddress = ev.getEventContractAddress();
             String eventName = ev.activityName != null ? ev.activityName : ev.attributeName;
             String databaseKey = TokensRealmSource.eventBlockKey(chainId, eventAddress, ev.type.name, ev.filter);
-            realm.executeTransactionAsync(r -> {
-                RealmAuxData realmToken = r.where(RealmAuxData.class)
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmAuxData realmToken = RealmCompat.where(r, RealmAuxData.class)
                         .equalTo("instanceKey", databaseKey)
                         .findFirst();
                 if (realmToken == null)
-                    realmToken = r.createObject(RealmAuxData.class, databaseKey);
+                    realmToken = RealmCompat.createObject(r, RealmAuxData.class, databaseKey);
                 realmToken.setResultTime(System.currentTimeMillis());
                 realmToken.setResult(ev.readBlock.toString(16));
                 realmToken.setFunctionId(eventName);
@@ -1934,14 +1950,15 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void storeAuxData(String walletAddress, String databaseKey, BigInteger tokenId, String eventData, String activityName, ContractAddress cAddr, long blockTime)
     {
-        try (Realm realm = realmManager.getRealmInstance(walletAddress))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(walletAddress)))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmAuxData realmToken = r.where(RealmAuxData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmAuxData realmToken = RealmCompat.where(r, RealmAuxData.class)
                         .equalTo("instanceKey", databaseKey)
                         .findFirst();
                 if (realmToken == null)
-                    realmToken = r.createObject(RealmAuxData.class, databaseKey);
+                    realmToken = RealmCompat.createObject(r, RealmAuxData.class, databaseKey);
                 realmToken.setResultTime(blockTime);
                 realmToken.setResult(eventData);
                 realmToken.setFunctionId(activityName);
@@ -2116,22 +2133,23 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return sig;
     }
 
-    private void storeCertificateData(String hash, XMLDsigDescriptor sig) throws RealmException
+    private void storeCertificateData(String hash, XMLDsigDescriptor sig) 
     {
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            realm.executeTransaction(r -> {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
                 //if signature present, then just update
-                RealmCertificateData realmData = r.where(RealmCertificateData.class)
+                RealmCertificateData realmData = RealmCompat.where(r, RealmCertificateData.class)
                         .equalTo("instanceKey", hash)
                         .findFirst();
 
                 if (realmData == null)
                 {
-                    realmData = r.createObject(RealmCertificateData.class, hash);
+                    realmData = RealmCompat.createObject(r, RealmCertificateData.class, hash);
                 }
                 realmData.setFromSig(sig);
-                r.insertOrUpdate(realmData);
+                RealmCompat.insertOrUpdate(r, realmData);
             });
         }
     }
@@ -2139,9 +2157,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private XMLDsigDescriptor getCertificateFromRealm(String hash)
     {
         XMLDsigDescriptor sig = null;
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            RealmCertificateData realmCert = realm.where(RealmCertificateData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCertificateData realmCert = RealmCompat.where(realm, RealmCertificateData.class)
                     .equalTo("instanceKey", hash)
                     .findFirst();
 
@@ -2228,9 +2247,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public boolean hasDefinition(Token token)
     {
         boolean hasDefinition = false;
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmTokenScriptData tsData = RealmCompat.where(realm, RealmTokenScriptData.class)
                     .equalTo("instanceKey", token.getTSKey())
                     .findFirst();
 
@@ -2242,9 +2262,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public boolean hasTokenView(Token token, String type)
     {
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmTokenScriptData tsData = RealmCompat.where(realm, RealmTokenScriptData.class)
                     .equalTo("instanceKey", token.getTSKey())
                     .findFirst();
 
@@ -2588,9 +2609,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private String getScriptUrl(long chainId, String contractAddress)
     {
         String entryKey = getTSDataKey(chainId, contractAddress);
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            RealmTokenScriptData entry = realm.where(RealmTokenScriptData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmTokenScriptData entry = RealmCompat.where(realm, RealmTokenScriptData.class)
                     .equalTo("instanceKey", entryKey)
                     .findFirst();
 
@@ -2615,9 +2637,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         TransactionResult tr = new TransactionResult(contract.chainId, contract.address, tokenId, attr);
         String dataBaseKey = functionKey(contract, tokenId, attr.name);
-        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(tokensService.getCurrentAddress())))
         {
-            RealmAuxData realmToken = realm.where(RealmAuxData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmAuxData realmToken = RealmCompat.where(realm, RealmAuxData.class)
                     .equalTo("instanceKey", dataBaseKey)
                     .equalTo("chainId", contract.chainId)
                     .findFirst();
@@ -2642,12 +2665,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         if (tokensService.getCurrentAddress() == null || !Utils.isAddressValid(tokensService.getCurrentAddress()))
             return tResult;
         if (tResult.result == null || tResult.resultTime < 0) return tResult;
-        try (Realm realm = realmManager.getRealmInstance(walletAddress))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(walletAddress)))
         {
+            Realm realm = realmCloser.getRealm();
             ContractAddress cAddr = new ContractAddress(tResult.contractChainId, tResult.contractAddress);
             String databaseKey = functionKey(cAddr, tResult.tokenId, tResult.attrId);
-            realm.executeTransaction(r -> {
-                RealmAuxData realmToken = r.where(RealmAuxData.class)
+            RealmCompat.executeTransaction(realm, r -> {
+                RealmAuxData realmToken = RealmCompat.where(r, RealmAuxData.class)
                         .equalTo("instanceKey", databaseKey)
                         .equalTo("chainId", tResult.contractChainId)
                         .findFirst();
@@ -2674,11 +2698,12 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     private void updateEventBlockTimes()
     {
-        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(tokensService.getCurrentAddress())))
         {
-            RealmResults<RealmAuxData> realmEvents = realm.where(RealmAuxData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.Results<RealmAuxData> realmEvents = RealmCompat.where(realm, RealmAuxData.class)
                     .endsWith("instanceKey", "-eventBlock")
-                    .sort("resultTime", Sort.ASCENDING)
+                    .sort("resultTime", RealmCompat.Sort.ASCENDING)
                     .findAll();
 
             for (RealmAuxData eventData : realmEvents)
@@ -2699,12 +2724,13 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     private void deleteAllEventData()
     {
         //delete all realm event/attribute result data
-        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(tokensService.getCurrentAddress())))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmResults<RealmAuxData> realmEvents = r.where(RealmAuxData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmCompat.Results<RealmAuxData> realmEvents = RealmCompat.where(r, RealmAuxData.class)
                         .findAll();
-                realmEvents.deleteAllFromRealm();
+                realmEvents.deleteAllFromRealm(r);
             });
         }
         catch (Exception e)
@@ -2713,17 +2739,18 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
 
         //Delete all tokenscript data
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmResults<RealmTokenScriptData> rd = r.where(RealmTokenScriptData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmCompat.Results<RealmTokenScriptData> rd = RealmCompat.where(r, RealmTokenScriptData.class)
                         .findAll();
 
-                RealmResults<RealmCertificateData> realmCert = r.where(RealmCertificateData.class)
+                RealmCompat.Results<RealmCertificateData> realmCert = RealmCompat.where(r, RealmCertificateData.class)
                         .findAll();
 
-                rd.deleteAllFromRealm();
-                realmCert.deleteAllFromRealm();
+                rd.deleteAllFromRealm(r);
+                realmCert.deleteAllFromRealm(r);
             });
         }
         catch (Exception e)
@@ -2748,11 +2775,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         }
     }
 
-    private void createAuxData(Realm realm, TransactionResult tResult, String dataBaseKey)
+    private void createAuxData(TypedRealm realm, TransactionResult tResult, String dataBaseKey)
     {
         try
         {
-            RealmAuxData realmData = realm.createObject(RealmAuxData.class, dataBaseKey);
+            RealmAuxData realmData = RealmCompat.createObject(realm, RealmAuxData.class, dataBaseKey);
             realmData.setResultTime(tResult.resultTime);
             realmData.setResult(tResult.result);
             realmData.setChainId(tResult.contractChainId);
@@ -2760,10 +2787,31 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
             realmData.setTokenId(tResult.tokenId.toString(Character.MAX_RADIX));
             realmData.setResultReceivedTime(System.currentTimeMillis());
         }
-        catch (RealmPrimaryKeyConstraintException e)
+        catch (RealmException e)
         {
             //in theory we should never see this
             Timber.e(e);
+        }
+    }
+
+    private String urlEncode(String value)
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8);
+        }
+        else
+        {
+            try
+            {
+                // StandardCharsets.UTF_8.name() returns "UTF-8"
+                return URLEncoder.encode(value, StandardCharsets.UTF_8.name());
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                // UTF-8 is guaranteed to be supported on all Android devices
+                return value;
+            }
         }
     }
 
@@ -2775,11 +2823,11 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
         //add all asset IDs
         if (tokenAsset.getBackgroundColor() != null)
-            TokenScriptResult.addPair(attrs, "background_colour", URLEncoder.encode(tokenAsset.getBackgroundColor(), StandardCharsets.UTF_8));
+            TokenScriptResult.addPair(attrs, "background_colour", urlEncode(tokenAsset.getBackgroundColor()));
         if (tokenAsset.getThumbnail() != null)
             TokenScriptResult.addPair(attrs, "image_preview_url", tokenAsset.getThumbnail());
         if (tokenAsset.getDescription() != null)
-            TokenScriptResult.addPair(attrs, "description", URLEncoder.encode(tokenAsset.getDescription(), StandardCharsets.UTF_8));
+            TokenScriptResult.addPair(attrs, "description", urlEncode(tokenAsset.getDescription()));
         if (tokenAsset.getExternalLink() != null)
             TokenScriptResult.addPair(attrs, "external_link", tokenAsset.getExternalLink());
         //if (tokenAsset.getTraits() != null) TokenScriptResult.addPair(attrs, "traits", tokenAsset.getTraits());
@@ -2955,15 +3003,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         Wallet wallet = new Wallet(tokensService.getCurrentAddress());
         int updateSize;
 
-        try (Realm realm = realmManager.getRealmInstance(wallet))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
         {
+            Realm realm = realmCloser.getRealm();
             List<RealmAttestation> forUpdate = getRealmItemsForUpdate(realm, td, scriptCollectionId);
             updateSize = forUpdate.size();
 
             //now execute update
             if (forUpdate.size() > 0)
             {
-                realm.executeTransaction(r -> {
+                RealmCompat.executeTransaction(realm, r -> {
                     for (RealmAttestation rAtt : forUpdate)
                     {
                         rAtt.setCollectionId(scriptCollectionId);
@@ -2975,10 +3024,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
         return String.valueOf(updateSize);
     }
 
-    private List<RealmAttestation> getRealmItemsForUpdate(Realm realm, TokenDefinition td, String scriptCollectionId)
+    private List<RealmAttestation> getRealmItemsForUpdate(TypedRealm realm, TokenDefinition td, String scriptCollectionId)
     {
         List<RealmAttestation> forUpdate = new ArrayList<>();
-        RealmResults<RealmAttestation> realmItems = realm.where(RealmAttestation.class)
+        RealmCompat.Results<RealmAttestation> realmItems = RealmCompat.where(realm, RealmAttestation.class)
                 .notEqualTo("collectionId", scriptCollectionId)
                 .findAll();
 
@@ -3086,9 +3135,10 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     {
         ContractLocator cr = null;
 
-        try (Realm realm = realmManager.getRealmInstance(ASSET_DEFINITION_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(ASSET_DEFINITION_DB)))
         {
-            RealmTokenScriptData tsData = realm.where(RealmTokenScriptData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmTokenScriptData tsData = RealmCompat.where(realm, RealmTokenScriptData.class)
                     .contains("filePath", importFileName)
                     .findFirst();
 
@@ -3114,7 +3164,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public void setErrorCallback(FragmentMessenger callback)
     {
-        homeMessenger = callback;
+
     }
 
     /**
@@ -3146,7 +3196,7 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
                             FileInputStream input = new FileInputStream(file);
                             TokenDefinition tokenDef = parseFile(input);
                             ContractInfo origins = tokenDef.contracts.get(tokenDef.holdingToken);
-                            if (origins.addresses.size() > 0)
+                            if (!origins.addresses.isEmpty())
                             {
                                 TokenScriptFile tsf = new TokenScriptFile(context, file.getAbsolutePath());
                                 tokenLocators.add(new TokenLocator(tokenDef.getTokenName(1), origins, tsf));
@@ -3210,22 +3260,23 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
 
     public void storeTokenViewHeight(long chainId, String address, int listViewHeight)
     {
-        try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(tokensService.getCurrentAddress())))
         {
-            realm.executeTransactionAsync(r -> {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
                 TokenScriptFile tsf = getTokenScriptFile(chainId, address);
                 if (tsf == null || !tsf.exists()) return;
                 String hash = tsf.calcMD5();
                 String databaseKey = tokenSizeDBKey(chainId, address);
 
-                RealmAuxData realmToken = r.where(RealmAuxData.class)
+                RealmAuxData realmToken = RealmCompat.where(r, RealmAuxData.class)
                         .equalTo("instanceKey", databaseKey)
                         .equalTo("chainId", chainId)
                         .findFirst();
 
                 if (realmToken == null)
                 {
-                    realmToken = r.createObject(RealmAuxData.class, databaseKey);
+                    realmToken = RealmCompat.createObject(r, RealmAuxData.class, databaseKey);
                 }
                 realmToken.setChainId(chainId);
                 realmToken.setResult(hash);
@@ -3237,15 +3288,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     public Single<Integer> fetchViewHeight(long chainId, String address)
     {
         return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getRealmInstance(tokensService.getCurrentAddress()))
+            try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(tokensService.getCurrentAddress())))
             {
+            Realm realm = realmCloser.getRealm();
                 //determine hash
                 TokenScriptFile tsf = getTokenScriptFile(chainId, address);
                 if (tsf == null || !tsf.exists()) return 0;
                 String hash = tsf.calcMD5();
                 String databaseKey = tokenSizeDBKey(chainId, address);
 
-                RealmAuxData realmToken = realm.where(RealmAuxData.class)
+                RealmAuxData realmToken = RealmCompat.where(realm, RealmAuxData.class)
                         .equalTo("instanceKey", databaseKey)
                         .equalTo("chainId", chainId)
                         .findFirst();
@@ -3283,15 +3335,16 @@ public class AssetDefinitionService implements ParseResult, AttributeInterface
     // For testing only
     private void deleteAWRealm()
     {
-        try (Realm realm = realmManager.getRealmInstance(IMAGES_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(IMAGES_DB)))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmResults<RealmAuxData> instance = r.where(RealmAuxData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmCompat.Results<RealmAuxData> instance = RealmCompat.where(r, RealmAuxData.class)
                         .findAll();
 
                 if (instance != null)
                 {
-                    instance.deleteAllFromRealm();
+                    instance.deleteAllFromRealm(r);
                 }
             });
         }

@@ -1,6 +1,6 @@
 package com.alphawallet.app.entity.walletconnect;
 
-import com.walletconnect.web3.wallet.client.Wallet;
+import com.reown.walletkit.client.Wallet;
 
 import java.util.ArrayList;
 import java.util.HashSet;

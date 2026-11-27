@@ -1,0 +1,6 @@
+- [x] Add translations to `res/values-es/strings.xml`
+- [x] Add translations to `res/values-fr/strings.xml`
+- [x] Add translations to `res/values-id/strings.xml`
+- [x] Add translations to `res/values-my/strings.xml`
+- [x] Add translations to `res/values-vi/strings.xml`
+- [x] Add translations to `res/values-zh/strings.xml`

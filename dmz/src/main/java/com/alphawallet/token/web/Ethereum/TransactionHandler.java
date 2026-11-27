@@ -40,15 +40,6 @@ public class TransactionHandler
         builder.readTimeout(20, TimeUnit.SECONDS);
         HttpService service = new HttpService(nodeURL, builder.build(), false);
         mWeb3 = Web3j.build(service);
-        try
-        {
-            Web3ClientVersion web3ClientVersion = mWeb3.web3ClientVersion().sendAsync().get();
-            System.out.println(web3ClientVersion.getWeb3ClientVersion());
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
     }
 
     public List<BigInteger> getBalanceArray(String address, String contractAddress) throws Exception

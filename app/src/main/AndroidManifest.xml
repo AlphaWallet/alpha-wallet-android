@@ -317,11 +317,6 @@
                 android:label="ERC1155 Asset Details" />
 
         <activity
-                android:name=".ui.TokenScriptJsActivity"
-                android:hardwareAccelerated="true"
-                android:label="TokenScript JS Viewer" />
-
-        <activity
                 android:name=".ui.Erc1155AssetListActivity"
                 android:hardwareAccelerated="true"
                 android:label="ERC1155 Asset Details" />
@@ -371,10 +366,6 @@
         <activity
                 android:name=".ui.WalletDiagnosticActivity"
                 android:label="@string/key_diagnostic" />
-
-        <activity
-                android:name=".ui.CrashReportSettingsActivity"
-                android:label="@string/settings_title_crash_reporting" />
 
         <service
                 android:name=".service.PriceAlertsService"

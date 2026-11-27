@@ -24,11 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Single;
-import io.realm.Case;
-import io.realm.Realm;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
-import io.realm.Sort;
+import io.realm.kotlin.Realm;
+import io.realm.kotlin.TypedRealm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
+import com.alphawallet.app.realm.RealmQueryBuilder;
+import com.alphawallet.app.realm.RealmCompat.Results;
 import timber.log.Timber;
 
 public class TransactionsRealmCache implements TransactionLocalSource {
@@ -43,9 +44,10 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     @Override
     public Transaction fetchTransaction(Wallet wallet, String hash)
     {
-        try (Realm instance = realmManager.getRealmInstance(wallet))
+        try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
         {
-            RealmTransaction realmTx = instance.where(RealmTransaction.class)
+            Realm instance = instanceCloser.getRealm();
+            RealmTransaction realmTx = RealmCompat.where(instance, RealmTransaction.class)
                     .equalTo("hash", hash)
                     .findFirst();
 
@@ -67,9 +69,10 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     @Override
     public long fetchTxCompletionTime(Wallet wallet, String hash)
     {
-        try (Realm instance = realmManager.getRealmInstance(wallet))
+        try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
         {
-            RealmTransaction realmTx = instance.where(RealmTransaction.class)
+            Realm instance = instanceCloser.getRealm();
+            RealmTransaction realmTx = RealmCompat.where(instance, RealmTransaction.class)
                     .equalTo("hash", hash)
                     .findFirst();
 
@@ -90,9 +93,10 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     public Transaction[] fetchPendingTransactions(String currentAddress)
     {
         Transaction[] pendingTransactions;
-        try (Realm instance = realmManager.getRealmInstance(new Wallet(currentAddress)))
+        try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(new Wallet(currentAddress))))
         {
-            RealmResults<RealmTransaction> pendingTxs = instance.where(RealmTransaction.class)
+            Realm instance = instanceCloser.getRealm();
+            RealmCompat.Results<RealmTransaction> pendingTxs = RealmCompat.where(instance, RealmTransaction.class)
                     .equalTo("blockNumber", "-2")
                     .or().equalTo("blockNumber", "0")
                     .findAll();
@@ -116,10 +120,11 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     {
         return Single.fromCallable(() -> {
             List<ActivityMeta> metas = new ArrayList<>();
-            try (Realm instance = realmManager.getRealmInstance(wallet))
+            try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
             {
-                RealmResults<RealmTransaction> txs = instance.where(RealmTransaction.class)
-                        .sort("timeStamp", Sort.DESCENDING)
+            Realm instance = instanceCloser.getRealm();
+                RealmCompat.Results<RealmTransaction> txs = RealmCompat.where(instance, RealmTransaction.class)
+                        .sort("timeStamp", RealmCompat.Sort.DESCENDING)
                         .equalTo("chainId", chainId)
                         .findAll();
                 Timber.tag("TRC").d( "Found %s TX Results", txs.size());
@@ -149,9 +154,10 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     {
         return Single.fromCallable(() -> {
             List<ActivityMeta> metas = new ArrayList<>();
-            try (Realm instance = realmManager.getRealmInstance(wallet.address))
+            try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet.address)))
             {
-                RealmResults<RealmAuxData> evs = instance.where(RealmAuxData.class)
+            Realm instance = instanceCloser.getRealm();
+                RealmCompat.Results<RealmAuxData> evs = RealmCompat.where(instance, RealmAuxData.class)
                         .endsWith("instanceKey", EVENT_CARDS)
                         .findAll();
                 Timber.tag("TRC").d( "Found %s TX Results", evs.size());
@@ -178,9 +184,10 @@ public class TransactionsRealmCache implements TransactionLocalSource {
             List<ActivityMeta> metas = new ArrayList<>();
 
             LongSparseArray<Integer> elementCount = new LongSparseArray<>();
-            try (Realm instance = realmManager.getRealmInstance(wallet))
+            try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
             {
-                final RealmResults<RealmTransaction> txs = generateRealmQuery(instance, fetchTime).findAll();
+            Realm instance = instanceCloser.getRealm();
+                final RealmCompat.Results<RealmTransaction> txs = generateRealmQuery(instance, fetchTime).findAll();
                 Timber.tag("TRC").d( "Found %s TX Results", txs.size());
 
                 for (RealmTransaction item : txs)
@@ -203,29 +210,30 @@ public class TransactionsRealmCache implements TransactionLocalSource {
         });
     }
 
-    private RealmQuery<RealmTransaction> generateRealmQuery(Realm instance, long fetchTime)
+    private RealmQueryBuilder<RealmTransaction> generateRealmQuery(TypedRealm instance, long fetchTime)
     {
         if (fetchTime > 0)
         {
-            return instance.where(RealmTransaction.class)
-                    .sort("timeStamp", Sort.DESCENDING)
+            return RealmCompat.where(instance, RealmTransaction.class)
+                    .sort("timeStamp", RealmCompat.Sort.DESCENDING)
                     .beginGroup()
                     .lessThan("timeStamp", fetchTime)
                     .endGroup();
         }
         else
         {
-            return instance.where(RealmTransaction.class)
-                    .sort("timeStamp", Sort.DESCENDING);
+            return RealmCompat.where(instance, RealmTransaction.class)
+                    .sort("timeStamp", RealmCompat.Sort.DESCENDING);
         }
     }
 
     @Override
     public RealmAuxData fetchEvent(String walletAddress, String eventKey)
     {
-        try (Realm instance = realmManager.getRealmInstance(walletAddress))
+        try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(walletAddress)))
         {
-            return instance.where(RealmAuxData.class)
+            Realm instance = instanceCloser.getRealm();
+            return RealmCompat.where(instance, RealmAuxData.class)
                     .equalTo("instanceKey", eventKey)
                     .findFirst();
         }
@@ -238,20 +246,21 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     @Override
     public Transaction putTransaction(Wallet wallet, final Transaction tx)
     {
-        try (Realm instance = realmManager.getRealmInstance(wallet))
+        try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
         {
-            instance.executeTransaction(r -> {
-                RealmTransaction realmTx = r.where(RealmTransaction.class)
+            Realm instance = instanceCloser.getRealm();
+            RealmCompat.executeTransaction(instance, r -> {
+                RealmTransaction realmTx = RealmCompat.where(r, RealmTransaction.class)
                         .equalTo("hash", tx.hash)
                         .findFirst();
 
                 if (realmTx == null)
                 {
-                    realmTx = r.createObject(RealmTransaction.class, tx.hash);
+                    realmTx = RealmCompat.createObject(r, RealmTransaction.class, tx.hash);
                 }
 
                 fill(realmTx, tx);
-                r.insertOrUpdate(realmTx);
+                RealmCompat.insertOrUpdate(r, realmTx);
             });
         }
         catch (Exception e)
@@ -267,10 +276,11 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     public Single<Boolean> deleteAllTickers()
     {
         return Single.fromCallable(() -> {
-            try (Realm instance = realmManager.getRealmInstance(TICKER_DB))
+            try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(TICKER_DB)))
             {
-                instance.executeTransaction(r -> r.deleteAll());
-                instance.refresh();
+            Realm instance = instanceCloser.getRealm();
+                RealmCompat.executeTransaction(instance, r -> RealmCompat.deleteAll(r));
+                RealmCompat.refresh(instance);
             }
             catch (Exception e)
             {
@@ -286,19 +296,20 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     {
         return Single.fromCallable(() -> {
             File databaseFile = null;
-            try (Realm instance = realmManager.getRealmInstance(new Wallet(currentAddress)))
+            try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(new Wallet(currentAddress))))
             {
+            Realm instance = instanceCloser.getRealm();
                 databaseFile = new File(instance.getConfiguration().getPath());
-                instance.executeTransaction(r -> {
+                RealmCompat.executeTransaction(instance, r -> {
                     //delete all the data
-                    r.where(RealmToken.class).findAll().deleteAllFromRealm();
-                    r.where(RealmTransaction.class).findAll().deleteAllFromRealm();
-                    r.where(RealmAuxData.class).findAll().deleteAllFromRealm();
-                    r.where(RealmNFTAsset.class).findAll().deleteAllFromRealm();
-                    r.where(RealmTransfer.class).findAll().deleteAllFromRealm();
-                    r.where(Realm1559Gas.class).findAll().deleteAllFromRealm();
+                    RealmCompat.where(r, RealmToken.class).findAll().deleteAllFromRealm(r);
+                    RealmCompat.where(r, RealmTransaction.class).findAll().deleteAllFromRealm(r);
+                    RealmCompat.where(r, RealmAuxData.class).findAll().deleteAllFromRealm(r);
+                    RealmCompat.where(r, RealmNFTAsset.class).findAll().deleteAllFromRealm(r);
+                    RealmCompat.where(r, RealmTransfer.class).findAll().deleteAllFromRealm(r);
+                    RealmCompat.where(r, Realm1559Gas.class).findAll().deleteAllFromRealm(r);
                 });
-                instance.refresh();
+                RealmCompat.refresh(instance);
             }
             catch (Exception e)
             {
@@ -317,12 +328,13 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                 }
             }
 
-            try (Realm walletRealm = realmManager.getWalletDataRealmInstance())
+            try (AutoCloseableRealm walletRealmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
             {
-                walletRealm.executeTransaction(r -> {
+            Realm walletRealm = walletRealmCloser.getRealm();
+                RealmCompat.executeTransaction(walletRealm, r -> {
                     //now delete all the wallet info (not key info!)
-                    RealmWalletData walletData = r.where(RealmWalletData.class)
-                            .equalTo("address", currentAddress, Case.INSENSITIVE)
+                    RealmWalletData walletData = RealmCompat.where(r, RealmWalletData.class)
+                            .equalTo("address", currentAddress, RealmCompat.Case.INSENSITIVE)
                             .findFirst();
 
                     if (walletData != null)
@@ -333,7 +345,7 @@ public class TransactionsRealmCache implements TransactionLocalSource {
                     }
                 });
 
-                walletRealm.refresh();
+                RealmCompat.refresh(walletRealm);
             }
 
             return true;
@@ -384,10 +396,11 @@ public class TransactionsRealmCache implements TransactionLocalSource {
     @Override
     public void markTransactionBlock(String walletAddress, String hash, long blockValue)
     {
-        try (Realm instance = realmManager.getRealmInstance(new Wallet(walletAddress)))
+        try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(new Wallet(walletAddress))))
         {
-            instance.executeTransactionAsync(r -> {
-                RealmTransaction realmTx = r.where(RealmTransaction.class)
+            Realm instance = instanceCloser.getRealm();
+            RealmCompat.executeTransactionAsync(instance, r -> {
+                RealmTransaction realmTx = RealmCompat.where(r, RealmTransaction.class)
                         .equalTo("hash", hash)
                         .findFirst();
 

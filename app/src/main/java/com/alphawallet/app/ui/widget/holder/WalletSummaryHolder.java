@@ -33,8 +33,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import io.reactivex.disposables.Disposable;
-import io.realm.Realm;
-import io.realm.RealmResults;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.RealmCompat.Results;
 
 public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements View.OnClickListener, AvatarWriteCallback
 {
@@ -185,7 +186,7 @@ public class WalletSummaryHolder extends BinderViewHolder<Wallet> implements Vie
 
     private Wallet fetchWallet(Wallet w)
     {
-        RealmWalletData realmWallet = realm.where(RealmWalletData.class)
+        RealmWalletData realmWallet = RealmCompat.where(realm, RealmWalletData.class)
                 .equalTo("address", w.address)
                 .findFirst();
         if (realmWallet != null)

@@ -1,7 +1,7 @@
 package com.alphawallet.app.walletconnect.entity;
 
 
-import static com.walletconnect.web3.wallet.client.Wallet.*;
+import static com.reown.walletkit.client.Wallet.*;
 
 /**
  * Created by JB on 21/11/2022.

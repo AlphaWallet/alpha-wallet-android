@@ -10,7 +10,8 @@ import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 
 import com.alphawallet.app.entity.Wallet;
 
@@ -39,11 +40,11 @@ public class FetchWalletsInteract {
         return accountRepository.storeWallet(wallet);
     }
 
-    public void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess) {
+    public void updateWalletData(Wallet wallet, RealmCompat.OnSuccess onSuccess) {
         accountRepository.updateWalletData(wallet, onSuccess);
     }
 
-    public void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess) {
+    public void updateWalletItem(Wallet wallet, WalletItem item, RealmCompat.OnSuccess onSuccess) {
         accountRepository.updateWalletItem(wallet, item, onSuccess);
     }
 

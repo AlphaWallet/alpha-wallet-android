@@ -229,6 +229,8 @@ public abstract class C {
     public static final long GAS_LIMIT_DEFAULT = 90000L;
     public static final long GAS_LIMIT_CONTRACT = 1000000L;
     public static final long GAS_PRICE_MIN = 400000000L;
+    /** Minimum EIP-1559 priority fee (0.1 Gwei). Quiet L2s often report 0 tips that fail inclusion. */
+    public static final long GAS_PRIORITY_FEE_MIN = 100000000L;
     public static final int ETHER_DECIMALS = 18;
     public static final long GAS_LIMIT_MAX =          4712380L;  //Max block gas for most chains
     public static final long GAS_LIMIT_MAX_KLAYTN = 100000000L;  //Klaytn gas limit, see https://docs.klaytn.com/klaytn/design/computation/computation-cost

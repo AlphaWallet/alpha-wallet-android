@@ -39,7 +39,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.Single;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 
 public class QRSelectionTest
 {

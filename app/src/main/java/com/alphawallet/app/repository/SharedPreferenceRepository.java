@@ -30,9 +30,10 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public static final String CURRENCY_SYMBOL_KEY = "currency_symbol";
     public static final String USER_LOCALE_PREF = "user_locale_pref";
     public static final String HIDE_ZERO_BALANCE_TOKENS = "hide_zero_balance_tokens";
+    public static final String SHOW_ALL_TOKENS = "show_all_tokens";
     public static final String FULL_SCREEN_STATE = "full_screen";
     public static final String EXPERIMENTAL_1559_TX = "ex_1559_tx";
-    public static final String USE_TOKENSCRIPT_VIEWER = "use_ts_viewer";
+    public static final String MULTICAST_TRANSACTIONS = "multicast_transactions";
     public static final String DEVELOPER_OVERRIDE = "developer_override";
     public static final String TESTNET_ENABLED = "testnet_enabled";
     public static final String PRICE_ALERTS = "price_alerts";
@@ -47,7 +48,6 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     private static final String LAST_VERSION_CODE = "last_version_code";
     private static final String SELECTED_SWAP_PROVIDERS_KEY = "selected_exchanges";
     private static final String ANALYTICS_KEY = "analytics_key";
-    private static final String CRASH_REPORTING_KEY = "crash_reporting_key";
     private static final String WALLET_LOGIN_TIME = "wallet_login_time_";
     private static final String RATE_APP_SHOWN = "rate_us_shown";
     private static final String LAUNCH_COUNT = "launch_count";
@@ -176,7 +176,7 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     @Override
     public boolean getFullScreenState()
     {
-        return pref.getBoolean(FULL_SCREEN_STATE, false);
+        return pref.getBoolean(FULL_SCREEN_STATE, true);
     }
 
     @Override
@@ -213,6 +213,18 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     public boolean getUse1559Transactions()
     {
         return pref.getBoolean(EXPERIMENTAL_1559_TX, true);
+    }
+
+    @Override
+    public void setMulticastTransactions(boolean state)
+    {
+        pref.edit().putBoolean(MULTICAST_TRANSACTIONS, state).apply();
+    }
+
+    @Override
+    public boolean getMulticastTransactions()
+    {
+        return pref.getBoolean(MULTICAST_TRANSACTIONS, true);
     }
 
     @Override
@@ -417,18 +429,6 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public boolean isCrashReportingEnabled()
-    {
-        return pref.getBoolean(CRASH_REPORTING_KEY, true);
-    }
-
-    @Override
-    public void setCrashReportingEnabled(boolean isEnabled)
-    {
-        pref.edit().putBoolean(CRASH_REPORTING_KEY, isEnabled).apply();
-    }
-
-    @Override
     public long getLoginTime(String address)
     {
         return pref.getLong(getAddressKey(WALLET_LOGIN_TIME, address), -1);
@@ -462,15 +462,15 @@ public class SharedPreferenceRepository implements PreferenceRepositoryType {
     }
 
     @Override
-    public boolean getUseTSViewer()
+    public boolean getShowAllTokens()
     {
-        return pref.getBoolean(USE_TOKENSCRIPT_VIEWER, true);
+        return pref.getBoolean(SHOW_ALL_TOKENS, false);
     }
 
     @Override
-    public void setUseTSViewer(boolean state)
+    public void setShowAllTokens(boolean showAll)
     {
-        pref.edit().putBoolean(USE_TOKENSCRIPT_VIEWER, state).apply();
+        pref.edit().putBoolean(SHOW_ALL_TOKENS, showAll).apply();
     }
 
     @NonNull

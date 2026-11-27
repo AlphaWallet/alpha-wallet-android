@@ -2,7 +2,7 @@ package com.alphawallet.app.ui;
 
 import static com.alphawallet.app.C.ETH_SYMBOL;
 import static com.alphawallet.app.C.Key.WALLET;
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
+import static com.alphawallet.app.repository.TokensRealmSource.realmTokenDatabaseKey;
 import static com.alphawallet.app.ui.MyAddressActivity.KEY_MODE;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.token.tools.TokenDefinition.UNCHANGED_SCRIPT;
@@ -61,8 +61,9 @@ import java.util.Collections;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.realm.Realm;
-import io.realm.RealmResults;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.RealmCompat.Results;
 
 @AndroidEntryPoint
 public class Erc20DetailActivity extends BaseActivity implements StandardFunctionInterface, BuyCryptoInterface
@@ -80,7 +81,7 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     private TokensAdapter tokenViewAdapter;
     private ActivityHistoryList activityHistoryList = null;
     private Realm realm = null;
-    private RealmResults<RealmToken> realmTokenUpdates;
+    private RealmCompat.Results<RealmToken> realmTokenUpdates;
     private CertifiedToolbarView certHeader;
     private final TokenInfoFragment tokenInfoFragment = new TokenInfoFragment();
 
@@ -319,10 +320,14 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
     {
         if (realm == null) realm = viewModel.getRealmInstance(wallet);
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
-        String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
+        String dbKey = realmTokenDatabaseKey(token);
         final TokenGroup group = viewModel.getTokensService().getTokenGroup(token);
-        realmTokenUpdates = realm.where(RealmToken.class).equalTo("address", dbKey)
-                .greaterThan("addedTime", System.currentTimeMillis() - 5 * DateUtils.MINUTE_IN_MILLIS).findAllAsync();
+        RealmToken initial = RealmCompat.where(realm, RealmToken.class).equalTo("address", dbKey).findFirst();
+        if (initial != null)
+        {
+            applyRealmTokenUpdate(initial, group);
+        }
+        realmTokenUpdates = RealmCompat.where(realm, RealmToken.class).equalTo("address", dbKey).findAllAsync();
         realmTokenUpdates.addChangeListener(realmTokens -> {
             if (realmTokens.isEmpty())
             {
@@ -331,22 +336,30 @@ public class Erc20DetailActivity extends BaseActivity implements StandardFunctio
 
             for (RealmToken t : realmTokens)
             {
-                TokenCardMeta meta = new TokenCardMeta(t.getChainId(), t.getTokenAddress(), t.getBalance(),
-                        t.getUpdateTime(), t.getLastTxTime(), t.getContractType(), group);
-                meta.isEnabled = t.isEnabled();
-
-                if (tokenMeta == null)
-                {
-                    tokenMeta = meta;
-                }
-                else if (!tokenMeta.balance.equals(meta.balance))
-                {
-                    playNotification();
-                }
-
-                tokenViewAdapter.updateToken(meta);
+                applyRealmTokenUpdate(t, group);
             }
         });
+    }
+
+    private void applyRealmTokenUpdate(RealmToken t, TokenGroup group)
+    {
+        String displayAddress = t.getTokenAddress().equalsIgnoreCase("eth")
+                ? token.getAddress().toLowerCase()
+                : t.getTokenAddress();
+        TokenCardMeta meta = new TokenCardMeta(t.getChainId(), displayAddress, t.getBalance(),
+                t.getUpdateTime(), t.getLastTxTime(), t.getContractType(), group);
+        meta.isEnabled = t.isEnabled();
+
+        if (tokenMeta == null)
+        {
+            tokenMeta = meta;
+        }
+        else if (!tokenMeta.balance.equals(meta.balance))
+        {
+            playNotification();
+        }
+
+        tokenViewAdapter.updateToken(meta);
     }
 
     private void playNotification()

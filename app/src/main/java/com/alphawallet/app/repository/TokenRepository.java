@@ -1,5 +1,6 @@
 package com.alphawallet.app.repository;
 
+import static com.alphawallet.app.service.TokensService.DEBUG_TOKEN;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 import static com.alphawallet.ethereum.EthereumNetworkBase.OKX_ID;
 import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
@@ -37,7 +38,7 @@ import com.alphawallet.app.util.ens.AWEnsResolver;
 import com.alphawallet.token.entity.ContractAddress;
 import com.alphawallet.token.entity.MagicLinkData;
 
-import org.bson.json.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
@@ -74,7 +75,9 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
 import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
@@ -221,6 +224,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public double getStoredWalletValue(String walletAddress)
+    {
+        return localSource.getStoredWalletValue(walletAddress);
+    }
+
+    @Override
     public Single<List<String>> getTickerUpdateList(List<Long> networkFilter)
     {
         return localSource.getTickerUpdateList(networkFilter);
@@ -292,6 +301,12 @@ public class TokenRepository implements TokenRepositoryType {
     }
 
     @Override
+    public Map<String, Token> fetchTokens(String walletAddress, List<ContractAddress> addresses)
+    {
+        return localSource.fetchTokens(new Wallet(walletAddress), addresses);
+    }
+
+    @Override
     public Token fetchAttestation(long chainId, String walletAddress, String address, String attnId)
     {
         Wallet wallet = new Wallet(walletAddress);
@@ -308,6 +323,12 @@ public class TokenRepository implements TokenRepositoryType {
     public TokenTicker getTokenTicker(Token token)
     {
         return localSource.getCurrentTicker(token);
+    }
+
+    @Override
+    public Map<String, TokenTicker> getTokenTickers(List<String> databaseKeys)
+    {
+        return localSource.getCurrentTickers(databaseKeys);
     }
 
     /**
@@ -558,8 +579,9 @@ public class TokenRepository implements TokenRepositoryType {
     {
         token.setTokenWallet(wallet.address);
         token.balance = checkUint256Balance(wallet, token.tokenInfo.chainId, token.getAddress());
-        try (Realm realm = getRealmInstance(wallet))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(getRealmInstance(wallet)))
         {
+            Realm realm = realmCloser.getRealm();
             token.updateBalance(realm);
         }
 
@@ -570,8 +592,9 @@ public class TokenRepository implements TokenRepositoryType {
     {
         BigDecimal newBalance;
         token.setTokenWallet(wallet.address);
-        try (Realm realm = getRealmInstance(wallet))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(getRealmInstance(wallet)))
         {
+            Realm realm = realmCloser.getRealm();
             newBalance = token.updateBalance(realm);
         }
 
@@ -1025,7 +1048,7 @@ public class TokenRepository implements TokenRepositoryType {
                 return response.getValue();
             }
         }
-        catch (InterruptedIOException|UnknownHostException|JsonParseException e)
+        catch (InterruptedIOException|UnknownHostException|JsonSyntaxException e)
         {
             //expected to happen when user switches wallets
             return "";

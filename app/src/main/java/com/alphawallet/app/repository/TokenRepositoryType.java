@@ -20,10 +20,12 @@ import com.alphawallet.token.entity.ContractAddress;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 
 public interface TokenRepositoryType
 {
@@ -47,9 +49,13 @@ public interface TokenRepositoryType
 
     TokenTicker getTokenTicker(Token token);
 
+    Map<String, TokenTicker> getTokenTickers(List<String> databaseKeys);
+
     Single<BigInteger> fetchLatestBlockNumber(long chainId);
 
     Token fetchToken(long chainId, String walletAddress, String address);
+
+    Map<String, Token> fetchTokens(String walletAddress, List<ContractAddress> addresses);
 
     String getTokenImageUrl(long chainId, String address);
 
@@ -96,6 +102,8 @@ public interface TokenRepositoryType
     boolean isEnabled(Token newToken);
 
     Single<Pair<Double, Double>> getTotalValue(String currentAddress, List<Long> networkFilters);
+
+    double getStoredWalletValue(String walletAddress);
 
     Single<List<String>> getTickerUpdateList(List<Long> networkFilter);
 

@@ -13,7 +13,6 @@ import com.alphawallet.app.R;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.service.AssetDefinitionService;
-import com.alphawallet.app.service.TokensService;
 import com.alphawallet.app.ui.widget.TokensAdapterCallback;
 import com.alphawallet.app.widget.TokenIcon;
 
@@ -27,11 +26,11 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta>
     private final TextView count;
     private final TokenIcon imageIcon;
     private final AssetDefinitionService assetDefinition;
-    private final TokensService tokensService;
+    private final TokenProvider tokenProvider;
 
     private TokensAdapterCallback tokensAdapterCallback;
 
-    public TokenGridHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs)
+    public TokenGridHolder(int resId, ViewGroup parent, AssetDefinitionService assetService, TokenProvider provider)
     {
         super(resId, parent);
 
@@ -41,17 +40,24 @@ public class TokenGridHolder extends BinderViewHolder<TokenCardMeta>
         ll.setClipToOutline(true);
         name = findViewById(R.id.token_name);
         count = findViewById(R.id.token_count);
-        tokensService = tSvs;
+        tokenProvider = provider;
         assetDefinition = assetService;
     }
 
     @Override
     public void bind(@Nullable TokenCardMeta tcm, @NonNull Bundle addition)
     {
+        imageIcon.clearLoad();
         if (tcm != null)
         {
-            Token token = tokensService.getToken(tcm.getChain(), tcm.getAddress());
-            if (token == null) return; //TODO: Generate placeholder
+            Token token = tokenProvider.getToken(tcm.getChain(), tcm.getAddress());
+            if (token == null)
+            {
+                name.setText(tcm.getAddress());
+                count.setText("");
+                clickLayer.setOnClickListener(null);
+                return;
+            }
             imageIcon.bindData(token);
             name.setText(token.getName(assetDefinition, token.balance.intValue()));
             count.setText(getString(R.string.token_count, token.balance.intValue()));

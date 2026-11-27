@@ -63,6 +63,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private final LinearLayout extendedInfo;
     private final AssetDefinitionService assetDefinition; //need to cache this locally, unless we cache every string we need in the constructor
     private final TokensService tokensService;
+    private final TokenProvider tokenProvider;
     private final RelativeLayout tokenLayout;
     private final MaterialCheckBox selectToken;
     private final ProgressBar tickerProgress;
@@ -71,7 +72,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     private TokensAdapterCallback tokensAdapterCallback;
     public String tokenKey;
 
-    public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs)
+    public TokenHolder(ViewGroup parent, AssetDefinitionService assetService, TokensService tSvs, TokenProvider provider)
     {
         super(R.layout.item_token, parent);
 
@@ -92,6 +93,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         itemView.setOnClickListener(this);
         assetDefinition = assetService;
         tokensService = tSvs;
+        tokenProvider = provider;
     }
 
     @Override
@@ -108,26 +110,28 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         {
             tokenKey = data.tokenId;
             tokenLayout.setVisibility(View.VISIBLE);
-            token = tokensService.getToken(data.getChain(), data.getAddress());
-            if (token != null)
-            {
-                token.group = data.getTokenGroup();
-            }
 
             if (data.group == TokenGroup.ATTESTATION)
             {
                 handleAttestation(data);
                 return;
             }
-            else if (token == null)
+
+            token = tokenProvider.getToken(data.getChain(), data.getAddress());
+            if (token != null)
             {
-                fillEmpty();
+                token.group = data.getTokenGroup();
+            }
+
+            if (token == null)
+            {
+                fillPending(data);
                 return;
             }
             else if (data.getNameWeight() < 1000L && !token.isEthereum())
             {
                 //edge condition - looking at a contract as an account
-                Token backupChain = tokensService.getToken(data.getChain(), "eth");
+                Token backupChain = tokenProvider.getToken(data.getChain(), "eth");
                 if (backupChain != null) token = backupChain;
             }
 
@@ -174,12 +178,6 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     }
 
     private void greyOutSpamTokenValue()
-    {
-
-    }
-
-    @Override
-    public void onDestroyView()
     {
 
     }
@@ -289,8 +287,23 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
 
     private void fillEmpty()
     {
+        token = null;
         balanceEth.setText(R.string.empty);
         balanceCurrency.setText(EMPTY_BALANCE);
+    }
+
+    private void fillPending(TokenCardMeta data)
+    {
+        token = null;
+        String filterText = data.getFilterText();
+        int separator = TextUtils.isEmpty(filterText) ? -1 : filterText.indexOf('\'');
+        String title = separator >= 0 && separator + 1 < filterText.length()
+                ? filterText.substring(separator + 1)
+                : data.getAddress();
+        balanceEth.setText(title);
+        balanceCoin.setVisibility(View.GONE);
+        selectToken.setVisibility(View.GONE);
+        blankTickerInfo();
     }
 
     @Override
@@ -322,7 +335,7 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
     {
         //Set the fiat equivalent (leftmost value)
         BigDecimal correctedBalance = token.getCorrectedBalance(Convert.Unit.ETHER.getFactor());
-        BigDecimal fiatBalance = correctedBalance.multiply(new BigDecimal(ticker.price)).setScale(Convert.Unit.ETHER.getFactor(), RoundingMode.DOWN);
+        BigDecimal fiatBalance = correctedBalance.multiply(parseOrZero(ticker.price)).setScale(Convert.Unit.ETHER.getFactor(), RoundingMode.DOWN);
         String converted = TickerService.getCurrencyString(fiatBalance.doubleValue());
         String formattedPercents = "";
         int color = Color.RED;
@@ -359,12 +372,26 @@ public class TokenHolder extends BinderViewHolder<TokenCardMeta> implements View
         }
 
         //This sets the crypto price value (middle amount)
-        BigDecimal currencyChange = new BigDecimal(fiatBalance.doubleValue()).multiply((
-            new BigDecimal(ticker.percentChange24h)).divide(new BigDecimal(100)));
+        BigDecimal currencyChange = new BigDecimal(fiatBalance.doubleValue()).multiply(
+            parseOrZero(ticker.percentChange24h).divide(new BigDecimal(100)));
         String formattedValue = TickerService.getCurrencyString(currencyChange.doubleValue());
 
         this.textAppreciation.setTextColor(color);
         this.textAppreciation.setText(formattedValue);
+    }
+
+    //Malformed/legacy ticker data can't always be parsed as a decimal string - don't crash the Wallet list over display data.
+    private static BigDecimal parseOrZero(String value)
+    {
+        if (TextUtils.isEmpty(value)) return BigDecimal.ZERO;
+        try
+        {
+            return new BigDecimal(value);
+        }
+        catch (NumberFormatException e)
+        {
+            return BigDecimal.ZERO;
+        }
     }
 
     private String shortTitle()

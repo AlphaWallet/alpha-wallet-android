@@ -88,6 +88,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by justindeguzman on 2/28/18.
@@ -324,7 +325,7 @@ public class WalletFragment extends BaseFragment implements
             adapter.updateTokenMetas(metas);
             systemView.hide();
             viewModel.checkDeleteMetas(metas);
-            viewModel.calculateFiatValues();
+            //viewModel.calculateFiatValues();
         }
     }
 
@@ -338,12 +339,9 @@ public class WalletFragment extends BaseFragment implements
     @Override
     public void syncComplete(TokensService svs, int syncCount)
     {
+        Timber.d("TIMER: Sync complete");
         if (syncCount > 0) handler.post(() -> addressAvatar.finishWaiting());
-        svs.getFiatValuePair()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::updateValue)
-                .isDisposed();
+        viewModel.calculateFiatValues();
 
         if (syncCount > 0)
         {
@@ -599,7 +597,6 @@ public class WalletFragment extends BaseFragment implements
         {
             adapter.setTokens(tokens);
             checkScrollPosition();
-            viewModel.calculateFiatValues();
         }
         systemView.showProgress(false);
 

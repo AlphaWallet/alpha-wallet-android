@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Single;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 
 public interface TokenLocalSource
 {
@@ -32,6 +33,8 @@ public interface TokenLocalSource
     boolean updateTokenBalance(Wallet wallet, Token token, BigDecimal balance, List<BigInteger> balanceArray);
 
     Token fetchToken(long chainId, Wallet wallet, String address);
+
+    Map<String, Token> fetchTokens(Wallet wallet, List<ContractAddress> addresses);
 
     void setEnable(Wallet wallet, ContractAddress cAddr, boolean isEnabled);
 
@@ -70,6 +73,10 @@ public interface TokenLocalSource
     TokenTicker getCurrentTicker(Token token);
 
     TokenTicker getCurrentTicker(String key);
+
+    Map<String, TokenTicker> getCurrentTickers(List<String> keys);
+
+    double getStoredWalletValue(String walletAddress);
 
     void setVisibilityChanged(Wallet wallet, ContractAddress cAddr);
 

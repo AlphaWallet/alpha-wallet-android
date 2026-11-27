@@ -25,10 +25,8 @@ import com.alphawallet.app.ui.widget.entity.ManageTokensData;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSearchItem;
 import com.alphawallet.app.ui.widget.entity.ManageTokensSortedItem;
 import com.alphawallet.app.ui.widget.entity.SortedItem;
-import com.alphawallet.app.ui.widget.entity.TokenIdSortedItem;
 import com.alphawallet.app.ui.widget.entity.TokenSortedItem;
 import com.alphawallet.app.ui.widget.entity.TotalBalanceSortedItem;
-import com.alphawallet.app.ui.widget.entity.WalletConnectSessionSortedItem;
 import com.alphawallet.app.ui.widget.entity.WarningData;
 import com.alphawallet.app.ui.widget.entity.WarningSortedItem;
 import com.alphawallet.app.ui.widget.holder.AssetInstanceScriptHolder;
@@ -39,19 +37,33 @@ import com.alphawallet.app.ui.widget.holder.ManageTokensHolder;
 import com.alphawallet.app.ui.widget.holder.SearchTokensHolder;
 import com.alphawallet.app.ui.widget.holder.TokenGridHolder;
 import com.alphawallet.app.ui.widget.holder.TokenHolder;
+import com.alphawallet.app.ui.widget.holder.TokenProvider;
 import com.alphawallet.app.ui.widget.holder.TotalBalanceHolder;
 import com.alphawallet.app.ui.widget.holder.WalletConnectSessionHolder;
 import com.alphawallet.app.ui.widget.holder.WarningHolder;
 import com.alphawallet.token.entity.ViewType;
+import com.alphawallet.token.entity.ContractAddress;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 {
-    private static final String TAG = "TKNADAPTER";
+    private static final int TOKEN_PAGE_SIZE = 25;
+    private static final int TOKEN_CACHE_SIZE = TOKEN_PAGE_SIZE * 2;
+    private static final int PREFETCH_THRESHOLD = 7;
+
     private TokenFilter filterType = TokenFilter.ALL;
     protected final AssetDefinitionService assetService;
     protected final TokensService tokensService;
@@ -64,6 +76,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     private boolean gridFlag;
 
     protected final TokensAdapterCallback tokensAdapterCallback;
+    private final CompositeDisposable prefetchDisposables = new CompositeDisposable();
+    private final Set<String> loadingTokenKeys = new HashSet<>();
+    private final TokenWindowCache tokenCache = new TokenWindowCache(TOKEN_CACHE_SIZE);
+    private int cacheGeneration;
 
     protected final SortedList<SortedItem> items = new SortedList<>(SortedItem.class, new SortedList.Callback<>()
     {
@@ -146,13 +162,13 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         switch (viewType)
         {
             case TokenHolder.VIEW_TYPE:
-                TokenHolder tokenHolder = new TokenHolder(parent, assetService, tokensService);
+                TokenHolder tokenHolder = new TokenHolder(parent, assetService, tokensService, this::getCachedToken);
                 tokenHolder.setOnTokenClickListener(tokensAdapterCallback);
                 holder = tokenHolder;
                 break;
 
             case TokenGridHolder.VIEW_TYPE:
-                TokenGridHolder tokenGridHolder = new TokenGridHolder(R.layout.item_token_grid, parent, assetService, tokensService);
+                TokenGridHolder tokenGridHolder = new TokenGridHolder(R.layout.item_token_grid, parent, assetService, this::getCachedToken);
                 tokenGridHolder.setOnTokenClickListener(tokensAdapterCallback);
                 holder = tokenGridHolder;
                 break;
@@ -200,6 +216,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
     public void onBindViewHolder(BinderViewHolder holder, int position)
     {
         items.get(position).view = holder;
+        if (items.get(position) instanceof TokenSortedItem)
+        {
+            prefetchForPosition(position);
+        }
         holder.bind(items.get(position).value);
     }
 
@@ -233,8 +253,135 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         return items.size();
     }
 
+    private Token getCachedToken(long chainId, String address)
+    {
+        return tokenCache.get(chainId, address);
+    }
+
+    private void prefetchForPosition(int adapterPosition)
+    {
+        int tokenOrdinal = tokenOrdinalAt(adapterPosition);
+        if (tokenOrdinal < 0) return;
+
+        int pageStart = (tokenOrdinal / TOKEN_PAGE_SIZE) * TOKEN_PAGE_SIZE;
+        loadTokenPage(pageStart);
+        if ((tokenOrdinal % TOKEN_PAGE_SIZE) >= TOKEN_PAGE_SIZE - PREFETCH_THRESHOLD)
+        {
+            loadTokenPage(pageStart + TOKEN_PAGE_SIZE);
+        }
+    }
+
+    private int tokenOrdinalAt(int adapterPosition)
+    {
+        int tokenOrdinal = -1;
+        for (int i = 0; i <= adapterPosition && i < items.size(); i++)
+        {
+            if (items.get(i) instanceof TokenSortedItem)
+            {
+                tokenOrdinal++;
+            }
+        }
+        return tokenOrdinal;
+    }
+
+    private void loadTokenPage(int pageStart)
+    {
+        if (tokensService == null || pageStart < 0) return;
+
+        List<ContractAddress> requests = new ArrayList<>();
+        Set<String> requestedKeys = new HashSet<>();
+        Set<String> affectedTokenIds = new HashSet<>();
+        int tokenOrdinal = 0;
+
+        for (int i = 0; i < items.size() && tokenOrdinal < pageStart + TOKEN_PAGE_SIZE; i++)
+        {
+            if (!(items.get(i) instanceof TokenSortedItem tokenItem)) continue;
+
+            TokenCardMeta meta = tokenItem.value;
+            if (tokenOrdinal >= pageStart && meta.group != TokenGroup.ATTESTATION)
+            {
+                addPrefetchRequest(meta.getContractAddress(), requestedKeys, requests);
+                affectedTokenIds.add(meta.tokenId.toLowerCase(Locale.ROOT));
+
+                // This legacy edge case displays the chain currency instead of a
+                // malformed account-as-contract row. Prefetch that currency too.
+                if (meta.getNameWeight() < 1000L && !meta.isEthereum())
+                {
+                    addPrefetchRequest(new ContractAddress(meta.getChain(), "eth"), requestedKeys, requests);
+                }
+            }
+            tokenOrdinal++;
+        }
+
+        if (requests.isEmpty()) return;
+
+        final int requestGeneration = cacheGeneration;
+        loadingTokenKeys.addAll(requestedKeys);
+        prefetchDisposables.add(Single.fromCallable(() -> tokensService.getTokens(requests))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        loaded -> onTokensPrefetched(requestGeneration, requestedKeys, affectedTokenIds, loaded),
+                        error -> onTokenPrefetchError(requestGeneration, requestedKeys, error)));
+    }
+
+    private void addPrefetchRequest(ContractAddress address, Set<String> requestedKeys,
+                                    List<ContractAddress> requests)
+    {
+        String key = address.getAddressKey().toLowerCase(Locale.ROOT);
+        if (!tokenCache.contains(key) && !loadingTokenKeys.contains(key) && requestedKeys.add(key))
+        {
+            requests.add(address);
+        }
+    }
+
+    private void onTokensPrefetched(int generation, Set<String> requestedKeys,
+                                    Set<String> affectedTokenIds, Map<String, Token> loaded)
+    {
+        if (generation != cacheGeneration) return;
+
+        loadingTokenKeys.removeAll(requestedKeys);
+        tokenCache.putAll(loaded);
+
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i) instanceof TokenSortedItem tokenItem
+                    && affectedTokenIds.contains(tokenItem.value.tokenId.toLowerCase(Locale.ROOT)))
+            {
+                notifyItemChanged(i);
+            }
+        }
+    }
+
+    private void onTokenPrefetchError(int generation, Set<String> requestedKeys, Throwable error)
+    {
+        if (generation == cacheGeneration)
+        {
+            loadingTokenKeys.removeAll(requestedKeys);
+        }
+        Timber.e(error, "Unable to prefetch token window");
+    }
+
+    private void invalidateCachedToken(TokenCardMeta token)
+    {
+        if (token == null) return;
+        tokenCache.remove(token);
+    }
+
+    private void resetTokenCache()
+    {
+        cacheGeneration++;
+        prefetchDisposables.clear();
+        loadingTokenKeys.clear();
+        tokenCache.clear();
+    }
+
     public void setWalletAddress(String walletAddress)
     {
+        if (this.walletAddress == null || !this.walletAddress.equalsIgnoreCase(walletAddress))
+        {
+            resetTokenCache();
+        }
         this.walletAddress = walletAddress;
     }
 
@@ -270,6 +417,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
     public void updateTokenMetas(TokenCardMeta[] tokens)
     {
+        for (TokenCardMeta token : tokens)
+        {
+            invalidateCachedToken(token);
+        }
         populateTokens(tokens, false);
     }
 
@@ -291,7 +442,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
             }
 
             TokenSortedItem tsi = new TokenSortedItem(TokenHolder.VIEW_TYPE, token, token.getNameWeight());
-            tsi.setFiatValue(tokensService.getTokenFiatValue(token.getChain(), token.getAddress()));
+            tsi.setFiatValue(token.getFiatValue());
             if (debugView) tsi.debug();
             int index = findItem(tsi);
             if (index > -1)
@@ -362,6 +513,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
                 TokenCardMeta thisToken = tsi.value;
                 if (thisToken.tokenId.equalsIgnoreCase(token.tokenId))
                 {
+                    invalidateCachedToken(thisToken);
                     items.remove(tsi);
                     break;
                 }
@@ -378,6 +530,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
             {
                 if (tsi.value.tokenId.toLowerCase(Locale.ROOT).startsWith(removalKey))
                 {
+                    invalidateCachedToken(tsi.value);
                     items.remove(tsi);
                     return tsi;
                 }
@@ -397,6 +550,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
                 if (thisToken.tokenId.equals(tokenId))
                 {
+                    invalidateCachedToken(thisToken);
                     items.remove(tsi);
                     return tsi;
                 }
@@ -416,6 +570,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
                 TokenCardMeta thisToken = tsi.value;
                 if (thisToken.tokenId.toLowerCase(Locale.ROOT).startsWith(tokenKey))
                 {
+                    invalidateCachedToken(thisToken);
                     items.remove(tsi);
                     return tsi;
                 }
@@ -473,6 +628,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
     private void populateTokens(TokenCardMeta[] tokens, boolean clear)
     {
+        if (clear)
+        {
+            resetTokenCache();
+        }
         items.beginBatchedUpdates();
         if (clear)
         {
@@ -493,6 +652,10 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
         addManageTokensLayout();
 
         items.endBatchedUpdates();
+        if (clear)
+        {
+            loadTokenPage(0);
+        }
     }
 
     public void setTotal(BigDecimal totalInCurrency)
@@ -542,6 +705,7 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
     public void clear()
     {
+        resetTokenCache();
         items.beginBatchedUpdates();
         items.clear();
         items.endBatchedUpdates();
@@ -581,7 +745,8 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
     public void onDestroy(RecyclerView recyclerView)
     {
-
+        resetTokenCache();
+        prefetchDisposables.dispose();
     }
 
     public void setDebug()
@@ -591,18 +756,66 @@ public class TokensAdapter extends RecyclerView.Adapter<BinderViewHolder>
 
     public void notifyTickerUpdate(List<String> updatedContracts)
     {
-        //check through tokens; refresh relevant tickers
+        if (updatedContracts == null || updatedContracts.isEmpty())
+        {
+            return;
+        }
+
+        List<TokenCardMeta> toRefresh = new ArrayList<>();
         for (int i = 0; i < items.size(); i++)
         {
             Object si = items.get(i);
             if (si instanceof TokenSortedItem)
             {
                 TokenCardMeta tcm = ((TokenSortedItem) si).value;
-                if (updatedContracts.contains(tcm.getAddress()))
+                if (updatedContracts.contains(tcm.getAddress())
+                        || (tcm.isEthereum() && updatedContracts.contains("eth")))
                 {
-                    TokenSortedItem tsi = (TokenSortedItem) si;
-                    tsi.setFiatValue(tokensService.getTokenFiatValue(tcm.getChain(), tcm.getAddress()));
-                    notifyItemChanged(i); //optimise update - no need to update elements without tickers
+                    toRefresh.add(tcm);
+                }
+            }
+        }
+
+        if (toRefresh.isEmpty())
+        {
+            return;
+        }
+
+        // Recompute fiat off Main (batched Realm), then apply to SortedList on Main.
+        prefetchDisposables.add(Single.fromCallable(() ->
+                        tokensService.attachFiatValues(toRefresh.toArray(new TokenCardMeta[0])))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::applyFiatUpdates, Timber::e));
+    }
+
+    private void applyFiatUpdates(TokenCardMeta[] updatedMetas)
+    {
+        if (updatedMetas == null || updatedMetas.length == 0)
+        {
+            return;
+        }
+
+        Set<String> updatedIds = new HashSet<>();
+        for (TokenCardMeta meta : updatedMetas)
+        {
+            if (meta != null)
+            {
+                updatedIds.add(meta.tokenId);
+            }
+        }
+
+        for (int i = 0; i < items.size(); i++)
+        {
+            Object si = items.get(i);
+            if (si instanceof TokenSortedItem)
+            {
+                TokenSortedItem tsi = (TokenSortedItem) si;
+                TokenCardMeta tcm = tsi.value;
+                if (updatedIds.contains(tcm.tokenId))
+                {
+                    tsi.setFiatValue(tcm.getFiatValue());
+                    notifyItemChanged(i);
                 }
             }
         }

@@ -3,13 +3,12 @@ plugins {
     alias(libs.plugins.androidApplication)
     id("com.worker8.android_lint_reporter") version "2.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.7"
-    id 'jacoco'
+    id("jacoco")
+    id("com.infomaniak.realm.kotlin")
+    id("org.jetbrains.kotlin.android")
+    id("com.google.dagger.hilt.android")
 }
 
-apply plugin: 'com.android.application'
-apply plugin: 'realm-android'
-apply plugin: 'kotlin-android'
-apply plugin: 'dagger.hilt.android.plugin'
 apply plugin: 'com.worker8.android_lint_reporter'
 apply plugin: 'io.gitlab.arturbosch.detekt'
 apply plugin: 'jacoco'
@@ -40,7 +39,7 @@ android_lint_reporter {
 
 android {
     namespace 'com.alphawallet.app'
-    compileSdk 36
+    compileSdk 37
 
     sourceSets {
         main {
@@ -52,10 +51,8 @@ android {
         applicationId "io.stormbird.wallet"
         minSdk 25
         targetSdk 36
-        versionCode 275
-        versionName "4.0"
-
-        android.buildFeatures.buildConfig true
+        versionCode 280
+        versionName "4.01"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
@@ -67,7 +64,7 @@ android {
         def DEFAULT_WALLETCONNECT_PROJECT_ID = "\"40c6071febfd93f4fe485c232a8a4cd9\""
         def DEFAULT_AURORA_API_KEY = "\"HFDDY5BNKGXBB82DE2G8S64C3C41B76PYI\""; //Put your Aurorascan.dev API key here - this one will rate limit as it is common
 
-        buildConfigField 'int', 'DB_VERSION', '55'
+        buildConfigField 'int', 'DB_VERSION', '58'
 
         buildConfigField "String", XInfuraAPI, DEFAULT_INFURA_API_KEY
         buildConfigField "String", "WALLETCONNECT_PROJECT_ID", DEFAULT_WALLETCONNECT_PROJECT_ID
@@ -120,13 +117,11 @@ android {
     buildTypes {
         debug {
             minifyEnabled false
-            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
         release {
             minifyEnabled false
-            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             ndk {
                 abiFilters "armeabi-v7a", "arm64-v8a"
@@ -139,7 +134,10 @@ android {
     }
     packagingOptions {
         jniLibs {
-            excludes += ['solidity/*']
+            // Reown WalletKit bundles its unused Chain Abstraction/Pay feature (yttrium/JNA),
+            // whose native libs are not yet built for 16KB page sizes. AlphaWallet doesn't use
+            // that feature, so strip the libraries to keep the APK 16KB-page-size compliant.
+            excludes += ['solidity/*', '**/libuniffi_yttrium.so', '**/libjnidispatch.so']
             useLegacyPackaging true
         }
         resources {
@@ -149,6 +147,9 @@ android {
     compileOptions {
         targetCompatibility JavaVersion.VERSION_21
         sourceCompatibility JavaVersion.VERSION_21
+    }
+    kotlinOptions {
+        jvmTarget = '21'
     }
     externalNativeBuild {
         cmake {
@@ -168,6 +169,7 @@ android {
         includeInBundle false
     }
     buildFeatures {
+        buildConfig true
         viewBinding true
     }
     lint {
@@ -265,18 +267,19 @@ dependencies {
     implementation 'com.github.florent37:TutoShowcase:d8b91be8a2'
     implementation libs.flexbox.layout
     implementation libs.kotson
-    implementation libs.mailchimp.sdk.android
     implementation libs.preference.ktx
 
     //Timber
     implementation libs.timber
+    implementation libs.kotlinx.coroutines.android
+    implementation "com.infomaniak.realm.kotlin:library-base:${libs.versions.realmKotlin.get()}"
 
-    implementation platform(libs.walletConnect.bom)
-    implementation("com.walletconnect:android-core", {
+    implementation platform(libs.reown.bom)
+    implementation("com.reown:android-core", {
         exclude group: 'org.web3j', module: '*'
         exclude group: 'org.bouncycastle', module: '*'
     })
-    implementation("com.walletconnect:web3wallet", {
+    implementation("com.reown:walletkit", {
         exclude group: 'org.web3j', module: '*'
         exclude group: 'org.bouncycastle', module: '*'
     })

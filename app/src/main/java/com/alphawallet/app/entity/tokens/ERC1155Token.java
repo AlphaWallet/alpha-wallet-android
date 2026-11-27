@@ -55,7 +55,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import io.realm.kotlin.TypedRealm;
+import com.alphawallet.app.realm.RealmCompat;
 import timber.log.Timber;
 
 public class ERC1155Token extends Token
@@ -427,7 +429,7 @@ public class ERC1155Token extends Token
         return assetsUnchanged;
     }
 
-    private void updateRealmBalance(Realm realm, Set<BigInteger> tokenIds, List<Uint256> balances)
+    private void updateRealmBalance(TypedRealm realm, Set<BigInteger> tokenIds, List<Uint256> balances)
     {
         boolean updated = false;
         //fill in balances
@@ -464,16 +466,16 @@ public class ERC1155Token extends Token
         }
     }
 
-    private void updateRealmBalances(Realm realm)
+    private void updateRealmBalances(TypedRealm realm)
     {
         if (realm == null) return;
-        realm.executeTransaction(r -> {
+        RealmCompat.executeTransaction(realm, r -> {
             for (Map.Entry<BigInteger, NFTAsset> entry : assets.entrySet())
             {
                 BigInteger tokenId = entry.getKey();
                 NFTAsset asset = entry.getValue();
                 String key = RealmNFTAsset.databaseKey(this, tokenId);
-                RealmNFTAsset realmAsset = realm.where(RealmNFTAsset.class)
+                RealmNFTAsset realmAsset = RealmCompat.where(realm, RealmNFTAsset.class)
                         .equalTo("tokenIdAddr", key)
                         .findFirst();
 
@@ -481,19 +483,19 @@ public class ERC1155Token extends Token
 
                 if (realmAsset == null)
                 {
-                    realmAsset = r.createObject(RealmNFTAsset.class, key); //create asset in realm
+                    realmAsset = RealmCompat.createObject(r, RealmNFTAsset.class, key); //create asset in realm
                     realmAsset.setMetaData(asset.jsonMetaData());
                 }
 
                 if (asset.getBalance().equals(BigDecimal.ZERO)) //remove asset no longer in balance
                 {
-                    realmAsset.deleteFromRealm();
+                    RealmCompat.deleteFromRealm(r, realmAsset);
                     assets.remove(tokenId);
                 }
                 else
                 {
                     realmAsset.setBalance(entry.getValue().getBalance()); //update realm balance
-                    r.insertOrUpdate(realmAsset);
+                    RealmCompat.insertOrUpdate(r, realmAsset);
                 }
             }
         });
@@ -676,7 +678,7 @@ public class ERC1155Token extends Token
      * @return
      */
     @Override
-    public BigDecimal updateBalance(Realm realm)
+    public BigDecimal updateBalance(TypedRealm realm)
     {
         SyncDef sync = eventSync.getSyncDef(realm);
         if (sync == null) return balance;
@@ -732,7 +734,7 @@ public class ERC1155Token extends Token
     }
 
     @Override
-    public HashSet<BigInteger> processLogsAndStoreTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, Realm realm)
+    public HashSet<BigInteger> processLogsAndStoreTransferEvents(EthLog receiveLogs, Event event, HashSet<String> txHashes, TypedRealm realm)
     {
         HashSet<BigInteger> tokenIds = new HashSet<>();
         for (EthLog.LogResult<?> ethLog : receiveLogs.getLogs())

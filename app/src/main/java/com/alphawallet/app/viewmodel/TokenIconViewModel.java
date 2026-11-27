@@ -24,7 +24,9 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import io.reactivex.Single;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
 import timber.log.Timber;
 
 @HiltViewModel
@@ -101,9 +103,10 @@ public class TokenIconViewModel extends BaseViewModel
     {
         String url = "";
         String instanceKey = address.toLowerCase() + "-" + networkId;
-        try (Realm realm = realmManager.getRealmInstance(IMAGES_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(IMAGES_DB)))
         {
-            RealmAuxData instance = realm.where(RealmAuxData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmAuxData instance = RealmCompat.where(realm, RealmAuxData.class)
                     .equalTo("instanceKey", instanceKey)
                     .findFirst();
 
@@ -129,10 +132,6 @@ public class TokenIconViewModel extends BaseViewModel
         {
             //attempt usual fetch
             icon = getPrimaryIconURL(token);
-        }
-        else
-        {
-            System.out.println("FROM DB: " + icon);
         }
 
         return icon;

@@ -53,8 +53,9 @@ import java.util.List;
 import java.util.Map;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.realm.Realm;
-import io.realm.RealmResults;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.RealmCompat.Results;
 
 /**
  * Created by James on 2/04/2019.
@@ -76,7 +77,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     private LinearLayout webWrapper;
     private ActivityHistoryList activityHistoryList = null;
     private Realm realm = null;
-    private RealmResults<RealmToken> realmTokenUpdates;
+    private RealmCompat.Results<RealmToken> realmTokenUpdates;
     private ActionSheetDialog confirmationDialog;
 
     private void initViews(Token t) {
@@ -160,7 +161,7 @@ public class TokenFunctionActivity extends BaseActivity implements StandardFunct
     {
         if (realmTokenUpdates != null) realmTokenUpdates.removeAllChangeListeners();
         String dbKey = databaseKey(token.tokenInfo.chainId, token.tokenInfo.address.toLowerCase());
-        realmTokenUpdates = realm.where(RealmToken.class).equalTo("address", dbKey).findAllAsync();
+        realmTokenUpdates = RealmCompat.where(realm, RealmToken.class).equalTo("address", dbKey).findAllAsync();
         realmTokenUpdates.addChangeListener(realmTokens -> {
             if (realmTokens.size() == 0) return;
             RealmToken t = realmTokens.first();

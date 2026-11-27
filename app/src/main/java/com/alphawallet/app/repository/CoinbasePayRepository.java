@@ -17,26 +17,46 @@ public class CoinbasePayRepository implements CoinbasePayRepositoryType
     private final KeyProvider keyProvider = KeyProviderFactory.get();
 
     @Override
-    public String getUri(DestinationWallet.Type type, String address, List<String> list)
+    public String getUri(DestinationWallet.Type type, String address, List<String> assets)
     {
         String appId = keyProvider.getCoinbasePayAppId();
         if (TextUtils.isEmpty(appId))
         {
             return "";
         }
-        else
-        {
-            Uri.Builder builder = new Uri.Builder();
-            builder.scheme(SCHEME)
-                    .authority(AUTHORITY)
-                    .appendPath(BUY_PATH)
-                    .appendPath(SELECT_ASSET_PATH)
-                    .appendQueryParameter(RequestParams.APP_ID, keyProvider.getCoinbasePayAppId())
-                    .appendQueryParameter(RequestParams.DESTINATION_WALLETS, CoinbasePayUtils.getDestWalletJson(type, address, list));
 
-            return builder.build().toString();
-        }
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme(SCHEME)
+                .authority(AUTHORITY)
+                .appendPath(BUY_PATH)
+                .appendPath(SELECT_ASSET_PATH)
+                .appendQueryParameter(RequestParams.APP_ID, appId)
+                .appendQueryParameter("addresses", buildAddressJson(address))
+                .appendQueryParameter("assets", buildAssetsJson(assets));
+
+        return builder.build().toString();
     }
+
+    private String buildAddressJson(String address)
+    {
+        // Coinbase expects a JSON array of strings
+        return "[\"" + address + "\"]";
+    }
+
+    private String buildAssetsJson(List<String> assets)
+    {
+        // Convert List<String> → JSON array
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < assets.size(); i++)
+        {
+            sb.append("\"").append(assets.get(i)).append("\"");
+            if (i < assets.size() - 1)
+                sb.append(",");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
 
     public static class Blockchains
     {

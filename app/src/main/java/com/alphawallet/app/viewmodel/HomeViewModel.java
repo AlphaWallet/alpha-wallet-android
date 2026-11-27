@@ -58,7 +58,6 @@ import com.alphawallet.app.util.QRParser;
 import com.alphawallet.app.util.RateApp;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.app.util.ens.AWEnsResolver;
-import com.alphawallet.app.widget.EmailPromptView;
 import com.alphawallet.app.widget.QRCodeActionsView;
 import com.alphawallet.app.widget.WhatsNewView;
 import com.alphawallet.token.entity.ContractInfo;
@@ -566,22 +565,6 @@ public class HomeViewModel extends BaseViewModel
     public int getLastFragmentId()
     {
         return preferenceRepository.getLastFragmentPage();
-    }
-
-    public void tryToShowEmailPrompt(Context context, View successOverlay, Handler handler, Runnable onSuccessRunnable)
-    {
-        if (preferenceRepository.getLaunchCount() == 4)
-        {
-            EmailPromptView emailPromptView = new EmailPromptView(context, successOverlay, handler, onSuccessRunnable);
-            BottomSheetDialog emailPromptDialog = new BottomSheetDialog(context);
-            emailPromptDialog.setContentView(emailPromptView);
-            emailPromptDialog.setCancelable(true);
-            emailPromptDialog.setCanceledOnTouchOutside(true);
-            emailPromptView.setParentDialog(emailPromptDialog);
-            BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) emailPromptView.getParent());
-            emailPromptDialog.setOnShowListener(dialog -> behavior.setPeekHeight(emailPromptView.getHeight()));
-            emailPromptDialog.show();
-        }
     }
 
     public void tryToShowWhatsNewDialog(Context context)

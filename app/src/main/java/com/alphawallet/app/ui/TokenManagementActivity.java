@@ -39,8 +39,9 @@ import com.alphawallet.app.widget.AWalletAlertDialog;
 import java.util.ArrayList;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.realm.Realm;
-import io.realm.RealmResults;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.RealmCompat.Results;
 
 @AndroidEntryPoint
 public class TokenManagementActivity extends BaseActivity implements TokenListAdapter.Callback
@@ -54,7 +55,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     private LinearLayout noResultsLayout;
     private Wallet wallet;
     private Realm realm;
-    private RealmResults<RealmToken> realmUpdates;
+    private RealmCompat.Results<RealmToken> realmUpdates;
     private String realmId;
     private ArrayList<ContractLocator> tokenUpdates;
 
@@ -241,7 +242,7 @@ public class TokenManagementActivity extends BaseActivity implements TokenListAd
     private void setRealmListener()
     {
         if (realmUpdates != null) realmUpdates.removeAllChangeListeners();
-        realmUpdates = realm.where(RealmToken.class)
+        realmUpdates = RealmCompat.where(realm, RealmToken.class)
             .like("address", ADDRESS_FORMAT)
             .findAllAsync();
         realmUpdates.addChangeListener(realmTokens -> {

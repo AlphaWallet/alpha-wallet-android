@@ -55,6 +55,16 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
         return preferenceRepository.getUse1559Transactions();
     }
 
+    public void toggleMulticastTransactions(boolean toggleState)
+    {
+        preferenceRepository.setMulticastTransactions(toggleState);
+    }
+
+    public boolean getMulticastTransactionsState()
+    {
+        return preferenceRepository.getMulticastTransactions();
+    }
+
     public boolean getDeveloperOverrideState()
     {
         return preferenceRepository.getDeveloperOverride();
@@ -83,15 +93,5 @@ public class AdvancedSettingsViewModel extends BaseViewModel {
     public void stopChainActivity()
     {
         transactionsService.stopActivity();
-    }
-
-    public void toggleUseViewer(boolean state)
-    {
-        preferenceRepository.setUseTSViewer(state);
-    }
-
-    public boolean getTokenScriptViewerState()
-    {
-        return preferenceRepository.getUseTSViewer();
     }
 }

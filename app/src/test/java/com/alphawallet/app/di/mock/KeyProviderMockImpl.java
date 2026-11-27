@@ -79,12 +79,6 @@ public class KeyProviderMockImpl implements KeyProvider
     }
 
     @Override
-    public String getMailchimpKey()
-    {
-        return FAKE_KEY_FOR_TESTING;
-    }
-
-    @Override
     public String getCoinbasePayAppId()
     {
         return FAKE_KEY_FOR_TESTING;

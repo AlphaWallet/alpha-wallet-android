@@ -13,7 +13,8 @@ import java.math.BigDecimal;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 import timber.log.Timber;
 
 public class GenericWalletInteract
@@ -79,7 +80,7 @@ public class GenericWalletInteract
 		return walletRepository.getWalletBackupWarning(walletAddr);
 	}
 
-	public void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess) {
+	public void updateWalletItem(Wallet wallet, WalletItem item, RealmCompat.OnSuccess onSuccess) {
 		walletRepository.updateWalletItem(wallet, item, onSuccess);
 	}
 

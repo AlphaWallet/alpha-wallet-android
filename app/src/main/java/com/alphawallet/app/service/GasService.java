@@ -53,7 +53,9 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -287,17 +289,18 @@ public class GasService implements ContractGasProvider
      */
     private void updateRealm(final GasPriceSpread oracleResult, final long chainId)
     {
-        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(TICKER_DB)))
         {
-            realm.executeTransaction(r -> {
-                RealmGasSpread rgs = r.where(RealmGasSpread.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
+                RealmGasSpread rgs = RealmCompat.where(r, RealmGasSpread.class)
                         .equalTo("chainId", chainId)
                         .findFirst();
                 if (rgs == null)
-                    rgs = r.createObject(RealmGasSpread.class, chainId);
+                    rgs = RealmCompat.createObject(r, RealmGasSpread.class, chainId);
 
                 rgs.setGasSpread(oracleResult, System.currentTimeMillis());
-                r.insertOrUpdate(rgs);
+                RealmCompat.insertOrUpdate(r, rgs);
             });
         }
     }
@@ -310,46 +313,70 @@ public class GasService implements ContractGasProvider
         {
             return getEIP1559FeeStructure(chainId)
                     .map(result -> {
-                        //select average
-                        EIP1559FeeOracleResult standard = (result != null && result.containsKey(TXSpeed.STANDARD)) ? result.get(TXSpeed.STANDARD) : null;
+                        // Fee maps are keyed by integer time-factor (0..15), not TXSpeed.
+                        EIP1559FeeOracleResult standard = selectStandard1559Fee(result);
                         if (standard != null)
                         {
                             return standard;
                         }
                         else
                         {
-                            //return legacy calc
+                            // Fallback: tip from node gas price estimate, floored by EIP1559FeeOracleResult.
                             EthGasPrice gasPrice = getNodeEstimate(chainId).blockingGet();
-                            return new EIP1559FeeOracleResult(BigInteger.ZERO, BigInteger.ZERO, gasPrice.getGasPrice());
+                            BigInteger nodePrice = gasPrice.getGasPrice();
+                            return new EIP1559FeeOracleResult(nodePrice, EIP1559FeeOracleResult.MIN_PRIORITY_FEE, nodePrice);
                         }
                     });
         }
         else
         {
-            //get legacy gas
+            // Legacy gas: store node price in baseFee to match ActionSheetDialog.getGasSettingsToUse().
             return getNodeEstimate(chainId)
-                    .map(result -> new EIP1559FeeOracleResult(result.getGasPrice(), BigInteger.ZERO, BigInteger.ZERO));
-
+                    .map(result -> new EIP1559FeeOracleResult(BigInteger.ZERO, BigInteger.ZERO, result.getGasPrice()));
         }
+    }
+
+    /**
+     * Pick the mid-tier EIP-1559 suggestion (matches GasPriceSpread STANDARD selection).
+     */
+    private EIP1559FeeOracleResult selectStandard1559Fee(Map<Integer, EIP1559FeeOracleResult> result)
+    {
+        if (result == null || result.isEmpty())
+        {
+            return null;
+        }
+
+        int quarter = result.size() / 4;
+        int standardKey = Math.min(quarter * 2, result.size() - 1);
+        if (result.containsKey(standardKey))
+        {
+            return result.get(standardKey);
+        }
+
+        // Contiguous keys aren't guaranteed; take the median key.
+        Integer[] keys = result.keySet().toArray(new Integer[0]);
+        java.util.Arrays.sort(keys);
+        return result.get(keys[keys.length / 2]);
     }
 
     private boolean updateEIP1559Realm(final Map<Integer, EIP1559FeeOracleResult> result, final long chainId)
     {
         boolean succeeded = true;
-        try (Realm realm = realmManager.getRealmInstance(TICKER_DB))
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(TICKER_DB)))
         {
-            realm.executeTransaction(r -> {
-                Realm1559Gas rgs = r.where(Realm1559Gas.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
+                Realm1559Gas rgs = RealmCompat.where(r, Realm1559Gas.class)
                         .equalTo("chainId", chainId)
                         .findFirst();
 
                 if (rgs == null)
                 {
-                    rgs = r.createObject(Realm1559Gas.class, chainId);
+                    rgs = RealmCompat.createObject(r, Realm1559Gas.class, chainId);
                 }
 
                 rgs.setResultData(result, System.currentTimeMillis());
-                //r.insertOrUpdate(rgs);
+                //RealmCompat.insertOrUpdate(r, rgs);
             });
         }
         catch (Exception e)

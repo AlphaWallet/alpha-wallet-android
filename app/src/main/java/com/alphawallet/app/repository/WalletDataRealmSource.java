@@ -19,10 +19,11 @@ import java.util.Map;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Case;
-import io.realm.Realm;
-import io.realm.RealmResults;
-import io.realm.Sort;
+import io.realm.kotlin.Realm;
+import io.realm.kotlin.TypedRealm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
+import com.alphawallet.app.realm.RealmCompat.Results;
 import timber.log.Timber;
 
 /**
@@ -42,14 +43,15 @@ public class WalletDataRealmSource {
     {
         return Single.fromCallable(() -> {
             Map<String, Wallet> walletList;
-            try (Realm realm = realmManager.getWalletDataRealmInstance())
+            try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
             {
+            Realm realm = realmCloser.getRealm();
                 walletList = loadOrCreateKeyRealmDB(realm, keystoreWallets, keyService); //call has action on upgrade to new UX
                 //Add additional - non critical wallet data. This database can be voided for upgrade if required
                 for (Wallet wallet : walletList.values())
                 {
-                    RealmWalletData data = realm.where(RealmWalletData.class)
-                            .equalTo("address", wallet.address, Case.INSENSITIVE)
+                    RealmWalletData data = RealmCompat.where(realm, RealmWalletData.class)
+                            .equalTo("address", wallet.address, RealmCompat.Case.INSENSITIVE)
                             .findFirst();
 
                     composeWallet(wallet, data);
@@ -63,14 +65,23 @@ public class WalletDataRealmSource {
         });
     }
 
-    private Map<String, Wallet> loadOrCreateKeyRealmDB(Realm realm, Wallet[] wallets, KeyService keyService)
+    private Map<String, Wallet> loadOrCreateKeyRealmDB(TypedRealm realm, Wallet[] wallets, KeyService keyService)
     {
         Map<String, Wallet> walletList = new HashMap<>();
         List<String> keyStoreList = walletArrayToAddressList(wallets);
 
-        realm.refresh(); //ensure we're fully up to date before query
-        RealmResults<RealmKeyType> realmKeyTypes = realm.where(RealmKeyType.class)
-                .sort("dateAdded", Sort.ASCENDING)
+        RealmCompat.executeTransaction(realm, r -> {
+            RealmCompat.Results<RealmKeyType> orphanKeys = RealmCompat.where(r, RealmKeyType.class)
+                    .equalTo("address", "")
+                    .findAll();
+            if (!orphanKeys.isEmpty()) {
+                orphanKeys.deleteAllFromRealm(r);
+            }
+        });
+
+        RealmCompat.refresh(realm); //ensure we're fully up to date before query
+        RealmCompat.Results<RealmKeyType> realmKeyTypes = RealmCompat.where(realm, RealmKeyType.class)
+                .sort("dateAdded", RealmCompat.Sort.ASCENDING)
                 .findAll();
 
         List<Wallet> walletUpdates = new ArrayList<>();
@@ -114,6 +125,8 @@ public class WalletDataRealmSource {
             }
         }
 
+        recoverOrphanedKeys(walletList, walletUpdates, keyService);
+
         if (walletUpdates.size() > 0)
         {
             storeWallets(realm, walletUpdates.toArray(new Wallet[0]));
@@ -121,6 +134,28 @@ public class WalletDataRealmSource {
 
         Timber.tag("RealmDebug").d("loadorcreate %s", walletList.size());
         return walletList;
+    }
+
+    /**
+     * Re-registers wallets whose RealmKeyType record was lost (eg through an inconsistent
+     * OEM backup/restore, or a failed database migration) but whose encrypted key file, iv file
+     * and Android Keystore alias are still intact on disk. See
+     * {@link KeyService#findRecoverableOrphanedKeys} for the safety checks performed.
+     */
+    private void recoverOrphanedKeys(Map<String, Wallet> walletList, List<Wallet> walletUpdates, KeyService keyService)
+    {
+        List<String> orphanedAddresses = keyService.findRecoverableOrphanedKeys(walletList.keySet());
+        for (String address : orphanedAddresses)
+        {
+            Wallet w = new Wallet(address);
+            w.type = WalletType.HDKEY;
+            w.walletCreationTime = System.currentTimeMillis();
+            w.authLevel = KeyService.AuthenticationLevel.NOT_SET; //original auth level was lost along with the record
+
+            walletList.put(w.address.toLowerCase(), w);
+            walletUpdates.add(w);
+            Timber.tag("RealmDebug").w("Recovered orphaned wallet key with intact key material: %s", address);
+        }
     }
 
     private List<String> walletArrayToAddressList(Wallet[] wallets)
@@ -166,8 +201,9 @@ public class WalletDataRealmSource {
     public Single<Wallet[]> storeWallets(Wallet[] wallets)
     {
         return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getWalletDataRealmInstance())
+            try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
             {
+            Realm realm = realmCloser.getRealm();
                 storeWallets(realm, wallets);
             }
             catch (Exception e)
@@ -178,9 +214,9 @@ public class WalletDataRealmSource {
         });
     }
 
-    private void storeWallets(Realm realm, Wallet[] wallets)
+    private void storeWallets(TypedRealm realm, Wallet[] wallets)
     {
-        realm.executeTransaction(r -> {
+        RealmCompat.executeTransaction(realm, r -> {
             for (Wallet wallet : wallets)
             {
                 storeKeyData(wallet, r);
@@ -198,11 +234,12 @@ public class WalletDataRealmSource {
         }));
     }
 
-    public void updateWalletData(Wallet wallet, Realm.Transaction.OnSuccess onSuccess)
+    public void updateWalletData(Wallet wallet, RealmCompat.OnSuccess onSuccess)
     {
-        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
         {
-            realm.executeTransactionAsync(r -> {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
                 storeKeyData(wallet, r);
                 storeWalletData(wallet, r);
                 Timber.tag("RealmDebug").d("storedKeydata %s", wallet.address);
@@ -215,13 +252,14 @@ public class WalletDataRealmSource {
         }
     }
 
-    public void updateWalletItem(Wallet wallet, WalletItem item, Realm.Transaction.OnSuccess onSuccess)
+    public void updateWalletItem(Wallet wallet, WalletItem item, RealmCompat.OnSuccess onSuccess)
     {
-        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmWalletData walletData = r.where(RealmWalletData.class)
-                        .equalTo("address", wallet.address, Case.INSENSITIVE)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmWalletData walletData = RealmCompat.where(r, RealmWalletData.class)
+                        .equalTo("address", wallet.address, RealmCompat.Case.INSENSITIVE)
                         .findFirst();
 
                 if (walletData != null)
@@ -242,7 +280,7 @@ public class WalletDataRealmSource {
                             break;
                     }
 
-                    r.insertOrUpdate(walletData);
+                    RealmCompat.insertOrUpdate(r, walletData);
                 }
                 Timber.tag("RealmDebug").d("storedKeydata %s", wallet.address);
             }, onSuccess);
@@ -258,9 +296,10 @@ public class WalletDataRealmSource {
     public Single<String> getName(String address) {
         return Single.fromCallable(() -> {
             String name = "";
-            try (Realm realm = realmManager.getWalletDataRealmInstance()) {
-                RealmWalletData realmWallet = realm.where(RealmWalletData.class)
-                        .equalTo("address", address, Case.INSENSITIVE)
+            try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance())) {
+            Realm realm = realmCloser.getRealm();
+                RealmWalletData realmWallet = RealmCompat.where(realm, RealmWalletData.class)
+                        .equalTo("address", address, RealmCompat.Case.INSENSITIVE)
                         .findFirst();
                 if (realmWallet != null) name = realmWallet.getName();
             } catch (Exception e) {
@@ -274,11 +313,12 @@ public class WalletDataRealmSource {
     {
         updateWarningTime(walletAddr);
 
-        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmKeyType realmKey = r.where(RealmKeyType.class)
-                        .equalTo("address", walletAddr, Case.INSENSITIVE)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmKeyType realmKey = RealmCompat.where(r, RealmKeyType.class)
+                        .equalTo("address", walletAddr, RealmCompat.Case.INSENSITIVE)
                         .findFirst();
 
                 if (realmKey != null)
@@ -291,10 +331,11 @@ public class WalletDataRealmSource {
 
     public void updateWarningTime(String walletAddr)
     {
-        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmWalletData realmWallet = r.where(RealmWalletData.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmWalletData realmWallet = RealmCompat.where(r, RealmWalletData.class)
                         .equalTo("address", walletAddr)
                         .findFirst();
 
@@ -329,13 +370,14 @@ public class WalletDataRealmSource {
     public Single<Wallet> deleteWallet(Wallet wallet)
     {
         return Single.fromCallable(() -> {
-            try (Realm realm = realmManager.getWalletDataRealmInstance())
+            try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
             {
-                realm.executeTransaction(r -> {
-                    RealmResults<RealmWalletData> realmWallet = r.where(RealmWalletData.class).equalTo("address", wallet.address, Case.INSENSITIVE).findAll();
-                    if (realmWallet != null) realmWallet.deleteAllFromRealm();
-                    RealmResults<RealmKeyType> realmKey = r.where(RealmKeyType.class).equalTo("address", wallet.address, Case.INSENSITIVE).findAll();
-                    if (realmKey != null) realmKey.deleteAllFromRealm();
+            Realm realm = realmCloser.getRealm();
+                RealmCompat.executeTransaction(realm, r -> {
+                    RealmCompat.Results<RealmWalletData> realmWallet = RealmCompat.where(r, RealmWalletData.class).equalTo("address", wallet.address, RealmCompat.Case.INSENSITIVE).findAll();
+                    if (realmWallet != null) realmWallet.deleteAllFromRealm(r);
+                    RealmCompat.Results<RealmKeyType> realmKey = RealmCompat.where(r, RealmKeyType.class).equalTo("address", wallet.address, RealmCompat.Case.INSENSITIVE).findAll();
+                    if (realmKey != null) realmKey.deleteAllFromRealm(r);
                 });
             }
             catch (Exception e)
@@ -343,10 +385,11 @@ public class WalletDataRealmSource {
                 Timber.e(e);
             }
 
-            try (Realm instance = realmManager.getRealmInstance(wallet))
+            try (AutoCloseableRealm instanceCloser = AutoCloseableRealm.wrap(realmManager.getRealmInstance(wallet)))
             {
-                instance.executeTransaction(r -> r.deleteAll());
-                instance.refresh();
+            Realm instance = instanceCloser.getRealm();
+                RealmCompat.executeTransaction(instance, r -> RealmCompat.deleteAll(r));
+                RealmCompat.refresh(instance);
             }
             catch (Exception e)
             {
@@ -359,11 +402,12 @@ public class WalletDataRealmSource {
 
     public void setIsDismissed(String walletAddr, boolean isDismissed)
     {
-        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmWalletData realmWallet = r.where(RealmWalletData.class)
-                        .equalTo("address", walletAddr, Case.INSENSITIVE)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmWalletData realmWallet = RealmCompat.where(r, RealmWalletData.class)
+                        .equalTo("address", walletAddr, RealmCompat.Case.INSENSITIVE)
                         .findFirst();
                 if (realmWallet != null)
                 {
@@ -375,9 +419,10 @@ public class WalletDataRealmSource {
 
     private void storeKeyData(Wallet wallet)
     {
-        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
         {
-            realm.executeTransaction(r -> {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
                 storeKeyData(wallet, r);
                 Timber.tag("RealmDebug").d("storedKeyData %s", wallet.address);
             });
@@ -386,9 +431,10 @@ public class WalletDataRealmSource {
 
     private void storeWalletData(Wallet wallet)
     {
-        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
         {
-            realm.executeTransaction(r -> {
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransaction(realm, r -> {
                 storeWalletData(wallet, r);
                 Timber.tag("RealmDebug").d("storedwalletdata %s", wallet.address);
             });
@@ -401,10 +447,11 @@ public class WalletDataRealmSource {
 
     private boolean isDismissedInSettings(String wallet)
     {
-        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
         {
-            RealmWalletData data = realm.where(RealmWalletData.class)
-                    .equalTo("address", wallet, Case.INSENSITIVE)
+            Realm realm = realmCloser.getRealm();
+            RealmWalletData data = RealmCompat.where(realm, RealmWalletData.class)
+                    .equalTo("address", wallet, RealmCompat.Case.INSENSITIVE)
                     .findFirst();
             return data != null && data.getIsDismissedInSettings();
         }
@@ -412,10 +459,11 @@ public class WalletDataRealmSource {
 
     private long getWalletWarningTime(String walletAddr)
     {
-        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
         {
-            RealmWalletData data = realm.where(RealmWalletData.class)
-                    .equalTo("address", walletAddr, Case.INSENSITIVE)
+            Realm realm = realmCloser.getRealm();
+            RealmWalletData data = RealmCompat.where(realm, RealmWalletData.class)
+                    .equalTo("address", walletAddr, RealmCompat.Case.INSENSITIVE)
                     .findFirst();
 
             if (data != null)
@@ -431,10 +479,11 @@ public class WalletDataRealmSource {
 
     private long getKeyBackupTime(String walletAddr)
     {
-        try (Realm realm = realmManager.getWalletDataRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
         {
-            RealmKeyType realmKey = realm.where(RealmKeyType.class)
-                    .equalTo("address", walletAddr, Case.INSENSITIVE)
+            Realm realm = realmCloser.getRealm();
+            RealmKeyType realmKey = RealmCompat.where(realm, RealmKeyType.class)
+                    .equalTo("address", walletAddr, RealmCompat.Case.INSENSITIVE)
                     .findFirst();
 
             if (realmKey != null)
@@ -465,15 +514,20 @@ public class WalletDataRealmSource {
         return realmManager.getWalletDataRealmInstance();
     }
 
-    private void storeKeyData(Wallet wallet, Realm r)
+    private void storeKeyData(Wallet wallet, TypedRealm r)
     {
-        RealmKeyType realmKey = r.where(RealmKeyType.class)
-                .equalTo("address", wallet.address, Case.INSENSITIVE)
+        if (android.text.TextUtils.isEmpty(wallet.address))
+        {
+            return;
+        }
+
+        RealmKeyType realmKey = RealmCompat.where(r, RealmKeyType.class)
+                .equalTo("address", wallet.address, RealmCompat.Case.INSENSITIVE)
                 .findFirst();
 
         if (realmKey == null)
         {
-            realmKey = r.createObject(RealmKeyType.class, wallet.address);
+            realmKey = RealmCompat.createObject(r, RealmKeyType.class, wallet.address);
             if (wallet.walletCreationTime != 0)
             {
                 realmKey.setDateAdded(wallet.walletCreationTime);
@@ -492,20 +546,25 @@ public class WalletDataRealmSource {
         realmKey.setLastBackup(wallet.lastBackupTime);
         realmKey.setAuthLevel(wallet.authLevel);
         realmKey.setKeyModulus("");
-        r.insertOrUpdate(realmKey);
+        RealmCompat.insertOrUpdate(r, realmKey);
     }
 
-    private void storeWalletData(Wallet wallet, Realm r)
+    private void storeWalletData(Wallet wallet, TypedRealm r)
     {
-        RealmWalletData item = r.where(RealmWalletData.class)
-                .equalTo("address", wallet.address, Case.INSENSITIVE)
+        if (android.text.TextUtils.isEmpty(wallet.address))
+        {
+            return;
+        }
+
+        RealmWalletData item = RealmCompat.where(r, RealmWalletData.class)
+                .equalTo("address", wallet.address, RealmCompat.Case.INSENSITIVE)
                 .findFirst();
-        if (item == null) item = r.createObject(RealmWalletData.class, wallet.address);
+        if (item == null) item = RealmCompat.createObject(r, RealmWalletData.class, wallet.address);
         item.setName(wallet.name);
         item.setENSName(wallet.ENSname);
         item.setBalance(wallet.balance);
         item.setENSAvatar(wallet.ENSAvatar);
-        r.insertOrUpdate(item);
+        RealmCompat.insertOrUpdate(r, item);
     }
 
     private boolean testLegacyCipher(Wallet w, KeyService service)
@@ -521,10 +580,11 @@ public class WalletDataRealmSource {
     {
         Map<String, Wallet> walletTypeData = new HashMap<>();
 
-        try (Realm realm = realmManager.getWalletTypeRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletTypeRealmInstance()))
         {
+            Realm realm = realmCloser.getRealm();
             //already synced?
-            RealmResults<RealmKeyType> rr = realm.where(RealmKeyType.class)
+            RealmCompat.Results<RealmKeyType> rr = RealmCompat.where(realm, RealmKeyType.class)
                     .findAll();
 
             for (RealmKeyType rk : rr)
@@ -544,14 +604,15 @@ public class WalletDataRealmSource {
         //Copy results back
         if (walletTypeData.size() > 0)
         {
-            try (Realm realm = realmManager.getWalletDataRealmInstance())
+            try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletDataRealmInstance()))
             {
-                realm.executeTransaction(r -> {
+            Realm realm = realmCloser.getRealm();
+                RealmCompat.executeTransaction(realm, r -> {
                     //first import data from TypeRealm
                     for (Wallet w : walletList.values())
                     {
-                        RealmKeyType data = realm.where(RealmKeyType.class)
-                                .equalTo("address", w.address, Case.INSENSITIVE)
+                        RealmKeyType data = RealmCompat.where(realm, RealmKeyType.class)
+                                .equalTo("address", w.address, RealmCompat.Case.INSENSITIVE)
                                 .findFirst();
 
                         if (data == null) continue;
@@ -567,7 +628,7 @@ public class WalletDataRealmSource {
                             {
                                 data.setLastBackup(walletFromTypeRealm.lastBackupTime);
                             }
-                            r.insertOrUpdate(data);
+                            RealmCompat.insertOrUpdate(r, data);
                         }
                     }
 
@@ -590,12 +651,13 @@ public class WalletDataRealmSource {
     private void deleteWalletTypeData()
     {
         //now that process has completed, delete the records
-        try (Realm realm = realmManager.getWalletTypeRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(realmManager.getWalletTypeRealmInstance()))
         {
+            Realm realm = realmCloser.getRealm();
             //already synced?
-            RealmResults<RealmKeyType> rr = realm.where(RealmKeyType.class)
+            RealmCompat.Results<RealmKeyType> rr = RealmCompat.where(realm, RealmKeyType.class)
                     .findAll();
-            realm.executeTransaction(r -> rr.deleteAllFromRealm()); //erase the database now we have extracted the data
+            RealmCompat.executeTransaction(realm, r -> rr.deleteAllFromRealm(r)); //erase the database now we have extracted the data
         }
     }
 }

@@ -57,8 +57,10 @@ import java.util.Objects;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
-import io.realm.RealmResults;
+import io.realm.kotlin.Realm;
+import io.realm.kotlin.TypedRealm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.RealmCompat.Results;
 import timber.log.Timber;
 
 /**
@@ -80,7 +82,7 @@ public class Web3TokenView extends WebView
     private PageReadyCallback assetHolder;
     private boolean showingError = false;
     private String unencodedPage;
-    private RealmResults<RealmAuxData> realmAuxUpdates;
+    private RealmCompat.Results<RealmAuxData> realmAuxUpdates;
 
     protected WebCompletionCallback keyPressCallback;
     @Nullable
@@ -497,10 +499,10 @@ public class Web3TokenView extends WebView
         invalidate();
     }
 
-    private long getLastUpdateTime(Realm realm, Token token, BigInteger tokenId)
+    private long getLastUpdateTime(TypedRealm realm, Token token, BigInteger tokenId)
     {
         long lastResultTime = 0;
-        RealmResults<RealmAuxData> lastEntry = RealmAuxData.getEventQuery(realm, token, tokenId, 1, 0).findAll();
+        RealmCompat.Results<RealmAuxData> lastEntry = RealmAuxData.getEventQuery(realm, token, tokenId, 1, 0).findAll();
         if (!lastEntry.isEmpty())
         {
             RealmAuxData data = lastEntry.first();
@@ -522,9 +524,9 @@ public class Web3TokenView extends WebView
         if (realmAuxUpdates != null)
         {
             realmAuxUpdates.removeAllChangeListeners();
-            if (!realmAuxUpdates.getRealm().isClosed())
+            if (!RealmCompat.isClosed(realmAuxUpdates.getRealm()))
             {
-                realmAuxUpdates.getRealm().close();
+                RealmCompat.close(realmAuxUpdates.getRealm());
             }
         }
 
@@ -539,9 +541,9 @@ public class Web3TokenView extends WebView
         if (realmAuxUpdates != null)
         {
             realmAuxUpdates.removeAllChangeListeners();
-            if (!realmAuxUpdates.getRealm().isClosed())
+            if (!RealmCompat.isClosed(realmAuxUpdates.getRealm()))
             {
-                realmAuxUpdates.getRealm().close();
+                RealmCompat.close(realmAuxUpdates.getRealm());
             }
         }
 

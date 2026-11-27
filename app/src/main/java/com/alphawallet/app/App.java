@@ -14,6 +14,7 @@ import androidx.preference.PreferenceManager;
 
 import com.alphawallet.app.repository.RpcConfigRepository;
 import com.alphawallet.app.service.AWHttpServiceWaterfall;
+import com.alphawallet.app.service.BlockedRpcService;
 import com.alphawallet.app.service.RPCRankingManager;
 import com.alphawallet.app.util.TimberInit;
 import com.alphawallet.app.walletconnect.AWWalletConnectClient;
@@ -25,7 +26,7 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.HiltAndroidApp;
 import io.reactivex.plugins.RxJavaPlugins;
-import io.realm.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 import timber.log.Timber;
 
 @HiltAndroidApp
@@ -36,6 +37,9 @@ public class App extends Application
 
     @Inject
     RPCRankingManager rpcRankingManager;
+
+    @Inject
+    BlockedRpcService blockedRpcService;
 
     @Inject
     RpcConfigRepository rpcConfigRepository;
@@ -67,7 +71,7 @@ public class App extends Application
     {
         super.onCreate();
         mInstance = this;
-        Realm.init(this);
+        RealmCompat.init(this);
         TimberInit.configTimber();
 
         int defaultTheme = PreferenceManager.getDefaultSharedPreferences(this)
@@ -103,6 +107,8 @@ public class App extends Application
         // Initialize RPC ranking system and trigger startup stale check
         AWHttpServiceWaterfall.setRankingManager(rpcRankingManager);
         rpcRankingManager.checkAndUpdateRPCs();
+        // Warm external IP + blocked-RPC cache so round-robin can skip known router blocks.
+        new Thread(blockedRpcService::getExternalIp, "blocked-rpc-ip-warmup").start();
 
         try
         {

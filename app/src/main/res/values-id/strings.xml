@@ -806,11 +806,6 @@
     <string name="exchange_with_oneinch">Tukar dengan 1 inci</string>
     <string name="swap">Tukar</string>
     <string name="action_send_to_this_address">Kirim ke Alamat ini</string>
-    <string name="stay_updated">Tetap mengikuti perkembangan terbaru</string>
-    <string name="email_prompt_hint">Kami mengirim email yang mengumumkan fitur-fitur utama. Apakah Anda ingin menerima email tersebut? (maksimal 1 email per minggu)</string>
-    <string name="hint_email_address">Alamat Email</string>
-    <string name="action_want_to_receive_email">Saya ingin menerima email seperti itu</string>
-    <string name="email_is_invalid">Harap berikan alamat email yang berlaku</string>
     <string name="github">Github (Mengajukan permasalahan)</string>
     <string name="chains_to_scan">Chains untuk memindai</string>
     <string name="action_view">Lihat</string>
@@ -948,10 +943,6 @@
     <string name="title_session_details">Detail Sesi</string>
     <string name="title_session_proposal">Proposal Sesi</string>
     <string name="message_wc_wallet_different_from_active_wallet">Dompet berbeda dengan dompet aktif.</string>
-    <string name="settings_title_analytics">Analitik</string>
-    <string name="settings_title_crash_reporting">Pelaporan Kerusakan</string>
-    <string name="message_share_anonymous_data">Bantu kami meningkatkan AlphaWallet dengan membagikan data anonim Anda kepada kami. Ini tidak termasuk informasi keuangan apa pun.</string>
-    <string name="share_anonymous_data">Bagikan Data Anonim?</string>
     <string name="enable_required_chains">Aktifkan rantai yang diperlukan?</string>
     <string name="enable_required_chains_message">Token yang dipilih ada di rantai saat ini tidak dipilih, mengaktifkan rantai yang tidak dipilih?</string>
     <string name="dialog_title_search_token">Cari Token?</string>
@@ -1000,9 +991,10 @@
     <string name="developer_override">Penggantian Pengembang</string>
     <string name="override_warning_text">Anda mungkin tanpa sadar menandatangani transaksi, yang dapat mengosongkan dana Anda. Anda mungkin ingin menandatangani bytecode sebagai pengembang, dan Anda dapat mengabaikan peringatan ini jika Anda menyetel mode pengembang di Setelan lanjutan.</string>
     <string name="constructor">Constructor</string>
-    <string name="use_tokenscript_viewer">Penampil TokenScript</string>
     <string name="not_recommended_to_visit">URL ini tidak masuk daftar putih. Anda masih dapat mengunjunginya dengan mengubah opsi perlindungan di pengaturan, tetapi tidak disarankan. Anda bisa kehilangan dana, terutama jika itu adalah investasi dalam penambangan kripto. Ada banyak situs investasi kripto yang teregulasi.</string>
     <string name="developer_override_warning">Peringatan: Anda akan menonaktifkan perlindungan standar. Ini mencegah Anda dari penipuan. Gunakan mode pengembang hanya jika Anda sedang menguji dapp Anda, atau jika Anda 100\% yakin bahwa situs tersebut aman. Ingat: jika seseorang memberi tahu Anda untuk mengaktifkan pengaturan ini, Anda hampir pasti akan kehilangan dana kripto Anda.</string>
     <string name="warning">Peringatan</string>
     <string name="i_accept">Saya menerima risikonya</string>
+    <string name="multicast_transactions">Transaksi Multicast</string>
+    <string name="multicast_transactions_sub">Gunakan hingga 3 RPC untuk menyiarkan TX</string>
 </resources>

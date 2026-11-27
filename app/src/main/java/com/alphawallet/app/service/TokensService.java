@@ -1,7 +1,7 @@
 package com.alphawallet.app.service;
 
-import static com.alphawallet.app.repository.TokensRealmSource.databaseKey;
-import static com.alphawallet.ethereum.EthereumNetworkBase.KLAYTN_ID;
+import static com.alphawallet.app.repository.TokensRealmSource.pendingMapKey;
+import static com.alphawallet.app.repository.TokensRealmSource.resetWalletMaintenance;
 import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 import android.text.TextUtils;
@@ -19,12 +19,12 @@ import com.alphawallet.app.entity.NetworkInfo;
 import com.alphawallet.app.entity.ServiceSyncCallback;
 import com.alphawallet.app.entity.Wallet;
 import com.alphawallet.app.entity.nftassets.NFTAsset;
+import com.alphawallet.app.entity.okx.OkProtocolType;
+import com.alphawallet.app.entity.okx.OkToken;
 import com.alphawallet.app.entity.okx.OkTokenCheck;
 import com.alphawallet.app.entity.tokendata.TokenGroup;
 import com.alphawallet.app.entity.tokendata.TokenTicker;
 import com.alphawallet.app.entity.tokendata.TokenUpdateType;
-import com.alphawallet.app.entity.okx.OkProtocolType;
-import com.alphawallet.app.entity.okx.OkToken;
 import com.alphawallet.app.entity.tokens.Token;
 import com.alphawallet.app.entity.tokens.TokenCardMeta;
 import com.alphawallet.app.entity.tokens.TokenFactory;
@@ -33,6 +33,7 @@ import com.alphawallet.app.repository.EthereumNetworkBase;
 import com.alphawallet.app.repository.EthereumNetworkRepository;
 import com.alphawallet.app.repository.EthereumNetworkRepositoryType;
 import com.alphawallet.app.repository.TokenRepositoryType;
+import com.alphawallet.app.repository.TokensRealmSource;
 import com.alphawallet.app.util.Utils;
 import com.alphawallet.token.entity.ContractAddress;
 
@@ -45,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -57,7 +59,7 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
 import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
@@ -72,6 +74,8 @@ public class TokensService
     private final ConcurrentLinkedDeque<Token> tokenStoreList = new ConcurrentLinkedDeque<>(); //used to hold tokens that will be stored
     private final Map<String, Long> pendingTokenMap = new ConcurrentHashMap<>(); //used to determine which token to update next
     private String currentAddress = null;
+    private volatile boolean initialMetaLoadComplete = true;
+    private volatile boolean updateCyclePending;
     private final EthereumNetworkRepositoryType ethereumNetworkRepository;
     private final TokenRepositoryType tokenRepository;
     private final TickerService tickerService;
@@ -101,6 +105,7 @@ public class TokensService
     private Disposable queryUnknownTokensDisposable;
     @Nullable
     private Disposable balanceCheckDisposable;
+    private volatile boolean balanceCheckInProgress;
     @Nullable
     private Disposable erc20CheckDisposable;
     @Nullable
@@ -113,6 +118,8 @@ public class TokensService
     private Disposable okDisposable;
 
     private static boolean done = false;
+
+    public static String DEBUG_TOKEN = "0x54f7";
 
     public TokensService(EthereumNetworkRepositoryType ethereumNetworkRepository,
                          TokenRepositoryType tokenRepository,
@@ -142,9 +149,11 @@ public class TokensService
         if (queryUnknownTokensDisposable == null || queryUnknownTokensDisposable.isDisposed())
         {
             ContractAddress t = unknownTokens.pollFirst();
-            Token cachedToken = t != null ? getToken(t.chainId, t.address) : null;
+            Token cachedToken = getToken(t.chainId, t.address);
+            boolean cachedNameBad = cachedToken != null
+                    && (hasNameIssue(cachedToken.tokenInfo.name));
 
-            if (t != null && !t.address.isEmpty() && (cachedToken == null || TextUtils.isEmpty(cachedToken.tokenInfo.name)))
+            if (!t.address.isEmpty() && (cachedToken == null || cachedNameBad))
             {
                 ContractType type = tokenRepository.determineCommonType(new TokenInfo(t.address, "", "", 18, false, t.chainId)).blockingGet();
 
@@ -154,12 +163,6 @@ public class TokensService
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe(this::finishAddToken, err -> onCheckError(err, t));
-            }
-            else if (t == null)
-            {
-                //stop the check
-                if (checkUnknownTokenCycle != null && !checkUnknownTokenCycle.isDisposed())
-                    checkUnknownTokenCycle.dispose();
             }
         }
     }
@@ -180,6 +183,15 @@ public class TokensService
         else return tokenRepository.fetchToken(chainId, currentAddress, addr.toLowerCase());
     }
 
+    public Map<String, Token> getTokens(List<ContractAddress> addresses)
+    {
+        if (TextUtils.isEmpty(currentAddress) || addresses == null || addresses.isEmpty())
+        {
+            return new HashMap<>();
+        }
+        return tokenRepository.fetchTokens(currentAddress, addresses);
+    }
+
     public void storeToken(Token token)
     {
         if (TextUtils.isEmpty(currentAddress) || token == null || token.getInterfaceSpec() == ContractType.OTHER) return;
@@ -192,6 +204,12 @@ public class TokensService
     public TokenTicker getTokenTicker(Token token)
     {
         return tokenRepository.getTokenTicker(token);
+    }
+
+    /** Batch ticker lookup keyed by the token database key (see TokensRealmSource.databaseKey). */
+    public Map<String, TokenTicker> getTokenTickers(List<String> databaseKeys)
+    {
+        return tokenRepository.getTokenTickers(databaseKeys);
     }
 
     public Single<TokenCardMeta[]> getAllTokenMetas(String searchString)
@@ -216,6 +234,7 @@ public class TokensService
         if (newWalletAddr != null && (currentAddress == null || !currentAddress.equalsIgnoreCase(newWalletAddr)))
         {
             currentAddress = newWalletAddr.toLowerCase();
+            resetWalletMaintenance(newWalletAddr);
             stopUpdateCycle();
             addLockedTokens();
             if (openseaService != null) openseaService.resetOffsetRead(networkFilter);
@@ -229,7 +248,7 @@ public class TokensService
         syncStart = System.currentTimeMillis();
         syncTimer = syncStart + 5*DateUtils.SECOND_IN_MILLIS;
 
-        eventTimer = Observable.interval(1, 500, TimeUnit.MILLISECONDS)
+        eventTimer = Observable.interval(10, DateUtils.SECOND_IN_MILLIS, TimeUnit.MILLISECONDS)
                 .doOnNext(l -> checkTokensBalance())
                 .observeOn(Schedulers.newThread()).subscribe();
     }
@@ -253,6 +272,12 @@ public class TokensService
 
     public void startUpdateCycle()
     {
+        if (!initialMetaLoadComplete)
+        {
+            updateCyclePending = true;
+            return;
+        }
+
         if ((eventTimer != null && !eventTimer.isDisposed() && (lastStartCycleTime + 10000) > System.currentTimeMillis())
                 || (lastStartCycleTime + 2000) > System.currentTimeMillis())
         {
@@ -285,6 +310,44 @@ public class TokensService
                 .subscribe(this::updateCycle, this::onError);
     }
 
+    public void beginInitialMetaLoad(String walletAddress)
+    {
+        if (TextUtils.isEmpty(walletAddress)
+                || TextUtils.isEmpty(currentAddress)
+                || !currentAddress.equalsIgnoreCase(walletAddress))
+        {
+            return;
+        }
+
+        boolean cycleWasRunning = eventTimer != null && !eventTimer.isDisposed();
+        if (cycleWasRunning)
+        {
+            stopUpdateCycle();
+        }
+        // The wallet screen expects the normal update cycle after its initial
+        // snapshot, even when a wallet switch already stopped the old cycle.
+        updateCyclePending = true;
+        initialMetaLoadComplete = false;
+    }
+
+    public void completeInitialMetaLoad(String walletAddress)
+    {
+        if (TextUtils.isEmpty(walletAddress)
+                || TextUtils.isEmpty(currentAddress)
+                || !currentAddress.equalsIgnoreCase(walletAddress))
+        {
+            return;
+        }
+
+        initialMetaLoadComplete = true;
+        if (updateCyclePending)
+        {
+            updateCyclePending = false;
+            lastStartCycleTime = 0;
+            startUpdateCycle();
+        }
+    }
+
     // Constructs a map of tokens requiring update
     private TokenCardMeta[] buildUpdateMap()
     {
@@ -293,20 +356,22 @@ public class TokensService
         for (TokenCardMeta meta : tokenList)
         {
             meta.lastTxUpdate = meta.lastUpdate;
-            String key = databaseKey(meta.getChain(), meta.getAddress());
-            if (!pendingTokenMap.containsKey(key))
+            String key = pendingMapKey(meta, currentAddress);
+            long pendingTime = pendingTokenMap.getOrDefault(key, 0L);
+            meta.lastUpdate = Math.max(meta.lastUpdate, pendingTime);
+            pendingTokenMap.put(key, meta.lastUpdate);
+
+            //populate the update list
+            if (requiresUpdate(meta))
             {
-                if (meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM) unSynced++;
-                pendingTokenMap.put(key, meta.lastUpdate);
+                addUnknownToken(meta);
             }
-            else if (meta.lastUpdate <= pendingTokenMap.get(key))
+
+            if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
+                    && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName())
             {
-                meta.lastUpdate = pendingTokenMap.get(key);
-                if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
-                        && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName()) { unSynced++; }
+                unSynced++;
             }
-            else if ((meta.type == ContractType.ERC20 || meta.type == ContractType.ETHEREUM)
-                    && meta.lastUpdate < syncStart && meta.isEnabled && meta.hasValidName()) { unSynced++; }
         }
 
         checkSyncStatus(unSynced, tokenList);
@@ -409,6 +474,7 @@ public class TokensService
         }
 
         if (balanceCheckDisposable != null && !balanceCheckDisposable.isDisposed()) { balanceCheckDisposable.dispose(); }
+        balanceCheckInProgress = false;
         if (erc20CheckDisposable != null && !erc20CheckDisposable.isDisposed()) { erc20CheckDisposable.dispose(); }
         if (tokenStoreDisposable != null && !tokenStoreDisposable.isDisposed()) { tokenStoreDisposable.dispose(); }
         if (openSeaQueryDisposable != null && !openSeaQueryDisposable.isDisposed()) { openSeaQueryDisposable.dispose(); }
@@ -658,14 +724,21 @@ public class TokensService
 
     private void checkTokensBalance()
     {
+        if (balanceCheckInProgress)
+        {
+            return;
+        }
+
         final Token t = getNextInBalanceUpdateQueue();
 
         if (t != null)
         {
+            balanceCheckInProgress = true;
             Timber.tag(TAG).d("Updating: " + t.tokenInfo.chainId + (t.isEthereum() ? " (Base Chain) ":"") + " : " + t.getAddress() + " : " + t.getFullName());
             balanceCheckDisposable = tokenRepository.updateTokenBalance(currentAddress, t)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
+                    .doFinally(() -> balanceCheckInProgress = false)
                     .subscribe(newBalance -> onBalanceChange(newBalance, t), this::onError);
         }
 
@@ -745,7 +818,7 @@ public class TokensService
         }
 
         //update check time
-        pendingTokenMap.put(databaseKey(t), System.currentTimeMillis());
+        pendingTokenMap.put(pendingMapKey(t), System.currentTimeMillis());
 
         //Switch this token chain on
         if (t.isEthereum() && newBalance.compareTo(BigDecimal.ZERO) > 0)
@@ -952,6 +1025,11 @@ public class TokensService
         tickerService.updateTickers();
     }
 
+    public Observable<Integer> tickerUpdateComplete()
+    {
+        return tickerService.tickerUpdateComplete();
+    }
+
     public Realm getRealmInstance(Wallet wallet)
     {
         return tokenRepository.getRealmInstance(wallet);
@@ -980,7 +1058,14 @@ public class TokensService
 
     public Single<Pair<Double, Double>> getFiatValuePair()
     {
+        Timber.d("TIMER: getFiatValuePair");
         return tokenRepository.getTotalValue(currentAddress, EthereumNetworkBase.getAllMainNetworks());
+    }
+
+    /** Last cached total wallet value (USD), persisted whenever a value scan completes. */
+    public double getStoredWalletValue()
+    {
+        return tokenRepository.getStoredWalletValue(currentAddress);
     }
 
     public Single<List<String>> getTickerUpdateList()
@@ -1012,6 +1097,73 @@ public class TokensService
         return fiatValue.doubleValue();
     }
 
+    /**
+     * Batch-compute fiat values onto metas using one ticker Realm open and one wallet Realm open.
+     * Must be called off the main thread. Mutates and returns the same array.
+     */
+    public TokenCardMeta[] attachFiatValues(TokenCardMeta[] metas)
+    {
+        if (metas == null || metas.length == 0 || TextUtils.isEmpty(currentAddress))
+        {
+            return metas;
+        }
+
+        List<String> tickerKeys = new ArrayList<>(metas.length);
+        List<ContractAddress> addresses = new ArrayList<>(metas.length);
+        for (TokenCardMeta meta : metas)
+        {
+            if (meta == null || meta.isNFT() || meta.group == TokenGroup.SPAM)
+            {
+                if (meta != null)
+                {
+                    meta.setFiatValue(0);
+                }
+                continue;
+            }
+            String tickerAddress = meta.isEthereum() ? "eth" : meta.getAddress().toLowerCase(Locale.ROOT);
+            tickerKeys.add(TokensRealmSource.databaseKey(meta.getChain(), tickerAddress));
+            addresses.add(new ContractAddress(meta.getChain(), meta.getAddress()));
+        }
+
+        Map<String, TokenTicker> tickers = tickerKeys.isEmpty()
+                ? Collections.emptyMap()
+                : getTokenTickers(tickerKeys);
+        Map<String, Token> tokens = addresses.isEmpty()
+                ? Collections.emptyMap()
+                : getTokens(addresses);
+
+        for (TokenCardMeta meta : metas)
+        {
+            if (meta == null || meta.isNFT() || meta.group == TokenGroup.SPAM)
+            {
+                continue;
+            }
+
+            String tickerAddress = meta.isEthereum() ? "eth" : meta.getAddress().toLowerCase(Locale.ROOT);
+            TokenTicker ticker = tickers.get(TokensRealmSource.databaseKey(meta.getChain(), tickerAddress));
+            Token token = tokens.get(ContractAddress.toAddressKey(meta.getChain(), meta.getAddress()));
+            if (token == null || ticker == null || TextUtils.isEmpty(ticker.price))
+            {
+                meta.setFiatValue(0);
+                continue;
+            }
+
+            try
+            {
+                BigDecimal correctedBalance = token.getCorrectedBalance(18);
+                BigDecimal fiat = correctedBalance.multiply(new BigDecimal(ticker.price))
+                        .setScale(18, RoundingMode.DOWN);
+                meta.setFiatValue(fiat.doubleValue());
+            }
+            catch (Exception e)
+            {
+                meta.setFiatValue(0);
+            }
+        }
+
+        return metas;
+    }
+
     ///////////////////////////////////////////
     // Update Heuristics - timings and weightings for token updates
     // Fine tune how and when tokens are updated here
@@ -1033,7 +1185,11 @@ public class TokensService
         long currentTime = System.currentTimeMillis();
         Token storeToken = pendingBaseCheck();
         if (storeToken == null) { storeToken = tokenStoreList.poll(); }
-        if (storeToken != null) { return storeToken; }
+        if (storeToken != null)
+        {
+            pendingTokenMap.put(pendingMapKey(storeToken), System.currentTimeMillis());
+            return storeToken;
+        }
 
         TokenCardMeta highestToken = null;
 
@@ -1088,7 +1244,7 @@ public class TokensService
 
         if (highestToken != null)
         {
-            pendingTokenMap.put(databaseKey(highestToken.getChain(), highestToken.getAddress()), System.currentTimeMillis());
+            pendingTokenMap.put(pendingMapKey(highestToken, currentAddress), System.currentTimeMillis());
             return getToken(highestToken.getChain(), highestToken.getAddress());
         }
         else
@@ -1394,7 +1550,7 @@ public class TokensService
             tokenRepository.deleteRealmTokens(new Wallet(currentAddress), metasToDelete);
             for (TokenCardMeta tcm : metasToDelete)
             {
-                pendingTokenMap.remove(databaseKey(tcm.getChain(), tcm.getAddress()));
+                pendingTokenMap.remove(pendingMapKey(tcm, currentAddress));
             }
             return true;
         });
@@ -1424,5 +1580,44 @@ public class TokensService
     public boolean isOnFocus()
     {
         return appHasFocus;
+    }
+
+    public static boolean hasNameIssue(String name)
+    {
+        return !TextUtils.isEmpty(name) && name.matches("0x[0-9a-fA-F]{4}\\.\\.\\.[0-9a-fA-F]{4}");
+    }
+
+    private boolean requiresUpdate(TokenCardMeta meta)
+    {
+        String filter = meta.getFilterText();
+        String name = filter.length() > 6 ? filter.startsWith("'") ? filter.toLowerCase().substring(1) : filter : "";
+        if (name.length() > 7 && name.toLowerCase().startsWith(DEBUG_TOKEN)){
+            Timber.d("Bad");
+        }
+
+        return hasNameIssue(name);
+    }
+
+    public void addUnknownToken(TokenCardMeta meta)
+    {
+        long chainId = meta.getChain();
+        String address = meta.getAddress();
+        for (ContractAddress check : unknownTokens)
+        {
+            if (check.chainId == chainId && check.address.equalsIgnoreCase(address))
+            {
+                return;
+            }
+        }
+
+        if (chainId == 1L)
+        {
+            unknownTokens.addFirst(new ContractAddress(chainId, address));
+        }
+        else
+        {
+            unknownTokens.addLast(new ContractAddress(chainId, address));
+        }
+        startUnknownCheck();
     }
 }

@@ -802,11 +802,6 @@
     <string name="exchange_with_oneinch">Exchange with 1inch</string>
     <string name="swap">Swap</string>
     <string name="action_send_to_this_address">Send to this Address</string>
-    <string name="stay_updated">Stay Updated</string>
-    <string name="email_prompt_hint">We send an email announcing major features. Would you like to receive such emails? (max 1 email per week)</string>
-    <string name="hint_email_address">Email Address</string>
-    <string name="action_want_to_receive_email">I want to receive such emails</string>
-    <string name="email_is_invalid">Please provide valid email address</string>
     <string name="github">Github (signaler un problème)</string>
     <string name="chains_to_scan">Chains to scan</string>
     <string name="action_view">View</string>
@@ -957,10 +952,6 @@
     <string name="title_session_details">Détails de la session</string>
     <string name="title_session_proposal">Proposition de séance</string>
     <string name="message_wc_wallet_different_from_active_wallet">Portefeuille différent du portefeuille actif.</string>
-    <string name="settings_title_analytics">Analytique</string>
-    <string name="settings_title_crash_reporting">Rapport d\'incident</string>
-    <string name="message_share_anonymous_data">Aidez-nous à améliorer AlphaWallet en partageant vos données anonymes avec nous. Cela n\'inclut aucune information financière.</string>
-    <string name="share_anonymous_data">Partager des données anonymes ?</string>
     <string name="enable_required_chains">Activer les chaînes requises?</string>
     <string name="enable_required_chains_message">Les jetons sélectionnés sont sur des chaînes actuellement non sélectionnées, activer les chaînes non sélectionnées?</string>
     <string name="dialog_title_search_token">Rechercher un jeton?</string>
@@ -1009,9 +1000,10 @@
     <string name="developer_override">Remplacement du Développeur</string>
     <string name="override_warning_text">Vous êtes peut-être sur le point de signer sans le savoir une transaction, ce qui pourrait vider vos fonds. Vous souhaiterez peut-être signer le bytecode en tant que développeur et vous pouvez ignorer cet avertissement si vous définissez le mode développeur dans les paramètres avancés.</string>
     <string name="constructor">Constructor</string>
-    <string name="use_tokenscript_viewer">Visionneuse TokenScript</string>
     <string name="not_recommended_to_visit">Cette URL n\'est pas sur liste blanche. Il est toujours possible de la visiter en modifiant les options de protection dans les paramètres, mais cela n\'est pas recommandé. Vous pourriez être sur le point de perdre vos fonds, surtout s\'il s\'agit d\'un investissement dans le minage de crypto-monnaies. Il existe de nombreux sites d\'investissement en crypto-monnaies réglementés.</string>
     <string name="developer_override_warning">Attention : vous êtes sur le point de désactiver la protection standard. Cela vous évite de vous faire arnaquer. N\'utilisez le mode développeur que si vous testez votre dapp ou si vous êtes sûr à 100 \% que le site est sûr. N\'oubliez pas : si quelqu\'un vous dit d\'activer ce paramètre, vous êtes presque certainement sur le point de perdre vos fonds cryptographiques.</string>
     <string name="warning">Attention</string>
     <string name="i_accept">J\'accepte le risque</string>
+    <string name="multicast_transactions">Transactions Multicast</string>
+    <string name="multicast_transactions_sub">Utilisez jusqu\'à 3 RPC pour diffuser les TX</string>
 </resources>

@@ -54,9 +54,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import io.realm.Realm;
-import io.realm.RealmObject;
-import io.realm.RealmQuery;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
+import com.alphawallet.app.realm.RealmCompat.Results;
+import com.alphawallet.app.realm.RealmQueryBuilder;
 
 @AndroidEntryPoint
 public class GasSettingsActivity extends BaseActivity implements GasSettingsCallback
@@ -66,8 +68,8 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
     private GasSliderView gasSliderView;
     private CustomAdapter adapter;
     private GasPriceSpread gasSpread;
-    private Realm1559Gas realmGasSpread;
-    private RealmGasSpread realmLegacyGasSpread;
+    private Results<Realm1559Gas> realmGasSpread;
+    private Results<RealmGasSpread> realmLegacyGasSpread;
     private TXSpeed currentGasSpeedIndex = TXSpeed.STANDARD;
     private long chainId;
     private BigDecimal presetGasLimit;
@@ -151,15 +153,15 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         gasWarningShown = false;
     }
 
-    private RealmQuery<RealmGasSpread> getGasQuery()
+    private RealmQueryBuilder<RealmGasSpread> getGasQuery()
     {
-        return viewModel.getTickerRealm().where(RealmGasSpread.class)
+        return RealmCompat.where(viewModel.getTickerRealm(), RealmGasSpread.class)
                 .equalTo("chainId", chainId);
     }
 
-    private RealmQuery<Realm1559Gas> getGasQuery2()
+    private RealmQueryBuilder<Realm1559Gas> getGasQuery2()
     {
-        return viewModel.getTickerRealm().where(Realm1559Gas.class)
+        return RealmCompat.where(viewModel.getTickerRealm(), Realm1559Gas.class)
                 .equalTo("chainId", chainId);
     }
 
@@ -168,10 +170,10 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         if (realmLegacyGasSpread != null) realmLegacyGasSpread.removeAllChangeListeners();
 
         realmLegacyGasSpread = getGasQuery().findFirstAsync();
-        realmLegacyGasSpread.addChangeListener(realmSpread -> {
-            if (realmLegacyGasSpread.isValid())
+        realmLegacyGasSpread.addChangeListener(results -> {
+            if (realmLegacyGasSpread.isValid() && results.first() != null)
             {
-                initLegacyGasSpeeds((RealmGasSpread) realmSpread);
+                initLegacyGasSpeeds(results.first());
             }
         });
     }
@@ -181,10 +183,10 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         if (realmGasSpread != null) realmGasSpread.removeAllChangeListeners();
 
         realmGasSpread = getGasQuery2().findFirstAsync();
-        realmGasSpread.addChangeListener(realmSpread -> {
-            if (realmGasSpread.isValid())
+        realmGasSpread.addChangeListener(results -> {
+            if (realmGasSpread.isValid() && results.first() != null)
             {
-                initGasSpeeds((Realm1559Gas) realmSpread);
+                initGasSpeeds(results.first());
             }
         });
     }
@@ -272,12 +274,12 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         closeRealmSpread(realmLegacyGasSpread);
     }
 
-    private void closeRealmSpread(RealmObject realmSpread)
+    private void closeRealmSpread(Results<?> realmSpread)
     {
         if (realmSpread != null && realmSpread.isValid())
         {
             realmSpread.removeAllChangeListeners();
-            if (!realmSpread.getRealm().isClosed()) realmSpread.getRealm().close();
+            if (!RealmCompat.isClosed(realmSpread.getRealm())) RealmCompat.close(realmSpread.getRealm());
         }
     }
 
@@ -554,9 +556,10 @@ public class GasSettingsActivity extends BaseActivity implements GasSettingsCall
         private String getGasCost(String gasAmountInBase)
         {
             String costStr = "";
-            try (Realm realm = viewModel.getTickerRealm())
+            try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(viewModel.getTickerRealm()))
             {
-                RealmTokenTicker rtt = realm.where(RealmTokenTicker.class)
+            Realm realm = realmCloser.getRealm();
+                RealmTokenTicker rtt = RealmCompat.where(realm, RealmTokenTicker.class)
                         .equalTo("contract", TokensRealmSource.databaseKey(chainId, "eth"))
                         .findFirst();
 

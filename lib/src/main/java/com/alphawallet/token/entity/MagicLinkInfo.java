@@ -23,9 +23,9 @@ public class MagicLinkInfo
 
     //Etherscan domains
     private static final String mainNetEtherscan = "https://cn.etherscan.com/";
-    private static final String classicEtherscan = "https://blockscout.com/etc/mainnet/";
+    private static final String classicEtherscan = "https://etc.blockscout.com/";
     private static final String callistoEtherscan = "https://etherscan.io/"; //TODO: determine callisto etherscan
-    private static final String xDaiEtherscan = "https://blockscout.com/poa/dai/";
+    private static final String xDaiEtherscan = "https://gnosis.blockscout.com/";
 
     public static String getNetworkNameById(long networkId) {
         NetworkInfo info = EthereumNetworkBase.getNetworkByChain(networkId);

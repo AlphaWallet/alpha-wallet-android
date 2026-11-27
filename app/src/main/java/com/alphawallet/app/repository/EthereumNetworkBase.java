@@ -85,6 +85,7 @@ import java.util.Random;
 import java.util.Set;
 
 import io.reactivex.Single;
+import timber.log.Timber;
 
 public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryType
 {
@@ -200,63 +201,58 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         }
     }
 
-    public static boolean applyRpcConfigJson(String json)
+    public static void applyRpcConfigJson(String json)
     {
-        if (TextUtils.isEmpty(json))
+        if (!TextUtils.isEmpty(json))
         {
-            return false;
-        }
-
-        try
-        {
-            RpcRankingsPayload payload = new Gson().fromJson(json, RpcRankingsPayload.class);
-            if (payload == null || payload.chains == null)
+            try
             {
-                return false;
-            }
-
-            Map<Long, String[]> updates = new HashMap<>();
-            for (RpcChainEntry chainEntry : payload.chains)
-            {
-                if (chainEntry == null || chainEntry.rpcs == null || chainEntry.rpcs.isEmpty() || !isChainSupported(chainEntry.chainId))
+                RpcRankingsPayload payload = new Gson().fromJson(json, RpcRankingsPayload.class);
+                if (payload == null || payload.chains == null)
                 {
-                    continue;
+                    return;
                 }
 
-                List<String> urls = new ArrayList<>();
-                for (RpcEntry rpcEntry : chainEntry.rpcs)
+                Map<Long, String[]> updates = new HashMap<>();
+                for (RpcChainEntry chainEntry : payload.chains)
                 {
-                    if (rpcEntry != null && !TextUtils.isEmpty(rpcEntry.url))
+                    if (chainEntry == null || chainEntry.rpcs == null || chainEntry.rpcs.isEmpty() || !isChainSupported(chainEntry.chainId))
                     {
-                        urls.add(rpcEntry.url);
+                        continue;
+                    }
+
+                    List<String> urls = new ArrayList<>();
+                    for (RpcEntry rpcEntry : chainEntry.rpcs)
+                    {
+                        if (rpcEntry != null && !TextUtils.isEmpty(rpcEntry.url))
+                        {
+                            urls.add(rpcEntry.url);
+                        }
+                    }
+
+                    if (!urls.isEmpty())
+                    {
+                        updates.put(chainEntry.chainId, urls.toArray(new String[0]));
                     }
                 }
 
-                if (!urls.isEmpty())
+                if (!updates.isEmpty())
                 {
-                    updates.put(chainEntry.chainId, urls.toArray(new String[0]));
+                    synchronized (rpcConfigLock)
+                    {
+                        for (Map.Entry<Long, String[]> entry : updates.entrySet())
+                        {
+                            CHAIN_CONFIG_RPC.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+
+                    refreshBuiltInNetworkRpcConfig();
                 }
             }
-
-            if (updates.isEmpty())
+            catch (Exception e)
             {
-                return false;
+                Timber.e(e, "applyRpcConfigJson");
             }
-
-            synchronized (rpcConfigLock)
-            {
-                for (Map.Entry<Long, String[]> entry : updates.entrySet())
-                {
-                    CHAIN_CONFIG_RPC.put(entry.getKey(), entry.getValue());
-                }
-            }
-
-            refreshBuiltInNetworkRpcConfig();
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
         }
     }
 
@@ -554,11 +550,12 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                     "https://api.etherscan.io/v2/api?chainid=1&"));
             put(CLASSIC_ID, new NetworkInfo(C.CLASSIC_NETWORK_NAME, C.ETC_SYMBOL,
                     CHAIN_CONFIG_RPC.get(CLASSIC_ID),
-                    "https://blockscout.com/etc/mainnet/tx/", CLASSIC_ID,
-                    "https://blockscout.com/etc/mainnet/api?"));
+                    "https://etc.blockscout.com/tx/", CLASSIC_ID,
+                    "https://api.blockscout.com/v2/api?chainid=61&"));
             put(GNOSIS_ID, new NetworkInfo(C.XDAI_NETWORK_NAME, C.xDAI_SYMBOL,
                     CHAIN_CONFIG_RPC.get(GNOSIS_ID),
-                    "https://gnosis.blockscout.com/tx/", GNOSIS_ID, "https://gnosis.blockscout.com?"));
+                    "https://gnosis.blockscout.com/tx/", GNOSIS_ID,
+                    "https://api.blockscout.com/v2/api?chainid=100&"));
             put(BINANCE_TEST_ID, new NetworkInfo(C.BINANCE_TEST_NETWORK, C.BINANCE_SYMBOL,
                     CHAIN_CONFIG_RPC.get(BINANCE_TEST_ID),
                     "https://testnet.bscscan.com/tx/", BINANCE_TEST_ID,
@@ -658,8 +655,8 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
             put(ROOTSTOCK_MAINNET_ID, new NetworkInfo(C.ROOTSTOCK_NETWORK_NAME, C.ROOTSTOCK_SYMBOL,
                     CHAIN_CONFIG_RPC.get(ROOTSTOCK_MAINNET_ID),
-                    "https://blockscout.com/rsk/mainnet/tx/", ROOTSTOCK_MAINNET_ID,
-                    "https://blockscout.com/rsk/mainnet/api?"));
+                    "https://rootstock.blockscout.com/tx/", ROOTSTOCK_MAINNET_ID,
+                    "https://api.blockscout.com/v2/api?chainid=30&"));
             put(ROOTSTOCK_TESTNET_ID, new NetworkInfo(C.ROOTSTOCK_TESTNET_NAME, C.ROOTSTOCK_TEST_SYMBOL,
                     CHAIN_CONFIG_RPC.get(ROOTSTOCK_TESTNET_ID),
                     "", ROOTSTOCK_TESTNET_ID,
@@ -1006,6 +1003,15 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
         return hasLockedGas.contains(chainId);
     }
 
+    /**
+     * Known networks that should use EIP-1559 transactions, even before the first
+     * {@code Realm1559Gas} row is cached. Locked-gas chains (e.g. Klaytn) are excluded.
+     */
+    public static boolean supportsEIP1559(long chainId)
+    {
+        return networkMap.indexOfKey(chainId) >= 0 && !hasLockedGas.contains(chainId);
+    }
+
     @Override
     public boolean hasBlockNativeGasAPI(long chainId)
     {
@@ -1088,7 +1094,7 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
                 CustomNetworks cn = new Gson().fromJson(networks, CustomNetworks.class);
                 this.list = cn.list;
                 this.mapToTestNet = cn.mapToTestNet;
-                if (list == null)
+                if (list == null || list.isEmpty())
                 {
                     return;
                 }
@@ -1097,6 +1103,10 @@ public abstract class EthereumNetworkBase implements EthereumNetworkRepositoryTy
 
                 for (NetworkInfo info : list)
                 {
+                    if (info == null)
+                    {
+                        continue;
+                    }
                     boolean containsBadUrl = false;
                     for (String thisUrl : info.rpcUrls)
                     {

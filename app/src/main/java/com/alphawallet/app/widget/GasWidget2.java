@@ -36,8 +36,11 @@ import com.alphawallet.app.web3.entity.Web3Transaction;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import io.realm.Realm;
-import io.realm.RealmQuery;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
+import com.alphawallet.app.realm.RealmCompat.Results;
+import com.alphawallet.app.realm.RealmQueryBuilder;
 
 /**
  * Created by JB on 20/01/2022.
@@ -45,7 +48,7 @@ import io.realm.RealmQuery;
 public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInterface
 {
     private GasPriceSpread gasSpread;
-    private Realm1559Gas realmGasSpread;
+    private Results<Realm1559Gas> realmGasSpread;
     private TokensService tokensService;
     private BigInteger customGasLimit;    //from slider
     private BigInteger presetGasLimit;    //this is the gas limit used for the presets. It will use, in order of priority: gas estimate from node, gas from dapp tx, calculated gas
@@ -134,9 +137,10 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     //set custom fee if specified by tx feed
     private void setupGasSpeeds(Web3Transaction w3tx)
     {
-        try (Realm realm = tokensService.getTickerRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(tokensService.getTickerRealmInstance()))
         {
-            Realm1559Gas gasReturn = realm.where(Realm1559Gas.class)
+            Realm realm = realmCloser.getRealm();
+            Realm1559Gas gasReturn = RealmCompat.where(realm, Realm1559Gas.class)
                 .equalTo("chainId", token.tokenInfo.chainId).findFirst();
 
             if (gasReturn != null)
@@ -224,9 +228,10 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     private BigInteger getLegacyGasPrice()
     {
         BigInteger legacyPrice = initialGasPrice;
-        try(Realm realm = tokensService.getTickerRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(tokensService.getTickerRealmInstance()))
         {
-            RealmGasSpread rgs = realm.where(RealmGasSpread.class)
+            Realm realm = realmCloser.getRealm();
+            RealmGasSpread rgs = RealmCompat.where(realm, RealmGasSpread.class)
                 .equalTo("chainId", token.tokenInfo.chainId).findFirst();
 
             if (rgs != null)
@@ -254,9 +259,9 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
         }
     }
 
-    private RealmQuery<Realm1559Gas> getGasQuery2()
+    private RealmQueryBuilder<Realm1559Gas> getGasQuery2()
     {
-        return tokensService.getTickerRealmInstance().where(Realm1559Gas.class)
+        return RealmCompat.where(tokensService.getTickerRealmInstance(), Realm1559Gas.class)
                 .equalTo("chainId", token.tokenInfo.chainId);
     }
 
@@ -264,10 +269,10 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
     {
         if (realmGasSpread != null) realmGasSpread.removeAllChangeListeners();
         realmGasSpread = getGasQuery2().findFirstAsync();
-        realmGasSpread.addChangeListener(realmSpread -> {
-            if (realmGasSpread.isValid())
+        realmGasSpread.addChangeListener(results -> {
+            if (realmGasSpread.isValid() && results.first() != null)
             {
-                initGasSpeeds((Realm1559Gas) realmSpread);
+                initGasSpeeds(results.first());
             }
         });
     }
@@ -308,9 +313,10 @@ public class GasWidget2 extends LinearLayout implements Runnable, GasWidgetInter
         String displayStr = context.getString(R.string.gas_amount, gasAmountInBase, baseCurrency.getSymbol());
 
         //Can we display value for gas?
-        try (Realm realm = tokensService.getTickerRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(tokensService.getTickerRealmInstance()))
         {
-            RealmTokenTicker rtt = realm.where(RealmTokenTicker.class)
+            Realm realm = realmCloser.getRealm();
+            RealmTokenTicker rtt = RealmCompat.where(realm, RealmTokenTicker.class)
                     .equalTo("contract", TokensRealmSource.databaseKey(token.tokenInfo.chainId, "eth"))
                     .findFirst();
 

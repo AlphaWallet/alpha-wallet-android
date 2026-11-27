@@ -132,15 +132,20 @@ public class AWHttpServiceWaterfall extends HttpService
 
     /**
      * Resolve the URLs to use: prefer ranked RPCs from the manager, fall back to hardcoded.
+     * Router/ISP-blocked domains for the current external IP are filtered out.
      */
     private String[] getActiveUrls()
     {
         if (rankingManager != null)
         {
-            String[] ranked = rankingManager.getRPCsForChain(chainId);
+            String[] ranked = rankingManager.getRPCsForChain(chainId); // already block-filtered
             if (ranked != null && ranked.length > 0)
             {
                 return ranked;
+            }
+            if (rankingManager.getBlockedRpcService() != null)
+            {
+                return rankingManager.getBlockedRpcService().filterBlocked(fallbackUrls);
             }
         }
         return fallbackUrls;
@@ -174,6 +179,18 @@ public class AWHttpServiceWaterfall extends HttpService
             {
                 response = performSingleIO(url, request);
 
+                if (rankingManager != null)
+                {
+                    rankingManager.recordRpcResponse(url, response);
+                    BlockedRpcService blockedRpcService = rankingManager.getBlockedRpcService();
+                    if (blockedRpcService != null && blockedRpcService.isBlocked(url))
+                    {
+                        response.close();
+                        rankingManager.recordCallResult(chainId, url, -1);
+                        continue;
+                    }
+                }
+
                 // Check if the response is valid (2xx status code)
                 if (response.isSuccessful())
                 {
@@ -206,6 +223,7 @@ public class AWHttpServiceWaterfall extends HttpService
                 if (rankingManager != null)
                 {
                     rankingManager.recordCallResult(chainId, url, -1);
+                    rankingManager.recordRpcFailure(url, e);
                 }
             }
         }

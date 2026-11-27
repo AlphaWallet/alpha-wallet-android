@@ -49,9 +49,8 @@ public class AdvancedSettingsActivity extends BaseActivity
     private SettingsItemView fullScreenSettings;
     private SettingsItemView refreshTokenDatabase;
     private SettingsItemView eip1559Transactions;
-    private SettingsItemView crashReporting;
+    private SettingsItemView multicastTransactions;
     private SettingsItemView developerOverride;
-    private SettingsItemView tokenScriptViewer;
     private AWalletAlertDialog waitDialog = null;
 
     @Nullable
@@ -117,13 +116,6 @@ public class AdvancedSettingsActivity extends BaseActivity
                 .withListener(this::onTokenScriptManagementClicked)
                 .build();
 
-        tokenScriptViewer = new SettingsItemView.Builder(this)
-                .withType(SettingsItemView.Type.TOGGLE)
-                .withIcon(R.drawable.ic_tokenscript)
-                .withTitle(R.string.use_tokenscript_viewer)
-                .withListener(this::onUseTokenScriptViewer)
-                .build();
-
         fullScreenSettings = new SettingsItemView.Builder(this)
                 .withType(SettingsItemView.Type.TOGGLE)
                 .withIcon(R.drawable.ic_phoneicon)
@@ -144,10 +136,12 @@ public class AdvancedSettingsActivity extends BaseActivity
                 .withListener(this::on1559TransactionsClicked)
                 .build();
 
-        crashReporting = new SettingsItemView.Builder(this)
-                .withIcon(R.drawable.ic_settings_crash_reporting)
-                .withTitle(R.string.settings_title_crash_reporting)
-                .withListener(this::onCrashReportingClicked)
+        multicastTransactions = new SettingsItemView.Builder(this)
+                .withType(SettingsItemView.Type.TOGGLE)
+                .withIcon(R.drawable.ic_icons_settings_1559)
+                .withTitle(R.string.multicast_transactions)
+                .withSubtitle(R.string.multicast_transactions_sub)
+                .withListener(this::onMulticastTransactionsClicked)
                 .build();
 
         developerOverride = new SettingsItemView.Builder(this)
@@ -159,8 +153,8 @@ public class AdvancedSettingsActivity extends BaseActivity
 
         fullScreenSettings.setToggleState(viewModel.getFullScreenState());
         eip1559Transactions.setToggleState(viewModel.get1559TransactionsState());
+        multicastTransactions.setToggleState(viewModel.getMulticastTransactionsState());
         developerOverride.setToggleState(viewModel.getDeveloperOverrideState());
-        tokenScriptViewer.setToggleState(viewModel.getTokenScriptViewerState());
     }
 
     @FunctionalInterface
@@ -215,9 +209,9 @@ public class AdvancedSettingsActivity extends BaseActivity
         viewModel.toggle1559Transactions(eip1559Transactions.getToggleState());
     }
 
-    private void onUseTokenScriptViewer()
+    private void onMulticastTransactionsClicked()
     {
-        viewModel.toggleUseViewer(tokenScriptViewer.getToggleState());
+        viewModel.toggleMulticastTransactions(multicastTransactions.getToggleState());
     }
 
     private void addSettingsToLayout()
@@ -231,8 +225,7 @@ public class AdvancedSettingsActivity extends BaseActivity
         advancedSettingsLayout.addView(fullScreenSettings);
         advancedSettingsLayout.addView(refreshTokenDatabase);
         advancedSettingsLayout.addView(eip1559Transactions);
-        advancedSettingsLayout.addView(tokenScriptViewer);
-        advancedSettingsLayout.addView(crashReporting);
+        advancedSettingsLayout.addView(multicastTransactions);
         advancedSettingsLayout.addView(developerOverride);
     }
 
@@ -339,12 +332,6 @@ public class AdvancedSettingsActivity extends BaseActivity
     private void onTokenScriptManagementClicked()
     {
         Intent intent = new Intent(this, TokenScriptManagementActivity.class);
-        startActivity(intent);
-    }
-
-    private void onCrashReportingClicked()
-    {
-        Intent intent = new Intent(this, CrashReportSettingsActivity.class);
         startActivity(intent);
     }
 

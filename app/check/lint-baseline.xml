@@ -6601,17 +6601,6 @@
 
     <issue
         id="ViewConstructor"
-        message="Custom view `EmailPromptView` is missing constructor used by tools: `(Context)` or `(Context,AttributeSet)` or `(Context,AttributeSet,int)`"
-        errorLine1="public class EmailPromptView extends LinearLayout implements StandardFunctionInterface {"
-        errorLine2="             ~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/alphawallet/app/widget/EmailPromptView.java"
-            line="32"
-            column="14"/>
-    </issue>
-
-    <issue
-        id="ViewConstructor"
         message="Custom view `EmptyTransactionsView` is missing constructor used by tools: `(Context)` or `(Context,AttributeSet)` or `(Context,AttributeSet,int)`"
         errorLine1="public class EmptyTransactionsView extends FrameLayout {"
         errorLine2="             ~~~~~~~~~~~~~~~~~~~~~">

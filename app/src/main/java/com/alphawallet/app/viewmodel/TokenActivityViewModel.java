@@ -11,7 +11,8 @@ import com.alphawallet.app.service.TokensService;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
 
 @HiltViewModel
 public class TokenActivityViewModel extends BaseViewModel {

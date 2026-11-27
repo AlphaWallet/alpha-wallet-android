@@ -55,7 +55,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.Nullable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
+import io.realm.kotlin.Realm;
+import com.alphawallet.app.realm.RealmCompat;
+import com.alphawallet.app.realm.AutoCloseableRealm;
 
 /**
  * Created by JB on 17/11/2020.
@@ -148,10 +150,11 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
         balanceDisplay.setupBalance(token, transaction);
         networkDisplay.setNetwork(token.tokenInfo.chainId);
 
-        gasWidgetInterface = setupGasWidget();
-
-        //ensure gas service is started
+        // Start fee polling before widget selection so 1559 data can land ASAP.
+        // Widget choice itself must not wait on Realm cache for known EIP-1559 chains.
         actionSheetCallback.getGasService().startGasPriceCycle(token.tokenInfo.chainId);
+
+        gasWidgetInterface = setupGasWidget();
 
         if (!tx.gasLimit.equals(BigInteger.ZERO))
         {
@@ -651,17 +654,18 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
     private void updateRealmTransactionFinishEstimate(String txHash)
     {
         final long expectedTime = System.currentTimeMillis() + gasWidgetInterface.getExpectedTransactionTime() * 1000;
-        try (Realm realm = tokensService.getWalletRealmInstance())
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(tokensService.getWalletRealmInstance()))
         {
-            realm.executeTransactionAsync(r -> {
-                RealmTransaction rt = r.where(RealmTransaction.class)
+            Realm realm = realmCloser.getRealm();
+            RealmCompat.executeTransactionAsync(realm, r -> {
+                RealmTransaction rt = RealmCompat.where(r, RealmTransaction.class)
                         .equalTo("hash", txHash)
                         .findFirst();
 
                 if (rt != null)
                 {
                     rt.setExpectedCompletion(expectedTime);
-                    r.insertOrUpdate(rt);
+                    RealmCompat.insertOrUpdate(r, rt);
                 }
             });
         }
@@ -885,9 +889,17 @@ public class ActionSheetDialog extends ActionSheet implements StandardFunctionIn
 
     private boolean has1559Gas()
     {
-        try (Realm realm = tokensService.getTickerRealmInstance())
+        // Prefer EIP-1559 for known networks immediately (e.g. Base Sepolia), rather than
+        // waiting until the first successful fee fetch writes Realm1559Gas.
+        if (EthereumNetworkBase.supportsEIP1559(token.tokenInfo.chainId))
         {
-            Realm1559Gas rgs = realm.where(Realm1559Gas.class)
+            return true;
+        }
+
+        try (AutoCloseableRealm realmCloser = AutoCloseableRealm.wrap(tokensService.getTickerRealmInstance()))
+        {
+            Realm realm = realmCloser.getRealm();
+            Realm1559Gas rgs = RealmCompat.where(realm, Realm1559Gas.class)
                     .equalTo("chainId", token.tokenInfo.chainId)
                     .findFirst();
 

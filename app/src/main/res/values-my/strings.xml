@@ -823,11 +823,6 @@
     <string name="exchange_with_oneinch">Exchange with 1inch</string>
     <string name="swap">Swap</string>
     <string name="action_send_to_this_address">ဤလိပ်စာကိုပို့ပါ</string>
-    <string name="stay_updated">Stay Updated</string>
-    <string name="email_prompt_hint">ကျွန်ုပ်တို့မှအဓိကပြုပြင်ပြောင်းလဲမှုများပြုလုပ်ခဲ့လျှင်အီးမေးလ်ပို့ပါမည်။ ၄င်းအီးမေးလ်များကို(အများဆုံးတပတ်တခါ)လက်ခံရရှိလိုပါသလား။</string>
-    <string name="hint_email_address">အီးမေးလ်လိပ်စာ</string>
-    <string name="action_want_to_receive_email">အီးမေးလ်များလက်ခံရရှိလိုပါသည်။</string>
-    <string name="email_is_invalid">ကျေးဇူးပြု၍ မှန်ကန်သောအီးမေးလ်ကို ထည့်သွင်းပါ</string>
     <string name="github">Github (File an issue)</string>
     <string name="chains_to_scan">Chains to scan</string>
     <string name="action_view">မြင်ကွင်း</string>
@@ -978,10 +973,6 @@
     <string name="title_session_details">အပိုင်းအသေးစိတ်</string>
     <string name="title_session_proposal">Session အဆိုပြုချက်</string>
     <string name="message_wc_wallet_different_from_active_wallet">ပိုက်ဆံအိတ်သည် တက်ကြွသောပိုက်ဆံအိတ်နှင့် ကွဲပြားသည်။</string>
-    <string name="settings_title_analytics">ပိုင်းခြားစိတ်ဖြာပါ။</string>
-    <string name="settings_title_crash_reporting">ပျက်စီးမှုသတင်းပို့ခြင်း။</string>
-    <string name="message_share_anonymous_data">သင်၏အမည်မသိဒေတာကို ကျွန်ုပ်တို့နှင့်မျှဝေခြင်းဖြင့် AlphaWallet တိုးတက်စေရန် ကျွန်ုပ်တို့ကိုကူညီပါ။ ၎င်းတွင် မည်သည့်ဘဏ္ဍာရေးဆိုင်ရာ အချက်အလက်မှ မပါဝင်ပါ။</string>
-    <string name="share_anonymous_data">အမည်မသိဒေတာကို မျှဝေမလား။</string>
     <string name="enable_required_chains">လိုအပ်တဲ့ သံကြိုးတွေကို လုပ်ဆောင်နိုင်မလား။</string>
     <string name="enable_required_chains_message">ရွေးချယ်ထားသော အမှတ်အသားများသည် လောလောဆယ် ရွေးချယ်မထားသော သံကြိုးများပေါ်တွင် ရွေးချယ်ထားပြီး ရွေးချယ်မှုမရှိသော သံကြိုးများ ဖြစ်စေနိုင်ပါသလော။</string>
     <string name="dialog_title_search_token">တိုကင်ကို ရှာမလား။</string>
@@ -1030,9 +1021,10 @@
     <string name="developer_override">Developer Override</string>
     <string name="override_warning_text">သင့်ငွေများကို အချည်းနှီးဖြစ်စေနိုင်သည့် ငွေပေးငွေယူတစ်ခုအား သင်မသိလိုက်ဘဲ လက်မှတ်ထိုးပါတော့မည်။ သင်သည် ဆော့ဖ်ဝဲအင်ဂျင်နီယာတစ်ဦးအနေဖြင့် bytecode ကို လက်မှတ်ထိုးလိုနိုင်ပြီး၊ Advanced ဆက်တင်များတွင် developer မုဒ်ကို သင်သတ်မှတ်ပါက ဤသတိပေးချက်ကို အစားထိုးနိုင်ပါသည်။</string>
     <string name="constructor">Constructor</string>
-    <string name="use_tokenscript_viewer">TokenScript ကြည့်ရှုသူ</string>
     <string name="not_recommended_to_visit">ဤ URL ကို တရားဝင်စာရင်းမသွင်းပါ။ ဆက်တင်များတွင် အကာအကွယ်ရွေးချယ်မှုများ ပြောင်းလဲခြင်းဖြင့် ဝင်ကြည့်ရန် ဖြစ်နိုင်သေးသော်လည်း ၎င်းကို အကြံပြုထားခြင်း မရှိပါ။ အထူးသဖြင့် crypto-mining တွင် ရင်းနှီးမြုပ်နှံပါက သင့်ရန်ပုံငွေများ ဆုံးရှုံးတော့မည်ဖြစ်သည်။ ထိန်းညှိထားသော crypto ရင်းနှီးမြှုပ်နှံမှုဆိုက်များစွာရှိသည်။</string>
     <string name="developer_override_warning">သတိပေးချက်- သင်သည် စံကာကွယ်ရေးကို ပိတ်ပါတော့မည်။ ၎င်းသည် သင့်အား အလိမ်ခံရခြင်းမှ ကာကွယ်ပေးသည်။ သင့် dapp ကို စမ်းသပ်နေပါက သို့မဟုတ် ဆိုက်သည် 100% စိတ်ချရကြောင်း 100\% သေချာပါက developer မုဒ်ကို အသုံးပြုပါ။ သတိရပါ- တစ်စုံတစ်ယောက်က ဤဆက်တင်ကိုဖွင့်ရန် သင့်အားပြောနေပါက၊ သင်သည် သင်၏ crypto ရန်ပုံငွေများကို ဆုံးရှုံးတော့မည်မှာ သေချာပါသည်။</string>
     <string name="warning">သတိပေးချက်</string>
     <string name="i_accept">အန္တရာယ်ကို ငါလက်ခံတယ်။</string>
+    <string name="multicast_transactions">Multicast ငွေလွှဲမှုများ</string>
+    <string name="multicast_transactions_sub">TX ကို ထုတ်လွှင့်ရန် RPC ၃ ခုအထိ အသုံးပြုပါ။</string>
 </resources>

@@ -804,11 +804,6 @@
     <string name="exchange_with_oneinch">Exchange with 1inch</string>
     <string name="swap">Swap</string>
     <string name="action_send_to_this_address">Send to this Address</string>
-    <string name="stay_updated">Stay Updated</string>
-    <string name="email_prompt_hint">We send an email announcing major features. Would you like to receive such emails? (max 1 email per week)</string>
-    <string name="hint_email_address">Email Address</string>
-    <string name="action_want_to_receive_email">I want to receive such emails</string>
-    <string name="email_is_invalid">Please provide valid email address</string>
     <string name="github">Github (vấn đề báo cáo)</string>
     <string name="chains_to_scan">Chains to scan</string>
     <string name="action_view">View</string>
@@ -957,10 +952,6 @@
     <string name="title_session_details">Session Details</string>
     <string name="title_session_proposal">Chi tiết phiên</string>
     <string name="message_wc_wallet_different_from_active_wallet">Ví khác với ví đang hoạt động.</string>
-    <string name="settings_title_analytics">Phân tích</string>
-    <string name="settings_title_crash_reporting">Báo cáo sự cố</string>
-    <string name="message_share_anonymous_data">Hãy giúp chúng tôi cải thiện AlphaWallet bằng cách chia sẻ dữ liệu ẩn danh của bạn với chúng tôi. Điều này không bao gồm bất kỳ thông tin tài chính.</string>
-    <string name="share_anonymous_data">Chia sẻ dữ liệu ẩn danh?</string>
     <string name="enable_required_chains">Kích hoạt chuỗi yêu cầu?</string>
     <string name="enable_required_chains_message">Các mã thông báo đã chọn nằm trên các chuỗi hiện không được chọn, cho phép các chuỗi chưa được chọn?</string>
     <string name="dialog_title_search_token">Tìm kiếm mã thông báo?</string>
@@ -1009,9 +1000,10 @@
     <string name="developer_override">Ghi đè Nhà phát triển</string>
     <string name="override_warning_text">Bạn có thể sắp vô tình ký một giao dịch, điều này có thể khiến tiền của bạn bị rỗng. Bạn có thể muốn ký mã byte với tư cách là nhà phát triển và bạn có thể ghi đè cảnh báo này nếu bạn đặt chế độ nhà phát triển trong cài đặt Nâng cao.</string>
     <string name="constructor">Constructor</string>
-    <string name="use_tokenscript_viewer">Trình xem TokenScript</string>
     <string name="not_recommended_to_visit">URL này không nằm trong danh sách trắng. Bạn vẫn có thể truy cập bằng cách thay đổi tùy chọn bảo vệ trong cài đặt, nhưng không được khuyến khích. Bạn có thể sắp mất tiền, đặc biệt nếu đó là khoản đầu tư vào khai thác tiền điện tử. Có rất nhiều trang web đầu tư tiền điện tử được quản lý.</string>
     <string name="developer_override_warning">Cảnh báo: Bạn sắp tắt chế độ bảo vệ tiêu chuẩn. Điều này giúp bạn tránh bị lừa đảo. Chỉ sử dụng chế độ nhà phát triển nếu bạn đang thử nghiệm dapp của mình hoặc nếu bạn chắc chắn 100\% rằng trang web an toàn. Hãy nhớ rằng: nếu ai đó bảo bạn bật cài đặt này, bạn gần như chắc chắn sẽ mất tiền mã hóa của mình.</string>
     <string name="warning">Cảnh báo</string>
     <string name="i_accept">Tôi chấp nhận rủi ro</string>
+    <string name="multicast_transactions">Giao dịch Multicast</string>
+    <string name="multicast_transactions_sub">Sử dụng tối đa 3 RPC để phát TX</string>
 </resources>

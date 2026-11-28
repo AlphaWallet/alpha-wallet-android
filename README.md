@@ -6,7 +6,7 @@
 [![Unit test](https://github.com/AlphaWallet/alpha-wallet-android/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/AlphaWallet/alpha-wallet-android/actions/workflows/ci.yml)
 [![E2E Test](https://github.com/AlphaWallet/alpha-wallet-android/actions/workflows/e2e.yml/badge.svg?branch=master)](https://github.com/AlphaWallet/alpha-wallet-android/actions/workflows/e2e.yml)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg )](https://github.com/AlphaWallet/alpha-wallet-android/graphs/commit-activity)
-![GitHub contributors](https://img.shields.io/github/contributors/AlphaWallet/alpha-wallet-android.svg)
+[![GitHub contributors](https://img.shields.io/github/contributors/AlphaWallet/alpha-wallet-android.svg)](https://github.com/AlphaWallet/alpha-wallet-android/graphs/contributors)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/AlphaWallet/alpha-wallet-android/blob/master/LICENSE)
 
 AlphaWallet is an open source programmable blockchain apps platform. It's compatible with tokenisation framework TokenScript, offering businesses and their users in-depth token interaction, a clean white label user experience and advanced security options. Supports all Ethereum based networks.

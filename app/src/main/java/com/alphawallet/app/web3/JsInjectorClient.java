@@ -30,11 +30,20 @@ import static com.alphawallet.ethereum.EthereumNetworkBase.MAINNET_ID;
 
 public class JsInjectorClient {
 
+    private static final String TAG = "JsInjectorClient";
     private static final String DEFAULT_CHARSET = "utf-8";
     private static final String DEFAULT_MIME_TYPE = "text/html";
     private final static String JS_TAG_TEMPLATE = "<script type=\"text/javascript\">%1$s%2$s</script>";
     final String SCRIPT_TAG = "<script";
     final String CDATA_TAG = "<![cdata[";
+
+    /**
+     * Characters that must never appear in an RPC URL we splice into a JS string
+     * literal. Their presence is a strong indicator of an attempted
+     * universal-XSS injection (see issue #2686).
+     */
+    private static final Pattern UNSAFE_URL_CHARS =
+            Pattern.compile("[\"'\\\\<>\\r\\n\\t\\u0000-\\u001f]");
 
     private long chainId;
     private Address walletAddress;
@@ -60,14 +69,58 @@ public class JsInjectorClient {
     public void setChainId(long chainId)
     {
         this.chainId = chainId;
-        this.rpcUrl = EthereumNetworkRepository.getDefaultNodeURL(chainId);
+        this.rpcUrl = sanitizeRpcUrl(EthereumNetworkRepository.getDefaultNodeURL(chainId));
     }
 
     // Set ChainId for TokenScript inject
     public void setTSChainId(long chainId)
     {
         this.chainId = chainId;
-        this.rpcUrl = EthereumNetworkRepository.getDefaultNodeURL(chainId);
+        this.rpcUrl = sanitizeRpcUrl(EthereumNetworkRepository.getDefaultNodeURL(chainId));
+    }
+
+    /**
+     * Validate and normalize an RPC URL before it is spliced into the
+     * JavaScript that is injected into every loaded page. Returns an empty
+     * string when the URL is missing, unparseable, not http(s), or contains
+     * any character that has meaning inside a JS string literal. This blocks
+     * the UXSS attack described in issue #2686, where a malicious chain
+     * registered via {@code wallet_addEthereumChain} could break out of the
+     * RPC-URL string in the template and inject arbitrary JavaScript.
+     */
+    static String sanitizeRpcUrl(String url)
+    {
+        if (TextUtils.isEmpty(url))
+        {
+            return "";
+        }
+        if (UNSAFE_URL_CHARS.matcher(url).find())
+        {
+            Log.w(TAG, "Rejecting RPC URL containing characters unsafe for JS string injection");
+            return "";
+        }
+        HttpUrl parsed = HttpUrl.parse(url);
+        if (parsed == null)
+        {
+            Log.w(TAG, "Rejecting unparseable RPC URL");
+            return "";
+        }
+        String scheme = parsed.scheme();
+        if (!"http".equals(scheme) && !"https".equals(scheme))
+        {
+            Log.w(TAG, "Rejecting RPC URL with non-http(s) scheme: " + scheme);
+            return "";
+        }
+        // Re-serialize through HttpUrl so any odd encodings are normalized to a
+        // canonical form before injection. Re-check the normalized form for
+        // unsafe characters in case parsing decoded any.
+        String normalized = parsed.toString();
+        if (UNSAFE_URL_CHARS.matcher(normalized).find())
+        {
+            Log.w(TAG, "Rejecting normalized RPC URL containing unsafe characters");
+            return "";
+        }
+        return normalized;
     }
 
     public String initJs(Context context)
@@ -193,7 +246,7 @@ public class JsInjectorClient {
     private String loadInitJs(Context context) {
         String initSrc = loadFile(context, R.raw.init);
         String address = walletAddress == null ? Address.EMPTY.toString() : Keys.toChecksumAddress(walletAddress.toString());
-        return String.format(initSrc, address, rpcUrl, chainId);
+        return String.format(initSrc, address, rpcUrl == null ? "" : rpcUrl, chainId);
     }
 
     String injectStyleAndWrap(String view, String style)

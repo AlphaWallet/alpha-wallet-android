@@ -24,6 +24,8 @@ public class DeepLinkService
     public static final String WC_COMMAND = "wc:";
     public static final String AW_PREFIX = "awallet://";
     public static final String OPEN_URL_PREFIX = "openURL?q=";
+    // Lower case variant produced by web pages that link to https://aw.app/openurl?url=...
+    public static final String OPEN_URL_PREFIX_WEB = "openurl?url=";
 
     public static DeepLinkRequest parseIntent(String importData, Intent startIntent)
     {
@@ -39,10 +41,22 @@ public class DeepLinkService
             importData = importData.substring(AW_PREFIX.length());
         }
 
+        // Universal links arrive as https://aw.app/openurl?url=... so strip the
+        // host part too before we look for the openURL marker.
+        if (importData.startsWith(AW_APP))
+        {
+            importData = importData.substring(AW_APP.length());
+        }
+
         if (importData.startsWith(OPEN_URL_PREFIX))
         {
             isOpenURL = true;
             importData = importData.substring(OPEN_URL_PREFIX.length());
+        }
+        else if (importData.startsWith(OPEN_URL_PREFIX_WEB))
+        {
+            isOpenURL = true;
+            importData = importData.substring(OPEN_URL_PREFIX_WEB.length());
         }
 
         importData = Utils.universalURLDecode(importData);
